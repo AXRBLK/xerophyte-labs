@@ -281,7 +281,7 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 /* phones: the icons fill the right, so the turntable parks top-left and glides in from the left edge */
 @media (max-width:700px){body.miniOn #clock{display:none}}   /* phones: the mini player needs the clock's room */
 @media (max-width:700px){.turntable{position:fixed;left:12px;top:calc(70px + env(safe-area-inset-top,0px));margin:0;z-index:3;transform:translateX(-100vw)}.turntable.on{transform:none}}
-.turntable{position:relative}
+@media (min-width:701px){.turntable{position:relative}}   /* phones pin it with position:fixed instead */
 .turntable canvas{width:128px;height:112px;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 /* the album cover: a crisp circular label centred on the platter (canvas 26,26 → 52px,52px), spinning at 33⅓ rpm */
 .turntable .deck-art{position:absolute;left:35px;top:35px;width:36px;height:36px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px #17171d;animation:deckspin 1.8s linear infinite;animation-play-state:paused}
@@ -299,6 +299,9 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 .modebtn{background:none;border:0;padding:0 2px;color:inherit;font:15px var(--font-ui);cursor:pointer;line-height:1}
 .modebtn:focus-visible{outline:1px dotted currentColor}
 .modebtn img{width:16px;height:16px;image-rendering:pixelated;vertical-align:-3px}
+#modebtn{display:inline-flex;align-items:center;gap:5px;padding:0 4px}
+#modebtn .mico{width:16px;height:16px;display:block}
+#modebtn .mlab{font:300 11px/1 var(--font-data);letter-spacing:.14em;text-transform:lowercase;opacity:.75}
 #discobtn{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;padding:0}
 #discobtn .ball{font-size:15px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;display:inline-block}
 #discobtn[aria-pressed="true"]{background:#4169e1;outline:3px solid #2a4cc0;outline-offset:1px;box-shadow:0 0 10px rgba(65,105,225,.85)}
@@ -341,9 +344,10 @@ body.night .chip.thirsty{border-color:#e08aa2}
   .hero h1{font-size:21.6px}
   .hero .sub,.hero .live{font-size:12px}
   .icons{position:fixed;flex-direction:row;flex-wrap:wrap;bottom:auto}
-  .icons.left{left:auto;right:12px;width:164px;justify-content:flex-end;align-content:flex-start;gap:6px 4px}
+  .icons.left{--k:1;left:auto;right:12px;width:164px;justify-content:flex-end;align-content:flex-start;gap:calc(6px*var(--k)) 4px}
   .icons.right{display:none}
-  .icon{width:78px}
+  .icon{width:calc(78px*var(--k,1));font-size:calc(14px*var(--k,1));padding:calc(6px*var(--k,1)) 2px;gap:calc(4px*var(--k,1))}
+  .icon img{width:calc(48px*var(--k,1));height:calc(48px*var(--k,1))}
   .hero{bottom:calc(58px + 5vh + env(safe-area-inset-bottom,0px))}
   .win{left:16px!important;right:16px;top:calc(62px + env(safe-area-inset-top,0px))!important;width:auto!important;min-width:0;max-height:calc(100% - 120px)}
   .bar{cursor:default}
@@ -389,7 +393,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
     <button type="button" onclick="AMP.prev()" aria-label="Previous / restart" title="Previous (restarts the song)">⏮</button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play">▶</button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause">❚❚</button><button type="button" onclick="AMP.stop()" aria-label="Stop" title="Stop">■</button><button type="button" onclick="AMP.next()" aria-label="Next song" title="Next song">⏭</button>
     <button type="button" class="mini-lcd" onclick="openWin('radio')" title="Show the player"><span id="miniTime">■ 00:00</span><span class="mini-title" id="miniTitle"></span></button>
   </div>
-  <div class="tray"><button class="modebtn" id="modebtn" type="button">☀</button><button class="modebtn" id="discobtn" type="button" aria-pressed="false" title="Enable Disco-mode" aria-label="Enable Disco-mode"><span class="ball" aria-hidden="true">🪩</span></button><span id="clock"></span></div>
+  <div class="tray"><button class="modebtn" id="modebtn" type="button"></button><button class="modebtn" id="discobtn" type="button" aria-pressed="false" title="Enable Disco-mode" aria-label="Enable Disco-mode"><span class="ball" aria-hidden="true">🪩</span></button><span id="clock"></span></div>
 </footer>
 
 <script>
@@ -644,10 +648,14 @@ function moonDisc(r){
   c.putImageData(img,0,0);
   return MOON_CACHE[r]=cv;
 }
+/* pixel-style SVG icons for the day/night switch (crisp at any screen density) */
+const ICON_SUN='<svg class="mico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="7" y="0" width="2" height="1"/><rect x="7" y="1" width="2" height="1"/><rect x="3" y="2" width="2" height="1"/><rect x="7" y="2" width="2" height="1"/><rect x="11" y="2" width="2" height="1"/><rect x="2" y="3" width="3" height="1"/><rect x="11" y="3" width="3" height="1"/><rect x="2" y="4" width="2" height="1"/><rect x="7" y="4" width="2" height="1"/><rect x="12" y="4" width="2" height="1"/><rect x="5" y="5" width="6" height="1"/><rect x="5" y="6" width="6" height="1"/><rect x="0" y="7" width="3" height="1"/><rect x="4" y="7" width="8" height="1"/><rect x="13" y="7" width="3" height="1"/><rect x="0" y="8" width="3" height="1"/><rect x="4" y="8" width="8" height="1"/><rect x="13" y="8" width="3" height="1"/><rect x="5" y="9" width="6" height="1"/><rect x="5" y="10" width="6" height="1"/><rect x="2" y="11" width="2" height="1"/><rect x="7" y="11" width="2" height="1"/><rect x="12" y="11" width="2" height="1"/><rect x="2" y="12" width="3" height="1"/><rect x="11" y="12" width="3" height="1"/><rect x="3" y="13" width="2" height="1"/><rect x="7" y="13" width="2" height="1"/><rect x="11" y="13" width="2" height="1"/><rect x="7" y="14" width="2" height="1"/><rect x="7" y="15" width="2" height="1"/></svg>';
+const ICON_MOON='<svg class="mico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="6" y="1" width="1" height="1"/><rect x="4" y="2" width="2" height="1"/><rect x="3" y="3" width="3" height="1"/><rect x="2" y="4" width="3" height="1"/><rect x="1" y="5" width="4" height="1"/><rect x="1" y="6" width="4" height="1"/><rect x="1" y="7" width="5" height="1"/><rect x="1" y="8" width="5" height="1"/><rect x="1" y="9" width="6" height="1"/><rect x="1" y="10" width="7" height="1"/><rect x="2" y="11" width="11" height="1"/><rect x="3" y="12" width="9" height="1"/><rect x="4" y="13" width="7" height="1"/><rect x="6" y="14" width="3" height="1"/></svg>';
 function isNightNow(){const h=new Date().getHours();return h>=19||h<6}
 function setNight(n){
   SCENE.night=n;document.body.classList.toggle("night",n);if(document.getElementById("title").textContent)neonTagline();
-  const b=document.getElementById("modebtn");if(b){b.textContent=n?"☾":"☀";b.title=n?"Night mode · click for day":"Day mode · click for night";b.setAttribute("aria-label",b.title)}
+  // the button shows where a click takes you: a moon by day, a sun by night
+  const b=document.getElementById("modebtn");if(b){b.innerHTML=(n?ICON_SUN:ICON_MOON)+'<span class="mlab">mode</span>';b.title=n?"Switch to day mode":"Switch to night mode";b.setAttribute("aria-label",b.title)}
   paintSky();
   try{if(LIVE&&LIVE.current)updateTray()}catch(e){}   // swap the sun/moon in the live weather icon
 }
@@ -2109,8 +2117,21 @@ function build(){
   const mark=SHEET_STATE==="ok"?'<span class="chk ok" title="Reading the sheet">✓</span>':SHEET_STATE==="partial"?'<span class="chk warn" title="Some tabs could not be read">!</span>':'<span class="chk off" title="Showing sample data">✗</span>';
   const rl=document.createElement("li");rl.className="adm";rl.innerHTML=`<button><img alt="" src="${sprite("globe")}">Refresh from sheet${mark}</button>`;rl.firstChild.onclick=()=>{toggleStart(false);boot(true)};ul.appendChild(rl);
   if(CONFIG.SHEET_ID){const ed=document.createElement("li");ed.className="adm";ed.innerHTML=`<a href="https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/edit" target="_blank" rel="noopener"><img alt="" src="${sprite("book")}">Open the sheet</a>`;ul.appendChild(ed)}
-  updateTray();
+  updateTray();fitIcons();
 }
+// phones: shrink the icon grid just enough that it never runs into the title block at the bottom right
+function fitIcons(){
+  const nav=document.getElementById("iconsLeft"),hero=document.querySelector(".hero");if(!nav||!hero)return;
+  if(innerWidth>700){nav.style.removeProperty("--k");nav.style.width="";return}
+  const room=()=>hero.getBoundingClientRect().top-8-nav.getBoundingClientRect().top;
+  const used=()=>{let b=0;nav.querySelectorAll(".icon").forEach(i=>{b=Math.max(b,i.getBoundingClientRect().bottom)});return b-nav.getBoundingClientRect().top};
+  const set=(cols,k)=>{nav.style.setProperty("--k",k);nav.style.width=Math.min(innerWidth-24,cols*(78*k+4))+"px"};
+  // prefer two right-hand columns at full size; shrink a little, then add a column, before shrinking further
+  for(const [cols,kMin] of [[2,.82],[3,.5]]){
+    for(let k=1;k>=kMin-.001;k=Math.round((k-.04)*100)/100){set(cols,k);if(used()<=room())return}
+  }
+}
+addEventListener("resize",()=>{clearTimeout(fitIcons.t);fitIcons.t=setTimeout(fitIcons,120)});
 function typeTitle(){
   const h=document.getElementById("title"),chars=[...h.querySelectorAll(".ch")];
   clearTimeout(typeTitle.t);
@@ -2135,6 +2156,7 @@ function updateTray(){
   if(LIVE&&LIVE.current){const c=LIVE.current,F=(SET.units||"F").toUpperCase().startsWith("F");
     ll.innerHTML=`<img class="wx" src="${wxIcon(c.weather_code,SCENE.night)}" alt="${esc(WMO[c.weather_code]??"")}" title="${esc(SET.location_name||"")}"><span>${Math.round(c.temperature_2m)}° · ${esc(WMO[c.weather_code]??"")} · wind ${Math.round(c.wind_speed_10m)} ${F?"mph":"km/h"}</span>`;ll.hidden=false}
   else ll.hidden=true;
+  if(typeof fitIcons==="function")requestAnimationFrame(fitIcons);   // the live line changes the title block's height
 }
 function tick(){if(SCENE.override==null&&isNightNow()!==SCENE.night)setNight(!SCENE.night);const d=new Date();document.getElementById("clock").textContent=d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+", "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}).toLowerCase().replace(" ","")}
 function toggleStart(force){const m=document.getElementById("startmenu"),b=document.getElementById("startbtn");const on=force??m.hidden;m.hidden=!on;b.setAttribute("aria-expanded",on)}
