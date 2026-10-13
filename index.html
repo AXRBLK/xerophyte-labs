@@ -43,7 +43,10 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 /* hero title */
 .hero{position:fixed;right:16px;bottom:calc(58px + env(safe-area-inset-bottom,0px));max-width:calc(100% - 32px);display:flex;flex-direction:column;align-items:flex-end;gap:5px;text-align:right;pointer-events:none;z-index:1}
 .hero h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:28.8px;line-height:1.15;letter-spacing:0;-webkit-font-smoothing:none;font-smooth:never;color:#f4ece0;text-shadow:2px 2px 0 rgba(40,36,58,.6)}
-.hero h1 span{display:block}
+/* each title line sits on its own dark plate (like the tagline bars) with a hard pixel outline, so it reads over cacti and blooms */
+.hero h1 span{display:block;width:fit-content;margin-left:auto;padding:1px 10px 3px;background:rgba(36,30,50,.62)}
+.hero h1 span+span{margin-top:3px}
+.hero h1{text-shadow:2px 0 0 #241c2e,-2px 0 0 #241c2e,0 2px 0 #241c2e,0 -2px 0 #241c2e,3px 3px 0 rgba(20,14,28,.75)!important}
 .hero h1{position:relative}
 /* load: a block cursor types the title, then the tagline flickers on in neon */
 .hero h1 .ch{font-style:normal;white-space:pre}
@@ -61,7 +64,7 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 }
 .hero .sub{transition:color .6s,text-shadow .6s,background-color .6s}
 body.still .hero h1 .cursor{animation:none}
-.hero .sub,.hero .live{display:inline-block;padding:2px 8px;background:rgba(40,36,58,.7);font-family:var(--font-ui);font-size:13.2px;letter-spacing:.08em;text-transform:uppercase;color:#efe2cc}
+.hero .sub,.hero .live{display:inline-block;padding:2px 8px;background:rgba(40,36,58,.78);font-family:var(--font-ui);font-size:13.2px;letter-spacing:.08em;text-transform:uppercase;color:#efe2cc}
 .hero .live{text-transform:none;letter-spacing:.02em;font-variant-numeric:tabular-nums}
 .hero .live{display:inline-flex;align-items:center;gap:8px}.hero .live .wx{width:26px;height:26px;image-rendering:pixelated;image-rendering:crisp-edges;margin:-3px 0}
 
@@ -271,8 +274,20 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 #w-radio .tape-empty{background:#101018;color:#a8a8c0}
 /* mini player in the taskbar while the window is minimized */
 .miniamp{display:flex;align-items:center;gap:2px;padding:2px;background:#24243a;border:1px solid #6a6a86;flex-shrink:0}
-.turntable{width:128px;height:112px;margin:2px auto 0;cursor:pointer;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.35))}
+/* the turntable glides in from the right edge of the window when music starts, and back out when it stops */
+.turntable{width:128px;height:112px;margin:2px auto 0;cursor:pointer;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.35));
+  transform:translateX(calc(100vw));visibility:hidden;transition:transform .9s cubic-bezier(.2,.8,.25,1),visibility 0s linear .9s}
+.turntable.on{transform:none;visibility:visible;transition:transform .9s cubic-bezier(.2,.8,.25,1),visibility 0s}
+/* phones: the icons fill the right, so the turntable parks top-left and glides in from the left edge */
+@media (max-width:700px){body.miniOn #clock{display:none}}   /* phones: the mini player needs the clock's room */
+@media (max-width:700px){.turntable{position:fixed;left:12px;top:calc(70px + env(safe-area-inset-top,0px));margin:0;z-index:3;transform:translateX(-100vw)}.turntable.on{transform:none}}
+.turntable{position:relative}
 .turntable canvas{width:128px;height:112px;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+/* the album cover: a crisp circular label centred on the platter (canvas 26,26 → 52px,52px), spinning at 33⅓ rpm */
+.turntable .deck-art{position:absolute;left:35px;top:35px;width:36px;height:36px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px #17171d;animation:deckspin 1.8s linear infinite;animation-play-state:paused}
+.turntable.spin .deck-art{animation-play-state:running}
+.turntable .deck-pin{position:absolute;left:51px;top:51px;width:3px;height:3px;background:#e4e4ec;box-shadow:1px 1px 0 #6c6c78}
+@keyframes deckspin{to{transform:rotate(360deg)}}
 .miniamp button{height:22px;min-width:24px;padding:0 4px;font:12px/1 var(--font-ui);color:#202030;background:linear-gradient(180deg,#d8d8e4,#9c9cb0);border:1px solid;border-color:#f0f0f8 #50506a #50506a #f0f0f8;cursor:pointer}
 .miniamp button:active{border-color:#50506a #f0f0f8 #f0f0f8 #50506a}
 .miniamp .mini-lcd{display:flex;gap:8px;align-items:center;max-width:300px;margin-left:2px;padding:0 8px;background:#000;color:#00e000;border-color:#14141e #6a6a86 #6a6a86 #14141e;font:11px var(--font-display);-webkit-font-smoothing:none;text-shadow:0 0 4px rgba(0,224,0,.45);overflow:hidden;white-space:nowrap}
@@ -305,8 +320,10 @@ body.night{
 }
 body.night .bar{background:linear-gradient(90deg,var(--chrome-lo),#2e3250)}
 body.night .hero h1.typing .ch.caret{background:#eef0ff}
-body.night .hero h1{color:#eef0ff;text-shadow:2px 2px 0 rgba(4,6,18,.8)}
-body.night .hero .sub,body.night .hero .live{background:rgba(8,10,26,.78);color:#d8dcf4}
+body.night .hero h1{color:#f4f4ff}
+body.night .hero h1 span{background:rgba(8,10,26,.8)}
+body.night .hero h1{text-shadow:2px 0 0 #060814,-2px 0 0 #060814,0 2px 0 #060814,0 -2px 0 #060814,3px 3px 0 rgba(0,0,0,.8)!important}
+body.night .hero .sub,body.night .hero .live{background:rgba(8,10,26,.86);color:#e2e6fa}
 body.night .marquee{background:rgba(8,10,26,.45)}
 body.night .icon span:last-child{background:rgba(10,13,32,.82);padding:1px 5px;color:#f0f2ff;text-shadow:none}
 body.night .icon:hover span:last-child,body.night .icon:focus-visible span:last-child{background:var(--title-b)}
@@ -547,9 +564,9 @@ const CRITTERS={
   stand:["kk................",".kN.......kk......","..kN.....kNNk.....","...kN...kNbNkkkkk.","....kN.kNNcNk.....",".....kNNNNcc......","....kNnNnNcc......",".....kNNNNk.......","......k..k........","......k..k........",".....kk..kk......."],
   peck:["..................","kk................",".kN...............","..kN..............","...kNNNNnNNk......","....kNnNnNnNk.....",".....kNNNNkNbk....",".......k.k.kNNkkk.","......k...k.......","......k...k.......",".....kk...kk......"],
   // common raven, facing right: heavy bill, red eye, wedge tail, fingered primaries, blue-violet sheen
-  ravenUp:["........K.K.K........",".......KK.KK.........","......KKvKK..........",".....KKvKK...........",".....KvKK............","....KKvKK.......KK...",".KK.KKKKKKKKKKKKKKK..","KKKKKkkvvvkkKKKKeKKKK",".KKK..KKKKKKKKKKK....","...........K.K......."],
-  ravenGlide:["..........K.K.K......",".........KK.KK.......","........KKvKK........",".......KKvKK.....KK..",".KK..KKKvKKKKKKKKKKK.","KKKKKkkvvvvkkKKKeKKKK",".KKK.KKKKKKKKKKKK....","...........K.K......."],
-  ravenDown:["................KK...",".KK..KKKKKKKKKKKKKK..","KKKKKkkvvvkkKKKKeKKKK",".KKK.KKKvvKKKKKKK....",".....KKvvKKK.........",".....KvvKK...........","....KKvKK............","...K.K.K............."],
+  ravenUp:[".K....................",".KKK.K................","..KKKKK...............","...vKKKK..............","...KvvKKK.............","...KKKvvKK............","....KKKKvKKK..........",".KK...KKKKKKKK...KKK..","KKKKKKKKKkvvkKKKKKeKKK","KKK.KKKKKKKKKKKKKK...",".......KKKKKKKK.......",".........K..K........."],
+  ravenGlide:["....K.................","....KK.K..............","...KKKKKK.............","...KKvKKKK............","....KKvvKKK...........",".....KKKvvKK..........","......KKKKvKK.........",".KK....KKKKKKKK..KKK..","KKKKKKKKKkvvkKKKKKeKKK","KKK.KKKKKKKKKKKKKK...",".......KKKKKKKK.......",".........K..K........."],
+  ravenDown:["......................","......................","......................","......................","......................","......................","......................",".KK...KKKKKKKKKK.KKK..","KKKKKKKKKkvvkKKKKKeKKK","KKK.KKKKKKKKKKKKKK...",".....KKKKvvKKKK.......","...KKKKvvKK..K........","...KKKvKK.............","..KK.KK..............."],
   ravenPerch:["..............","........KKK...",".......KKKeK..","......KKKKKKKK","......KKKKKK..",".....KKKKKK...","....KKkvvKK...","...KKkvvvKK...","..KKkvvvKKK...",".KKKkvvKKK....","KKKKKKKKKK....","KK..KKKKK.....","K....K..K.....","....KKKKKK...."],
   ravenSleep:["..............","..............","........KKK...",".......KKKkK..","......KKKKKKKK","......KKKKKK..",".....KKKKKK...","....KKkvvKK...","...KKkvvvKK...","..KKkvvvKKK...",".KKKkvvKKK....","KKKKKKKKKK....","KK..KKKKK.....","....KKKKKK...."],
   toad:["......w.w..","..tdtdtTTT.",".tTtTtTTkTt","tdtTtdtTTT.","..t..t..t.."],
@@ -1625,13 +1642,20 @@ function openWin(id){
   const W=WINS[id];if(!W)return;W.el.classList.remove("stowed");
   W.render(W.el.querySelector(".body"),W.el.querySelector(".status"));
   if(!W.placed){
-    const off=(openOrder++%5)*22;
+    const off=id==="radio"?0:(openOrder++%5)*22;   // the radio always opens in the same spot, up by the right-hand icons
     const ww=Math.min(W.el.offsetWidth||parseInt(W.el.style.width),innerWidth-32);
     W.el.style.left=Math.max(16,Math.min(innerWidth-ww-16,(W.x??(innerWidth-ww)/2)+off))+"px";
     W.el.style.top=Math.max(60,(W.y??90)+off)+"px";W.placed=true;
   }
-  W.el.hidden=false;W.open=true;W.min=false;focusWin(id);renderTasks();
+  W.el.hidden=false;W.open=true;W.min=false;fitWin(W);focusWin(id);renderTasks();
 }
+// keep a window's bottom edge above the taskbar: cap its height to the room below its top (the body scrolls inside)
+function fitWin(W){
+  if(innerWidth<=700){W.el.style.maxHeight="";return}
+  const top=parseInt(W.el.style.top)||W.el.offsetTop,bar=(document.querySelector(".taskbar")||{}).offsetHeight||44;
+  W.el.style.maxHeight=Math.max(180,innerHeight-bar-12-top)+"px";
+}
+addEventListener("resize",()=>Object.values(WINS).forEach(W=>{if(W.open)fitWin(W)}));
 function closeWin(id){if(id==="radio"&&SPOT.ctl){try{SPOT.ctl.pause()}catch(e){}}const W=WINS[id];W.el.hidden=true;W.open=false;W.min=false;renderTasks()}
 function focusWin(id){
   Object.values(WINS).forEach(w=>w.el.classList.remove("active"));
@@ -1645,7 +1669,8 @@ function drag(el,handle){
   });
   handle.addEventListener("pointermove",e=>{if(!on)return;
     el.style.left=Math.max(-el.offsetWidth+80,Math.min(innerWidth-80,ox+e.clientX-sx))+"px";
-    el.style.top=Math.max(44,Math.min(innerHeight-90,oy+e.clientY-sy))+"px";});
+    el.style.top=Math.max(44,Math.min(innerHeight-90,oy+e.clientY-sy))+"px";
+    const W=Object.values(WINS).find(w=>w.el===el);if(W)fitWin(W)});
   const end=()=>{on=false;handle.style.cursor=""};
   handle.addEventListener("pointerup",end);handle.addEventListener("pointercancel",end);
 }
@@ -1788,12 +1813,14 @@ const DECK={art:null,artSrc:"",raf:0,last:0,th:0};
 function loadArt(src,keep){
   if(!src||src===DECK.artSrc)return;DECK.artSrc=src;if(!keep)DECK.art=null;
   const im=new Image();im.onload=()=>{if(DECK.artSrc!==src)return;const c=document.createElement("canvas");c.width=c.height=17;
-    const x=c.getContext("2d");x.imageSmoothingEnabled=true;x.drawImage(im,0,0,17,17);DECK.art=c;drawDeck()};im.referrerPolicy="no-referrer";im.src=src;
+    const x=c.getContext("2d");x.imageSmoothingEnabled=true;x.drawImage(im,0,0,17,17);DECK.art=c;drawDeck();
+    // the real cover, full resolution, laid over the record's label and turning with it
+    const tag=document.querySelector("#turntable .deck-art");if(tag){tag.src=src;tag.hidden=false}};im.referrerPolicy="no-referrer";im.src=src;
 }
 function deckPlaying(){const st=SPOT.state;return !!SPOT.ctl&&!st.paused&&!SPOT.stopped&&!st.buffering}
 function spinDeck(){
   const el=document.getElementById("turntable");if(!el)return;
-  const on=deckPlaying();el.hidden=!on;
+  const on=deckPlaying();el.classList.toggle("on",on);el.classList.toggle("spin",on&&!document.body.classList.contains("still"));
   if(on&&!DECK.raf){const loop=t=>{DECK.raf=requestAnimationFrame(loop);if(t-DECK.last<70)return;
       const dt=DECK.last?Math.min(200,t-DECK.last):0;DECK.last=t;if(!document.body.classList.contains("still"))DECK.th+=dt/1000*Math.PI*2*.555;drawDeck()};
     DECK.raf=requestAnimationFrame(loop)}
@@ -1846,6 +1873,7 @@ const AMP={
 function updateMini(){
   const m=document.getElementById("miniamp"),W=WINS.radio;if(!m)return;
   m.hidden=!(W&&W.open&&W.min&&SPOT.src);
+  document.body.classList.toggle("miniOn",!m.hidden);
   if(m.hidden)return;
   const s=SPOT.state,st=s.buffering?"…":!s.paused?"▶":SPOT.stopped||!s.pos?"■":"❚❚";
   document.getElementById("miniTime").textContent=`${st} ${fmtT(s.pos)}`;
@@ -2013,11 +2041,16 @@ function contactForm(body){
           _subject:"Xerophyte Labs: "+(d.subject||"new message"),_replyto:d.email,_template:"table",_captcha:"false"})});
       const j=await r.json().catch(()=>({}));
       if(r.ok&&String(j.success)!=="false"){f.reset();say("Sent! Thanks, I'll write back soon.","ok")}
+      else if(/activat/i.test(j.message||"")){
+        // FormSubmit holds messages until the owner clicks the one-time activation link it emails them
+        say("Almost there: this form is waiting for a one-time activation by the site owner. Your message wasn't delivered yet, so please try again later.","err");
+        if(ADMIN)msg.textContent+=" (Admin: check "+to+" for the FormSubmit email titled “Activate Form”, including spam, and click its link.)";
+        return}
       else throw new Error(j.message||r.status);
     }catch(err){
       // fall back to the visitor's own mail app with everything filled in
       const q=`mailto:${to}?subject=${encodeURIComponent("Xerophyte Labs: "+(d.subject||"hello"))}&body=${encodeURIComponent(d.message+"\n\n"+d.email+(d.phone?"\n"+d.phone:""))}`;
-      msg.innerHTML=`Couldn't send from here. <a href="${q}">Open it in your mail app</a> instead.`;msg.className="cmsg err";
+      msg.innerHTML=`Couldn't send from here${err&&err.message&&!/^\d+$/.test(err.message)?` (${esc(err.message)})`:""}. <a href="${q}">Open it in your mail app</a> instead.`;msg.className="cmsg err";
     }finally{btn.disabled=false}
   };
 }
@@ -2047,7 +2080,7 @@ function build(){
   const mob=innerWidth<=700,cx=w=>Math.max(130,(innerWidth-w)/2);
   defineWindow("cacti",{title:"My Cacti",icon:"saguaro",w:640,x:mob?16:120,y:84,render:renderCacti,menu:["File","View","Water"],status:true});
   defineWindow("map",{title:"Desert Map",icon:"map",w:Math.min(860,innerWidth-40),x:mob?16:Math.max(110,(innerWidth-860)/2),y:70,render:renderMap,status:true});
-  defineWindow("radio",{title:radioName(),icon:"radio",w:380,x:innerWidth-450,y:300,render:renderRadio,status:true});
+  defineWindow("radio",{title:radioName(),icon:"radio",w:380,x:innerWidth-595,y:64,render:renderRadio,status:true});
   defineWindow("today",{title:"Weather Now",icon:"sun",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
   defineWindow("log",{title:"Weather Log",icon:"chart",w:640,x:cx(640),y:110,render:renderLog,menu:["File","Edit","Chart"],status:true});
   const thirsty=(DATA.cacti||[]).filter(c=>c.name&&cactusState(c).status==="thirsty").length;
@@ -2060,8 +2093,8 @@ function build(){
     const name=lab||label;if(WINS[id]&&lab){WINS[id].title=lab;WINS[id].el.querySelector(".bar b").textContent=lab;WINS[id].el.setAttribute("aria-label",lab)}col.append(iconBtn(id,name,icon,badge))};
   place(L,"cacti","My Cacti","saguaro",thirsty||"");place(L,"log","Weather Log","chart");
   place(mob?L:R,"today","Weather Now","sun");place(mob?L:R,"map","Desert Map","map");place(mob?L:R,"radio",radioName(),"radio");
-  if(!HIDDEN.has("radio")){const tt=document.createElement("div");tt.className="turntable";tt.id="turntable";tt.hidden=true;tt.title="Now spinning";
-    tt.innerHTML='<canvas width="64" height="56" aria-hidden="true"></canvas>';tt.onclick=()=>openWin("radio");(mob?L:R).append(tt);spinDeck()}
+  if(!HIDDEN.has("radio")){const tt=document.createElement("div");tt.className="turntable";tt.id="turntable";tt.title="Now spinning";
+    tt.innerHTML='<canvas width="64" height="56" aria-hidden="true"></canvas><img class="deck-art" alt="" hidden><i class="deck-pin"></i>';tt.onclick=()=>openWin("radio");if(DECK.art){const im=tt.querySelector(".deck-art");im.src=DECK.artSrc;im.hidden=false}(mob?L:R).append(tt);spinDeck()}
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
     const id="p"+i;defineWindow(id,{title:p.title,icon:(p.icon||"folder").toLowerCase(),w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
     place((p.side||"").toLowerCase()==="right"&&!mob?R:L,id,p.title,(p.icon||"folder").toLowerCase());
