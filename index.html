@@ -1045,6 +1045,25 @@ function setDisco(on,user){
   const b=document.getElementById("discobtn");if(b){b.setAttribute("aria-pressed",on);b.title=on?"Disable Disco-mode":"Enable Disco-mode";b.setAttribute("aria-label",b.title)}
   clearInterval(SCENE.timer);if(SCENE.motion&&SCENE.ctx)SCENE.timer=setInterval(drawScene,on?90:125);else drawScene();
 }
+/* sun and moon: on arrival they sit where the real clock puts them (highest at noon / midnight),
+   then travel their arc in a few minutes, sink behind the mountains, and rise again from the east */
+const ORB={t0:0,p0:0,night:null};
+function arcStart(N){
+  const d=new Date(),h=d.getHours()+d.getMinutes()/60;let p;
+  if(!N)p=h<12?.5*(h-6)/6:.5+.5*(h-12)/7;                 // 6am rise · noon top · 7pm set
+  else{const hn=h>=12?h-19:h+5;p=hn<5?.5*hn/5:.5+.5*(hn-5)/6}  // 7pm rise · midnight top · 6am set
+  return Math.min(.92,Math.max(.06,p));
+}
+function orbPos(s,N){
+  const now=performance.now()/1000;
+  if(ORB.night!==N){ORB.night=N;ORB.t0=now;ORB.p0=arcStart(N)}
+  const ARC=420,REST=40;                                     // seconds to cross the sky, seconds spent below the ridge
+  let p=ORB.p0+(now-ORB.t0)/ARC;
+  const cyc=1+REST/ARC;if(p>cyc)p=(p%cyc);                   // round again: rise from the left
+  if(p>1)return null;
+  const sr=s.sr,top=Math.round(s.H0*.1)+sr,low=s.H0+sr+2;   // low = fully hidden behind the ranges
+  return {x:Math.round(s.w*(.06+.88*p)),y:Math.round(low-(low-top)*Math.pow(Math.sin(Math.PI*p),.7))};
+}
 function drawScene(){
   const s=SCENE,c=s.ctx;if(!c)return;s.t++;const N=s.night;
   if(s.disco&&N){drawDisco(c,s)}else{
@@ -1066,8 +1085,7 @@ function drawScene(){
   // sun sinks and rises over ~6 minutes; the moon crosses the sky over ~10
   const now=performance.now()/1000,sr=s.sr;
   if(N)c.drawImage(s.layers.clouds,0,0);                 // night: clouds behind the moon
-  if(N){const t=(now%600)/600,mx=Math.round(s.w*(.12+.76*t)),my=Math.round(s.H0*(.14+.3*(2*t-1)**2));c.drawImage(s.layers.orb,mx-sr,my-sr)}
-  else{const ph=now/360*Math.PI*2,sx=Math.round(s.w*.66+Math.sin(ph)*s.w*.03),sy=Math.round(s.H0-sr*.35+Math.sin(ph)*sr*1.15);c.drawImage(s.layers.orb,sx-sr,sy-sr)}
+  {const o=orbPos(s,N);if(o)c.drawImage(s.layers.orb,o.x-sr,o.y-sr)}
   }
   if(!N)c.drawImage(s.layers.clouds,0,0);                // day: sunset streaks in front of the sun
   if(s.disco&&!N)pulseSky(c,s);
