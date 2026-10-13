@@ -394,6 +394,9 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 .hero h1 .cursor,.hero h1.typing .ch.caret{background:#fff}
 /* vector player buttons (no emoji fallbacks on phones) */
 .pico{display:block;width:12px;height:12px;margin:auto;pointer-events:none}
+/* the button icons glow the same LCD green as the player's display */
+#w-radio .amp-btns .pico,.miniamp .pico{color:#00e000;filter:drop-shadow(0 0 2px rgba(0,224,0,.45))}
+#w-radio .amp-btns button:disabled .pico{color:#2e6a2e;filter:none}
 .amp-btns button,.amp-btns .amp-eject,.miniamp button:not(.mini-lcd){display:inline-flex;align-items:center;justify-content:center}
 /* tray: every item on one centre line */
 .tray>*{display:inline-flex;align-items:center;line-height:1;margin:0}
