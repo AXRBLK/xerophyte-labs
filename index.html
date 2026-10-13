@@ -318,6 +318,12 @@ body.night .chip.thirsty{border-color:#e08aa2}
   .bar{cursor:default}
   .days{grid-template-columns:repeat(3,1fr)}
 }
+/* phones and touch screens: finger-sized minimize / close buttons */
+@media (max-width:700px),(pointer:coarse){
+  .bar{padding:4px 4px 4px 8px;gap:8px}
+  .bar button,#w-radio .bar button{width:44px;height:38px;font-size:22px;flex:none}
+  #w-radio .bar,#w-radio.active .bar{padding:4px 4px 4px 8px}
+}
 body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title span{animation:none}
 </style>
 </head>
