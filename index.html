@@ -517,7 +517,8 @@ function sprite(name){
 const SCENE={timer:null,night:false,override:null};
 const BAYER=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]].map(r=>r.map(v=>(v+.5)/16));
 const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
-const RAVENPAL={K:"#0e0c14",k:"#1f1a2c",v:"#3d3769",e:"#d42f3a"};
+// the eye is a single pixel (the smallest the scene grid allows), so it uses a deep red to read small rather than as a bright dot
+const RAVENPAL={K:"#0e0c14",k:"#1f1a2c",v:"#3d3769",e:"#962632"};
 const CPAL={k:"#29232c",K:"#0b0a12",N:"#5c4838",n:"#8a6e52",c:"#ddcfb8",b:"#7088aa",v:"#463e54",t:"#c4ab8a",T:"#a48d70",d:"#76624c",w:"#ece2d0",S:"#a8824e",s:"#6e5434"};
 const GLOW={S:"#8fe0cc",s:"#4c9a8c"}; // scorpions fluoresce under moonlight
 const OWLPAL={k:"#241a14",D:"#3e2c20",B:"#5c4230",L:"#8a6a4c",T:"#b08a5a",r:"#b8743e",w:"#d8d0c0",W:"#efe8da",Y:"#e8b828",p:"#0c0806",d:"#2e241c"};
@@ -546,9 +547,9 @@ const CRITTERS={
   stand:["kk................",".kN.......kk......","..kN.....kNNk.....","...kN...kNbNkkkkk.","....kN.kNNcNk.....",".....kNNNNcc......","....kNnNnNcc......",".....kNNNNk.......","......k..k........","......k..k........",".....kk..kk......."],
   peck:["..................","kk................",".kN...............","..kN..............","...kNNNNnNNk......","....kNnNnNnNk.....",".....kNNNNkNbk....",".......k.k.kNNkkk.","......k...k.......","......k...k.......",".....kk...kk......"],
   // common raven, facing right: heavy bill, red eye, wedge tail, fingered primaries, blue-violet sheen
-  ravenUp:["............K.K.K.......","...........KK.KKK.......","...........KKKKK........","..........KKvKKK........",".........KKvKKK.........","........KKvvKK..........",".......KKKvKKK..........","..KK..KKKKKKKKKKKKK.....",".KKKKKKKkvvvkKKKKKKKK...","KKKKKKKKKkkkkKKKKKKeKKKK",".KKK....KKKKKKKKKKKKKK..","...........K..K........."],
-  ravenGlide:["........................","........................","..........K.K.K.........",".........KKKKKK.........",".........KKKvKKK........","........KKKvvKKKK.......","..KK..KKKKKvKKKKKKK.....",".KKKKKKKkvvvvkKKKKKKK...","KKKKKKKKKkkkkKKKKKKeKKKK",".KKK....KKKKKKKKKKKKKK..","..........K..K..........","........................"],
-  ravenDown:["........................","........................","........................","........................","........................","........................","..KK...KKKKKKKKKKKK.....",".KKKKKKKKkvvvvkKKKKKK...","KKKKKKKKKkkkkKKKKKKeKKKK",".KKK....KKvvKKKKKKKKKK..",".......KKvvKKK..........","......KKvKKK............",".....KKKKKK.............","....K.K.KK.............."],
+  ravenUp:["........K.K.K........",".......KK.KK.........","......KKvKK..........",".....KKvKK...........",".....KvKK............","....KKvKK.......KK...",".KK.KKKKKKKKKKKKKKK..","KKKKKkkvvvkkKKKKeKKKK",".KKK..KKKKKKKKKKK....","...........K.K......."],
+  ravenGlide:["..........K.K.K......",".........KK.KK.......","........KKvKK........",".......KKvKK.....KK..",".KK..KKKvKKKKKKKKKKK.","KKKKKkkvvvvkkKKKeKKKK",".KKK.KKKKKKKKKKKK....","...........K.K......."],
+  ravenDown:["................KK...",".KK..KKKKKKKKKKKKKK..","KKKKKkkvvvkkKKKKeKKKK",".KKK.KKKvvKKKKKKK....",".....KKvvKKK.........",".....KvvKK...........","....KKvKK............","...K.K.K............."],
   ravenPerch:["..............","........KKK...",".......KKKeK..","......KKKKKKKK","......KKKKKK..",".....KKKKKK...","....KKkvvKK...","...KKkvvvKK...","..KKkvvvKKK...",".KKKkvvKKK....","KKKKKKKKKK....","KK..KKKKK.....","K....K..K.....","....KKKKKK...."],
   ravenSleep:["..............","..............","........KKK...",".......KKKkK..","......KKKKKKKK","......KKKKKK..",".....KKKKKK...","....KKkvvKK...","...KKkvvvKK...","..KKkvvvKKK...",".KKKkvvKKK....","KKKKKKKKKK....","KK..KKKKK.....","....KKKKKK...."],
   toad:["......w.w..","..tdtdtTTT.",".tTtTtTTkTt","tdtTtdtTTT.","..t..t..t.."],
@@ -672,8 +673,11 @@ function paintSky(){
   dither(gc,0,H0,w,span,["#c9b292","#bba385","#ab9478","#98836b","#85735e","#726452"].map(hex));
   const plants=layer(w,h);let c=gc;
   const bloomCv=layer(w,h);let bcx=null; // night blooms, kept untinted so they glow
-  const px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1);if(bcx)bcx.clearRect(x,y,1,1)};
-  const rect=(x,y,ww,hh,col)=>{c.fillStyle=col;c.fillRect(x,y,ww,hh);if(bcx)bcx.clearRect(x,y,ww,hh)};
+  const flowerCv=layer(w,h);let fcx=null;const flowers=[]; // prickly-pear flowers on their own layer so they can sway in disco
+  const px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1);if(bcx)bcx.clearRect(x,y,1,1);if(fcx)fcx.clearRect(x,y,1,1)};
+  const rect=(x,y,ww,hh,col)=>{c.fillStyle=col;c.fillRect(x,y,ww,hh);if(bcx)bcx.clearRect(x,y,ww,hh);if(fcx)fcx.clearRect(x,y,ww,hh)};
+  const flower=(fx,fy,big)=>{flowers.push({x:fx,y:fy});const f=(x,y,ww,hh,col)=>{fcx.fillStyle=col;fcx.fillRect(x,y,ww,hh)};
+    f(fx,fy-1,2,2,"#e6c868");if(big)f(fx-1,fy,4,1,"#ecd58a");f(fx,fy-1,1,1,"#c89a52")};
   // cloud streaks get their own layer: at night they sit behind the moon instead of striping across it
   const clouds=layer(w,h);c=clouds.getContext("2d");
   for(let i=0;i<Math.max(4,w/45);i++){
@@ -704,7 +708,7 @@ function paintSky(){
   });
   rect(0,H0,w,1,"#d4b896");
   for(let i=0;i<w/30;i++)rect(ri(0,w),ri(H0+3,h-4),ri(10,40),1,"#9a8268");
-  c=plants.getContext("2d");bcx=bloomCv.getContext("2d");
+  c=plants.getContext("2d");bcx=bloomCv.getContext("2d");fcx=flowerCv.getContext("2d");
   const addBloom=b=>{blooms.push(b);
     if(!b.big)return sprt(bcx,CRITTERS.bloomSmall,b.x-1,b.y-2,false,BLOOM);
     // a crown of night blooms: one opening skyward, two flaring out sideways on green tubes
@@ -744,7 +748,7 @@ function paintSky(){
     const pads=[[0,-ry],[-rx-1,-ry*2],[rx,-ry*2-1]];if(rnd()<.7)pads.push([ri(-1,1),-ry*3-1]);if(rnd()<.5)pads.push([rx*2,-ry]);
     pads.forEach(([dx,dy])=>pad(x+dx,base+dy,rx,ry,fill,edge));
     pads.slice(1).forEach(([dx,dy])=>{const n=ri(1,far?1:3);for(let i=0;i<n;i++){const fx=x+dx+ri(-rx+1,rx-1),fy=base+dy-ry+(Math.abs(fx-x-dx)>rx/2?1:0);
-      rect(fx,fy-1,2,2,"#e6c868");if(s>1)rect(fx-1,fy,4,1,"#ecd58a");px(fx,fy-1,"#c89a52")}});
+      flower(fx,fy,s>1)}});
   }
   function cholla(x,base,s,far){
     const lit=far?"#b8ab8c":"#ddd0a6",mid=far?"#9c9076":"#bfb088",sh=far?"#80765f":"#978a6a",glow=far?"#cfc3a4":"#f0e6c6";
@@ -808,7 +812,7 @@ function paintSky(){
   });
   const GW=Math.max(24,Math.min(30,Math.round(h*.12)));
   const nest=giantSaguaro(Math.max(Math.round(w*.14),(GW>>1)+4),GW);
-  if(N){tint(ground,NIGHT_TINT);tint(plants,NIGHT_TINT);tint(clouds,NIGHT_TINT)}
+  if(N){tint(ground,NIGHT_TINT);tint(plants,NIGHT_TINT);tint(clouds,NIGHT_TINT);tint(flowerCv,NIGHT_TINT)}
   // the lip of the cavity, copied so it can be drawn over the owl's lower body
 
 
@@ -823,7 +827,7 @@ function paintSky(){
   const mice=N?[0,1,2].map(i=>({x:ri(20,w-30),y:H0+ri(Math.round(span*.45),span-6),dir:rnd()<.5?1:-1,state:"pause",timer:ri(10,60),yo:0})):[];
   const bats=N?[0,1,2,3].map(i=>({x:ri(0,w),y:ri(Math.round(H0*.2),Math.round(H0*.7)),vx:(i%2?-1:1)*1.2,vy:0,state:"roam",timer:ri(10,80)})):[];
   SCENE.ridge=ridge;SCENE.bikes=null;SCENE.dust=[];
-  Object.assign(SCENE,{layers:{sky,orb,clouds,ground,plants,bloom:bloomCv},sr,H0,span,ctx:cv.getContext("2d"),groundA:layer(w,h),airA:layer(w,h),w,h,t:0,stars,toads,ravens,perches:usable,scorps,bats,mice,shoot:[],groundY,blooms:N?blooms:[]});
+  Object.assign(SCENE,{layers:{sky,orb,clouds,ground,plants,bloom:bloomCv,flowers:flowerCv},flowers,sr,H0,span,ctx:cv.getContext("2d"),groundA:layer(w,h),airA:layer(w,h),w,h,t:0,stars,toads,ravens,perches:usable,scorps,bats,mice,shoot:[],groundY,blooms:N?blooms:[]});
   SCENE.owl={nest,state:"home",blink:0,timer:RI(40,120),path:[],x:0,y:0,face:1};
   SCENE.runner={x:Math.round(w*.4),y:H0+Math.round(span*.52),dir:1,state:N?"asleep":"stand",timer:20};
   clearInterval(SCENE.timer);
@@ -887,7 +891,7 @@ function stepRaven(r,s){
     r.y=Math.max(4,r.y);
     if(r.x>w+28||r.x<-28){r.circ=null;r.vx=-r.vx*(.8+R()*.4);r.cy=RI(Math.round(H0*.14),Math.round(H0*.5));r.x=r.vx>0?-27:w+27}
     const free=s.perches.filter(p=>!s.ravens.some(o=>o.target===p));
-    if(free.length&&R()<.006&&r.x>0&&r.x<w){r.target=free[RI(0,free.length-1)];r.state="descend"}
+    if(free.length&&R()<.006&&r.x>0&&r.x<w){r.target=free[RI(0,free.length-1)];r.state="descend";r.circ=null}
   }else if(r.state==="descend"){
     const tx=r.target.x-6,ty=r.target.y-13,dx=tx-r.x,dy=ty-r.y,d=Math.hypot(dx,dy);
     r.face=dx>=0?1:-1;r.flap=d<20?2:0;
@@ -963,9 +967,9 @@ function drawDisco(c,s){
   if(!AUR.cv||AUR.w!==w||AUR.h!==hh){AUR.cv=layer(w,hh);AUR.w=w;AUR.h=hh;AUR.img=AUR.cv.getContext("2d").createImageData(w,hh)}
   const st=SPOT.state,playing=!!SPOT.ctl&&!st.paused&&!st.buffering;
   const pos=playing?st.pos+(now-(SPOT.at||now)):0;
-  const kick=playing?Math.exp(-((pos/468.75)%1)*4):0;
-  const pulse=playing?.45+.55*kick:.55+.12*Math.sin(t*.9);
-  const hueShift=playing?Math.floor(pos/1875)%4*14:0; // colour steps every bar of music
+  const swell=playing?.5-.5*Math.cos(pos/3750*Math.PI*2):0;            // one smooth breath per bar
+  const pulse=playing?.5+.3*swell:.55+.1*Math.sin(t*.6);
+  const hueShift=playing?(Math.sin(pos/15000*Math.PI*2)*.5+.5)*42:0;      // colours drift slowly instead of stepping
   const D=AUR.img.data,reach=H0*.42;
   const ribbons=[[.36,.07,.011,.35,.52],[.56,.06,.017,-.28,.74],[.26,.05,.008,.2,.38]];
   const col=new Float32Array(hh*3);
@@ -1106,7 +1110,7 @@ function orbPos(s,N,rad){
   const cyc=1+REST/ARC;if(p>cyc)p=(p%cyc);                   // round again: rise from the left
   if(p>1)return null;
   const sr=rad||s.sr,top=Math.round(s.H0*.1)+sr,low=s.H0+sr+2;   // low = fully hidden behind the ranges
-  return {x:Math.round(s.w*(.06+.88*p)),y:Math.round(low-(low-top)*Math.pow(Math.sin(Math.PI*p),.7))};
+  return {x:Math.round(s.w*(N?.94-.88*p:.06+.88*p)),y:Math.round(low-(low-top)*Math.pow(Math.sin(Math.PI*p),.7))};
 }
 // day disco only: faint heat ripples, pixel rings that leave the sun every couple of seconds, widen and fade; drawn before the
 // mountains so they slip behind the ridgeline, and left where they started so they trail the moving sun
@@ -1169,6 +1173,12 @@ function drawScorp(ctx,p,frame,bob,pal){
   const front=r=>r.slice(0,3),back=r=>r.slice(3);
   sprt(ctx,f.map(back),p.dir<0?p.x:p.x+3,p.y-4,p.dir<0,pal);sprt(ctx,f.map(front),p.dir<0?p.x+6:p.x,p.y-5,p.dir<0,pal);
 }
+// flowers and blooms: drawn whole normally; in disco each one is lifted out and rocks a pixel side to side, slowly
+function swayLayer(c,cv,list,s,box){
+  if(!s.disco||!list||!list.length){c.drawImage(cv,0,0);return}
+  const t=performance.now()/1000;
+  list.forEach((f,i)=>{const [x,y,w,h]=box(f),dx=Math.round(Math.sin(t*.8+i*1.7+f.x*.13)*1.15);c.drawImage(cv,x,y,w,h,x+dx,y,w,h)});
+}
 function drawScene(){
   const s=SCENE,c=s.ctx;if(!c)return;s.t++;const N=s.night;
   if(s.disco&&N){drawDisco(c,s);drawMoon(c,s)}else{
@@ -1224,7 +1234,8 @@ function drawScene(){
   if(tk)truckLights(c,tk);
   if(N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)drawScorp(c,p,hold?0:p.state==="walk"?(s.t>>1)%2:0,bob,GLOW)});
   c.drawImage(s.layers.plants,0,0);
-  if(N&&shown("night_blooms"))c.drawImage(s.layers.bloom,0,0);
+  swayLayer(c,s.layers.flowers,s.flowers,s,f=>[f.x-2,f.y-2,6,4]);
+  if(N&&shown("night_blooms"))swayLayer(c,s.layers.bloom,s.blooms,s,b=>{if(!b.big)return [b.x-2,b.y-3,5,5];const hf=Math.max(2,(b.tw||6)>>1);return [b.x-hf-7,b.y-6,hf*2+15,12]});
 
   // things in the air (and the owl at its door) go in front of the plants
   const A=s.airA,a=A.getContext("2d");a.clearRect(0,0,s.w,s.h);
@@ -1660,10 +1671,21 @@ const NOW={uri:null,title:"",artist:"",started:false,art:""};
 function lookupTrack(uri,dur){
   const m=String(uri||"").match(/^spotify:(track|episode):([A-Za-z0-9]+)$/);if(!m||uri===NOW.uri)return;
   NOW.uri=uri;NOW.title=NOW.artist="";ampText();
-  fetch(`https://open.spotify.com/oembed?url=https://open.spotify.com/${m[1]}/${m[2]}`).then(r=>r.ok?r.json():null).then(j=>{
-    if(!j||NOW.uri!==uri)return;NOW.title=String(j.title||"").trim();NOW.art=j.thumbnail_url||"";loadArt(NOW.art);ampText();
-    if(NOW.title&&m[1]==="track")findArtist(NOW.title,dur).then(a=>{if(NOW.uri===uri&&a){NOW.artist=a;ampText()}});
-  }).catch(()=>{});
+  const page=`https://open.spotify.com/${m[1]}/${m[2]}`;
+  // Spotify's oEmbed first; if the browser blocks it, the same data through noembed.com (JSONP needs no CORS)
+  fetch(`https://open.spotify.com/oembed?url=${page}`).then(r=>r.ok?r.json():null).catch(()=>null)
+    .then(j=>j&&j.title?j:jsonp(`https://noembed.com/embed?url=${encodeURIComponent(page)}`))
+    .then(j=>{
+      if(!j||NOW.uri!==uri)return;NOW.title=String(j.title||"").trim();NOW.art=j.thumbnail_url||"";if(NOW.art)loadArt(NOW.art);ampText();
+      if(NOW.title&&m[1]==="track")findArtist(NOW.title,dur).then(a=>{if(NOW.uri!==uri||!a)return;
+        if(a.artist){NOW.artist=a.artist;ampText()}
+        if(a.art&&!DECK.art)loadArt(a.art,true)});                       // iTunes cover if Spotify's never arrived
+    }).catch(()=>{});
+}
+function jsonp(url){
+  return new Promise(res=>{const cb="jp"+Date.now()+Math.floor(Math.random()*1e4),sc=document.createElement("script");
+    const done=v=>{delete window[cb];sc.remove();res(v)};window[cb]=d=>done(d);
+    sc.src=url+(url.includes("?")?"&":"?")+"callback="+cb;sc.onerror=()=>done(null);document.head.appendChild(sc);setTimeout(()=>window[cb]&&done(null),6000)});
 }
 function findArtist(title,dur){
   return new Promise(res=>{
@@ -1673,9 +1695,9 @@ function findArtist(title,dur){
     window[cb]=d=>{const want=norm(title),hits=(d&&d.results||[]).filter(r=>norm(r.trackName)===want);
       // full-length plays must match the track length; 30-second previews fall back to the top match
       const full=dur>35000,pick=full?hits.find(r=>Math.abs((r.trackTimeMillis||0)-dur)<3000):hits[0];
-      done(pick?pick.artistName:"")};
+      const top=pick||hits[0];done({artist:pick?pick.artistName:"",art:top&&top.artworkUrl100?top.artworkUrl100.replace("100x100","300x300"):""})};
     sc.src=`https://itunes.apple.com/search?term=${encodeURIComponent(title)}&entity=song&limit=50&callback=${cb}`;
-    sc.onerror=()=>done("");document.head.appendChild(sc);setTimeout(()=>window[cb]&&done(""),6000);
+    sc.onerror=()=>done(null);document.head.appendChild(sc);setTimeout(()=>window[cb]&&done(null),6000);
   });
 }
 function nowLine(){if(!NOW.started||!NOW.title)return "";return (NOW.artist?NOW.artist+" - ":"")+NOW.title}
@@ -1763,10 +1785,10 @@ function kickPlay(){
 }
 /* ---------- the turntable: appears under the radio while music plays; the record spins with the album art on its label ---------- */
 const DECK={art:null,artSrc:"",raf:0,last:0,th:0};
-function loadArt(src){
-  if(!src||src===DECK.artSrc)return;DECK.artSrc=src;DECK.art=null;
+function loadArt(src,keep){
+  if(!src||src===DECK.artSrc)return;DECK.artSrc=src;if(!keep)DECK.art=null;
   const im=new Image();im.onload=()=>{if(DECK.artSrc!==src)return;const c=document.createElement("canvas");c.width=c.height=17;
-    const x=c.getContext("2d");x.imageSmoothingEnabled=true;x.drawImage(im,0,0,17,17);DECK.art=c};im.src=src;
+    const x=c.getContext("2d");x.imageSmoothingEnabled=true;x.drawImage(im,0,0,17,17);DECK.art=c;drawDeck()};im.referrerPolicy="no-referrer";im.src=src;
 }
 function deckPlaying(){const st=SPOT.state;return !!SPOT.ctl&&!st.paused&&!SPOT.stopped&&!st.buffering}
 function spinDeck(){
@@ -1783,9 +1805,13 @@ function drawDeck(){
   const P=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)};
   c.clearRect(0,0,W,H);
   // plinth: chunky orange box with a dark outline, light top edge and shadowed base
-  c.fillStyle="#2a1814";c.fillRect(1,1,W-2,H-2);c.fillStyle="#c75a30";c.fillRect(2,2,W-4,H-4);
-  c.fillStyle="#e07a44";c.fillRect(2,2,W-4,1);c.fillRect(2,2,1,H-4);c.fillStyle="#9a3e22";c.fillRect(2,H-3,W-4,1);c.fillRect(W-3,2,1,H-4);
-  c.fillStyle="#b04c28";c.fillRect(3,H-14,W-6,2);
+  // birch plinth: pale wood with long wavy grain and a darker end-grain edge
+  c.fillStyle="#3a2a1c";c.fillRect(1,1,W-2,H-2);c.fillStyle="#e8d6ae";c.fillRect(2,2,W-4,H-4);
+  for(let y=3;y<H-3;y++){const k=(y*7)%11;if(k>2)continue;const off=Math.round(Math.sin(y*.9)*3);
+    for(let x=3;x<W-3;x++){const wav=Math.sin((x+off)*.21+y*.7);if(wav>.35)P(x,y,k===0?"#d6c094":"#ddc89e")}}
+  [[11,18],[47,40],[38,9]].forEach(([kx,ky])=>{P(kx,ky,"#b89a6a");P(kx+1,ky,"#c8ac7c");P(kx-1,ky,"#c8ac7c")});   // little birch knots
+  c.fillStyle="#f6ead0";c.fillRect(2,2,W-4,1);c.fillRect(2,2,1,H-4);c.fillStyle="#b89a6c";c.fillRect(2,H-3,W-4,1);c.fillRect(W-3,2,1,H-4);
+  c.fillStyle="#d2ba8a";c.fillRect(3,H-14,W-6,1);
   // the record: dark grooves, with two pale glare wedges that sweep round as it turns
   const cx=26,cy=26,R=22,th=DECK.th;
   for(let y=-R-1;y<=R+1;y++)for(let x=-R-1;x<=R+1;x++){const d=Math.hypot(x,y);if(d>R+.5)continue;
