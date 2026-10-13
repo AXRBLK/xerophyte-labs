@@ -311,9 +311,10 @@ body.night .chip.thirsty{border-color:#e08aa2}
   .hero h1{font-size:21.6px}
   .hero .sub,.hero .live{font-size:12px}
   .icons{position:fixed;flex-direction:row;flex-wrap:wrap;bottom:auto}
-  .icons.left{left:16px;right:16px}
+  .icons.left{left:auto;right:12px;width:164px;justify-content:flex-end;align-content:flex-start;gap:6px 4px}
   .icons.right{display:none}
-  .icon{width:76px}
+  .icon{width:78px}
+  .hero{bottom:calc(58px + 5vh + env(safe-area-inset-bottom,0px))}
   .win{left:16px!important;right:16px;top:calc(62px + env(safe-area-inset-top,0px))!important;width:auto!important;min-width:0;max-height:calc(100% - 120px)}
   .bar{cursor:default}
   .days{grid-template-columns:repeat(3,1fr)}
@@ -321,8 +322,14 @@ body.night .chip.thirsty{border-color:#e08aa2}
 /* phones and touch screens: finger-sized minimize / close buttons */
 @media (max-width:700px),(pointer:coarse){
   .bar{padding:4px 4px 4px 8px;gap:8px}
-  .bar button,#w-radio .bar button{width:44px;height:38px;font-size:22px;flex:none}
+  .bar button,#w-radio .bar button{width:44px;height:38px;font-size:22px;flex:none;touch-action:manipulation}
   #w-radio .bar,#w-radio.active .bar{padding:4px 4px 4px 8px}
+}
+/* phones: no minimize; a big close box that closes from anywhere inside it */
+@media (max-width:700px){
+  .bar [data-a=min]{display:none}
+  .bar [data-a=close],#w-radio .bar [data-a=close]{width:64px;height:44px;margin:-4px -4px -4px 0;font-size:26px}
+  .bar{touch-action:manipulation}
 }
 body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title span{animation:none}
 </style>
@@ -346,7 +353,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 </div>
 
 <footer class="taskbar">
-  <button class="start" id="startbtn" aria-expanded="false" aria-controls="startmenu">Start ☀</button>
+  <button class="start" id="startbtn" aria-expanded="false" aria-controls="startmenu">Start</button>
   <div class="tasks" id="tasks"></div>
   <div class="miniamp" id="miniamp" role="group" aria-label="Radio player" hidden>
     <button type="button" onclick="AMP.prev()" aria-label="Back to start" title="Back to start">⏮</button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play">▶</button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause">❚❚</button><button type="button" onclick="AMP.stop()" aria-label="Stop" title="Stop">■</button>
@@ -991,6 +998,17 @@ function bobBeat(){
   const pos=playing?st.pos+(now-(SPOT.at||now)):now;
   return ((pos/937.5)%1)<.32?1:0;
 }
+// daytime disco: the sky swells softly on each slow beat and drifts through warm party colours every bar
+const SKY_PULSE=[[255,120,170],[190,130,255],[255,176,90],[120,200,255]];
+function pulseSky(c,s){
+  const st=SPOT.state,playing=!!SPOT.ctl&&!st.paused&&!st.buffering,now=performance.now();
+  const pos=playing?st.pos+(now-(SPOT.at||now)):now*.6;           // with no music it just breathes slowly
+  const ph=(pos/937.5)%1,bar=Math.floor(pos/3750);
+  const [r,g,b]=SKY_PULSE[bar%SKY_PULSE.length],a=(playing?.07:.05)+(playing?.13:.06)*Math.exp(-ph*3.2);
+  const gr=c.createLinearGradient(0,0,0,s.H0);
+  gr.addColorStop(0,`rgba(${r},${g},${b},${a.toFixed(3)})`);gr.addColorStop(1,`rgba(${r},${g},${b},${(a*.35).toFixed(3)})`);
+  c.fillStyle=gr;c.fillRect(0,0,s.w,s.H0);
+}
 function sprtBob(c,rows,x,y,split,dy,flip,pal){
   if(!dy)return sprt(c,rows,x,y,flip,pal);
   sprt(c,rows.slice(split),x,y+split,flip,pal);sprt(c,rows.slice(0,split),x,y+dy,flip,pal);
@@ -1034,6 +1052,7 @@ function drawScene(){
   if(N){const t=(now%600)/600,mx=Math.round(s.w*(.12+.76*t)),my=Math.round(s.H0*(.14+.3*(2*t-1)**2));c.drawImage(s.layers.orb,mx-sr,my-sr)}
   else{const ph=now/360*Math.PI*2,sx=Math.round(s.w*.66+Math.sin(ph)*s.w*.03),sy=Math.round(s.H0-sr*.35+Math.sin(ph)*sr*1.15);c.drawImage(s.layers.orb,sx-sr,sy-sr)}
   }
+  if(s.disco&&!N)pulseSky(c,s);
   c.drawImage(s.layers.ground,0,0);
   if(s.disco&&!N&&shown("dirt_bikes"))drawBikes(c,s);
   const bob=s.disco?bobBeat():0;
@@ -1418,14 +1437,20 @@ function defineWindow(id,{title,icon,w,x,y,render,menu,status}){
   document.getElementById("windows").appendChild(el);
   WINS[id]={el,title,icon,x,y,render,status,placed:false};
   el.addEventListener("pointerdown",()=>focusWin(id));
-  el.querySelector("[data-a=close]").onclick=e=>{e.stopPropagation();closeWin(id)};
+  // close on click, and straight away on a finger lift so touch screens never miss it
+  const cb=el.querySelector("[data-a=close]");
+  cb.onclick=e=>{e.stopPropagation();if(W0().open)closeWin(id)};
+  // touchend + preventDefault also cancels the follow-up "ghost" click, which would otherwise land on whatever was under the window
+  cb.addEventListener("touchend",e=>{e.preventDefault();e.stopPropagation();if(W0().open)closeWin(id)},{passive:false});
+  const W0=()=>WINS[id];
   el.querySelector("[data-a=min]").onclick=e=>{e.stopPropagation();shrinkWin(id)};
   drag(el,el.querySelector(".bar"));
 }
 // minimize with a quick shrink toward the window's taskbar button
 function shrinkWin(id){
   const W=WINS[id],el=W.el;if(!W.open||W.min)return;
-  const btn=[...document.querySelectorAll("#tasks .task")].find(b=>b.textContent===W.title)||document.getElementById("tasks");
+  let btn=[...document.querySelectorAll("#tasks .task")].find(b=>b.textContent===W.title)||document.getElementById("tasks");
+  if(id==="radio"){const m=document.getElementById("miniamp");if(m){m.hidden=false;m.style.visibility="hidden";btn=m;requestAnimationFrame(()=>m.style.visibility="")}}
   if(!el.animate||document.body.classList.contains("still")||!btn){minWin(id);return}
   const a=el.getBoundingClientRect(),b=btn.getBoundingClientRect();
   const sc=Math.max(.06,b.width/a.width),dx=b.left-a.left,dy=b.top-a.top;
