@@ -637,11 +637,14 @@ function paintSky(){
   const bloomCv=layer(w,h);let bcx=null; // night blooms, kept untinted so they glow
   const px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1);if(bcx)bcx.clearRect(x,y,1,1)};
   const rect=(x,y,ww,hh,col)=>{c.fillStyle=col;c.fillRect(x,y,ww,hh);if(bcx)bcx.clearRect(x,y,ww,hh)};
+  // cloud streaks get their own layer: at night they sit behind the moon instead of striping across it
+  const clouds=layer(w,h);c=clouds.getContext("2d");
   for(let i=0;i<Math.max(4,w/45);i++){
     const cy=ri(Math.round(H0*.2),Math.round(H0*.62)),cx=ri(-20,w),len=ri(14,46);
     if(N&&i%2)continue;
     rect(cx,cy,len,2,"#a8858e");rect(cx+ri(3,8),cy-2,Math.round(len*.5),2,"#b8949a");rect(cx+ri(-6,4),cy+2,Math.round(len*.7),1,"#8e7080");
   }
+  c=gc;
   // distant ranges: three gentle, rolling layers fading into haze, with a saddle where the sun sets
   [[.22,"#b4a2b2",2.1,.2],[.17,"#a693a6",3.0,1.7],[.12,"#98859a",4.2,3.1]].forEach(([amp,col,k,ph],li)=>{
     for(let x=0;x<w;x++){
@@ -768,7 +771,7 @@ function paintSky(){
   });
   const GW=Math.max(24,Math.min(30,Math.round(h*.12)));
   const nest=giantSaguaro(Math.max(Math.round(w*.14),(GW>>1)+4),GW);
-  if(N){tint(ground,NIGHT_TINT);tint(plants,NIGHT_TINT)}
+  if(N){tint(ground,NIGHT_TINT);tint(plants,NIGHT_TINT);tint(clouds,NIGHT_TINT)}
   // the lip of the cavity, copied so it can be drawn over the owl's lower body
 
 
@@ -783,7 +786,7 @@ function paintSky(){
   const mice=N?[0,1,2].map(i=>({x:ri(20,w-30),y:H0+ri(Math.round(span*.45),span-6),dir:rnd()<.5?1:-1,state:"pause",timer:ri(10,60),yo:0})):[];
   const bats=N?[0,1,2,3].map(i=>({x:ri(0,w),y:ri(Math.round(H0*.2),Math.round(H0*.7)),vx:(i%2?-1:1)*1.2,vy:0,state:"roam",timer:ri(10,80)})):[];
   SCENE.ridge=ridge;SCENE.bikes=null;SCENE.dust=[];
-  Object.assign(SCENE,{layers:{sky,orb,ground,plants,bloom:bloomCv},sr,H0,span,ctx:cv.getContext("2d"),groundA:layer(w,h),airA:layer(w,h),w,h,t:0,stars,toads,ravens,perches:usable,scorps,bats,mice,shoot:[],groundY,blooms:N?blooms:[]});
+  Object.assign(SCENE,{layers:{sky,orb,clouds,ground,plants,bloom:bloomCv},sr,H0,span,ctx:cv.getContext("2d"),groundA:layer(w,h),airA:layer(w,h),w,h,t:0,stars,toads,ravens,perches:usable,scorps,bats,mice,shoot:[],groundY,blooms:N?blooms:[]});
   SCENE.owl={nest,state:"home",blink:0,timer:RI(40,120),path:[],x:0,y:0,face:1};
   SCENE.runner={x:Math.round(w*.4),y:H0+Math.round(span*.52),dir:1,state:N?"asleep":"stand",timer:20};
   clearInterval(SCENE.timer);
@@ -1062,9 +1065,11 @@ function drawScene(){
   });
   // sun sinks and rises over ~6 minutes; the moon crosses the sky over ~10
   const now=performance.now()/1000,sr=s.sr;
+  if(N)c.drawImage(s.layers.clouds,0,0);                 // night: clouds behind the moon
   if(N){const t=(now%600)/600,mx=Math.round(s.w*(.12+.76*t)),my=Math.round(s.H0*(.14+.3*(2*t-1)**2));c.drawImage(s.layers.orb,mx-sr,my-sr)}
   else{const ph=now/360*Math.PI*2,sx=Math.round(s.w*.66+Math.sin(ph)*s.w*.03),sy=Math.round(s.H0-sr*.35+Math.sin(ph)*sr*1.15);c.drawImage(s.layers.orb,sx-sr,sy-sr)}
   }
+  if(!N)c.drawImage(s.layers.clouds,0,0);                // day: sunset streaks in front of the sun
   if(s.disco&&!N)pulseSky(c,s);
   c.drawImage(s.layers.ground,0,0);
   if(s.disco&&!N&&shown("dirt_bikes"))drawBikes(c,s);
@@ -1370,7 +1375,7 @@ async function loadAll(){
 }
 
 let SHEET_STATE="loading";
-/* ---------- admin mode: click the giant saguaro to show the sheet tools in the Start menu ---------- */
+/* ---------- admin mode: click the blooms on the giant saguaro's right arm to show the sheet tools in the Start menu ---------- */
 let ADMIN=false;try{ADMIN=localStorage.getItem("xl-admin")==="1"}catch(e){}
 function setAdmin(on){ADMIN=on;try{on?localStorage.setItem("xl-admin","1"):localStorage.removeItem("xl-admin")}catch(e){}
   document.body.classList.toggle("admin",on);
@@ -1379,7 +1384,8 @@ function setAdmin(on){ADMIN=on;try{on?localStorage.setItem("xl-admin","1"):local
 function hitGiant(e){
   const g=SCENE.giant,cv=document.getElementById("sky");if(!g||!cv.width)return false;
   const x=e.clientX*cv.width/innerWidth,y=e.clientY*cv.height/innerHeight;
-  return (x>=g.tx0&&x<=g.tx1)||(x>=g.ax&&x<=g.ax+g.AW&&y>=g.armTop&&y<=g.ay+g.AW);
+  // only the crown of blooms on top of the giant saguaro's right arm (they flare out sideways at night)
+  return x>=g.ax-7&&x<=g.ax+g.AW+7&&y>=g.armTop-9&&y<=g.armTop+5;
 }
 document.addEventListener("click",e=>{
   // only bare desert counts: not an icon, window, taskbar or menu
