@@ -144,7 +144,12 @@ td.wrap{white-space:normal;min-width:140px}
 .task{max-width:160px;padding:4px 10px;color:var(--sand);background:transparent;border:1px solid rgba(243,201,160,.45);font:13px var(--font-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
 .task.on{background:rgba(243,201,160,.18);border-color:var(--sand);color:#fff}
 .tray{display:flex;gap:16px;padding:4px 12px;border:1px solid rgba(243,201,160,.45);font-size:13px;color:#fff;white-space:nowrap;font-variant-numeric:tabular-nums}
-.tray .src{color:var(--sand)}
+.startmenu .adm{display:none}body.admin .startmenu .adm{display:block}
+.startmenu .chk{margin-left:auto;padding-left:8px;font-weight:700}.startmenu .chk.ok{color:#2f8a3a}.startmenu .chk.warn{color:#b07a18}.startmenu .chk.off{color:#a83a2a}
+body.night .startmenu .chk.ok{color:#6ade74}body.night .startmenu .chk.warn{color:#f0b84a}body.night .startmenu .chk.off{color:#ff7a66}
+.startmenu li button:hover .chk,.startmenu li button:focus-visible .chk{color:#fff}
+#toast{position:fixed;left:50%;bottom:calc(52px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:70;padding:6px 12px;background:#000;color:#00e000;border:2px solid #6a6a86;font:12px var(--font-display);-webkit-font-smoothing:none;pointer-events:none}
+#toast.show{animation:toastIn .2s steps(3)}@keyframes toastIn{from{opacity:0;transform:translate(-50%,6px)}}
 .startmenu{position:fixed;left:4px;bottom:calc(44px + env(safe-area-inset-bottom,0px));width:240px;display:flex;background:var(--chrome);color:var(--ink);border:2px solid;border-color:var(--chrome-hi) var(--chrome-lo) var(--chrome-lo) var(--chrome-hi);z-index:60;font-family:var(--font-ui)}
 .startmenu[hidden]{display:none!important}
 .startmenu .side{width:28px;background:linear-gradient(0deg,var(--title-a),var(--title-b));color:#fff;writing-mode:vertical-rl;transform:rotate(180deg);font-weight:600;padding:8px 0;letter-spacing:.06em}
@@ -249,7 +254,7 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 #w-radio .amp-btns button:active,#w-radio .amp-eject:active{border-color:#50506a #f0f0f8 #f0f0f8 #50506a}
 #w-radio .amp-btns button:disabled{color:#70708a;cursor:default}
 #w-radio .amp-eject{margin-left:6px}
-.amp-brand{margin-left:auto;font:400 8px var(--font-display);letter-spacing:.14em;color:#8a8aa8;white-space:nowrap}
+.amp-brand{margin-left:auto;font:400 8px var(--font-display);letter-spacing:.14em;color:#8a8aa8;white-space:nowrap;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;max-width:150px}
 .amp-brand b{color:#e8d898;font-weight:400}
 #w-radio .deck{background:#000;border-color:#14141e #6a6a86 #6a6a86 #14141e}
 #w-radio .tape-empty{background:#101018;color:#a8a8c0}
@@ -311,7 +316,6 @@ body.night .chip.thirsty{border-color:#e08aa2}
   .icon{width:76px}
   .win{left:16px!important;right:16px;top:calc(62px + env(safe-area-inset-top,0px))!important;width:auto!important;min-width:0;max-height:calc(100% - 120px)}
   .bar{cursor:default}
-  .tray .src{display:none}
   .days{grid-template-columns:repeat(3,1fr)}
 }
 body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title span{animation:none}
@@ -328,6 +332,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 <nav class="icons right" id="iconsRight" aria-label="Desktop, right"></nav>
 
 <div id="windows"></div>
+<div id="toast" role="status" hidden></div>
 
 <div class="startmenu" id="startmenu" hidden>
   <div class="side" id="startside">Xerophyte Labs</div>
@@ -341,7 +346,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
     <button type="button" onclick="AMP.prev()" aria-label="Back to start" title="Back to start">⏮</button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play">▶</button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause">❚❚</button><button type="button" onclick="AMP.stop()" aria-label="Stop" title="Stop">■</button>
     <button type="button" class="mini-lcd" onclick="openWin('radio')" title="Show the player"><span id="miniTime">■ 00:00</span><span class="mini-title" id="miniTitle"></span></button>
   </div>
-  <div class="tray"><button class="modebtn" id="motionbtn" type="button">❚❚</button><button class="modebtn" id="modebtn" type="button">☀</button><button class="modebtn" id="discobtn" type="button" aria-pressed="false"><span class="ball" aria-hidden="true">🪩</span></button><span class="src" id="src">loading…</span><span id="traytemp">--°</span><span id="clock"></span></div>
+  <div class="tray"><button class="modebtn" id="motionbtn" type="button">❚❚</button><button class="modebtn" id="modebtn" type="button">☀</button><button class="modebtn" id="discobtn" type="button" aria-pressed="false"><span class="ball" aria-hidden="true">🪩</span></button><span id="traytemp">--°</span><span id="clock"></span></div>
 </footer>
 
 <script>
@@ -711,6 +716,7 @@ function paintSky(){
     const hcx=gx,rx=9,ry=14,hcy=Math.round(h*.4);
     for(let y=-ry-2;y<=ry+2;y++)for(let x=-rx-2;x<=rx+2;x++){const o=(x*x)/((rx+2)*(rx+2))+(y*y)/((ry+2)*(ry+2)),n=(x*x)/(rx*rx)+(y*y)/(ry*ry);
       if(n<=1)px(hcx+x,hcy+y,y<-ry+3?"#120e12":"#1c161c");else if(o<=1)px(hcx+x,hcy+y,x<0?"#b8b898":"#98987e")}
+    SCENE.giant={tx0:gx-(GW>>1),tx1:gx+(GW>>1),ax,AW,armTop,ay};
     return {x:hcx,top:hcy-ry,cy:hcy};
   }
 
@@ -983,7 +989,7 @@ function sprtBob(c,rows,x,y,split,dy,flip,pal){
   sprt(c,rows.slice(split),x,y+split,flip,pal);sprt(c,rows.slice(0,split),x,y+dy,flip,pal);
 }
 function discoMusic(){
-  if(!SPOT.src)return;
+  if(!(SPOT.src||spotifySrc(SET.spotify_url||SET.spotify_playlist)))return;
   // tuck the player into the taskbar whether it was closed, open on screen or never loaded
   const W=WINS.radio;
   if(!W.open)openWin("radio");
@@ -1320,9 +1326,26 @@ async function loadAll(){
   }
   if(fails===4)USING_SAMPLE=true;
   DATA=out;SET=Object.fromEntries((out.settings||[]).map(r=>[String(r.key||"").toLowerCase(),r.value]));
-  document.getElementById("src").textContent=USING_SAMPLE?"sample data":(fails?"sheet (partial)":"sheet ✓");
+  SHEET_STATE=USING_SAMPLE?"sample":fails?"partial":"ok";
 }
 
+let SHEET_STATE="loading";
+/* ---------- admin mode: click the giant saguaro to show the sheet tools in the Start menu ---------- */
+let ADMIN=false;try{ADMIN=localStorage.getItem("xl-admin")==="1"}catch(e){}
+function setAdmin(on){ADMIN=on;try{on?localStorage.setItem("xl-admin","1"):localStorage.removeItem("xl-admin")}catch(e){}
+  document.body.classList.toggle("admin",on);
+  const t=document.getElementById("toast");t.textContent=on?"✓ Admin on: sheet tools are in the Start menu":"Admin off";
+  t.hidden=false;t.classList.remove("show");void t.offsetWidth;t.classList.add("show");clearTimeout(setAdmin.t);setAdmin.t=setTimeout(()=>t.hidden=true,2400)}
+function hitGiant(e){
+  const g=SCENE.giant,cv=document.getElementById("sky");if(!g||!cv.width)return false;
+  const x=e.clientX*cv.width/innerWidth,y=e.clientY*cv.height/innerHeight;
+  return (x>=g.tx0&&x<=g.tx1)||(x>=g.ax&&x<=g.ax+g.AW&&y>=g.armTop&&y<=g.ay+g.AW);
+}
+document.addEventListener("click",e=>{
+  // only bare desert counts: not an icon, window, taskbar or menu
+  if(e.target.closest("button,a,input,.win,.taskbar,.startmenu,.icon,.mk"))return;
+  if(hitGiant(e))setAdmin(!ADMIN);
+});
 /* ---------- sheet switches: Desktop and Wildlife tabs ---------- */
 const isNo=v=>/^(no|off|false|hide|hidden|0)$/i.test(String(v??"").trim());
 let HIDE_WILD=new Set();
@@ -1416,6 +1439,8 @@ function renderTasks(active){
 const radioName=()=>String(SET.radio_title||"").trim()||"Xerophyte FM";
 /* now playing: Spotify's embed only reports the track's URI, so the song title comes from
    Spotify's public oEmbed and the artist from an iTunes search matched on title and length */
+// the skin's maker stamp: the radio name with its last word picked out, e.g. CHOLLA HUGGER RADIO
+const ampBrand=t=>{const w=String(t).trim().split(/\s+/);const last=w.length>1?w.pop():"";return esc(w.join(" "))+(last?` <b>${esc(last)}</b>`:"")};
 const NOW={uri:null,title:"",artist:"",started:false};
 function lookupTrack(uri,dur){
   const m=String(uri||"").match(/^spotify:(track|episode):([A-Za-z0-9]+)$/);if(!m||uri===NOW.uri)return;
@@ -1469,7 +1494,7 @@ function renderRadio(body,status){
     <div class="amp-btns">
       <button id="ampPrev" aria-label="Back to start" title="Back to start">⏮</button><button id="ampPlay" aria-label="Play" title="Play">▶</button><button id="ampPause" aria-label="Pause" title="Pause">❚❚</button><button id="ampStop" aria-label="Stop" title="Stop">■</button>
       ${src?`<a class="amp-eject" href="https://open.spotify.com/${src.type}/${src.id}" target="_blank" rel="noopener" title="Open in Spotify" aria-label="Open in Spotify">⏏</a>`:""}
-      <span class="amp-brand">XEROPHYTE<b>AMP</b></span>
+      <span class="amp-brand">${ampBrand(title)}</span>
     </div>
     <div class="deck">${src?`<div id="spotHost" class="tape-empty">Loading the tape…</div>`:`<div class="tape-empty">Paste a public Spotify playlist link into the <b>spotify_url</b> row of your sheet's Settings tab, then refresh.</div>`}</div>
   </div>`;
@@ -1689,7 +1714,9 @@ function build(){
   // Desktop tab: show = no hides an icon (and its Start menu entry); label renames it
   const HIDDEN=new Set();
   const place=(col,id,label,icon,badge)=>{const r=deskRow(id,label);if(r&&isNo(r.show)){HIDDEN.add(id);return}
-    const name=r&&r.label?r.label:label;if(WINS[id]&&r&&r.label){WINS[id].title=r.label;WINS[id].el.querySelector(".bar b").textContent=r.label;WINS[id].el.setAttribute("aria-label",r.label)}col.append(iconBtn(id,name,icon,badge))};
+    // the radio is always named by Settings › radio_title; a Desktop label only applies when that is blank
+    const lab=id==="radio"&&String(SET.radio_title||"").trim()?"":r&&r.label;
+    const name=lab||label;if(WINS[id]&&lab){WINS[id].title=lab;WINS[id].el.querySelector(".bar b").textContent=lab;WINS[id].el.setAttribute("aria-label",lab)}col.append(iconBtn(id,name,icon,badge))};
   place(L,"cacti","My Cacti","saguaro",thirsty||"");place(L,"log","Weather Log","chart");
   place(mob?L:R,"today","Weather Now","sun");place(mob?L:R,"map","Desert Map","map");place(mob?L:R,"radio",radioName(),"radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
@@ -1699,9 +1726,11 @@ function build(){
   // start menu
   const ul=document.getElementById("startlist");ul.innerHTML="";
   Object.entries(WINS).filter(([id])=>!HIDDEN.has(id)).forEach(([id,w])=>{const li=document.createElement("li");li.innerHTML=`<button><img alt="" src="${sprite(w.icon)}">${esc(w.title)}</button>`;li.firstChild.onclick=()=>{toggleStart(false);openWin(id)};ul.appendChild(li)});
-  ul.insertAdjacentHTML("beforeend","<hr>");
-  const rl=document.createElement("li");rl.innerHTML=`<button><img alt="" src="${sprite("globe")}">Refresh from sheet</button>`;rl.firstChild.onclick=()=>{toggleStart(false);boot(true)};ul.appendChild(rl);
-  if(CONFIG.SHEET_ID){const ed=document.createElement("li");ed.innerHTML=`<a href="https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/edit" target="_blank" rel="noopener"><img alt="" src="${sprite("book")}">Open the sheet</a>`;ul.appendChild(ed)}
+  ul.insertAdjacentHTML("beforeend",'<hr class="adm">');
+  // sheet tools only show in admin mode; the check says whether the site is reading the sheet
+  const mark=SHEET_STATE==="ok"?'<span class="chk ok" title="Reading the sheet">✓</span>':SHEET_STATE==="partial"?'<span class="chk warn" title="Some tabs could not be read">!</span>':'<span class="chk off" title="Showing sample data">✗</span>';
+  const rl=document.createElement("li");rl.className="adm";rl.innerHTML=`<button><img alt="" src="${sprite("globe")}">Refresh from sheet${mark}</button>`;rl.firstChild.onclick=()=>{toggleStart(false);boot(true)};ul.appendChild(rl);
+  if(CONFIG.SHEET_ID){const ed=document.createElement("li");ed.className="adm";ed.innerHTML=`<a href="https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/edit" target="_blank" rel="noopener"><img alt="" src="${sprite("book")}">Open the sheet</a>`;ul.appendChild(ed)}
   updateTray();
 }
 function typeTitle(){
@@ -1757,7 +1786,7 @@ document.getElementById("discobtn").onclick=()=>setDisco(!SCENE.disco,true);
 document.getElementById("motionbtn").onclick=()=>setMotion(!SCENE.motion,true);tick();setInterval(tick,30000);
 document.getElementById("modebtn").onclick=()=>{SCENE.override=!SCENE.night;setNight(SCENE.override)};
 let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(paintSky,150)});
-boot();
+document.body.classList.toggle("admin",ADMIN);boot();
 </script>
 </body>
 </html>
