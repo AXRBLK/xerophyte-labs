@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Xerophyte Labs</title>
+<link rel="icon" id="favicon" type="image/png" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -265,7 +266,19 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 .modebtn{background:none;border:0;padding:0 2px;color:inherit;font:15px var(--font-ui);cursor:pointer;line-height:1}
 .modebtn:focus-visible{outline:1px dotted currentColor}
 .modebtn img{width:16px;height:16px;image-rendering:pixelated;vertical-align:-3px}
-.modebtn[aria-pressed="true"]{background:rgba(255,255,255,.16);box-shadow:0 0 6px rgba(255,170,255,.6)}
+#discobtn{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;padding:0}
+#discobtn .ball{font-size:15px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;display:inline-block}
+#discobtn[aria-pressed="true"]{outline:2px solid #4169e1;outline-offset:1px;background:rgba(65,105,225,.18);box-shadow:0 0 8px rgba(65,105,225,.7)}
+/* the ball stays upright and turns on its axis: facet light slides across its face, glints twinkle on top */
+#discobtn .ball{position:relative}
+#discobtn[aria-pressed="true"] .ball::after{content:"";position:absolute;inset:24% 9% 2% 9%;border-radius:50%;pointer-events:none;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,0) 0 3px,rgba(255,255,255,.8) 3px 3.5px,rgba(160,190,255,0) 3.5px 6px);
+  background-size:6px 100%;mix-blend-mode:screen;animation:orbit 1.1s linear infinite}
+#discobtn[aria-pressed="true"] .ball::before{content:"";position:absolute;width:3px;height:3px;right:0;top:20%;background:#fff;
+  box-shadow:-9px 7px 0 -1px #fff,-4px 11px 0 -1px #cfe0ff;border-radius:50%;animation:glint 1.1s steps(2) infinite}
+@keyframes orbit{from{background-position:0 0}to{background-position:6px 0}}
+@keyframes glint{50%{opacity:.15}}
+body.still #discobtn .ball::after,body.still #discobtn .ball::before{animation:none}
 body.night{
   --dusk:#0e1124; --sand:#d4d6ec; --bloom:#c0607a; --sage:#7e9a8a;
   --chrome:#383c56; --chrome-hi:#666c94; --chrome-lo:#181a2c; --ink:#e6e6f4; --paper:#1e2138;
@@ -328,7 +341,7 @@ body.still .marquee .track,body.still .lcd-scroll span{animation:none}
     <button type="button" onclick="AMP.prev()" aria-label="Back to start" title="Back to start">⏮</button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play">▶</button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause">❚❚</button><button type="button" onclick="AMP.stop()" aria-label="Stop" title="Stop">■</button>
     <button type="button" class="mini-lcd" onclick="openWin('radio')" title="Show the player"><span id="miniTime">■ 00:00</span><span class="mini-title" id="miniTitle"></span></button>
   </div>
-  <div class="tray"><button class="modebtn" id="motionbtn" type="button">❚❚</button><button class="modebtn" id="modebtn" type="button">☀</button><button class="modebtn" id="discobtn" type="button" aria-pressed="false"><img id="discoimg" alt=""></button><span class="src" id="src">loading…</span><span id="traytemp">--°</span><span id="clock"></span></div>
+  <div class="tray"><button class="modebtn" id="motionbtn" type="button">❚❚</button><button class="modebtn" id="modebtn" type="button">☀</button><button class="modebtn" id="discobtn" type="button" aria-pressed="false"><span class="ball" aria-hidden="true">🪩</span></button><span class="src" id="src">loading…</span><span id="traytemp">--°</span><span id="clock"></span></div>
 </footer>
 
 <script>
@@ -338,12 +351,15 @@ body.still .marquee .track,body.still .lcd-scroll span{animation:none}
    between /d/ and /edit). Leave it empty to show the sample data.
    ================================================================ */
 const CONFIG = {
-  SHEET_ID: "1kGzmtVuyHWI7vJxlEywCUTZq-Z4b-T_ClRw8mJSx448",
-  TABS: { settings: "Settings", cacti: "Cacti", weather: "Weather", pages: "Pages" }
+  SHEET_ID: "1_s8wHoqnpTuUg0agL-XtJg6ZsSm2AcozVO2PDzgEmZI",
+  TABS: { settings: "Settings", cacti: "Cacti", weather: "Weather", pages: "Pages", desktop: "Desktop", wildlife: "Wildlife" }
 };
 
 /* ---------- sample data (shown when no sheet is connected) ---------- */
+const WILDLIFE=["owl","owl_chicks","roadrunner","ravens","horned_lizards","scorpions","bats","night_blooms","shooting_stars","dirt_bikes"];
 const SAMPLE = {
+  desktop: [],
+  wildlife: WILDLIFE.map(a=>({animal:a,show:"yes"})),
   settings: [
     {key:"title_line_1",value:"Welcome to"},
     {key:"title_line_2",value:"Xerophyte"},
@@ -521,6 +537,7 @@ function sprt(c,rows,x,y,flip,pal,only){
 }
 const layer=(w,h)=>{const cv=document.createElement("canvas");cv.width=w;cv.height=h;return cv};
 function dither(c,x0,y0,ww,hh,pal){
+  if(ww<1||hh<1)return;
   const img=c.getImageData(x0,y0,ww,hh),D=img.data;
   for(let y=0;y<hh;y++)for(let x=0;x<ww;x++){
     const t=y/hh*(pal.length-1),i=Math.floor(t),f=t-i;
@@ -550,6 +567,8 @@ function paintSky(){
   const cv=document.getElementById("sky"),N=SCENE.night;
   const S=innerWidth<=700?3:4;
   const w=Math.ceil(innerWidth/S),h=Math.ceil(innerHeight/S);
+  // a frame can report zero size while it's still being laid out (previews, background tabs): wait for a real size
+  if(w<8||h<8){clearInterval(SCENE.timer);SCENE.ctx=null;clearTimeout(paintSky.retry);paintSky.retry=setTimeout(paintSky,250);return}
   cv.width=w;cv.height=h;
   let seed=1987;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
   const ri=(a,b)=>Math.floor(a+rnd()*(b-a+1));
@@ -589,10 +608,10 @@ function paintSky(){
     rect(cx,cy,len,2,"#a8858e");rect(cx+ri(3,8),cy-2,Math.round(len*.5),2,"#b8949a");rect(cx+ri(-6,4),cy+2,Math.round(len*.7),1,"#8e7080");
   }
   // distant ranges: three gentle, rolling layers fading into haze, with a saddle where the sun sets
-  [[.15,"#b4a2b2",1.3,.2],[.12,"#a693a6",1.9,1.7],[.09,"#98859a",2.6,3.1]].forEach(([amp,col,k,ph],li)=>{
+  [[.22,"#b4a2b2",2.1,.2],[.17,"#a693a6",3.0,1.7],[.12,"#98859a",4.2,3.1]].forEach(([amp,col,k,ph],li)=>{
     for(let x=0;x<w;x++){
       const f=x/w,notch=1-.5*Math.exp(-(((f-.66)/.14)**2));
-      const hgt=amp*(.62+.28*Math.sin(f*Math.PI*k+ph)+.1*Math.sin(f*Math.PI*k*2.7+ph*1.9))*notch;
+      const hgt=amp*(.5+.3*Math.sin(f*Math.PI*k+ph)+.12*Math.sin(f*Math.PI*k*2.7+ph*1.9)+.14*Math.abs(Math.sin(f*Math.PI*k*1.6+ph)))*notch; // sharper crests
       const y=Math.round(H0-h*hgt);rect(x,y,1,H0-y,col);
       if(li<2&&(x+li)%5===0)px(x,y,li?"#b09cb0":"#c2b0c0");
     }
@@ -830,7 +849,7 @@ function stepBat(b,s){
   b.x+=b.vx;b.y+=b.vy;
   if(b.y<s.H0*.12)b.vy+=.4;if(b.y>s.H0*.8)b.vy-=.4;
   if(b.x<-8)b.x=s.w+6;if(b.x>s.w+8)b.x=-6;
-  if(--b.timer<=0&&s.blooms.length){b.target=s.blooms[RI(0,s.blooms.length-1)];b.state="visit"}
+  if(--b.timer<=0&&s.blooms.length&&shown("night_blooms")){b.target=s.blooms[RI(0,s.blooms.length-1)];b.state="visit"}
 }
 /* disco sky: pixel northern lights. Curtains of light drift and ripple behind the mountains and pulse with the music.
    Spotify doesn't share its audio with other pages, so the pulse rides a 128 bpm beat locked to the song's playback clock,
@@ -838,6 +857,7 @@ function stepBat(b,s){
 const AUR={};
 function drawDisco(c,s){
   const w=s.w,H0=s.H0,hh=H0+2,now=performance.now(),t=now/1000;
+  if(w<1||hh<1)return;
   if(!AUR.cv||AUR.w!==w||AUR.h!==hh){AUR.cv=layer(w,hh);AUR.w=w;AUR.h=hh;AUR.img=AUR.cv.getContext("2d").createImageData(w,hh)}
   const st=SPOT.state,playing=!!SPOT.ctl&&!st.paused&&!st.buffering;
   const pos=playing?st.pos+(now-(SPOT.at||now)):0;
@@ -876,6 +896,10 @@ function drawDisco(c,s){
 /* daytime disco: a gang of dirt bikes tearing along the ridge of the near range, kicking up dust */
 const RIDERS=[["#c8503c","#7a3428"],["#d8b048","#8a6a28"],["#4a86b8","#2a4e70"],["#e8e4dc","#8a8680"],["#5aa058","#2e6034"]];
 const BIKE_CACHE={};
+// little motocross bike: helmet and visor, rider leaning on the bars, high front fender, number plate, knobby wheels
+const MINI_BIKE=[
+  [".......HH....","......HHHV...","......JJ.....",".....JJJJk...","..bbbkkLbbP..",".bbbbssLbbbb.","..kk..s...kk.",".k..k....k..k","..kk......kk."],
+  [".......HH....","......HHHV...","......JJ.....",".....JJJJk...","..bbbkkLbbP..",".bbbbssLbbbb.",".k.k..s...k.k","..kk.....k.k.",".k.k......kk."]];
 function bikeSprite(i,frame){
   const key=i+":"+frame;if(BIKE_CACHE[key])return BIKE_CACHE[key];
   const cv=layer(24,18),c=cv.getContext("2d"),[hc,jc]=RIDERS[i];
@@ -911,15 +935,15 @@ function drawBikes(c,s){
   if(g.wait>0){g.wait--;return}
   g.x+=1.7;
   RIDERS.forEach(([hc,jc],i)=>{
-    const x=Math.round(g.x-i*30-(i%2)*6);if(x<-26||x>s.w+2)return;
-    const rl=s.ridge[Math.max(0,Math.min(s.w-1,x+4))],rr=s.ridge[Math.max(0,Math.min(s.w-1,x+19))];
+    const x=Math.round(g.x-i*16-(i%2)*3);if(x<-14||x>s.w+2)return;
+    const rl=s.ridge[Math.max(0,Math.min(s.w-1,x+2))],rr=s.ridge[Math.max(0,Math.min(s.w-1,x+10))];
     const hop=(Math.floor(s.t/3)+i*5)%17===0?2:(Math.floor(s.t/3)+i*5)%17===1?1:0;
-    const y=Math.round((rl+rr)/2)-17-hop;
-    if(s.t%2===0)s.dust.push({x:x,y:y+16,life:6});
-    c.drawImage(bikeSprite(i,s.t%2),x,y);
+    const y=Math.round((rl+rr)/2)-9-hop;
+    if(s.t%2===0)s.dust.push({x:x,y:y+8,life:5});
+    sprt(c,MINI_BIKE[s.t%2],x,y,false,{H:hc,V:"#1c1814",J:jc,b:hc,s:"#c8c4bc",L:"#3a3634",P:"#f0ece4",k:"#1c1814"});
   });
   s.dust=s.dust.filter(d=>{d.life--;d.x-=.6;d.y-=.2;c.fillStyle=d.life>3?"#d8c0a0":"#b8a088";c.fillRect(Math.round(d.x),Math.round(d.y),d.life>3?2:1,1);return d.life>0});
-  if(g.x-RIDERS.length*30>s.w+20){g.x=-30;g.wait=RI(60,160)}
+  if(g.x-RIDERS.length*16>s.w+20){g.x=-30;g.wait=RI(60,160)}
 }
 /* a slow half-time beat for head bobs while the disco is on */
 function bobBeat(){
@@ -931,7 +955,14 @@ function sprtBob(c,rows,x,y,split,dy,flip,pal){
   if(!dy)return sprt(c,rows,x,y,flip,pal);
   sprt(c,rows.slice(split),x,y+split,flip,pal);sprt(c,rows.slice(0,split),x,y+dy,flip,pal);
 }
-function setDisco(on){
+function discoMusic(){
+  if(!SPOT.src)return;
+  if(SPOT.ctl){try{SPOT.ctl.play()}catch(e){}return}
+  // load the player tucked into the taskbar, then start the first track as soon as it's ready
+  SPOT.autoplay=true;openWin("radio");minWin("radio");
+}
+function setDisco(on,user){
+  if(on&&user)discoMusic();
   SCENE.disco=on;document.body.classList.toggle("disco",on);
   const b=document.getElementById("discobtn");if(b){b.setAttribute("aria-pressed",on);b.title=on?"Northern lights on · click to turn off":"Disco sky: northern lights that pulse with Xerophyte FM";b.setAttribute("aria-label",b.title)}
   clearInterval(SCENE.timer);if(SCENE.motion&&SCENE.ctx)SCENE.timer=setInterval(drawScene,on?90:125);else drawScene();
@@ -948,7 +979,7 @@ function drawScene(){
     if(st.big&&i===3){c.fillStyle=sp[1];c.fillRect(st.x-1,st.y,1,1);c.fillRect(st.x+1,st.y,1,1);c.fillRect(st.x,st.y-1,1,1);c.fillRect(st.x,st.y+1,1,1)}
   });
   // shooting stars: rare at dusk, frequent at night
-  if(R()<(N?1/55:1/600)){const dir=R()<.5?1:-1;s.shoot.push({x:RI(0,s.w),y:RI(2,Math.round(s.H0*.35)),vx:dir*(2+R()*1.5),vy:1+R()*.8,life:RI(10,20)})}
+  if(shown("shooting_stars")&&R()<(N?1/55:1/600)){const dir=R()<.5?1:-1;s.shoot.push({x:RI(0,s.w),y:RI(2,Math.round(s.H0*.35)),vx:dir*(2+R()*1.5),vy:1+R()*.8,life:RI(10,20)})}
   s.shoot=s.shoot.filter(m=>{
     m.x+=m.vx;m.y+=m.vy;m.life--;
     ["#f6f2e4","#c8c6d8","#8e90b0","#5c6088","#3a4068"].forEach((col,k)=>{c.fillStyle=col;c.fillRect(Math.round(m.x-m.vx*k*.6),Math.round(m.y-m.vy*k*.6),1,1)});
@@ -960,44 +991,49 @@ function drawScene(){
   else{const ph=now/360*Math.PI*2,sx=Math.round(s.w*.66+Math.sin(ph)*s.w*.03),sy=Math.round(s.H0-sr*.35+Math.sin(ph)*sr*1.15);c.drawImage(s.layers.orb,sx-sr,sy-sr)}
   }
   c.drawImage(s.layers.ground,0,0);
-  if(s.disco&&!N)drawBikes(c,s);
+  if(s.disco&&!N&&shown("dirt_bikes"))drawBikes(c,s);
   const bob=s.disco?bobBeat():0;
 
   // ground animals sit between the sand and the plants, so they always pass behind cacti
   const G=s.groundA,g=G.getContext("2d");g.clearRect(0,0,s.w,s.h);
-  if(!N)s.toads.forEach(t=>{stepToad(t,s.w);g.fillStyle="#6e5e4c";g.fillRect(Math.round(t.x)+1,t.y+5,10,1);sprt(g,CRITTERS.toad,t.x,t.y+t.bob,t.dir<0)});
-  s.scorps.forEach(p=>stepScorp(p,s));
-  if(!N)s.scorps.forEach(p=>{if(p.alive)sprt(g,CRITTERS.scorp[p.state==="walk"?(s.t>>1)%2:0],p.x,p.y-4,p.dir<0)});
-  const rr=s.runner;stepRunner(rr,s);
-  if(rr.state!=="away"&&rr.state!=="asleep"){
+  if(!N&&shown("horned_lizards"))s.toads.forEach(t=>{stepToad(t,s.w);g.fillStyle="#6e5e4c";g.fillRect(Math.round(t.x)+1,t.y+5,10,1);sprt(g,CRITTERS.toad,t.x,t.y+t.bob,t.dir<0)});
+  const scorpOn=shown("scorpions");if(!scorpOn)s.scorps.forEach(p=>p.alive=false);
+  if(scorpOn)s.scorps.forEach(p=>stepScorp(p,s));
+  if(!N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)sprt(g,CRITTERS.scorp[p.state==="walk"?(s.t>>1)%2:0],p.x,p.y-4,p.dir<0)});
+  const rr=s.runner;if(shown("roadrunner"))stepRunner(rr,s);
+  if(shown("roadrunner")&&rr.state!=="away"&&rr.state!=="asleep"){
     const rs=rr.state==="run"||rr.state==="hunt"?CRITTERS.run[s.t%2]:rr.state==="peck"||(rr.state==="eat"&&s.t%4<2)?CRITTERS.peck:CRITTERS.stand;
     g.fillStyle="#6e5e4c";g.fillRect(Math.round(rr.x)+4,Math.round(rr.y),9,1);(rr.state==="stand"||rr.state==="peck")?sprtBob(g,rs,rr.x,rr.y-11,5,bob,rr.dir<0):sprt(g,rs,rr.x,rr.y-11,rr.dir<0);
   }
   if(N)tint(G,"rgba(16,22,58,.5)");
   c.drawImage(G,0,0);
-  if(N)s.scorps.forEach(p=>{if(p.alive)sprt(c,CRITTERS.scorp[p.state==="walk"?(s.t>>1)%2:0],p.x,p.y-4,p.dir<0,GLOW)});
+  if(N&&scorpOn)s.scorps.forEach(p=>{if(!p.alive)return;const f=CRITTERS.scorp[p.state==="walk"?(s.t>>1)%2:0];
+    if(!bob){sprt(c,f,p.x,p.y-4,p.dir<0,GLOW);return}
+    // head and pincers (the front three columns) nod on the beat; body and tail stay put
+    const front=r=>r.slice(0,3),back=r=>r.slice(3);
+    sprt(c,f.map(back),p.dir<0?p.x:p.x+3,p.y-4,p.dir<0,GLOW);sprt(c,f.map(front),p.dir<0?p.x+6:p.x,p.y-5,p.dir<0,GLOW)});
   c.drawImage(s.layers.plants,0,0);
-  if(N)c.drawImage(s.layers.bloom,0,0);
+  if(N&&shown("night_blooms"))c.drawImage(s.layers.bloom,0,0);
 
   // things in the air (and the owl at its door) go in front of the plants
   const A=s.airA,a=A.getContext("2d");a.clearRect(0,0,s.w,s.h);
-  const o=s.owl;stepOwl(o,s);let owlSprite=null,ox=0,oy=0;
+  const o=s.owl,owlOn=shown("owl");if(owlOn)stepOwl(o,s);let owlSprite=null,ox=0,oy=0;
   if(o.state==="home"){owlSprite=!N||o.blink>0?CRITTERS.owlBlink:CRITTERS.owlHome;ox=o.nest.x-8;oy=o.nest.top+(N?3:4)}
   else{owlSprite=o.flap?((s.t>>1)%2?CRITTERS.owlUp:CRITTERS.owlDown):CRITTERS.owlGlide;ox=o.x-OWL_FW;oy=o.y-OWL_FH}
-  s.ravens.forEach(r=>{
+  if(shown("ravens"))s.ravens.forEach(r=>{
     stepRaven(r,s);if(r.state==="gone")return;
     const f=r.state==="roost"?CRITTERS.ravenSleep:r.state==="perch"?CRITTERS.ravenPerch:r.flap>0?((s.t>>1)%2?CRITTERS.ravenUp:CRITTERS.ravenDown):CRITTERS.ravenGlide;
     (r.state==="perch"||r.state==="roost")?sprtBob(a,f,r.x,r.y,3,bob,r.face<0):sprt(a,f,r.x,r.y,r.face<0);
   });
-  s.bats.forEach(b=>{stepBat(b,s);sprt(a,CRITTERS.bat[b.state==="feed"?s.t%2:(s.t>>1)%2],b.x,b.y)});
+  if(shown("bats"))s.bats.forEach(b=>{stepBat(b,s);sprt(a,CRITTERS.bat[b.state==="feed"?s.t%2:(s.t>>1)%2],b.x,b.y)});
   if(N)tint(A,"rgba(16,22,58,.5)");
   c.drawImage(A,0,0);
-  if(o.state!=="home"){
+  if((o.state!=="home"||!owlOn)&&shown("owl_chicks")){
     o.chicks=o.chicks||[{b:0},{b:0}];
     o.chicks.forEach((ch,i)=>{if(ch.b>0)ch.b--;else if(R()<.025)ch.b=RI(1,3);
       sprt(c,ch.b>0?CRITTERS.chickBlink:CRITTERS.chick,o.nest.x+(i?1:-9),o.nest.top+(i?16:13),false,CHICKPAL)});
   }
-  (o.state==="home"?sprtBob:(c,r,x,y,sp,dy,f,p)=>sprt(c,r,x,y,f,p))(c,owlSprite,ox,oy,10,bob,false,N?OWLPAL_N:OWLPAL_DAY); // asleep and shadowed by day; awake with bright eyes at night
+  if(owlOn)(o.state==="home"?sprtBob:(c,r,x,y,sp,dy,f,p)=>sprt(c,r,x,y,f,p))(c,owlSprite,ox,oy,10,bob,false,N?OWLPAL_N:OWLPAL_DAY); // asleep and shadowed by day; awake with bright eyes at night
 }
 
 /* ---------- Desert Map: pixel-rendered satellite/terrain with live weather ---------- */
@@ -1243,13 +1279,24 @@ async function loadAll(){
   const out={};USING_SAMPLE=!CONFIG.SHEET_ID;let fails=0;
   for(const [k,tab] of Object.entries(CONFIG.TABS)){
     if(!CONFIG.SHEET_ID){out[k]=SAMPLE[k];continue}
-    try{out[k]=await loadTab(tab)}catch(e){out[k]=SAMPLE[k];fails++}
+    // each tab must carry its own header; Google returns the first tab when a name doesn't exist
+    const need={settings:"key",cacti:"name",weather:"date",pages:"title",desktop:"icon",wildlife:"animal"}[k];
+    try{const rows=await loadTab(tab);out[k]=rows.length&&!(need in rows[0])?(k==="desktop"||k==="wildlife"?[]:SAMPLE[k]):rows}
+    catch(e){out[k]=k==="desktop"||k==="wildlife"?[]:SAMPLE[k];if(k!=="desktop"&&k!=="wildlife")fails++}
   }
-  if(fails===Object.keys(CONFIG.TABS).length)USING_SAMPLE=true;
+  if(fails===4)USING_SAMPLE=true;
   DATA=out;SET=Object.fromEntries((out.settings||[]).map(r=>[String(r.key||"").toLowerCase(),r.value]));
   document.getElementById("src").textContent=USING_SAMPLE?"sample data":(fails?"sheet (partial)":"sheet ✓");
 }
 
+/* ---------- sheet switches: Desktop and Wildlife tabs ---------- */
+const isNo=v=>/^(no|off|false|hide|hidden|0)$/i.test(String(v??"").trim());
+let HIDE_WILD=new Set();
+const shown=name=>!HIDE_WILD.has(name);
+function deskRow(id,label){
+  const keys=[String(id).toLowerCase(),String(label).toLowerCase()];
+  return (DATA.desktop||[]).find(r=>keys.includes(String(r.icon||"").trim().toLowerCase()));
+}
 /* ---------- cactus logic ---------- */
 function cactusState(c){
   const last=toDate(c.last_watered),every=num(c.water_every_days)||14;
@@ -1379,6 +1426,7 @@ function loadSpotify(src){
     const host=document.getElementById("spotHost");if(!host)return;
     SPOT.api.createController(host,{uri:src.uri,width:"100%",height:152},ctl=>{
       SPOT.ctl=ctl;
+      if(SPOT.autoplay){const go=()=>{if(SPOT.autoplay){SPOT.autoplay=false;try{ctl.play()}catch(e){}}};ctl.addListener("ready",go);setTimeout(go,1500)}
       ctl.addListener("playback_update",e=>{const d=e.data||{};
         SPOT.state={paused:!!d.isPaused,pos:d.position||0,dur:d.duration||0,buffering:!!d.isBuffering};SPOT.at=performance.now();
         if(!d.isPaused)SPOT.stopped=false;ampUpdate()});
@@ -1567,15 +1615,20 @@ function build(){
   defineWindow("today",{title:"Weather Now",icon:"sun",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
   defineWindow("log",{title:"Weather Log",icon:"chart",w:640,x:cx(640),y:110,render:renderLog,menu:["File","Edit","Chart"],status:true});
   const thirsty=(DATA.cacti||[]).filter(c=>c.name&&cactusState(c).status==="thirsty").length;
-  L.append(iconBtn("cacti","My Cacti","saguaro",thirsty||""),iconBtn("log","Weather Log","chart"));
-  (mob?L:R).append(iconBtn("today","Weather Now","sun"),iconBtn("map","Desert Map","map"),iconBtn("radio","Xerophyte FM","radio"));
+  HIDE_WILD=new Set((DATA.wildlife||[]).filter(r=>isNo(r.show)).map(r=>String(r.animal||"").trim().toLowerCase()));
+  // Desktop tab: show = no hides an icon (and its Start menu entry); label renames it
+  const HIDDEN=new Set();
+  const place=(col,id,label,icon,badge)=>{const r=deskRow(id,label);if(r&&isNo(r.show)){HIDDEN.add(id);return}
+    const name=r&&r.label?r.label:label;if(WINS[id]&&r&&r.label)WINS[id].title=r.label;col.append(iconBtn(id,name,icon,badge))};
+  place(L,"cacti","My Cacti","saguaro",thirsty||"");place(L,"log","Weather Log","chart");
+  place(mob?L:R,"today","Weather Now","sun");place(mob?L:R,"map","Desert Map","map");place(mob?L:R,"radio","Xerophyte FM","radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
     const id="p"+i;defineWindow(id,{title:p.title,icon:(p.icon||"folder").toLowerCase(),w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
-    ((p.side||"").toLowerCase()==="right"&&!mob?R:L).append(iconBtn(id,p.title,(p.icon||"folder").toLowerCase()));
+    place((p.side||"").toLowerCase()==="right"&&!mob?R:L,id,p.title,(p.icon||"folder").toLowerCase());
   });
   // start menu
   const ul=document.getElementById("startlist");ul.innerHTML="";
-  Object.entries(WINS).forEach(([id,w])=>{const li=document.createElement("li");li.innerHTML=`<button><img alt="" src="${sprite(w.icon)}">${esc(w.title)}</button>`;li.firstChild.onclick=()=>{toggleStart(false);openWin(id)};ul.appendChild(li)});
+  Object.entries(WINS).filter(([id])=>!HIDDEN.has(id)).forEach(([id,w])=>{const li=document.createElement("li");li.innerHTML=`<button><img alt="" src="${sprite(w.icon)}">${esc(w.title)}</button>`;li.firstChild.onclick=()=>{toggleStart(false);openWin(id)};ul.appendChild(li)});
   ul.insertAdjacentHTML("beforeend","<hr>");
   const rl=document.createElement("li");rl.innerHTML=`<button><img alt="" src="${sprite("globe")}">Refresh from sheet</button>`;rl.firstChild.onclick=()=>{toggleStart(false);boot(true)};ul.appendChild(rl);
   if(CONFIG.SHEET_ID){const ed=document.createElement("li");ed.innerHTML=`<a href="https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/edit" target="_blank" rel="noopener"><img alt="" src="${sprite("book")}">Open the sheet</a>`;ul.appendChild(ed)}
@@ -1625,8 +1678,12 @@ const hashMode=(location.hash||"").slice(1).toLowerCase();
 if(hashMode==="night"||hashMode==="day")SCENE.override=hashMode==="night";
 SCENE.motion=motionPref();setMotion(SCENE.motion,false);
 setNight(SCENE.override??isNightNow());
-document.getElementById("discoimg").src=sprite("disco");setDisco(false);
-document.getElementById("discobtn").onclick=()=>setDisco(!SCENE.disco);
+// favicon: the beavertail prickly pear specimen, scaled up crisply
+(()=>{const src=document.createElement("canvas");src.width=src.height=24;drawSpecimen(src.getContext("2d"),"opuntia");
+  const cv=document.createElement("canvas");cv.width=cv.height=48;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;x.drawImage(src,0,0,48,48);
+  document.getElementById("favicon").href=cv.toDataURL("image/png")})();
+setDisco(false);
+document.getElementById("discobtn").onclick=()=>setDisco(!SCENE.disco,true);
 document.getElementById("motionbtn").onclick=()=>setMotion(!SCENE.motion,true);tick();setInterval(tick,30000);
 document.getElementById("modebtn").onclick=()=>{SCENE.override=!SCENE.night;setNight(SCENE.override)};
 let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(paintSky,150)});
