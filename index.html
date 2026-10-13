@@ -268,7 +268,7 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 .modebtn img{width:16px;height:16px;image-rendering:pixelated;vertical-align:-3px}
 #discobtn{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;padding:0}
 #discobtn .ball{font-size:15px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;display:inline-block}
-#discobtn[aria-pressed="true"]{outline:2px solid #4169e1;outline-offset:1px;background:rgba(65,105,225,.18);box-shadow:0 0 8px rgba(65,105,225,.7)}
+#discobtn[aria-pressed="true"]{background:#4169e1;outline:3px solid #2a4cc0;outline-offset:1px;box-shadow:0 0 10px rgba(65,105,225,.85)}
 /* the ball stays upright and turns on its axis: facet light slides across its face, glints twinkle on top */
 #discobtn .ball{position:relative}
 #discobtn[aria-pressed="true"] .ball::after{content:"";position:absolute;inset:24% 9% 2% 9%;border-radius:50%;pointer-events:none;
@@ -356,7 +356,7 @@ const CONFIG = {
 };
 
 /* ---------- sample data (shown when no sheet is connected) ---------- */
-const WILDLIFE=["owl","owl_chicks","roadrunner","ravens","horned_lizards","scorpions","bats","night_blooms","shooting_stars","dirt_bikes"];
+const WILDLIFE=["desert_mice","owl","owl_chicks","roadrunner","ravens","horned_lizards","scorpions","bats","night_blooms","shooting_stars","dirt_bikes"];
 const SAMPLE = {
   desktop: [],
   wildlife: WILDLIFE.map(a=>({animal:a,show:"yes"})),
@@ -493,6 +493,7 @@ const mixHex=(a,b,t)=>{const A=hex(a),B=hex(b);return "#"+A.map((v,i)=>Math.roun
 const OWLPAL_N=Object.fromEntries(Object.entries(OWLPAL).map(([k,v])=>[k,"WYp".includes(k)?v:mixHex(v,"#1a2250",.3)]));
 const CHICKPAL={g:"#9a98a2",G:"#6a6874",Y:"#f2c230",p:"#140c08",o:"#8a7040"};
 const OWLPAL_DAY=Object.fromEntries(Object.entries(OWLPAL).map(([k,v])=>[k,mixHex(v,"#1a1418",.4)]));
+const MOUSE={P:"#e0aeb0",p:"#b88494",B:"#8e6c5c",W:"#f6f0ea",k:"#1c1824",n:"#e0aeb0",t:"#d6a2a6"};
 const BLOOM={W:"#ffffff",w:"#e6ecf4",Y:"#ffd84a",O:"#e8a830",g:"#7e9a6a"};
 const BLOOM_TOP=["..W...W..",".WWW.WWW.","WWwWYWwWW",".WWYOYWW.","..WWWWW..","...ggg..."];
 const BLOOM_SIDE=[".WW....","WWWW...","WwYWWgg","WYOWggg","WwYWWgg","WWWW...",".WW...."];
@@ -528,6 +529,9 @@ const CRITTERS={
   chickBlink:["..gggg..",".g....g.","g......g","gGG..GGg",".g.oo.g.","..gggg.."],
   scorp:[["......sS.",".......S.","SS.SSSS..","s.s.s.s.."],["......sS.",".......S.","SS.SSSS..",".s.s.s.s."]],
   bat:[["K...K","KK.KK",".KKK."],[".....","KKKKK","K.K.K"]],
+  // desert mouse: big round pink ears, brown back, white face and belly, long curling pink tail
+  mouseSit:["..........PPp...",".........PPpPp..",".........PPppP..","........BBBBWWWn",".......BBBBBkWW.","....BBBBBBWWWW..","...BBBBBWWWW....",".tBBBBPWWPW.....","t...............",".tttttttt......."],
+  mouseHop:["..........PPp...",".........PPpPp..",".........PPppP..","........BBBBWWWn",".......BBBBBkWW.","....BBBBBBWWWW..","...BBBBBWWWW....",".tBBBBBWWWW.....","t...P....P......","................"],
   bloomBig:[".W.W.","WWYWW",".WWW."],
   bloomSmall:["WYW",".W."]
 };
@@ -600,8 +604,9 @@ function paintSky(){
   const ground=layer(w,h),gc=ground.getContext("2d");
   dither(gc,0,H0,w,span,["#c9b292","#bba385","#ab9478","#98836b","#85735e","#726452"].map(hex));
   const plants=layer(w,h);let c=gc;
-  const px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)};
-  const rect=(x,y,ww,hh,col)=>{c.fillStyle=col;c.fillRect(x,y,ww,hh)};
+  const bloomCv=layer(w,h);let bcx=null; // night blooms, kept untinted so they glow
+  const px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1);if(bcx)bcx.clearRect(x,y,1,1)};
+  const rect=(x,y,ww,hh,col)=>{c.fillStyle=col;c.fillRect(x,y,ww,hh);if(bcx)bcx.clearRect(x,y,ww,hh)};
   for(let i=0;i<Math.max(4,w/45);i++){
     const cy=ri(Math.round(H0*.2),Math.round(H0*.62)),cx=ri(-20,w),len=ri(14,46);
     if(N&&i%2)continue;
@@ -629,16 +634,22 @@ function paintSky(){
   });
   rect(0,H0,w,1,"#d4b896");
   for(let i=0;i<w/30;i++)rect(ri(0,w),ri(H0+3,h-4),ri(10,40),1,"#9a8268");
-  c=plants.getContext("2d");
+  c=plants.getContext("2d");bcx=bloomCv.getContext("2d");
+  const addBloom=b=>{blooms.push(b);
+    if(!b.big)return sprt(bcx,CRITTERS.bloomSmall,b.x-1,b.y-2,false,BLOOM);
+    // a crown of night blooms: one opening skyward, two flaring out sideways on green tubes
+    const half=Math.max(2,(b.tw||6)>>1);
+    sprt(bcx,BLOOM_TOP,b.x-4,b.y-5,false,BLOOM);sprt(bcx,BLOOM_SIDE,b.x-half-6,b.y,false,BLOOM);sprt(bcx,BLOOM_SIDE,b.x+half-1,b.y,true,BLOOM)};
 
   const SAG=[["#6a5c6c","#5c5060","#4e4454"],["#8c9878","#6e7c62","#55614c"],["#7e9270","#5f7456","#46583f"]];
   const perches=[],blooms=[];
   function saguaro(x,base,hh,pal,depth){
+    let crown=null;const tips=[];
     const tw=Math.max(3,Math.round(hh/8));
     const column=(x0,y0,ww,len)=>{for(let i=0;i<ww;i++){const col=i===0?pal[0]:i===ww-1?pal[2]:(i%2?pal[1]:pal[0]);rect(x0+i,y0+1,1,len-1,col)}rect(x0+1,y0,ww-2,1,pal[0])};
     column(x-(tw>>1),base-hh,tw,hh);
     if(depth>0&&hh>=16)perches.push({x:x,y:base-hh});
-    if(depth>0&&rnd()<.8)blooms.push({x:x,y:base-hh,big:depth===2,tw});
+    if(depth>0&&rnd()<.8)crown={x:x,y:base-hh,big:depth===2,tw};
     const arms=hh>40?ri(2,3):hh>18?ri(1,2):hh>10?ri(0,1):0;
     let side=rnd()<.5?-1:1;
     for(let a=0;a<arms;a++,side*=-1){
@@ -648,9 +659,10 @@ function paintSky(){
       const ax=side>0?x+(tw>>1)+out-aw+1:x-(tw>>1)-out;
       column(ax,ay-up,aw,up+aw);
       if(depth===2)perches.push({x:ax+(aw>>1),y:ay-up});
-      if(depth>0&&rnd()<.7)blooms.push({x:ax+(aw>>1),y:ay-up,big:depth===2,tw:aw});
+      if(depth>0&&rnd()<.7)tips.push({x:ax+(aw>>1),y:ay-up,big:depth===2,tw:aw});
     }
     if(depth>0&&hh>14)for(let i=0;i<3;i++)px(x-(tw>>1)+ri(0,tw-1),base-hh+ri(0,1),"#e8e0cc");
+    if(crown)addBloom(crown);tips.forEach(addBloom);
   }
   function pad(cx,cy,rx,ry,fill,edge){
     for(let y=-ry;y<=ry;y++)for(let x=-rx;x<=rx;x++){const v=(x*x)/(rx*rx)+(y*y)/(ry*ry);if(v<=1)px(cx+x,cy+y,v>.62||x>rx*.5?edge:fill)}
@@ -691,10 +703,10 @@ function paintSky(){
       if(i%4===2)for(let y=y0+((i*3)%5);y<y1;y+=5)px(x0+i,y,f<.5?"#d8d4b4":"#b8b49a");}};
     const AW=Math.round(GW*.62),ay=Math.round(h*.6),ax=gx+(GW>>1)+8;
     rib(gx+(GW>>1)-3,ay,ax-gx-(GW>>1)+AW,ay+AW);                // elbow
-    const armTop=Math.round(h*.16);
+    const armTop=Math.round(h*.25);
     rib(ax,armTop,AW,ay+AW-2);                                        // arm turning up, ending in frame
     [[0,0],[1,0],[AW-1,0],[AW-2,0],[0,1],[AW-1,1]].forEach(([dx,dy])=>c.clearRect(ax+dx,armTop+dy,1,1));
-    blooms.push({x:ax+(AW>>1),y:armTop+1,big:true,tw:AW});perches.push({x:ax+(AW>>1),y:armTop});
+    addBloom({x:ax+(AW>>1),y:armTop+1,big:true,tw:AW});perches.push({x:ax+(AW>>1),y:armTop});
     rib(gx-(GW>>1),-2,GW,h+2);                                        // trunk
     const hcx=gx,rx=9,ry=14,hcy=Math.round(h*.4);
     for(let y=-ry-2;y<=ry+2;y++)for(let x=-rx-2;x<=rx+2;x++){const o=(x*x)/((rx+2)*(rx+2))+(y*y)/((ry+2)*(ry+2)),n=(x*x)/(rx*rx)+(y*y)/(ry*ry);
@@ -702,15 +714,21 @@ function paintSky(){
     return {x:hcx,top:hcy-ry,cy:hcy};
   }
 
-  const items=[],area=w/100;
-  for(let i=0;i<10*area;i++)items.push(["cre",ri(0,w),H0+ri(2,span-2)]);
-  for(let i=0;i<5*area;i++)items.push(["sag",ri(0,w),H0+ri(1,5),ri(7,13),0]);
-  for(let i=0;i<3.5*area;i++)items.push(["sag",ri(0,w),H0+ri(8,Math.round(span*.45)),ri(16,30),1]);
-  for(let i=0;i<4*area;i++)items.push(["opu",ri(0,w),H0+ri(4,Math.round(span*.5)),.7+rnd()*.4,true]);
-  for(let i=0;i<4*area;i++)items.push(["opu",ri(0,w),H0+ri(Math.round(span*.55),span),1.1+rnd()*.7,false]);
-  for(let i=0;i<4*area;i++)items.push(["cho",ri(0,w),H0+ri(3,Math.round(span*.45)),1+rnd()*.3,true]);
-  for(let i=0;i<4*area;i++)items.push(["cho",ri(0,w),H0+ri(Math.round(span*.5),span-2),1.2+rnd()*.6,false]);
-  [[.3,1,.3],[.8,.99,.4],[.95,1,.28]].forEach(([fx,fy,fh])=>items.push(["sag",Math.round(w*fx),Math.round(h*fy),Math.round(Math.min(h,w*.8)*fh),2]));
+  const items=[],area=w/100,taken=[];
+  // each plant claims some elbow room; a spot too close to a neighbour at a similar depth is skipped
+  const spot=(y0,y1,gap)=>{for(let k=0;k<12;k++){const x=ri(0,w),y=ri(y0,y1);
+    if(taken.every(([px2,py2,g2])=>Math.abs(py2-y)>7||Math.abs(px2-x)>(gap+g2)*.6)){taken.push([x,y,gap]);return [x,y]}}return null};
+  const fixed=[[.3,1,.3],[.8,.99,.4],[.95,1,.28]];
+  fixed.forEach(([fx,fy])=>taken.push([Math.round(w*fx),Math.round(h*fy),16]));
+  const add=(n,kind,y0,y1,gap,extra)=>{for(let i=0;i<n;i++){const p=spot(y0,y1,gap);if(p)items.push([kind,p[0],p[1],...extra()])}};
+  for(let i=0;i<6*area;i++)items.push(["cre",ri(0,w),H0+ri(2,span-2)]);
+  add(3.5*area,"sag",H0+1,H0+5,6,()=>[ri(7,13),0]);
+  add(2.5*area,"sag",H0+8,H0+Math.round(span*.45),10,()=>[ri(16,28),1]);
+  add(2.5*area,"opu",H0+4,H0+Math.round(span*.5),8,()=>[.7+rnd()*.35,true]);
+  add(2.5*area,"opu",H0+Math.round(span*.55),H0+span,14,()=>[.95+rnd()*.5,false]);
+  add(2.5*area,"cho",H0+3,H0+Math.round(span*.45),7,()=>[.95+rnd()*.3,true]);
+  add(2.5*area,"cho",H0+Math.round(span*.5),H0+span-2,12,()=>[1.05+rnd()*.45,false]);
+  fixed.forEach(([fx,fy,fh])=>items.push(["sag",Math.round(w*fx),Math.round(h*fy),Math.round(Math.min(h,w*.8)*fh),2]));
   items.sort((a,b)=>a[2]-b[2]).forEach(it=>{
     if(it[0]==="cre")creosote(it[1],it[2]);
     else if(it[0]==="sag")saguaro(it[1],it[2],it[3],SAG[it[4]],it[4]);
@@ -721,16 +739,7 @@ function paintSky(){
   const nest=giantSaguaro(Math.max(Math.round(w*.14),(GW>>1)+4),GW);
   if(N){tint(ground,NIGHT_TINT);tint(plants,NIGHT_TINT)}
   // the lip of the cavity, copied so it can be drawn over the owl's lower body
-  // night-blooming saguaro flowers, kept untinted so they glow
-  const bloomCv=layer(w,h);
-  if(N){const bc=bloomCv.getContext("2d");blooms.forEach(b=>{
-    if(!b.big)return sprt(bc,CRITTERS.bloomSmall,b.x-1,b.y-2,false,BLOOM);
-    // a crown of night blooms: one opening skyward, two flaring out sideways on green tubes
-    const half=Math.max(2,(b.tw||6)>>1);
-    sprt(bc,BLOOM_TOP,b.x-4,b.y-5,false,BLOOM);
-    sprt(bc,BLOOM_SIDE,b.x-half-6,b.y,false,BLOOM);
-    sprt(bc,BLOOM_SIDE,b.x+half-1,b.y,true,BLOOM);
-  })}
+
 
   // the living
   const stars=[];for(let i=0;i<w*(N?.75:.3);i++)stars.push({x:ri(0,w),y:ri(0,Math.round(H0*(N?.7:.34))),ph:rnd()*6.28,sp:.04+rnd()*.12,big:rnd()<(N?.08:.12)});
@@ -740,9 +749,10 @@ function paintSky(){
   if(N)ravens.forEach((r,i)=>{const p=usable[(i*7)%Math.max(1,usable.length)];if(p){r.state="roost";r.target=p;r.x=p.x-3;r.y=p.y-6;r.face=i%2?1:-1}else r.state="gone"});
   const groundY=()=>H0+ri(Math.round(span*.42),span-6);
   const scorps=[];for(let i=0;i<(N?4:2);i++)scorps.push({x:ri(10,w-20),y:groundY(),dir:rnd()<.5?1:-1,state:"pause",timer:ri(10,60),alive:true});
+  const mice=N?[0,1,2].map(i=>({x:ri(20,w-30),y:H0+ri(Math.round(span*.45),span-6),dir:rnd()<.5?1:-1,state:"pause",timer:ri(10,60),yo:0})):[];
   const bats=N?[0,1,2,3].map(i=>({x:ri(0,w),y:ri(Math.round(H0*.2),Math.round(H0*.7)),vx:(i%2?-1:1)*1.2,vy:0,state:"roam",timer:ri(10,80)})):[];
   SCENE.ridge=ridge;SCENE.bikes=null;SCENE.dust=[];
-  Object.assign(SCENE,{layers:{sky,orb,ground,plants,bloom:bloomCv},sr,H0,span,ctx:cv.getContext("2d"),groundA:layer(w,h),airA:layer(w,h),w,h,t:0,stars,toads,ravens,perches:usable,scorps,bats,shoot:[],groundY,blooms:N?blooms:[]});
+  Object.assign(SCENE,{layers:{sky,orb,ground,plants,bloom:bloomCv},sr,H0,span,ctx:cv.getContext("2d"),groundA:layer(w,h),airA:layer(w,h),w,h,t:0,stars,toads,ravens,perches:usable,scorps,bats,mice,shoot:[],groundY,blooms:N?blooms:[]});
   SCENE.owl={nest,state:"home",blink:0,timer:RI(40,120),path:[],x:0,y:0,face:1};
   SCENE.runner={x:Math.round(w*.4),y:H0+Math.round(span*.52),dir:1,state:N?"asleep":"stand",timer:20};
   clearInterval(SCENE.timer);
@@ -833,6 +843,20 @@ function stepOwl(o,s){
     if(d<1.6){o.path.shift();if(!o.path.length){o.state="home";o.timer=RI(40,160)}return}
     const sp=Math.min(o.path.length<=2?.9:1.5,d);o.x+=dx/d*sp;o.y+=dy/d*sp;
     o.flap=tg.flap||dy/d<-.7?((s.t>>1)%3!==2?1:0):0; // wingbeats only when taking off or climbing hard
+  }
+}
+function stepMouse(m,s){
+  // desert mouse: bursts of springy hops, pauses to nibble seeds, freezes when the owl is out
+  const o=s.owl;
+  if(o&&o.state==="fly"&&Math.hypot(o.x-m.x,o.y-m.y)<70){m.state="freeze";m.timer=RI(10,30);m.yo=0;return}
+  m.timer--;
+  if(m.state==="hop"){
+    m.ht=(m.ht||0)+1;m.x+=m.dir*(m.fast?3:2);m.yo=[-1,-3,-4,-3,-1,0][m.ht%6];
+    if(m.x<4||m.x>s.w-20)m.dir*=-1;
+    if(m.ht%6===0&&--m.hops<=0){m.state=R()<.5?"nibble":"pause";m.timer=RI(16,60);m.yo=0;m.fast=false}
+  }else if(m.timer<=0){
+    if(m.state==="freeze"){m.state="hop";m.hops=RI(4,7);m.ht=0;m.fast=true;if(R()<.5)m.dir*=-1}
+    else{m.state="hop";m.hops=RI(2,5);m.ht=0;if(R()<.35)m.dir*=-1}
   }
 }
 function stepBat(b,s){
@@ -930,12 +954,15 @@ function bikeSprite(i,frame){
   return BIKE_CACHE[key]=cv;
 }
 function drawBikes(c,s){
-  if(!s.bikes)s.bikes={x:-40,wait:0};
-  const g=s.bikes;
+  const lineup=()=>{ // 2–3 riders picked at random, strung out at random distances
+    const pick=RIDERS.map((_,i)=>i).sort(()=>R()-.5).slice(0,RI(2,3));let off=0;
+    return pick.map((ri,k)=>{if(k)off+=RI(14,70);return {ri,off,sp:1.5+R()*.5}})};
+  if(!s.bikes||s.bikes.x===undefined)s.bikes={x:-40,wait:0,riders:lineup()};
+  const g=s.bikes;if(!g.riders)g.riders=lineup();
   if(g.wait>0){g.wait--;return}
   g.x+=1.7;
-  RIDERS.forEach(([hc,jc],i)=>{
-    const x=Math.round(g.x-i*16-(i%2)*3);if(x<-14||x>s.w+2)return;
+  g.riders.forEach(({ri:i,off})=>{const [hc,jc]=RIDERS[i];
+    const x=Math.round(g.x-off);if(x<-14||x>s.w+2)return;
     const rl=s.ridge[Math.max(0,Math.min(s.w-1,x+2))],rr=s.ridge[Math.max(0,Math.min(s.w-1,x+10))];
     const hop=(Math.floor(s.t/3)+i*5)%17===0?2:(Math.floor(s.t/3)+i*5)%17===1?1:0;
     const y=Math.round((rl+rr)/2)-9-hop;
@@ -943,7 +970,7 @@ function drawBikes(c,s){
     sprt(c,MINI_BIKE[s.t%2],x,y,false,{H:hc,V:"#1c1814",J:jc,b:hc,s:"#c8c4bc",L:"#3a3634",P:"#f0ece4",k:"#1c1814"});
   });
   s.dust=s.dust.filter(d=>{d.life--;d.x-=.6;d.y-=.2;c.fillStyle=d.life>3?"#d8c0a0":"#b8a088";c.fillRect(Math.round(d.x),Math.round(d.y),d.life>3?2:1,1);return d.life>0});
-  if(g.x-RIDERS.length*16>s.w+20){g.x=-30;g.wait=RI(60,160)}
+  if(g.x-g.riders[g.riders.length-1].off>s.w+20){g.x=-30;g.wait=RI(60,160);g.riders=lineup()}
 }
 /* a slow half-time beat for head bobs while the disco is on */
 function bobBeat(){
@@ -957,9 +984,13 @@ function sprtBob(c,rows,x,y,split,dy,flip,pal){
 }
 function discoMusic(){
   if(!SPOT.src)return;
-  if(SPOT.ctl){try{SPOT.ctl.play()}catch(e){}return}
-  // load the player tucked into the taskbar, then start the first track as soon as it's ready
-  SPOT.autoplay=true;openWin("radio");minWin("radio");
+  // tuck the player into the taskbar whether it was closed, open on screen or never loaded
+  const W=WINS.radio;
+  if(!W.open)openWin("radio");
+  if(!W.min)minWin("radio");
+  if(!SPOT.ctl){SPOT.autoplay=true;return}          // first track starts as soon as the player is ready
+  const st=SPOT.state;
+  if(st.paused||SPOT.stopped||!st.pos){try{SPOT.ctl.play()}catch(e){}}   // already playing? leave the song alone
 }
 function setDisco(on,user){
   if(on&&user)discoMusic();
@@ -1005,7 +1036,10 @@ function drawScene(){
     const rs=rr.state==="run"||rr.state==="hunt"?CRITTERS.run[s.t%2]:rr.state==="peck"||(rr.state==="eat"&&s.t%4<2)?CRITTERS.peck:CRITTERS.stand;
     g.fillStyle="#6e5e4c";g.fillRect(Math.round(rr.x)+4,Math.round(rr.y),9,1);(rr.state==="stand"||rr.state==="peck")?sprtBob(g,rs,rr.x,rr.y-11,5,bob,rr.dir<0):sprt(g,rs,rr.x,rr.y-11,rr.dir<0);
   }
-  if(N)tint(G,"rgba(16,22,58,.5)");
+  if(N&&shown("desert_mice"))(s.mice||[]).forEach(m=>{stepMouse(m,s);
+    const f=m.state==="hop"&&m.yo<0?CRITTERS.mouseHop:CRITTERS.mouseSit;
+    sprtBob(g,f,m.x,m.y-10+m.yo,5,m.state==="nibble"&&s.t%4<2?1:0,m.dir<0,MOUSE)});
+  if(N)tint(G,"rgba(16,22,58,.42)");
   c.drawImage(G,0,0);
   if(N&&scorpOn)s.scorps.forEach(p=>{if(!p.alive)return;const f=CRITTERS.scorp[p.state==="walk"?(s.t>>1)%2:0];
     if(!bob){sprt(c,f,p.x,p.y-4,p.dir<0,GLOW);return}
