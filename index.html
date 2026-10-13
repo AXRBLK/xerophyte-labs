@@ -790,7 +790,9 @@ function paintSky(){
   function saguaro(x,base,hh,pal,depth){
     let crown=null;const tips=[];
     const tw=Math.max(3,Math.round(hh/8));
-    const column=(x0,y0,ww,len)=>{for(let i=0;i<ww;i++){const col=i===0?pal[0]:i===ww-1?pal[2]:(i%2?pal[1]:pal[0]);rect(x0+i,y0+1,1,len-1,col)}rect(x0+1,y0,ww-2,1,pal[0])};
+    const column=(x0,y0,ww,len)=>{for(let i=0;i<ww;i++){const col=i===0?pal[0]:i===ww-1?pal[2]:(i%2?pal[1]:pal[0]);rect(x0+i,y0+1,1,len-1,col)}rect(x0+1,y0,ww-2,1,pal[0]);
+      // the near (second-layer) saguaros get just a hint of spines: faint dots down every other rib
+      if(depth===2&&ww>=4)for(let i=1;i<ww-1;i+=2)for(let y=y0+3+((i*2)%4);y<y0+len-1;y+=4)px(x0+i,y,i<ww/2?"#93a684":"#6e8262")};
     column(x-(tw>>1),base-hh,tw,hh);
     if(depth>0&&hh>=16)perches.push({x:x,y:base-hh});
     if(depth>0&&rnd()<.8)crown={x:x,y:base-hh,big:depth===2,tw};
@@ -845,7 +847,7 @@ function paintSky(){
       const col=i===0||i===ww-1?"#3e4e38":i%4===0?(f<.4?"#6c8460":"#4e6244"):f<.3?"#94aa82":f<.65?"#7e9470":"#62785a";
       rect(x0+i,y0,1,y1-y0,col);
       if(i%4===2)for(let y=y0+((i*3)%5);y<y1;y+=5){
-        const lit=f<.5,sp=lit?"#e8e2c4":"#c4bea2",felt=lit?"#a89c80":"#8a8068";
+        const lit=f<.5,sp=lit?"#b2c39e":"#7f9270",felt=lit?"#9aa886":"#6e7f60";   // faint: only a shade off the rib colour
         px(x0+i,y,felt);                                                  // woolly areole
         px(x0+i-1,y-1,sp);px(x0+i+1,y-1,sp);                              // spines fanning up and out
         if((y>>1)%2)px(x0+i,y-2,sp);                                      // a longer central spine now and then
