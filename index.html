@@ -893,7 +893,7 @@ function paintSky(){
     else opuntia(it[1],it[2],it[3],it[4]);
   });
   c=plantCtx;
-  const GW=Math.max(24,Math.min(30,Math.round(h*.12)));
+  const GW=Math.max(29,Math.min(36,Math.round(h*.144)));   // the owl's giant saguaro (20% wider than before)
   const nest=giantSaguaro(Math.max(Math.round(w*.14),(GW>>1)+4),GW);
   // the far skyline (top of the mountain ranges in each column), smoothed: the day-disco ripples echo it
   {const gd=gc.getImageData(0,0,w,H0).data,top=new Array(w).fill(H0);
