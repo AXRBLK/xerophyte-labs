@@ -28,6 +28,7 @@
   --font-data:"IBM Plex Mono",ui-monospace,"Menlo",monospace;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%}
 body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-data);font-size:14px;overflow:hidden}
 #sky{position:fixed;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated;image-rendering:crisp-edges}
@@ -39,14 +40,12 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
 /* hero title */
-.hero{position:fixed;left:0;right:0;top:50%;transform:translateY(-55%);text-align:center;pointer-events:none;z-index:1;padding-inline:110px}
-.hero h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:96px;line-height:1.1;letter-spacing:0;-webkit-font-smoothing:none;font-smooth:never;color:#f4ece0;text-shadow:4px 4px 0 rgba(40,36,58,.55);text-wrap:balance}
+.hero{position:fixed;right:16px;bottom:calc(58px + env(safe-area-inset-bottom,0px));max-width:calc(100% - 32px);display:flex;flex-direction:column;align-items:flex-end;gap:5px;text-align:right;pointer-events:none;z-index:1}
+.hero h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:24px;line-height:1.15;letter-spacing:0;-webkit-font-smoothing:none;font-smooth:never;color:#f4ece0;text-shadow:2px 2px 0 rgba(40,36,58,.6)}
 .hero h1 span{display:block}
-@media (max-width:1180px){.hero h1{font-size:72px}}
-@media (max-width:900px){.hero h1{font-size:56px}}
-.hero h1 span:nth-child(1){transform:translateX(-4%)}
-.hero h1 span:nth-child(3){transform:translateX(6%)}
-.hero .sub{display:inline-block;margin-top:14px;padding:3px 10px;background:rgba(40,36,58,.7);font-family:var(--font-ui);font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:#efe2cc}
+.hero .sub,.hero .live{display:inline-block;padding:2px 8px;background:rgba(40,36,58,.7);font-family:var(--font-ui);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#efe2cc}
+.hero .live{text-transform:none;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.hero .live i{display:inline-block;width:6px;height:6px;margin-right:6px;background:#9ec48a;vertical-align:1px}
 
 /* icons */
 .icons{position:fixed;top:calc(64px + env(safe-area-inset-top,0px));bottom:56px;display:flex;flex-direction:column;flex-wrap:wrap;gap:6px;z-index:3;align-content:flex-start}
@@ -163,6 +162,50 @@ td.wrap{white-space:normal;min-width:140px}
 .deck iframe{display:block;border:0;border-radius:10px}
 .tape-empty{padding:12px;background:var(--paper);font:12px/1.5 var(--font-data);color:var(--ink2)}
 
+/* Desert Map */
+.win .body.map-body{padding:0;display:flex;flex-direction:column;overflow:auto}
+.maptools{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:6px;background:var(--chrome);border-bottom:1px solid var(--chrome-lo);font-family:var(--font-ui)}
+.maptools button{height:24px;padding:0 8px;font:13px var(--font-ui);color:var(--ink);background:var(--chrome);border:2px solid;border-color:var(--chrome-hi) var(--chrome-lo) var(--chrome-lo) var(--chrome-hi);cursor:pointer;white-space:nowrap}
+.maptools button[aria-pressed="true"],.maptools button:active{border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo);background:var(--paper)}
+.maptools button:focus-visible{outline:1px dotted var(--ink);outline-offset:-4px}
+.maptools .sep{width:1px;height:20px;background:var(--chrome-lo)}
+.mapgrid{display:grid;grid-template-columns:minmax(0,1fr) 230px;min-height:0}
+.mapwrap{position:relative;height:440px;overflow:hidden;cursor:grab;touch-action:none;background:#b8a684;outline:none;min-width:0}
+.mapwrap.grabbing{cursor:grabbing}
+.mapwrap:focus-visible{box-shadow:inset 0 0 0 2px var(--link)}
+.mapcv,.maplabels,.mapnight,.mapmarks{position:absolute;inset:0;width:100%;height:100%}
+.mapcv{image-rendering:pixelated;image-rendering:crisp-edges;filter:saturate(.78) sepia(.14) contrast(1.03)}
+.maplabels,.mapnight,.mapmarks{pointer-events:none}
+.mapnight{background:#141c48;mix-blend-mode:multiply;opacity:0}
+body.night .mapnight{opacity:.55}
+body.night .mapcv{filter:saturate(.5) brightness(.8)}
+.mk{position:absolute;left:0;top:0;margin:-24px 0 0 -10px;display:flex;align-items:flex-end;gap:2px;padding:0;background:none;border:0;cursor:pointer;pointer-events:auto}
+.mk img{width:20px;height:20px;image-rendering:pixelated;filter:drop-shadow(1px 1px 0 rgba(0,0,0,.6))}
+.mk.home{margin:-28px 0 0 -12px}.mk.home img{width:24px;height:24px}
+.mk b{font:600 11px var(--font-ui);color:#1c1218;background:#f4ece0;border:1px solid #1c1218;padding:0 3px;margin-bottom:2px;font-variant-numeric:tabular-nums}
+.mk.sel b{background:#e6c868}
+.mk:focus-visible b{outline:2px solid #e6c868;outline-offset:1px}
+.mapattr{position:absolute;right:0;bottom:0;padding:1px 6px;font:10px var(--font-data);color:#1c1218;background:rgba(244,236,224,.75);pointer-events:none}
+.mapwrap.tuning::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.2) 0 1px,rgba(0,0,0,.3) 1px 3px);animation:tune .34s steps(5) forwards}
+@keyframes tune{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(8px)}}
+.mapside{display:flex;flex-direction:column;min-height:0;max-height:440px;border-left:2px solid var(--chrome-lo);background:var(--paper);min-width:0}
+.pl-info{padding:10px 12px;border-bottom:1px solid var(--line);font-size:12px}
+.pl-info h3{margin:0;font-family:var(--font-ui);font-size:16px;font-weight:600}
+.pl-region{color:var(--mute);font-size:11px;margin-top:2px}
+.pl-now{display:flex;gap:10px;align-items:center;margin:8px 0 6px}
+.pl-now b{font-family:var(--font-display);font-size:28px;font-weight:400;color:var(--link);line-height:1;-webkit-font-smoothing:none}
+.pl-now span{font-size:11px;line-height:1.45}
+.pl-info p{margin:0;font-size:12px;line-height:1.45}
+.places{list-style:none;margin:0;padding:4px;overflow:auto;flex:1}
+.places button{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;padding:4px 6px;background:none;border:1px solid transparent;color:var(--ink);font:13px var(--font-ui);text-align:left;cursor:pointer}
+.places button small{display:block;font-size:10px;color:var(--mute)}
+.places button i{font-style:normal;font-family:var(--font-data);font-size:12px;font-variant-numeric:tabular-nums}
+.places button:hover{border-color:var(--line)}
+.places button:focus-visible{outline:1px dotted var(--ink)}
+.places button[aria-pressed="true"]{background:var(--title-a);color:#fff}
+.places button[aria-pressed="true"] small{color:#e8dde8}
+@media (max-width:700px){.mapgrid{grid-template-columns:1fr}.mapwrap{height:300px}.mapside{max-height:none;border-left:0;border-top:2px solid var(--chrome-lo)}}
+
 /* night mode: moonlit desktop */
 .modebtn{background:none;border:0;padding:0 2px;color:inherit;font:15px var(--font-ui);cursor:pointer;line-height:1}
 .modebtn:focus-visible{outline:1px dotted currentColor}
@@ -173,8 +216,8 @@ body.night{
   --link:#aebcff; --card:#282c46; --line:#3e4468; --line2:#31365a; --mute:#a4a8c6; --ink2:#cfd1e4; --band:#2c3356;
 }
 body.night .bar{background:linear-gradient(90deg,var(--chrome-lo),#2e3250)}
-body.night .hero h1{color:#eef0ff;text-shadow:4px 4px 0 rgba(4,6,18,.75)}
-body.night .hero .sub{background:rgba(8,10,26,.78);color:#d8dcf4}
+body.night .hero h1{color:#eef0ff;text-shadow:2px 2px 0 rgba(4,6,18,.8)}
+body.night .hero .sub,body.night .hero .live{background:rgba(8,10,26,.78);color:#d8dcf4}
 body.night .marquee{background:rgba(8,10,26,.45)}
 body.night .icon span:last-child{background:rgba(10,13,32,.82);padding:1px 5px;color:#f0f2ff;text-shadow:none}
 body.night .icon:hover span:last-child,body.night .icon:focus-visible span:last-child{background:var(--title-b)}
@@ -189,9 +232,8 @@ body.night .chip.thirsty{border-color:#e08aa2}
 
 @media (max-width:700px){
   body{overflow:hidden}
-  .hero{padding-inline:16px;top:auto;bottom:70px;transform:none}
-  .hero h1{font-size:32px;text-shadow:3px 3px 0 rgba(40,36,58,.55)}
-  .hero .sub{font-size:13px}
+  .hero h1{font-size:18px}
+  .hero .sub,.hero .live{font-size:10px}
   .icons{position:fixed;flex-direction:row;flex-wrap:wrap;bottom:auto}
   .icons.left{left:16px;right:16px}
   .icons.right{display:none}
@@ -201,7 +243,7 @@ body.night .chip.thirsty{border-color:#e08aa2}
   .tray .src{display:none}
   .days{grid-template-columns:repeat(3,1fr)}
 }
-@media (prefers-reduced-motion:reduce){.marquee .track{animation:none}}
+body.still .marquee .track,body.still .lcd-scroll span{animation:none}
 </style>
 </head>
 <body>
@@ -209,7 +251,7 @@ body.night .chip.thirsty{border-color:#e08aa2}
 
 <div class="marquee" aria-hidden="true"><div class="track" id="marquee"></div></div>
 
-<div class="hero"><h1 id="title"></h1><div class="sub" id="tagline"></div></div>
+<div class="hero"><h1 id="title"></h1><div class="sub" id="tagline"></div><div class="live" id="liveLine" hidden></div></div>
 
 <nav class="icons left" id="iconsLeft" aria-label="Desktop"></nav>
 <nav class="icons right" id="iconsRight" aria-label="Desktop, right"></nav>
@@ -224,7 +266,7 @@ body.night .chip.thirsty{border-color:#e08aa2}
 <footer class="taskbar">
   <button class="start" id="startbtn" aria-expanded="false" aria-controls="startmenu">Start ☀</button>
   <div class="tasks" id="tasks"></div>
-  <div class="tray"><button class="modebtn" id="modebtn" type="button">☀</button><span class="src" id="src">loading…</span><span id="traytemp">--°</span><span id="clock"></span></div>
+  <div class="tray"><button class="modebtn" id="motionbtn" type="button">❚❚</button><button class="modebtn" id="modebtn" type="button">☀</button><span class="src" id="src">loading…</span><span id="traytemp">--°</span><span id="clock"></span></div>
 </footer>
 
 <script>
@@ -288,6 +330,7 @@ folder:["................","..kkkkk.........",".kyyyyyk........","kyyyyyyykkkkkk
 letter:["................","................","................","kkkkkkkkkkkkkkkk","kwkwwwwwwwwwwkwk","kwwkwwwwwwwwkwwk","kwwwkwwwwwwkwwwk","kwwwwkwwwwkwwwwk","kwwwwwkkkkwwwwwk","kwwwwkwwwwkwwwwk","kwwwkwwwwwwkwwwk","kwwkwwwwwwwwkwwk","kkkkkkkkkkkkkkkk","................","................","................"],
 book:["................",".kkkkkkkkkkkk...",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSSwwwk..",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSwwwwk..",".krrkwwwwwwwwk..",".krrkwwwwwwwwk..",".kkkkkkkkkkkkk..","................","................","................"],
 radio:["................","....kkkkkkkk....","....k......k....","kkkkkkkkkkkkkkkk","kssssssssssssssk","ksSSSssyyssSSSsk","kSkkkSsyysSkkkSk","kSkSkSssssSkSkSk","kSkkkSsrbsSkkkSk","ksSSSssssssSSSsk","kssssssssssssssk","kkkkkkkkkkkkkkkk","................","................","................","................"],
+map:["................",".kkkkkkkkkkkkkk.",".kbbbkgggkbbbbk.",".kbbgkgggkbbbbk.",".kbggkgyykbbgbk.",".kgggkgyykbgggk.",".kggykyyykggggk.",".kgyykyyrkgggyk.",".kyyykyrykggyyk.",".kyyykyyrkgyyyk.",".kyybkyyykyyybk.",".kybbkyyykyybbk.",".kbbbkyybkybbbk.",".kkkkkkkkkkkkkk.","................","................"],
 computer:["................","..kkkkkkkkkkkk..","..ksssssssssSk..","..kskkkkkkkksSk.","..kskbbbbbbksSk.","..kskblbbbbksSk.","..kskbbbbbbksSk.","..kskkkkkkkksSk.","..ksssssssssSk..","..kkkkkkkkkkkk..",".....kSSSSk.....","..kkkkkkkkkkkk..",".kssssssssssssk.",".kSsSsSsSsSsSsk.",".kkkkkkkkkkkkkk.","................"],
 globe:["................",".....kkkkkk.....","...kkbbggbbkk...","..kbbggggbbbbk..","..kbgggggbbggk..",".kbbbggbbbgggbk.",".kbbbbgbbbbggbk.",".kbbbbbbbbbbbbk.",".kbbggbbbbbbbbk.",".kbgggggbbbgbbk.","..kbgggbbbgggk..","..kbbggbbbbbbk..","...kkbbbbbbkk...",".....kkkkkk.....","......kSSk......","....kkkkkkkk...."]
 };
@@ -501,7 +544,7 @@ function paintSky(){
   SCENE.runner={x:Math.round(w*.15),y:H0+Math.round(span*.52),dir:1,state:N?"asleep":"stand",timer:20};
   clearInterval(SCENE.timer);
   drawScene();
-  if(!matchMedia("(prefers-reduced-motion: reduce)").matches)SCENE.timer=setInterval(drawScene,125);
+  if(SCENE.motion)SCENE.timer=setInterval(drawScene,125);
 }
 const R=Math.random,RI=(a,b)=>Math.floor(a+R()*(b-a+1));
 function stepRunner(rr,s){
@@ -645,6 +688,202 @@ function drawScene(){
     s.scorps.forEach(p=>{if(p.alive)sprt(c,CRITTERS.scorp[p.state==="walk"?(s.t>>1)%2:0],p.x,p.y-4,p.dir<0,GLOW)});
   }
   eyes.forEach(([x,y])=>{c.fillStyle=N?"#ffe46a":CPAL.Y;c.fillRect(x,y,1,1)});
+}
+
+/* ---------- Desert Map: pixel-rendered satellite/terrain with live weather ---------- */
+const PLACES=[
+  {id:"anza",name:"Anza-Borrego",region:"Colorado Desert",where:"California, US",lat:33.2559,lon:-116.375,z:10,home:true,blurb:"Home base. California's largest state park: badlands, palm oases and spring wildflower blooms."},
+  {id:"jotr",name:"Joshua Tree",region:"Mojave meets Colorado",where:"California, US",lat:33.873,lon:-115.901,z:10,blurb:"Two deserts meet here: Joshua trees on the high side, a teddybear cholla garden down low."},
+  {id:"dv",name:"Death Valley",region:"Mojave Desert",where:"California, US",lat:36.23,lon:-116.77,z:9,blurb:"The lowest, hottest and driest place in North America. Badwater Basin sits 282 ft below sea level."},
+  {id:"mojave",name:"Mojave Preserve",region:"Mojave Desert",where:"California, US",lat:35.141,lon:-115.51,z:9,blurb:"Kelso Dunes, cinder cones and the Joshua tree woodland of Cima Dome."},
+  {id:"saguaro",name:"Saguaro NP",region:"Sonoran Desert",where:"Arizona, US",lat:32.2967,lon:-111.1666,z:10,blurb:"Forests of saguaros on both sides of Tucson."},
+  {id:"organ",name:"Organ Pipe",region:"Sonoran Desert",where:"Arizona, US",lat:32.0,lon:-112.85,z:10,blurb:"The one place in the US where organ pipe cactus grows wild in numbers."},
+  {id:"pinacate",name:"El Pinacate",region:"Gran Desierto de Altar",where:"Sonora, MX",lat:31.77,lon:-113.5,z:9,blurb:"Volcanic craters beside North America's largest field of active sand dunes."},
+  {id:"cirios",name:"Valle de los Cirios",region:"Central Desert",where:"Baja California, MX",lat:29.73,lon:-114.72,z:10,blurb:"Granite boulder fields, towering cardón and the upside-down-carrot cirio (boojum tree)."},
+  {id:"vizcaino",name:"El Vizcaíno",region:"Vizcaíno Desert",where:"Baja California Sur, MX",lat:27.65,lon:-113.38,z:8,blurb:"A fog-fed coastal desert whose lagoons are gray whale nurseries."},
+  {id:"basin",name:"Great Basin",region:"Great Basin Desert",where:"Nevada, US",lat:39.3,lon:-116.7,z:7,blurb:"The largest desert in the US, and a cold one: sagebrush, winter snow and few cacti."},
+  {id:"whitesands",name:"White Sands",region:"Chihuahuan Desert",where:"New Mexico, US",lat:32.78,lon:-106.17,z:10,blurb:"The world's largest gypsum dunefield."},
+  {id:"bigbend",name:"Big Bend",region:"Chihuahuan Desert",where:"Texas, US",lat:29.25,lon:-103.25,z:9,blurb:"Chihuahuan Desert along the Rio Grande, with dozens of cactus species."},
+  {id:"cuatro",name:"Cuatro Ciénegas",region:"Chihuahuan Desert",where:"Coahuila, MX",lat:26.92,lon:-102.07,z:10,blurb:"Spring-fed turquoise pools in the desert, home to living stromatolites."},
+  {id:"tehuacan",name:"Tehuacán-Cuicatlán",region:"Tehuacán Valley",where:"Puebla & Oaxaca, MX",lat:18.33,lon:-97.47,z:10,blurb:"A UNESCO valley with some of the densest columnar-cactus forests on Earth."}
+];
+const ESRI="https://server.arcgisonline.com/ArcGIS/rest/services/";
+const TILES={
+  sat:{url:ESRI+"World_Imagery/MapServer/tile/{z}/{y}/{x}",max:17},
+  topo:{url:ESRI+"World_Topo_Map/MapServer/tile/{z}/{y}/{x}",max:17},
+  labels:{url:ESRI+"Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",max:17},
+  radar:null
+};
+const MAP={z:9,cx:0,cy:0,base:"sat",pix:2,radar:false,sel:"anza",cache:new Map(),wx:{},wxAt:0,W:0,H:0,raf:0,markers:[]};
+const wsz=z=>256*Math.pow(2,z);
+const lon2x=(lon,z)=>(lon+180)/360*wsz(z);
+const lat2y=(lat,z)=>{const s=Math.sin(lat*Math.PI/180);return (.5-Math.log((1+s)/(1-s))/(4*Math.PI))*wsz(z)};
+const isF=()=>(SET.units||"F").toUpperCase().startsWith("F");
+function tileURL(L,z,x,y){return L.url.replace("{z}",z).replace("{x}",x).replace("{y}",y)}
+function tileImg(url){
+  let t=MAP.cache.get(url);
+  if(!t){const img=new Image();t={img,ok:false};img.onload=()=>{t.ok=true;mapDirty()};img.src=url;MAP.cache.set(url,t);
+    if(MAP.cache.size>700)MAP.cache.delete(MAP.cache.keys().next().value)}
+  return t;
+}
+function drawTile(c,L,z,x,y,dx,dy,sz){
+  const t=tileImg(tileURL(L,z,x,y));
+  if(t.ok){c.drawImage(t.img,dx,dy,sz,sz);return}
+  for(let up=1;up<=4&&z-up>=0;up++){ // show a blurrier parent tile while this one loads
+    const k=1<<up,px=x>>up,py=y>>up,pt=MAP.cache.get(tileURL(L,z-up,px,py));
+    if(pt&&pt.ok){const sub=256/k;c.drawImage(pt.img,(x-px*k)*sub,(y-py*k)*sub,sub,sub,dx,dy,sz,sz);return}
+  }
+}
+function drawLayer(c,L,p,alpha){
+  const z=MAP.z,zz=Math.min(z,L.max),s=Math.pow(2,z-zz),n=Math.pow(2,zz),T=256*s;
+  const left=MAP.cx-MAP.W/2,top=MAP.cy-MAP.H/2;
+  const x0=Math.floor(left/T),x1=Math.floor((left+MAP.W)/T),y0=Math.max(0,Math.floor(top/T)),y1=Math.min(n-1,Math.floor((top+MAP.H)/T));
+  c.globalAlpha=alpha||1;
+  for(let ty=y0;ty<=y1;ty++)for(let tx=x0;tx<=x1;tx++){
+    const dx=Math.floor((tx*T-left)/p),dy=Math.floor((ty*T-top)/p),sz=Math.ceil(T/p)+1;
+    drawTile(c,L,zz,((tx%n)+n)%n,ty,dx,dy,sz);
+  }
+  c.globalAlpha=1;
+}
+function mapDirty(){if(!MAP.raf)MAP.raf=requestAnimationFrame(mapRender)}
+function mapRender(){
+  MAP.raf=0;if(!MAP.cv||!MAP.W)return;
+  const c=MAP.cv.getContext("2d"),p=MAP.pix;
+  c.fillStyle="#b8a684";c.fillRect(0,0,MAP.cv.width,MAP.cv.height);
+  c.imageSmoothingEnabled=true;
+  drawLayer(c,TILES[MAP.base],p);
+  if(MAP.radar&&TILES.radar)drawLayer(c,TILES.radar,p,.7);
+  const lc=MAP.lcv.getContext("2d");lc.clearRect(0,0,MAP.lcv.width,MAP.lcv.height);
+  if(MAP.base==="sat")drawLayer(lc,TILES.labels,1);
+  const left=MAP.cx-MAP.W/2,top=MAP.cy-MAP.H/2,ws=wsz(MAP.z);
+  MAP.markers.forEach(m=>{
+    let x=lon2x(m.p.lon,MAP.z)-left;while(x<-ws/2)x+=ws;while(x>MAP.W+ws/2)x-=ws;
+    const y=lat2y(m.p.lat,MAP.z)-top;
+    m.el.style.transform=`translate(${Math.round(x)}px,${Math.round(y)}px)`;
+    m.el.hidden=x<-60||x>MAP.W+60||y<-30||y>MAP.H+40;
+    m.el.classList.toggle("sel",m.p.id===MAP.sel);
+  });
+  const zl=document.getElementById("mapZoom");if(zl)zl.textContent="z"+MAP.z;
+}
+function clampMap(){const ws=wsz(MAP.z);MAP.cy=Math.max(0,Math.min(ws,MAP.cy));MAP.cx=((MAP.cx%ws)+ws)%ws}
+function zoomAt(d,mx,my){
+  const nz=Math.max(3,Math.min(13,MAP.z+d));if(nz===MAP.z)return;
+  mx=mx??MAP.W/2;my=my??MAP.H/2;
+  const f=Math.pow(2,nz-MAP.z),px=MAP.cx-MAP.W/2+mx,py=MAP.cy-MAP.H/2+my;
+  MAP.cx=px*f-mx+MAP.W/2;MAP.cy=py*f-my+MAP.H/2;MAP.z=nz;clampMap();mapDirty();
+}
+function mapGo(lat,lon,z){
+  const set=()=>{MAP.z=z;MAP.cx=lon2x(lon,z);MAP.cy=lat2y(lat,z);clampMap();mapDirty()};
+  if(!MAP.wrap||document.body.classList.contains("still")){set();return}
+  MAP.wrap.classList.remove("tuning");void MAP.wrap.offsetWidth;MAP.wrap.classList.add("tuning");setTimeout(set,140);
+}
+function fitAll(){
+  const lats=PLACES.map(p=>p.lat),lons=PLACES.map(p=>p.lon);
+  const W=MAP.W||600,H=MAP.H||400;let z=8;
+  while(z>3&&(lon2x(Math.max(...lons),z)-lon2x(Math.min(...lons),z)>W-80||lat2y(Math.min(...lats),z)-lat2y(Math.max(...lats),z)>H-80))z--;
+  mapGo((Math.min(...lats)+Math.max(...lats))/2,(Math.min(...lons)+Math.max(...lons))/2,z);
+}
+async function loadPlacesWx(force){
+  if(!force&&Date.now()-MAP.wxAt<10*60e3)return;MAP.wxAt=Date.now();
+  const q=`current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1${isF()?"&temperature_unit=fahrenheit&wind_speed_unit=mph":""}`;
+  const base="https://api.open-meteo.com/v1/forecast?";
+  try{
+    const r=await fetch(`${base}latitude=${PLACES.map(p=>p.lat).join(",")}&longitude=${PLACES.map(p=>p.lon).join(",")}&${q}`);
+    const j=await r.json(),arr=Array.isArray(j)?j:[j];
+    if(arr.length!==PLACES.length||!arr[0].current)throw 0;
+    PLACES.forEach((p,i)=>MAP.wx[p.id]=arr[i]);
+  }catch(e){
+    await Promise.all(PLACES.map(async p=>{try{const j=await (await fetch(`${base}latitude=${p.lat}&longitude=${p.lon}&${q}`)).json();if(j.current)MAP.wx[p.id]=j}catch(e){}}));
+  }
+  if(!Object.keys(MAP.wx).length)MAP.wxAt=0;
+  mapPaintWx();
+}
+function mapPaintWx(){
+  const U=isF()?"mph":"km/h";
+  MAP.markers.forEach(m=>{const w=MAP.wx[m.p.id];m.t.textContent=w?Math.round(w.current.temperature_2m)+"°":"—"});
+  document.querySelectorAll("#placeList [data-id]").forEach(b=>{const w=MAP.wx[b.dataset.id];b.querySelector("i").textContent=w?Math.round(w.current.temperature_2m)+"°":"—°"});
+  const p=PLACES.find(x=>x.id===MAP.sel),w=MAP.wx[p.id],box=document.getElementById("placeInfo");if(!box)return;
+  const now=w?`<div class="pl-now"><b>${Math.round(w.current.temperature_2m)}°</b><span>${WMO[w.current.weather_code]??""}<br>feels ${Math.round(w.current.apparent_temperature)}° · ${w.current.relative_humidity_2m}% humidity<br>wind ${Math.round(w.current.wind_speed_10m)} ${U} · today ${Math.round(w.daily.temperature_2m_max[0])}°/${Math.round(w.daily.temperature_2m_min[0])}°</span></div>`
+    :`<div class="pl-now muted">Live weather is loading, or unavailable right now.</div>`;
+  box.innerHTML=`<h3>${esc(p.name)}</h3><div class="pl-region">${esc(p.region)} · ${esc(p.where)}</div>${now}<p>${esc(p.blurb)}</p>`;
+}
+function selectPlace(id,fly){
+  MAP.sel=id;const p=PLACES.find(x=>x.id===id);
+  document.querySelectorAll("#placeList [data-id]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.id===id));
+  mapPaintWx();if(fly)mapGo(p.lat,p.lon,p.z);else mapDirty();
+}
+async function toggleRadar(btn){
+  if(!TILES.radar){
+    btn.textContent="Radar…";
+    try{const j=await (await fetch("https://api.rainviewer.com/public/weather-maps.json")).json();const f=j.radar.past[j.radar.past.length-1];
+      TILES.radar={url:`${j.host}${f.path}/256/{z}/{x}/{y}/2/1_1.png`,max:7,time:f.time}}
+    catch(e){btn.textContent="Radar";btn.title="Radar is unavailable right now";return}
+  }
+  MAP.radar=!MAP.radar;btn.setAttribute("aria-pressed",MAP.radar);
+  btn.textContent=MAP.radar?"Radar "+new Date(TILES.radar.time*1000).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}):"Radar";
+  mapDirty();
+}
+function renderMap(body,status){
+  if(body.dataset.built){mapDirty();loadPlacesWx();return}
+  body.dataset.built="1";body.classList.add("map-body");
+  body.innerHTML=`<div class="maptools" role="toolbar" aria-label="Map controls">
+      <button data-a="home">⌂ Anza-Borrego</button><button data-a="all">◎ All deserts</button>
+      <span class="sep"></span>
+      <button data-base="sat" aria-pressed="true">Satellite</button><button data-base="topo" aria-pressed="false">Terrain</button>
+      <button data-a="radar" aria-pressed="false">Radar</button>
+      <span class="sep"></span>
+      <button data-a="pix" title="Pixel size">Pixels 2×</button><button data-a="in" aria-label="Zoom in">+</button><button data-a="out" aria-label="Zoom out">−</button>
+    </div>
+    <div class="mapgrid">
+      <div class="mapwrap" tabindex="0" aria-label="Map of North American deserts. Drag or use arrow keys to pan, plus and minus to zoom.">
+        <canvas class="mapcv"></canvas><canvas class="maplabels"></canvas><div class="mapnight"></div><div class="mapmarks"></div>
+        <div class="mapattr">Imagery © Esri · Radar RainViewer · Weather Open-Meteo</div>
+      </div>
+      <aside class="mapside"><div id="placeInfo" class="pl-info"></div><ol id="placeList" class="places">${PLACES.map(p=>`<li><button data-id="${p.id}" aria-pressed="${p.id===MAP.sel}"><span>${esc(p.name)}<small>${esc(p.region)}</small></span><i>—°</i></button></li>`).join("")}</ol></aside>
+    </div>`;
+  const wrap=MAP.wrap=body.querySelector(".mapwrap");MAP.cv=body.querySelector(".mapcv");MAP.lcv=body.querySelector(".maplabels");
+  const marks=body.querySelector(".mapmarks");
+  MAP.markers=PLACES.map(p=>{const el=document.createElement("button");el.className="mk"+(p.home?" home":"");el.setAttribute("aria-label",p.name);el.title=`${p.name} · ${p.region}`;
+    el.innerHTML=`<img alt="" src="${sprite(p.home?"flower":"cactus")}"><b>—</b>`;el.onclick=e=>{e.stopPropagation();selectPlace(p.id,false)};marks.appendChild(el);return {p,el,t:el.querySelector("b")}});
+  body.querySelectorAll("#placeList [data-id]").forEach(b=>b.onclick=()=>selectPlace(b.dataset.id,true));
+  body.querySelector(".maptools").onclick=e=>{
+    const b=e.target.closest("button");if(!b)return;
+    if(b.dataset.base){MAP.base=b.dataset.base;body.querySelectorAll("[data-base]").forEach(x=>x.setAttribute("aria-pressed",x===b));mapDirty();return}
+    const a=b.dataset.a;
+    if(a==="home")selectPlace("anza",true);
+    else if(a==="all")fitAll();
+    else if(a==="radar")toggleRadar(b);
+    else if(a==="pix"){MAP.pix=MAP.pix===2?3:MAP.pix===3?1:2;b.textContent="Pixels "+MAP.pix+"×";sizeMap()}
+    else if(a==="in")zoomAt(1);else if(a==="out")zoomAt(-1);
+  };
+  let drag=null,acc=0,last=0;
+  wrap.addEventListener("pointerdown",e=>{if(e.target.closest(".mk"))return;drag={x:e.clientX,y:e.clientY};wrap.setPointerCapture(e.pointerId);wrap.classList.add("grabbing")});
+  wrap.addEventListener("pointermove",e=>{if(!drag)return;MAP.cx-=e.clientX-drag.x;MAP.cy-=e.clientY-drag.y;drag={x:e.clientX,y:e.clientY};clampMap();mapDirty()});
+  const end=()=>{drag=null;wrap.classList.remove("grabbing")};wrap.addEventListener("pointerup",end);wrap.addEventListener("pointercancel",end);
+  wrap.addEventListener("wheel",e=>{e.preventDefault();acc+=e.deltaY;const now=Date.now();if(Math.abs(acc)>40&&now-last>220){const r=wrap.getBoundingClientRect();zoomAt(acc>0?-1:1,e.clientX-r.left,e.clientY-r.top);acc=0;last=now}},{passive:false});
+  wrap.addEventListener("dblclick",e=>{const r=wrap.getBoundingClientRect();zoomAt(1,e.clientX-r.left,e.clientY-r.top)});
+  wrap.addEventListener("keydown",e=>{const k=e.key,s=80;
+    if(k==="ArrowLeft")MAP.cx-=s;else if(k==="ArrowRight")MAP.cx+=s;else if(k==="ArrowUp")MAP.cy-=s;else if(k==="ArrowDown")MAP.cy+=s;
+    else if(k==="+"||k==="=")return zoomAt(1);else if(k==="-")return zoomAt(-1);else return;
+    e.preventDefault();clampMap();mapDirty()});
+  function sizeMap(){
+    const r=wrap.getBoundingClientRect();MAP.W=Math.round(r.width);MAP.H=Math.round(r.height);if(!MAP.W)return;
+    MAP.cv.width=Math.ceil(MAP.W/MAP.pix);MAP.cv.height=Math.ceil(MAP.H/MAP.pix);MAP.lcv.width=MAP.W;MAP.lcv.height=MAP.H;
+    if(!MAP.placed){MAP.placed=true;const p=PLACES[0];MAP.z=p.z;MAP.cx=lon2x(p.lon,p.z);MAP.cy=lat2y(p.lat,p.z)}
+    mapRender();
+  }
+  new ResizeObserver(sizeMap).observe(wrap);
+  if(status)status.innerHTML=`<span>${PLACES.length} desert sites</span><span id="mapZoom">z${MAP.z}</span>`;
+  mapPaintWx();loadPlacesWx();
+}
+
+/* ---------- motion: on by default, off when the device asks for reduced motion, and the visitor's choice is remembered ---------- */
+const MOTION_KEY="xl-motion";
+function motionPref(){try{const v=localStorage.getItem(MOTION_KEY);if(v!==null)return v==="1"}catch(e){}return !matchMedia("(prefers-reduced-motion: reduce)").matches}
+function setMotion(on,save){
+  SCENE.motion=on;if(save){try{localStorage.setItem(MOTION_KEY,on?"1":"0")}catch(e){}}
+  document.body.classList.toggle("still",!on);clearInterval(SCENE.timer);if(on&&SCENE.ctx)SCENE.timer=setInterval(drawScene,125);
+  const b=document.getElementById("motionbtn");if(b){b.textContent=on?"❚❚":"▶";b.title=on?"Pause the desert":"Animate the desert";b.setAttribute("aria-label",b.title)}
 }
 
 /* ---------- data helpers ---------- */
@@ -896,8 +1135,22 @@ function renderToday(body,status){
 }
 
 function weatherRows(){
-  return (DATA.weather||[]).map(r=>({...r,d:toDate(r.date),high:num(r.high),low:num(r.low),rain:num(r.rain)??0}))
-    .filter(r=>r.d&&r.high!=null).sort((a,b)=>a.d-b.d);
+  const sheet=(DATA.weather||[]).map(r=>({...r,d:toDate(r.date),high:num(r.high),low:num(r.low),rain:num(r.rain)??0})).filter(r=>r.d);
+  if(!HIST)return sheet.filter(r=>r.high!=null).sort((a,b)=>a.d-b.d);
+  // live observations win; the sheet adds notes and any older days
+  const by=new Map(HIST.map(r=>[+r.d,{...r}]));
+  sheet.forEach(r=>{const l=by.get(+r.d);if(l){if(r.notes)l.notes=r.notes}else if(r.high!=null)by.set(+r.d,r)});
+  return [...by.values()].sort((a,b)=>a.d-b.d);
+}
+let HIST=null;
+async function loadHistory(){
+  const lat=num(SET.latitude),lon=num(SET.longitude);if(lat==null||lon==null)return null;
+  const F=(SET.units||"F").toUpperCase().startsWith("F");
+  try{
+    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code&past_days=30&forecast_days=1&timezone=auto${F?"&temperature_unit=fahrenheit&precipitation_unit=inch":""}`);
+    const d=(await r.json()).daily;
+    return d.time.map((t,i)=>({date:t,d:toDate(t),high:d.temperature_2m_max[i]==null?null:Math.round(d.temperature_2m_max[i]),low:d.temperature_2m_min[i]==null?null:Math.round(d.temperature_2m_min[i]),rain:+(d.precipitation_sum[i]||0).toFixed(2),conditions:WMO[d.weather_code[i]]??"",notes:""})).filter(r=>r.high!=null);
+  }catch(e){return null}
 }
 function renderLog(body,status){
   const all=weatherRows(),rows=all.slice(-30);
@@ -916,8 +1169,8 @@ function renderLog(body,status){
   const month=rows[rows.length-1].d.getMonth(),yr=rows[rows.length-1].d.getFullYear();
   const rainMonth=all.filter(r=>r.d.getMonth()===month&&r.d.getFullYear()===yr).reduce((s,r)=>s+r.rain,0);
   const U=(SET.units||"F").toUpperCase().startsWith("F")?"°F":"°C",RU=U==="°F"?'"':" mm";
-  body.innerHTML=`${exampleTag()}
-  <h3>Last ${rows.length} days · ${esc(SET.location_name||"")}</h3>
+  body.innerHTML=`${HIST?"":exampleTag()}
+  <h3>Last ${rows.length} days · ${esc(SET.location_name||"")}${HIST?" · live":""}</h3>
   <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Daily high and low temperatures with rainfall">
     ${ticks.map(v=>`<line class="grid-l" x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end">${v}°</text>`).join("")}
     <path class="band" d="${band}"/>
@@ -959,12 +1212,13 @@ function build(){
 
   const mob=innerWidth<=700,cx=w=>Math.max(130,(innerWidth-w)/2);
   defineWindow("cacti",{title:"My Cacti",icon:"cactus",w:640,x:mob?16:120,y:84,render:renderCacti,menu:["File","View","Water"],status:true});
+  defineWindow("map",{title:"Desert Map",icon:"map",w:Math.min(860,innerWidth-40),x:mob?16:Math.max(110,(innerWidth-860)/2),y:70,render:renderMap,status:true});
   defineWindow("radio",{title:"Xerophyte FM",icon:"radio",w:380,x:innerWidth-450,y:300,render:renderRadio,status:true});
   defineWindow("today",{title:"Weather Now",icon:"sun",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
   defineWindow("log",{title:"Weather Log",icon:"chart",w:640,x:cx(640),y:110,render:renderLog,menu:["File","Edit","Chart"],status:true});
   const thirsty=(DATA.cacti||[]).filter(c=>c.name&&cactusState(c).status==="thirsty").length;
   L.append(iconBtn("cacti","My Cacti","cactus",thirsty||""),iconBtn("log","Weather Log","chart"));
-  (mob?L:R).append(iconBtn("today","Weather Now","sun"),iconBtn("radio","Xerophyte FM","radio"));
+  (mob?L:R).append(iconBtn("today","Weather Now","sun"),iconBtn("map","Desert Map","map"),iconBtn("radio","Xerophyte FM","radio"));
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
     const id="p"+i;defineWindow(id,{title:p.title,icon:(p.icon||"folder").toLowerCase(),w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
     ((p.side||"").toLowerCase()==="right"&&!mob?R:L).append(iconBtn(id,p.title,(p.icon||"folder").toLowerCase()));
@@ -980,6 +1234,10 @@ function build(){
 function updateTray(){
   let t="--";if(LIVE&&LIVE.current)t=Math.round(LIVE.current.temperature_2m);else{const r=weatherRows();if(r.length)t=Math.round(r[r.length-1].high)}
   document.getElementById("traytemp").textContent=t+"°";
+  const ll=document.getElementById("liveLine");
+  if(LIVE&&LIVE.current){const c=LIVE.current,F=(SET.units||"F").toUpperCase().startsWith("F");
+    ll.innerHTML=`<i></i>${esc(SET.location_name||"")} · ${Math.round(c.temperature_2m)}° · ${esc(WMO[c.weather_code]??"")} · wind ${Math.round(c.wind_speed_10m)} ${F?"mph":"km/h"}`;ll.hidden=false}
+  else ll.hidden=true;
 }
 function tick(){if(SCENE.override==null&&isNightNow()!==SCENE.night)setNight(!SCENE.night);const d=new Date();document.getElementById("clock").textContent=d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+", "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}).toLowerCase().replace(" ","")}
 function toggleStart(force){const m=document.getElementById("startmenu"),b=document.getElementById("startbtn");const on=force??m.hidden;m.hidden=!on;b.setAttribute("aria-expanded",on)}
@@ -991,13 +1249,15 @@ async function boot(refresh){
   const wasOpen=refresh?Object.keys(WINS).filter(k=>WINS[k].open&&!WINS[k].min):[];
   await loadAll();build();
   wasOpen.forEach(openWin);
-  if(!refresh&&innerWidth>700)openWin("cacti");
-  LIVE=await loadLive();updateTray();
-  if(WINS.today.open)openWin("today");
+  [LIVE,HIST]=await Promise.all([loadLive(),loadHistory()]);updateTray();
+  ["today","log"].forEach(id=>{if(WINS[id].open&&!WINS[id].min)openWin(id)});
+  if(!refresh&&!boot.timer)boot.timer=setInterval(async()=>{LIVE=await loadLive()||LIVE;HIST=await loadHistory()||HIST;updateTray();if(WINS.today.open&&!WINS.today.min)openWin("today")},15*60e3);
 }
 const hashMode=(location.hash||"").slice(1).toLowerCase();
 if(hashMode==="night"||hashMode==="day")SCENE.override=hashMode==="night";
-setNight(SCENE.override??isNightNow());tick();setInterval(tick,30000);
+SCENE.motion=motionPref();setMotion(SCENE.motion,false);
+setNight(SCENE.override??isNightNow());
+document.getElementById("motionbtn").onclick=()=>setMotion(!SCENE.motion,true);tick();setInterval(tick,30000);
 document.getElementById("modebtn").onclick=()=>{SCENE.override=!SCENE.night;setNight(SCENE.override)};
 let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(paintSky,150)});
 boot();
