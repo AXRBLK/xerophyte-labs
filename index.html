@@ -42,7 +42,7 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 
 /* hero title */
 .hero{position:fixed;right:16px;bottom:calc(58px + env(safe-area-inset-bottom,0px));max-width:calc(100% - 32px);display:flex;flex-direction:column;align-items:flex-end;gap:5px;text-align:right;pointer-events:none;z-index:1}
-.hero h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:24px;line-height:1.15;letter-spacing:0;-webkit-font-smoothing:none;font-smooth:never;color:#f4ece0;text-shadow:2px 2px 0 rgba(40,36,58,.6)}
+.hero h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:28.8px;line-height:1.15;letter-spacing:0;-webkit-font-smoothing:none;font-smooth:never;color:#f4ece0;text-shadow:2px 2px 0 rgba(40,36,58,.6)}
 .hero h1 span{display:block}
 .hero h1{position:relative}
 /* load: a block cursor types the title, then the tagline flickers on in neon */
@@ -61,9 +61,9 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 }
 .hero .sub{transition:color .6s,text-shadow .6s,background-color .6s}
 body.still .hero h1 .cursor{animation:none}
-.hero .sub,.hero .live{display:inline-block;padding:2px 8px;background:rgba(40,36,58,.7);font-family:var(--font-ui);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#efe2cc}
+.hero .sub,.hero .live{display:inline-block;padding:2px 8px;background:rgba(40,36,58,.7);font-family:var(--font-ui);font-size:13.2px;letter-spacing:.08em;text-transform:uppercase;color:#efe2cc}
 .hero .live{text-transform:none;letter-spacing:.02em;font-variant-numeric:tabular-nums}
-.hero .live i{display:inline-block;width:6px;height:6px;margin-right:6px;background:#9ec48a;vertical-align:1px}
+.hero .live{display:inline-flex;align-items:center;gap:8px}.hero .live .wx{width:26px;height:26px;image-rendering:pixelated;image-rendering:crisp-edges;margin:-3px 0}
 
 /* icons */
 .icons{position:fixed;top:calc(64px + env(safe-area-inset-top,0px));bottom:56px;display:flex;flex-direction:column;flex-wrap:wrap;gap:6px;z-index:3;align-content:flex-start}
@@ -308,8 +308,8 @@ body.night .chip.thirsty{border-color:#e08aa2}
 
 @media (max-width:700px){
   body{overflow:hidden}
-  .hero h1{font-size:18px}
-  .hero .sub,.hero .live{font-size:10px}
+  .hero h1{font-size:21.6px}
+  .hero .sub,.hero .live{font-size:12px}
   .icons{position:fixed;flex-direction:row;flex-wrap:wrap;bottom:auto}
   .icons.left{left:16px;right:16px}
   .icons.right{display:none}
@@ -352,7 +352,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
     <button type="button" onclick="AMP.prev()" aria-label="Back to start" title="Back to start">⏮</button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play">▶</button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause">❚❚</button><button type="button" onclick="AMP.stop()" aria-label="Stop" title="Stop">■</button>
     <button type="button" class="mini-lcd" onclick="openWin('radio')" title="Show the player"><span id="miniTime">■ 00:00</span><span class="mini-title" id="miniTitle"></span></button>
   </div>
-  <div class="tray"><button class="modebtn" id="motionbtn" type="button">❚❚</button><button class="modebtn" id="modebtn" type="button">☀</button><button class="modebtn" id="discobtn" type="button" aria-pressed="false"><span class="ball" aria-hidden="true">🪩</span></button><span id="traytemp">--°</span><span id="clock"></span></div>
+  <div class="tray"><button class="modebtn" id="modebtn" type="button">☀</button><button class="modebtn" id="discobtn" type="button" aria-pressed="false"><span class="ball" aria-hidden="true">🪩</span></button><span id="traytemp">--°</span><span id="clock"></span></div>
 </footer>
 
 <script>
@@ -576,6 +576,7 @@ function setNight(n){
   SCENE.night=n;document.body.classList.toggle("night",n);if(document.getElementById("title").textContent)neonTagline();
   const b=document.getElementById("modebtn");if(b){b.textContent=n?"☾":"☀";b.title=n?"Night mode · click for day":"Day mode · click for night";b.setAttribute("aria-label",b.title)}
   paintSky();
+  try{if(LIVE&&LIVE.current)updateTray()}catch(e){}   // swap the sun/moon in the live weather icon
 }
 const NIGHT_TINT="rgba(16,22,58,.58)";
 function paintSky(){
@@ -998,11 +999,11 @@ function discoMusic(){
   if(!(SPOT.src||spotifySrc(SET.spotify_url||SET.spotify_playlist)))return;
   // tuck the player into the taskbar whether it was closed, open on screen or never loaded
   const W=WINS.radio;
-  if(!W.open)openWin("radio");
-  if(!W.min)minWin("radio");
-  if(!SPOT.ctl){SPOT.autoplay=true;return}          // first track starts as soon as the player is ready
+  openWin("radio");                                   // show the player first…
   const st=SPOT.state;
-  if(st.paused||SPOT.stopped||!st.pos){try{SPOT.ctl.play()}catch(e){}}   // already playing? leave the song alone
+  if(!SPOT.ctl)SPOT.autoplay=true;                    // first track starts the moment the player is ready
+  else if(st.paused||SPOT.stopped||!st.pos)kickPlay(); // already playing? leave the song alone
+  clearTimeout(discoMusic.t);discoMusic.t=setTimeout(()=>{if(W.open&&!W.min)shrinkWin("radio")},900);  // …then tuck it away
 }
 function setDisco(on,user){
   if(on&&user)discoMusic();
@@ -1277,13 +1278,12 @@ function renderMap(body,status){
   mapPaintWx();loadPlacesWx();
 }
 
-/* ---------- motion: always plays on arrival; the tray button pauses it for the visit ---------- */
+/* ---------- motion: the desert always animates ---------- */
 const MOTION_KEY="xl-motion";
 function motionPref(){return true}
 function setMotion(on,save){
   SCENE.motion=on;
   document.body.classList.toggle("still",!on);clearInterval(SCENE.timer);if(on&&SCENE.ctx)SCENE.timer=setInterval(drawScene,SCENE.disco?90:125);
-  const b=document.getElementById("motionbtn");if(b){b.textContent=on?"❚❚":"▶";b.title=on?"Pause the desert":"Animate the desert";b.setAttribute("aria-label",b.title)}
 }
 
 /* ---------- data helpers ---------- */
@@ -1371,6 +1371,33 @@ function cactusState(c){
 }
 
 /* ---------- live weather (Open-Meteo, free, no key) ---------- */
+/* pixel weather icon for the live line: drawn from the Open-Meteo weather code */
+const WX_ART={
+  sun:[".....y.....",".y.......y.","....yyy....","...yYYYy...","..yYYYYYy..","y.yYYYYYy.y","..yYYYYYy..","...yYYYy...","....yyy....",".y.......y.",".....y....."],
+  moon:["...........","....mmm....","...mmM.....","..mmM......","..mmM......","..mmM......","..mmmM.....","...mmmmm.m.","....mmmmm..","...........","..........."],
+  cloud:["....ccc....","...cccccc..",".cccccccc..","cccccccccc.","cccccccccc.",".CCCCCCCC.."],
+  dark:["....ddd....","...dddddd..",".dddddddd..","dddddddddd.","dddddddddd.",".DDDDDDDD.."],
+  fog:["..........","ffffffff..","..........","..ffffffff","..........","ffffffff..","..........","..ffffffff"],
+  rain:["b...b...b.","..........",".b...b...b"],
+  snow:["w...w...w.","..........",".w...w...w"],
+  bolt:["...z","..z.",".zzz","..z.",".z.."]
+};
+const WX_PAL={y:"#f2c84a",Y:"#fae49a",m:"#ece6c4",M:"#b8b292",c:"#f0eef4",C:"#a8a8bc",d:"#8c8ca4",D:"#5c5c74",f:"#d8d4dc",b:"#6aa8e8",w:"#ffffff",z:"#ffd84a"};
+const wxCache={};
+function wxIcon(code,night){
+  code=+code||0;const key=code+(night?"n":"d");if(wxCache[key])return wxCache[key];
+  const cv=document.createElement("canvas");cv.width=cv.height=13;const c=cv.getContext("2d");
+  const put=(art,ox,oy)=>art.forEach((r,y)=>[...r].forEach((ch,x)=>{if(WX_PAL[ch]){c.fillStyle=WX_PAL[ch];c.fillRect(ox+x,oy+y,1,1)}}));
+  const sky=night?WX_ART.moon:WX_ART.sun;
+  if(code<=1)put(sky,1,1);                                        // clear
+  else if(code===2){put(sky,0,0);put(WX_ART.cloud,2,6)}           // partly cloudy
+  else if(code===3)put(WX_ART.cloud,1,4);                         // overcast
+  else if(code===45||code===48)put(WX_ART.fog,1,2);               // fog
+  else if(code>=95){put(WX_ART.dark,1,1);put(WX_ART.bolt,4,7)}    // thunder
+  else if((code>=71&&code<=77)||code===85||code===86){put(WX_ART.cloud,1,1);put(WX_ART.snow,1,8)}
+  else {put(code>=63&&code!==80?WX_ART.dark:WX_ART.cloud,1,1);put(WX_ART.rain,1,8)}  // drizzle, rain, showers
+  return wxCache[key]=cv.toDataURL();
+}
 const WMO={0:"Clear",1:"Mostly clear",2:"Partly cloudy",3:"Overcast",45:"Fog",48:"Rime fog",51:"Light drizzle",53:"Drizzle",55:"Heavy drizzle",61:"Light rain",63:"Rain",65:"Heavy rain",71:"Light snow",73:"Snow",75:"Heavy snow",80:"Showers",81:"Showers",82:"Downpour",95:"Thunderstorm",96:"Hail storm",99:"Hail storm"};
 async function loadLive(){
   const lat=num(SET.latitude),lon=num(SET.longitude);if(lat==null||lon==null)return null;
@@ -1392,8 +1419,19 @@ function defineWindow(id,{title,icon,w,x,y,render,menu,status}){
   WINS[id]={el,title,icon,x,y,render,status,placed:false};
   el.addEventListener("pointerdown",()=>focusWin(id));
   el.querySelector("[data-a=close]").onclick=e=>{e.stopPropagation();closeWin(id)};
-  el.querySelector("[data-a=min]").onclick=e=>{e.stopPropagation();minWin(id)};
+  el.querySelector("[data-a=min]").onclick=e=>{e.stopPropagation();shrinkWin(id)};
   drag(el,el.querySelector(".bar"));
+}
+// minimize with a quick shrink toward the window's taskbar button
+function shrinkWin(id){
+  const W=WINS[id],el=W.el;if(!W.open||W.min)return;
+  const btn=[...document.querySelectorAll("#tasks .task")].find(b=>b.textContent===W.title)||document.getElementById("tasks");
+  if(!el.animate||document.body.classList.contains("still")||!btn){minWin(id);return}
+  const a=el.getBoundingClientRect(),b=btn.getBoundingClientRect();
+  const sc=Math.max(.06,b.width/a.width),dx=b.left-a.left,dy=b.top-a.top;
+  el.style.transformOrigin="0 0";
+  const an=el.animate([{transform:"none",opacity:1},{transform:`translate(${dx}px,${dy}px) scale(${sc})`,opacity:.25}],{duration:380,easing:"cubic-bezier(.5,0,.9,.6)"});
+  an.onfinish=()=>{minWin(id);el.style.transformOrigin=""};
 }
 function minWin(id){
   const W=WINS[id];W.min=true;
@@ -1526,7 +1564,7 @@ function loadSpotify(src){
     const host=document.getElementById("spotHost");if(!host)return;
     SPOT.api.createController(host,{uri:src.uri,width:"100%",height:152},ctl=>{
       SPOT.ctl=ctl;
-      if(SPOT.autoplay){const go=()=>{if(SPOT.autoplay){SPOT.autoplay=false;try{ctl.play()}catch(e){}}};ctl.addListener("ready",go);setTimeout(go,1500)}
+      if(SPOT.autoplay){SPOT.autoplay=false;ctl.addListener("ready",()=>kickPlay());kickPlay()}
       ctl.addListener("playback_update",e=>{const d=e.data||{};
         SPOT.state={paused:!!d.isPaused,pos:d.position||0,dur:d.duration||0,buffering:!!d.isBuffering};SPOT.at=performance.now();
         if(!d.isPaused){SPOT.stopped=false;NOW.started=true}
@@ -1534,9 +1572,23 @@ function loadSpotify(src){
     });
   };
   if(SPOT.api){mount();return}
-  window.onSpotifyIframeApiReady=api=>{SPOT.api=api;clearTimeout(SPOT.fail);mount()};
-  if(!SPOT.loading){SPOT.loading=true;const sc=document.createElement("script");sc.src="https://open.spotify.com/embed/iframe-api/v1";sc.async=true;sc.onerror=fallback;document.head.appendChild(sc)}
+  SPOT.pending=mount;preloadSpotify();
   clearTimeout(SPOT.fail);SPOT.fail=setTimeout(()=>{if(!SPOT.api)fallback()},7000);
+  SPOT.onfail=fallback;
+}
+function preloadSpotify(){
+  if(SPOT.loading)return;SPOT.loading=true;
+  window.onSpotifyIframeApiReady=api=>{SPOT.api=api;clearTimeout(SPOT.fail);if(SPOT.pending){const m=SPOT.pending;SPOT.pending=null;m()}};
+  const sc=document.createElement("script");sc.src="https://open.spotify.com/embed/iframe-api/v1";sc.async=true;
+  sc.onerror=()=>{SPOT.loading=false;SPOT.onfail&&SPOT.onfail()};document.head.appendChild(sc);
+}
+// ask Spotify to play, and keep asking for a few seconds: the embed ignores play() until its track has loaded
+function kickPlay(){
+  clearInterval(SPOT.kick);let n=0;
+  const go=()=>{const C=SPOT.ctl;if(!C)return;
+    if(n++>12||(!SPOT.state.paused&&!SPOT.stopped&&SPOT.state.pos>0)){clearInterval(SPOT.kick);return}
+    try{SPOT.state.pos>0&&!SPOT.stopped?C.resume():C.play()}catch(e){}};
+  go();SPOT.kick=setInterval(go,700);
 }
 const AMP={
   play(){const C=SPOT.ctl;if(!C)return;SPOT.state.pos>0?C.resume():C.play()},
@@ -1729,6 +1781,8 @@ function build(){
     const id="p"+i;defineWindow(id,{title:p.title,icon:(p.icon||"folder").toLowerCase(),w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
     place((p.side||"").toLowerCase()==="right"&&!mob?R:L,id,p.title,(p.icon||"folder").toLowerCase());
   });
+  // warm up the Spotify player API in the background so the radio and disco start fast
+  if(spotifySrc(SET.spotify_url||SET.spotify_playlist))setTimeout(preloadSpotify,1200);
   // start menu
   const ul=document.getElementById("startlist");ul.innerHTML="";
   Object.entries(WINS).filter(([id])=>!HIDDEN.has(id)).forEach(([id,w])=>{const li=document.createElement("li");li.innerHTML=`<button><img alt="" src="${sprite(w.icon)}">${esc(w.title)}</button>`;li.firstChild.onclick=()=>{toggleStart(false);openWin(id)};ul.appendChild(li)});
@@ -1762,7 +1816,7 @@ function updateTray(){
   document.getElementById("traytemp").textContent=t+"°";
   const ll=document.getElementById("liveLine");
   if(LIVE&&LIVE.current){const c=LIVE.current,F=(SET.units||"F").toUpperCase().startsWith("F");
-    ll.innerHTML=`<i></i>${esc(SET.location_name||"")} · ${Math.round(c.temperature_2m)}° · ${esc(WMO[c.weather_code]??"")} · wind ${Math.round(c.wind_speed_10m)} ${F?"mph":"km/h"}`;ll.hidden=false}
+    ll.innerHTML=`<img class="wx" src="${wxIcon(c.weather_code,SCENE.night)}" alt="${esc(WMO[c.weather_code]??"")}" title="${esc(SET.location_name||"")}"><span>${Math.round(c.temperature_2m)}° · ${esc(WMO[c.weather_code]??"")} · wind ${Math.round(c.wind_speed_10m)} ${F?"mph":"km/h"}</span>`;ll.hidden=false}
   else ll.hidden=true;
 }
 function tick(){if(SCENE.override==null&&isNightNow()!==SCENE.night)setNight(!SCENE.night);const d=new Date();document.getElementById("clock").textContent=d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+", "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}).toLowerCase().replace(" ","")}
@@ -1789,7 +1843,7 @@ setNight(SCENE.override??isNightNow());
   document.getElementById("favicon").href=cv.toDataURL("image/png")})();
 setDisco(false);
 document.getElementById("discobtn").onclick=()=>setDisco(!SCENE.disco,true);
-document.getElementById("motionbtn").onclick=()=>setMotion(!SCENE.motion,true);tick();setInterval(tick,30000);
+tick();setInterval(tick,30000);
 document.getElementById("modebtn").onclick=()=>{SCENE.override=!SCENE.night;setNight(SCENE.override)};
 let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(paintSky,150)});
 document.body.classList.toggle("admin",ADMIN);boot();
