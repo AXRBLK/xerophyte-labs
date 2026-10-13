@@ -43,6 +43,17 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 .hero{position:fixed;right:16px;bottom:calc(58px + env(safe-area-inset-bottom,0px));max-width:calc(100% - 32px);display:flex;flex-direction:column;align-items:flex-end;gap:5px;text-align:right;pointer-events:none;z-index:1}
 .hero h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:24px;line-height:1.15;letter-spacing:0;-webkit-font-smoothing:none;font-smooth:never;color:#f4ece0;text-shadow:2px 2px 0 rgba(40,36,58,.6)}
 .hero h1 span{display:block}
+.hero h1{position:relative}
+/* load shimmer: one hard-edged band of light sweeps across the whole title */
+.hero h1 .glint{position:absolute;inset:0;color:transparent;text-shadow:none;pointer-events:none;opacity:0;
+  background:linear-gradient(100deg,transparent 0 42%,rgba(255,248,214,.95) 42% 50%,rgba(232,200,104,.9) 50% 56%,transparent 56%);
+  background-size:400% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text}
+.hero h1 .glint .cursor{visibility:hidden}
+.hero h1.shimmer .glint{animation:glint .7s steps(10) .3s 1 both}
+@keyframes glint{0%{background-position:100% 0;opacity:1}99%{background-position:0 0;opacity:1}100%{opacity:0}}
+.hero h1 .cursor{display:inline-block;width:.5em;height:.82em;margin-left:.18em;vertical-align:-.04em;background:currentColor;box-shadow:2px 2px 0 rgba(40,36,58,.6);animation:blink 1.06s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+body.still .hero h1.shimmer .glint{animation:none}
 .hero .sub,.hero .live{display:inline-block;padding:2px 8px;background:rgba(40,36,58,.7);font-family:var(--font-ui);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#efe2cc}
 .hero .live{text-transform:none;letter-spacing:.02em;font-variant-numeric:tabular-nums}
 .hero .live i{display:inline-block;width:6px;height:6px;margin-right:6px;background:#9ec48a;vertical-align:1px}
@@ -183,7 +194,11 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 .mk img{width:20px;height:20px;image-rendering:pixelated;filter:drop-shadow(1px 1px 0 rgba(0,0,0,.6))}
 .mk.home{margin:-28px 0 0 -12px}.mk.home img{width:24px;height:24px}
 .mk b{font:600 11px var(--font-ui);color:#1c1218;background:#f4ece0;border:1px solid #1c1218;padding:0 3px;margin-bottom:2px;font-variant-numeric:tabular-nums}
+.mk.sel{z-index:2}
 .mk.sel b{background:#e6c868}
+.mk .nm{font:600 11px var(--font-ui);color:#fbf4e6;text-shadow:1px 0 0 #1c1218,-1px 0 0 #1c1218,0 1px 0 #1c1218,0 -1px 0 #1c1218;margin:0 0 3px 2px;white-space:nowrap}
+.mk.nolabel .nm{display:none}
+.mk.sel .nm{color:#ffe48a}
 .mk:focus-visible b{outline:2px solid #e6c868;outline-offset:1px}
 .mapattr{position:absolute;right:0;bottom:0;padding:1px 6px;font:10px var(--font-data);color:#1c1218;background:rgba(244,236,224,.75);pointer-events:none}
 .mapwrap.tuning::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.2) 0 1px,rgba(0,0,0,.3) 1px 3px);animation:tune .34s steps(5) forwards}
@@ -205,6 +220,40 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 .places button[aria-pressed="true"]{background:var(--title-a);color:#fff}
 .places button[aria-pressed="true"] small{color:#e8dde8}
 @media (max-width:700px){.mapgrid{grid-template-columns:1fr}.mapwrap{height:300px}.mapside{max-height:none;border-left:0;border-top:2px solid var(--chrome-lo)}}
+
+/* Xerophyte AMP: a classic Winamp-style skin */
+#w-radio{background:linear-gradient(180deg,#4a4a62,#2a2a3e);border-color:#7a7a96 #14141e #14141e #7a7a96;color:#d8d8e8}
+#w-radio .bar,#w-radio.active .bar{background:#24243a;color:#e8d898;font:400 10px var(--font-display);letter-spacing:.12em;text-transform:uppercase;padding:2px 3px 2px 6px}
+#w-radio .bar b{display:flex;align-items:center;gap:8px;font-weight:400;font-size:10px}
+#w-radio .bar b::before,#w-radio .bar b::after{content:"";flex:1;height:7px;background:repeating-linear-gradient(180deg,#c8b060 0 1px,transparent 1px 2px);opacity:.75}
+#w-radio .bar img{filter:none}
+#w-radio .bar button{width:14px;height:14px;font-size:9px;line-height:1;background:#3a3a52;color:#d8d8e8;border-color:#6a6a86 #14141e #14141e #6a6a86}
+#w-radio .status{display:none}
+.win.stowed{left:-10000px!important;top:0!important;visibility:visible}
+#w-radio .body.amp-body{background:transparent;margin:4px 6px 8px;padding:0}
+#w-radio .lcd{background:#000;color:#00e000;border-color:#14141e #6a6a86 #6a6a86 #14141e;text-shadow:0 0 4px rgba(0,224,0,.45)}
+#w-radio .lcd-state{color:#00b000;font-size:8px}
+#w-radio .lcd-time{color:#00f000;font-size:34px}
+#w-radio .lcd-scroll{border-top-color:#103810;color:#00e000}
+#w-radio .seek{height:10px;background:#101018;border-color:#14141e #6a6a86 #6a6a86 #14141e;position:relative}
+#w-radio .seek i{background:linear-gradient(180deg,#e0c070,#a07830);min-width:14px;box-shadow:inset -14px 0 0 #d8d8e8}
+#w-radio .amp-btns{gap:2px;align-items:center}
+#w-radio .amp-btns button,#w-radio .amp-eject{min-width:30px;height:22px;padding:0 4px;font:13px/1 var(--font-ui);color:#202030;background:linear-gradient(180deg,#d8d8e4,#9c9cb0);border:2px solid;border-color:#f0f0f8 #50506a #50506a #f0f0f8;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;cursor:pointer}
+#w-radio .amp-btns button:active,#w-radio .amp-eject:active{border-color:#50506a #f0f0f8 #f0f0f8 #50506a}
+#w-radio .amp-btns button:disabled{color:#70708a;cursor:default}
+#w-radio .amp-eject{margin-left:6px}
+.amp-brand{margin-left:auto;font:400 8px var(--font-display);letter-spacing:.14em;color:#8a8aa8;white-space:nowrap}
+.amp-brand b{color:#e8d898;font-weight:400}
+#w-radio .deck{background:#000;border-color:#14141e #6a6a86 #6a6a86 #14141e}
+#w-radio .tape-empty{background:#101018;color:#a8a8c0}
+/* mini player in the taskbar while the window is minimized */
+.miniamp{display:flex;align-items:center;gap:2px;padding:2px;background:#24243a;border:1px solid #6a6a86;flex-shrink:0}
+.miniamp button{height:22px;min-width:24px;padding:0 4px;font:12px/1 var(--font-ui);color:#202030;background:linear-gradient(180deg,#d8d8e4,#9c9cb0);border:1px solid;border-color:#f0f0f8 #50506a #50506a #f0f0f8;cursor:pointer}
+.miniamp button:active{border-color:#50506a #f0f0f8 #f0f0f8 #50506a}
+.miniamp .mini-lcd{display:flex;gap:8px;align-items:center;max-width:220px;margin-left:2px;padding:0 8px;background:#000;color:#00e000;border-color:#14141e #6a6a86 #6a6a86 #14141e;font:11px var(--font-display);-webkit-font-smoothing:none;text-shadow:0 0 4px rgba(0,224,0,.45);overflow:hidden;white-space:nowrap}
+.miniamp .mini-title{overflow:hidden;text-overflow:ellipsis;color:#00b000}
+.miniamp button:focus-visible{outline:1px dotted #e8d898;outline-offset:-3px}
+@media (max-width:700px){.miniamp .mini-title{display:none}.miniamp button{min-width:22px}}
 
 /* night mode: moonlit desktop */
 .modebtn{background:none;border:0;padding:0 2px;color:inherit;font:15px var(--font-ui);cursor:pointer;line-height:1}
@@ -266,6 +315,10 @@ body.still .marquee .track,body.still .lcd-scroll span{animation:none}
 <footer class="taskbar">
   <button class="start" id="startbtn" aria-expanded="false" aria-controls="startmenu">Start ☀</button>
   <div class="tasks" id="tasks"></div>
+  <div class="miniamp" id="miniamp" role="group" aria-label="Xerophyte FM" hidden>
+    <button type="button" onclick="AMP.prev()" aria-label="Back to start" title="Back to start">⏮</button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play">▶</button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause">❚❚</button><button type="button" onclick="AMP.stop()" aria-label="Stop" title="Stop">■</button>
+    <button type="button" class="mini-lcd" onclick="openWin('radio')" title="Show the player"><span id="miniTime">■ 00:00</span><span class="mini-title" id="miniTitle"></span></button>
+  </div>
   <div class="tray"><button class="modebtn" id="motionbtn" type="button">❚❚</button><button class="modebtn" id="modebtn" type="button">☀</button><span class="src" id="src">loading…</span><span id="traytemp">--°</span><span id="clock"></span></div>
 </footer>
 
@@ -319,10 +372,10 @@ const SAMPLE = {
 };
 
 /* ---------- pixel sprites ---------- */
-const PAL={k:"#1c1218",g:"#5fa05a",G:"#2f6b3a",y:"#ffd24a",o:"#e0913a",w:"#ffffff",s:"#c9c2bb",S:"#6d625b",r:"#e0413a",b:"#4d86c9",n:"#b0603a",p:"#ff4f8b",l:"#9fd18a"};
+const PAL={k:"#1c1218",g:"#5fa05a",G:"#2f6b3a",y:"#ffd24a",o:"#e0913a",w:"#ffffff",s:"#c9c2bb",S:"#6d625b",r:"#e0413a",b:"#4d86c9",n:"#b0603a",p:"#ff4f8b",l:"#9fd18a",R:"#d8b47c",D:"#6a4a30"};
 const SPRITES={
-cactus:["......kk........",".....kgGk.......",".....kgGk.......","..kk.kgGk.......",".kgGkkgGk..kk...",".kgGkkgGk.kgGk..",".kgGkkgGk.kgGk..",".kgggggGkkkgGk..","..kkGgggggggGk..","....kkkgGkkkk...","......kgGk......","....kkkkkkkk....","....knnnnnnk....","....kknnnnkk....",".....knnnnk.....",".....kkkkkk....."],
-flower:["......kpk.......",".....kpppk......","......kkk.......",".....kgGk.......","....kgggGk......","...kggggGGk.....","...kgkggGkGk....","...kggggGGGk....","...kgkgggkGk....","...kggggGGGk....","....kgggGGk.....","....kkkkkkkk....","...knnnnnnnnk...","....knnnnnnk....","....knnnnnnk....",".....kkkkkk....."],
+cactus:["......kk........",".....kgGk.......",".....kgGk.......","..kk.kgGk.......",".kgGkkgGk..kk...",".kgGkkgGk.kgGk..",".kgGkkgGk.kgGk..",".kgggggGkkkgGk..","..kkGgggggggGk..","....kkkgGkkkk...","......kgGk......","......DgGD......",".....RDRRDR.....","....R.R..R.R....","...R..R...R.R...","..R..R.....R..R."],
+flower:["......kpk.......",".....kpppk......","......kkk.......",".....kgGk.......","....kgggGk......","...kggggGGk.....","...kgkggGkGk....","...kggggGGGk....","...kgkgggkGk....","...kggggGGGk....","....kgggGGk.....","....kDDDDDDk....","....R.RDDR.R....","...R..R..R..R...","..R...R...R..R..",".R...R.....R...R"],
 sun:["................","...y............",".y.yyy..........","..yyyyy.y.......",".yyyyyyy........","yyyyyyyy........",".yyyykkkkk......",".yyykwwwwwk.....","..ykwwwwwwwkkk..","...kwwwwwwwwwwk.","..kwwwwwwwwwwwwk","..kwwwwwwswwwwwk","..kswwwwwwwwwssk","...kkkkkkkkkkkk.","................","................"],
 chart:["................","kkkkkkkkkkkkkkkk","kwwwwwwwwwwwwwwk","kwwwwwwwwwwwrwwk","kwwwwwwwwwwrwrwk","kwwwwwwrwwrwwwwk","kwwwwwrwrrwwwwwk","kwwwwrwwwwwwwwwk","kwrrrwwwwwwwwwwk","kwwwwwwwwwwwwwwk","kwwwwwwwwbbwwwwk","kwwbbwwbbbbwbbwk","kwwbbwbbbbbwbbwk","kkkkkkkkkkkkkkkk","................","................"],
 thermo:["......kkk.......",".....kwwwk......",".....kwrwk.kk...",".....kwrwk......",".....kwrwk.kk...",".....kwrwk......",".....kwrwk.kk...",".....kwrwk......",".....kwrwk......","....kwrrrwk.....","...kwrrrrrwk....","...krrrrrrrk....","...krrrrrrrk....","....krrrrrk.....",".....kkkkk......","................"],
@@ -348,9 +401,22 @@ function sprite(name){
 const SCENE={timer:null,night:false,override:null};
 const BAYER=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]].map(r=>r.map(v=>(v+.5)/16));
 const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
-const CPAL={k:"#29232c",K:"#0b0a12",N:"#5c4838",n:"#8a6e52",c:"#ddcfb8",b:"#7088aa",v:"#463e54",t:"#c4ab8a",T:"#a48d70",d:"#76624c",w:"#ece2d0",
-  o:"#8a6a4c",l:"#d8c6a2",Y:"#e6cc4a",B:"#b8a070",D:"#4e3c2e",S:"#a8824e",s:"#6e5434"};
+const CPAL={k:"#29232c",K:"#0b0a12",N:"#5c4838",n:"#8a6e52",c:"#ddcfb8",b:"#7088aa",v:"#463e54",t:"#c4ab8a",T:"#a48d70",d:"#76624c",w:"#ece2d0",S:"#a8824e",s:"#6e5434"};
 const GLOW={S:"#8fe0cc",s:"#4c9a8c"}; // scorpions fluoresce under moonlight
+const OWLPAL={k:"#241a14",D:"#3e2c20",B:"#5c4230",L:"#8a6a4c",T:"#b08a5a",r:"#b8743e",w:"#d8d0c0",W:"#efe8da",Y:"#e8b828",p:"#0c0806",d:"#2e241c"};
+const mixHex=(a,b,t)=>{const A=hex(a),B=hex(b);return "#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join("")};
+const OWLPAL_N=Object.fromEntries(Object.entries(OWLPAL).map(([k,v])=>[k,"WYp".includes(k)?v:mixHex(v,"#1a2250",.3)]));
+const CHICKPAL={g:"#9a98a2",G:"#6a6874",Y:"#f2c230",p:"#140c08",o:"#8a7040"};
+const BLOOM={W:"#ffffff",Y:"#ffd84a",g:"#cfe0c0"};
+const OWL_EYES=[".kBrYYYwwYYYrBk.",".kBrYpYddYpYrBk."];
+const OWL_SHUT=[".kBrDDDwwDDDrBk.",".kBrrrrddrrrrBk."];
+const owlFace=eyes=>["..k..........k..","..Dk........kD..","...DBk....kBD...","...kDBkkkkBDk...","..kBLBLDDLBLBk..","..kDrrwDDwrrDk..",...eyes,".kDrrrkddkrrrDk.","..kDrrrkkrrrDk..","..kBWWWWWWWWBk..",".kBLwLwLLwLwLBk.",".kDBLBLBBLBLBDk.","kDBLTLTLLTLTLBDk","kDBBDBBDDBBDBBDk","kDBLTLTLLTLTLBDk","kDBBDBBDDBBDBBDk","kDBLTLTLLTLTLBDk","kDDBDBBDDBBDBDDk",".kDBLTLLLLTLBDk.",".kDBDBBDDBBDBDk.",".kDDBLTLLTLBDDk.","..kDBDBDDBDBDk..","..kDTLTkkTLTDk..","...kTTk..kTTk...","..kdkdk..kdkdk.."];
+const OWL_FLY={
+  up:["kk..........kk...kk..........kk.",".kDk........kDkkkDk........kDk..","..kBDk......krYdYrk......kDBk...","...kLBDk....kBWWWBk....kDBLk....","....kTLBDk.kDBLTLBDk.kDBLTk.....",".....kkTLBDDBLTLTLBDDBLTkk......",".......kkkDBLTLTLTLBDkkk........","...........kDBLTLBDk............","............kDBDBDk.............","............kDkDkDk.............","................................"],
+  down:["................................","............kk...kk.............","............kDkkkDk.............","............krYdYrk.............","........kkkkkBWWWBkkkkk.........","....kkkDDBBLDBLTLBDLBBDDkkk.....","..kkDBLTLLBDBLTLTLBDBLLTLBDkk...",".kDBLTkkkkDBLTLTLBDkkkkTLBDk....","kDBk.......kDBLTLBDk.......kBDk.","kk..........kDBDBDk..........kk.","............kDkDkDk............."],
+  glide:["............kk...kk.............","............kDkkkDk.............","............krYdYrk.............","kkk.........kBWWWBk.........kkk.",".kDkkkk....kDBLTLBDk....kkkkDk..","..kDBLDkkkkDBLTLTLBDkkkkDLBDk...","...kDBLTLBDBLTLTLTLBDBLTLBDk....",".....kkDkDkDBLTLTLBDkDkDkk......","...........kDBLTLBDk............","............kDBDBDk.............","............kDkDkDk............."]
+};
+
 const CRITTERS={
   run:[
    ["...........kk.....","..........kNNk....","kk.......kNbNkkkkk",".kN.....kNNcNk....","..kN...kNNcc......","...kNNNNnNcc......","....kNnNnNnc......",".....kNNNNk.......","......kk.k........",".....k...k........","....kk....kk......"],
@@ -362,18 +428,24 @@ const CRITTERS={
   ravenDown:[".............","...kkkkkkk...","kkkkvkkkvkkkk","k..kkkk...k..","...k........."],
   ravenGlide:[".............",".............","kkkkkvkkvkkkk","...kkkkkkkk..","....k........"],
   ravenPerch:["....kk.","...kkkk","..kvkk.",".kkkkk.","kkkk...","..k.k.."],
-  ravenSleep:["......."," ...kk.","..kkkkk",".kkkkkk","kkkkk..","..k.k.."].map(r=>r.replace(/ /g,".")),
+  ravenSleep:[".......","....kk.","..kkkkk",".kkkkkk","kkkkk..","..k.k.."],
   toad:["......w.w..","..tdtdtTTT.",".tTtTtTTkTt","tdtTtdtTTT.","..t..t..t.."],
-  owlHome:["..o...o..",".ooooooo.","oYkoBoYko","oolllllo.",".ollllo.."],
-  owlBlink:["..o...o..",".ooooooo.","oDDoBoDDo","oolllllo.",".ollllo.."],
-  owlUp:["oo.......oo",".oo.....oo.","..oooYooo..","...olllo...","....o.o...."],
-  owlDown:["...........","...ooYoo...","ooooolooooo","o..olllo..o","....o.o...."],
+  owlHome:owlFace(OWL_EYES),
+  owlBlink:owlFace(OWL_SHUT),
+  // front view in flight: both eyes stay visible on every wingbeat
+  owlUp:OWL_FLY.up,
+  owlDown:OWL_FLY.down,
+  owlGlide:OWL_FLY.glide,
+  chick:["..gggg..",".g....g.","gYp..pYg","gYY..YYg",".g.oo.g.","..gggg.."],
+  chickBlink:["..gggg..",".g....g.","g......g","gGG..GGg",".g.oo.g.","..gggg.."],
   scorp:[["......sS.",".......S.","SS.SSSS..","s.s.s.s.."],["......sS.",".......S.","SS.SSSS..",".s.s.s.s."]],
-  bat:[["K...K","KK.KK",".KKK."],[".....","KKKKK","K.K.K"]]
+  bat:[["K...K","KK.KK",".KKK."],[".....","KKKKK","K.K.K"]],
+  bloomBig:[".W.W.","WWYWW",".WWW."],
+  bloomSmall:["WYW",".W."]
 };
-function sprt(c,rows,x,y,flip,pal){
+function sprt(c,rows,x,y,flip,pal,only){
   x=Math.round(x);y=Math.round(y);pal=pal||CPAL;
-  rows.forEach((r,j)=>{for(let i=0;i<r.length;i++){const col=pal[r[i]]||CPAL[r[i]];if(col){c.fillStyle=col;c.fillRect(flip?x+r.length-1-i:x+i,y+j,1,1)}}});
+  rows.forEach((r,j)=>{for(let i=0;i<r.length;i++){const ch=r[i];if(only&&!only.includes(ch))continue;const col=pal[ch]||CPAL[ch];if(col){c.fillStyle=col;c.fillRect(flip?x+r.length-1-i:x+i,y+j,1,1)}}});
 }
 const layer=(w,h)=>{const cv=document.createElement("canvas");cv.width=w;cv.height=h;return cv};
 function dither(c,x0,y0,ww,hh,pal){
@@ -397,10 +469,11 @@ function disc(r,pal,craters){
 }
 function isNightNow(){const h=new Date().getHours();return h>=19||h<6}
 function setNight(n){
-  SCENE.night=n;document.body.classList.toggle("night",n);
+  SCENE.night=n;document.body.classList.toggle("night",n);if(document.getElementById("title").textContent)shimmerTitle();
   const b=document.getElementById("modebtn");if(b){b.textContent=n?"☾":"☀";b.title=n?"Night mode · click for day":"Day mode · click for night";b.setAttribute("aria-label",b.title)}
   paintSky();
 }
+const NIGHT_TINT="rgba(16,22,58,.58)";
 function paintSky(){
   const cv=document.getElementById("sky"),N=SCENE.night;
   const S=innerWidth<=700?3:4;
@@ -413,11 +486,9 @@ function paintSky(){
   // sky
   const sky=layer(w,h),skc=sky.getContext("2d");
   dither(skc,0,0,w,H0+2,(N?["#0b0e1f","#0e1226","#11162d","#151a34","#191f3b","#1e2442","#232a48","#29304d","#2f3652","#363c56"]:["#28243a","#352f48","#463b55","#5a4860","#705766","#88676c","#a07a72","#b78e7c","#c9a488","#d8ba98"]).map(hex));
-  if(N){ // faint milky way band
-    for(let i=0;i<w*2.2;i++){const t=rnd(),x=Math.round(t*w),y=Math.round(H0*(.05+.5*t)+(rnd()-.5)*H0*.16);if(y<H0){skc.fillStyle=rnd()<.5?"#2a3158":"#232a4e";skc.fillRect(x,y,1,1)}}
-  }
+  if(N){for(let i=0;i<w*2.2;i++){const t=rnd(),x=Math.round(t*w),y=Math.round(H0*(.05+.5*t)+(rnd()-.5)*H0*.16);if(y<H0){skc.fillStyle=rnd()<.5?"#2a3158":"#232a4e";skc.fillRect(x,y,1,1)}}}
 
-  // sun (day) or moon (night), drawn each frame so it can drift
+  // sun (day) or moon (night)
   const sr=Math.round(h*(N?.07:.12));
   let orb;
   if(N)orb=disc(sr,["#f4f0e0","#e8e2cc","#d8d0b6"],"#c6bea4");
@@ -434,9 +505,10 @@ function paintSky(){
     sc.putImageData(sid,0,0);
   }
 
-  // foreground: clouds, ranges, ground, plants
-  const fg=layer(w,h),c=fg.getContext("2d");
-  dither(c,0,H0,w,span,["#c9b292","#bba385","#ab9478","#98836b","#85735e","#726452"].map(hex));
+  // ground layer: clouds, ranges, sand. Plants get their own layer so animals can pass behind them.
+  const ground=layer(w,h),gc=ground.getContext("2d");
+  dither(gc,0,H0,w,span,["#c9b292","#bba385","#ab9478","#98836b","#85735e","#726452"].map(hex));
+  const plants=layer(w,h);let c=gc;
   const px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)};
   const rect=(x,y,ww,hh,col)=>{c.fillStyle=col;c.fillRect(x,y,ww,hh)};
   for(let i=0;i<Math.max(4,w/45);i++){
@@ -456,14 +528,16 @@ function paintSky(){
   });
   rect(0,H0,w,1,"#d4b896");
   for(let i=0;i<w/30;i++)rect(ri(0,w),ri(H0+3,h-4),ri(10,40),1,"#9a8268");
+  c=plants.getContext("2d");
 
   const SAG=[["#6a5c6c","#5c5060","#4e4454"],["#8c9878","#6e7c62","#55614c"],["#7e9270","#5f7456","#46583f"]];
-  const perches=[];let nest=null;
-  function saguaro(x,base,hh,pal,depth,hasNest){
+  const perches=[],blooms=[];
+  function saguaro(x,base,hh,pal,depth){
     const tw=Math.max(3,Math.round(hh/8));
     const column=(x0,y0,ww,len)=>{for(let i=0;i<ww;i++){const col=i===0?pal[0]:i===ww-1?pal[2]:(i%2?pal[1]:pal[0]);rect(x0+i,y0+1,1,len-1,col)}rect(x0+1,y0,ww-2,1,pal[0])};
     column(x-(tw>>1),base-hh,tw,hh);
     if(depth>0&&hh>=16)perches.push({x:x,y:base-hh});
+    if(depth>0&&rnd()<.8)blooms.push({x:x,y:base-hh,big:depth===2});
     const arms=hh>40?ri(2,3):hh>18?ri(1,2):hh>10?ri(0,1):0;
     let side=rnd()<.5?-1:1;
     for(let a=0;a<arms;a++,side*=-1){
@@ -473,13 +547,9 @@ function paintSky(){
       const ax=side>0?x+(tw>>1)+out-aw+1:x-(tw>>1)-out;
       column(ax,ay-up,aw,up+aw);
       if(depth===2)perches.push({x:ax+(aw>>1),y:ay-up});
+      if(depth>0&&rnd()<.7)blooms.push({x:ax+(aw>>1),y:ay-up,big:depth===2});
     }
     if(depth>0&&hh>14)for(let i=0;i<3;i++)px(x-(tw>>1)+ri(0,tw-1),base-hh+ri(0,1),"#e8e0cc");
-    if(hasNest){ // woodpecker-dug cavity with a callus rim
-      const hy=base-Math.round(hh*.7);
-      rect(x-2,hy-1,5,7,"#a8ae90");rect(x-1,hy,3,5,"#1e1820");rect(x-2,hy+1,1,3,"#1e1820");rect(x+2,hy+1,1,3,"#1e1820");
-      nest={x:x,y:hy+5};
-    }
   }
   function pad(cx,cy,rx,ry,fill,edge){
     for(let y=-ry;y<=ry;y++)for(let x=-rx;x<=rx;x++){const v=(x*x)/(rx*rx)+(y*y)/(ry*ry);if(v<=1)px(cx+x,cy+y,v>.62||x>rx*.5?edge:fill)}
@@ -512,6 +582,21 @@ function paintSky(){
     branch(x-(sw>>1)+1,base-th+1,far?2:ri(2,3));
   }
   function creosote(x,base){for(let i=0;i<6;i++)px(x+ri(-3,3),base-ri(0,3),rnd()<.6?"#6e7452":"#545a40")}
+  // the owl's home: a giant saguaro right up close, cropped by the top and bottom of the screen
+  function giantSaguaro(gx,GW){
+    const rib=(x0,y0,ww,y1)=>{for(let i=0;i<ww;i++){const f=i/(ww-1);
+      const col=i===0||i===ww-1?"#3e4e38":i%4===0?(f<.4?"#6c8460":"#4e6244"):f<.3?"#94aa82":f<.65?"#7e9470":"#62785a";
+      rect(x0+i,y0,1,y1-y0,col);
+      if(i%4===2)for(let y=y0+((i*3)%5);y<y1;y+=5)px(x0+i,y,f<.5?"#d8d4b4":"#b8b49a");}};
+    const AW=Math.round(GW*.62),ay=Math.round(h*.6),ax=gx+(GW>>1)+8;
+    rib(gx+(GW>>1)-3,ay,ax-gx-(GW>>1)+AW,ay+AW);                // elbow
+    rib(ax,-2,AW,ay+AW-2);                                            // arm rising off-screen
+    rib(gx-(GW>>1),-2,GW,h+2);                                        // trunk
+    const hcx=gx,rx=9,ry=14,hcy=Math.round(h*.4);
+    for(let y=-ry-2;y<=ry+2;y++)for(let x=-rx-2;x<=rx+2;x++){const o=(x*x)/((rx+2)*(rx+2))+(y*y)/((ry+2)*(ry+2)),n=(x*x)/(rx*rx)+(y*y)/(ry*ry);
+      if(n<=1)px(hcx+x,hcy+y,y<-ry+3?"#120e12":"#1c161c");else if(o<=1)px(hcx+x,hcy+y,x<0?"#b8b898":"#98987e")}
+    return {x:hcx,top:hcy-ry,cy:hcy};
+  }
 
   const items=[],area=w/100;
   for(let i=0;i<10*area;i++)items.push(["cre",ri(0,w),H0+ri(2,span-2)]);
@@ -521,14 +606,20 @@ function paintSky(){
   for(let i=0;i<4*area;i++)items.push(["opu",ri(0,w),H0+ri(Math.round(span*.55),span),1.1+rnd()*.7,false]);
   for(let i=0;i<4*area;i++)items.push(["cho",ri(0,w),H0+ri(3,Math.round(span*.45)),1+rnd()*.3,true]);
   for(let i=0;i<4*area;i++)items.push(["cho",ri(0,w),H0+ri(Math.round(span*.5),span-2),1.2+rnd()*.6,false]);
-  [[.06,.99,.44],[.22,1,.3],[.8,.99,.4],[.95,1,.28]].forEach(([fx,fy,fh])=>items.push(["sag",Math.round(w*fx),Math.round(h*fy),Math.round(Math.min(h,w*.8)*fh),2,fx===.8]));
+  [[.3,1,.3],[.8,.99,.4],[.95,1,.28]].forEach(([fx,fy,fh])=>items.push(["sag",Math.round(w*fx),Math.round(h*fy),Math.round(Math.min(h,w*.8)*fh),2]));
   items.sort((a,b)=>a[2]-b[2]).forEach(it=>{
     if(it[0]==="cre")creosote(it[1],it[2]);
-    else if(it[0]==="sag")saguaro(it[1],it[2],it[3],SAG[it[4]],it[4],it[5]);
+    else if(it[0]==="sag")saguaro(it[1],it[2],it[3],SAG[it[4]],it[4]);
     else if(it[0]==="cho")cholla(it[1],it[2],it[3],it[4]);
     else opuntia(it[1],it[2],it[3],it[4]);
   });
-  if(N)tint(fg,"rgba(16,22,58,.58)");
+  const GW=Math.max(24,Math.min(30,Math.round(h*.12)));
+  const nest=giantSaguaro(Math.max(Math.round(w*.14),(GW>>1)+4),GW);
+  if(N){tint(ground,NIGHT_TINT);tint(plants,NIGHT_TINT)}
+  // the lip of the cavity, copied so it can be drawn over the owl's lower body
+  // night-blooming saguaro flowers, kept untinted so they glow
+  const bloomCv=layer(w,h);
+  if(N){const bc=bloomCv.getContext("2d");blooms.forEach(b=>b.big?sprt(bc,CRITTERS.bloomBig,b.x-2,b.y-3,false,BLOOM):sprt(bc,CRITTERS.bloomSmall,b.x-1,b.y-2,false,BLOOM))}
 
   // the living
   const stars=[];for(let i=0;i<w*(N?.75:.3);i++)stars.push({x:ri(0,w),y:ri(0,Math.round(H0*(N?.7:.34))),ph:rnd()*6.28,sp:.04+rnd()*.12,big:rnd()<(N?.08:.12)});
@@ -538,10 +629,10 @@ function paintSky(){
   if(N)ravens.forEach((r,i)=>{const p=usable[(i*7)%Math.max(1,usable.length)];if(p){r.state="roost";r.target=p;r.x=p.x-3;r.y=p.y-6;r.face=i%2?1:-1}else r.state="gone"});
   const groundY=()=>H0+ri(Math.round(span*.42),span-6);
   const scorps=[];for(let i=0;i<(N?4:2);i++)scorps.push({x:ri(10,w-20),y:groundY(),dir:rnd()<.5?1:-1,state:"pause",timer:ri(10,60),alive:true});
-  const bats=N?[0,1,2].map(i=>({x:ri(0,w),y:ri(Math.round(H0*.2),Math.round(H0*.7)),vx:(i%2?-1:1)*1.2,vy:0})):[];
-  Object.assign(SCENE,{layers:{sky,orb,fg},sr,H0,span,ctx:cv.getContext("2d"),actors:layer(w,h),w,h,t:0,stars,toads,ravens,perches:usable,scorps,bats,shoot:[],groundY});
-  SCENE.owl={nest,state:"home",blink:0,timer:RI(40,120),path:[],x:nest?nest.x:0,y:nest?nest.y:0,face:1};
-  SCENE.runner={x:Math.round(w*.15),y:H0+Math.round(span*.52),dir:1,state:N?"asleep":"stand",timer:20};
+  const bats=N?[0,1,2,3].map(i=>({x:ri(0,w),y:ri(Math.round(H0*.2),Math.round(H0*.7)),vx:(i%2?-1:1)*1.2,vy:0,state:"roam",timer:ri(10,80)})):[];
+  Object.assign(SCENE,{layers:{sky,orb,ground,plants,bloom:bloomCv},sr,H0,span,ctx:cv.getContext("2d"),groundA:layer(w,h),airA:layer(w,h),w,h,t:0,stars,toads,ravens,perches:usable,scorps,bats,shoot:[],groundY,blooms:N?blooms:[]});
+  SCENE.owl={nest,state:"home",blink:0,timer:RI(40,120),path:[],x:0,y:0,face:1};
+  SCENE.runner={x:Math.round(w*.4),y:H0+Math.round(span*.52),dir:1,state:N?"asleep":"stand",timer:20};
   clearInterval(SCENE.timer);
   drawScene();
   if(SCENE.motion)SCENE.timer=setInterval(drawScene,125);
@@ -558,7 +649,8 @@ function stepRunner(rr,s){
   }
   if(rr.state==="hunt"){
     const p=rr.target;if(!p||!p.alive){rr.state="stand";rr.timer=RI(10,30);return}
-    const dx=p.x+4-(rr.x+(rr.dir>0?14:2)),dy=p.y-rr.y;rr.dir=dx>=0?1:-1;
+    const tgt=p.x+4,mid=rr.x+8;if(Math.abs(tgt-mid)>8)rr.dir=tgt>mid?1:-1; // commit to a facing, then close in beak-first
+    const dx=tgt-(rr.x+(rr.dir>0?14:2)),dy=p.y-rr.y;
     if(Math.abs(dx)<3&&Math.abs(dy)<2){rr.state="eat";rr.timer=12;p.alive=false;p.timer=RI(240,600);return}
     rr.x+=Math.sign(dx)*Math.min(3.6,Math.abs(dx));rr.y+=Math.sign(dy)*Math.min(1.6,Math.abs(dy));
   }
@@ -576,8 +668,7 @@ function stepRunner(rr,s){
 function stepScorp(p,s){
   if(!p.alive){if(--p.timer<=0){p.alive=true;p.dir=R()<.5?1:-1;p.x=p.dir>0?-8:s.w+2;p.y=s.groundY();p.state="walk";p.timer=RI(40,120)}return}
   p.timer--;
-  const rr=s.runner,threat=rr.state==="hunt"&&rr.target===p;
-  if(threat){p.state="freeze";return}
+  const rr=s.runner;if(rr.state==="hunt"&&rr.target===p){p.state="freeze";return}
   if(p.state==="walk"){p.x+=p.dir*(s.night?.6:.4);if(p.x<-10||p.x>s.w+4)p.dir*=-1;if(p.timer<=0){p.state="pause";p.timer=RI(20,90)}}
   else if(p.timer<=0){p.state="walk";p.timer=RI(20,80);if(R()<.4)p.dir*=-1}
 }
@@ -610,30 +701,42 @@ function stepRaven(r,s){
     if(--r.timer<=0){r.state="soar";r.cy=Math.max(H0*.12,r.y)}
   }
 }
+const OWL_FW=16,OWL_FH=5; // half size of the flying sprite
 function stepOwl(o,s){
-  if(!o.nest)return;
+  const n=o.nest;
   if(o.state==="home"){
     if(o.blink>0)o.blink--;else if(R()<(s.night?.03:.02))o.blink=RI(1,2);
     if(--o.timer<=0&&R()<(s.night?1/90:1/600)){
-      // a sortie: out and up, a swoop to the ground, a loop, then home
-      const n=o.nest,gx=Math.max(10,Math.min(s.w-10,n.x+RI(-s.w*.35,s.w*.35)));
-      o.path=[{x:n.x+RI(-30,30),y:n.y-RI(18,40)},{x:gx,y:s.groundY()-6},{x:gx+RI(-40,40),y:s.H0*.35+RI(-10,10)},{x:n.x,y:n.y-4},{x:n.x,y:n.y}];
-      o.state="fly";o.x=n.x-5;o.y=n.y-5;
+      // a sortie: flap out of the cavity, glide down to swoop at the ground, ride a thermal, then glide home
+      const gx=Math.max(20,Math.min(s.w-20,n.x+RI(30,Math.round(s.w*.6)))),gy=s.groundY()-8;
+      const cx=Math.max(30,Math.min(s.w-30,gx+RI(-30,30))),cy=s.H0*.3+RI(-8,8),r=RI(16,28),dir=R()<.5?1:-1,a0=R()*6.28,steps=Math.round(14*(1+R()*.6));
+      const loop=[];for(let k=0;k<=steps;k++){const a=a0+dir*k*Math.PI*2/14;loop.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r*.5})}
+      o.path=[{x:n.x+RI(16,30),y:n.cy-RI(16,26),flap:true},{x:gx,y:gy},{x:gx+dir*20,y:gy-14,flap:true},...loop,{x:n.x+10,y:n.cy-10},{x:n.x,y:n.cy}];
+      o.state="fly";o.x=n.x;o.y=n.cy;o.flap=0;
     }
   }else{
     const tg=o.path[0];if(!tg){o.state="home";o.timer=RI(40,160);return}
-    const tx=tg.x-5,ty=tg.y-5,dx=tx-o.x,dy=ty-o.y,d=Math.hypot(dx,dy);
-    o.face=dx>=0?1:-1;
-    if(d<1.6){o.path.shift();if(!o.path.length){o.state="home";o.timer=RI(40,160);o.x=o.nest.x;o.y=o.nest.y}}
-    else{const sp=Math.min(o.path.length===1?.8:1.8,d);o.x+=dx/d*sp;o.y+=dy/d*sp}
+    const dx=tg.x-o.x,dy=tg.y-o.y,d=Math.hypot(dx,dy);
+    if(d<1.6){o.path.shift();if(!o.path.length){o.state="home";o.timer=RI(40,160)}return}
+    const sp=Math.min(o.path.length<=2?.9:1.5,d);o.x+=dx/d*sp;o.y+=dy/d*sp;
+    o.flap=tg.flap||dy/d<-.7?((s.t>>1)%3!==2?1:0):0; // wingbeats only when taking off or climbing hard
   }
 }
 function stepBat(b,s){
+  // bats roam, then visit the night-blooming saguaro flowers to feed
+  if(b.state==="visit"){
+    const t=b.target,dx=t.x-2-b.x,dy=t.y-6-b.y,d=Math.hypot(dx,dy);
+    if(d<1.5){b.state="feed";b.timer=RI(12,36);return}
+    const sp=Math.min(1.7,d);b.x+=dx/d*sp+(R()-.5)*.6;b.y+=dy/d*sp+(R()-.5)*.6;return;
+  }
+  if(b.state==="feed"){b.x=b.target.x-2+(R()<.5?-1:1)*(R()<.4?1:0);b.y=b.target.y-6+(R()<.3?-1:0);
+    if(--b.timer<=0){b.state="roam";b.timer=RI(40,140);b.vy=-1.4;b.vx=(R()<.5?-1:1)*1.2}return}
   b.vx+=(R()-.5)*.9;b.vy+=(R()-.5)*.9;
   const sp=Math.hypot(b.vx,b.vy);if(sp>2.2){b.vx*=2.2/sp;b.vy*=2.2/sp}
   b.x+=b.vx;b.y+=b.vy;
   if(b.y<s.H0*.12)b.vy+=.4;if(b.y>s.H0*.8)b.vy-=.4;
   if(b.x<-8)b.x=s.w+6;if(b.x>s.w+8)b.x=-6;
+  if(--b.timer<=0&&s.blooms.length){b.target=s.blooms[RI(0,s.blooms.length-1)];b.state="visit"}
 }
 function drawScene(){
   const s=SCENE,c=s.ctx;if(!c)return;s.t++;const N=s.night;
@@ -649,45 +752,50 @@ function drawScene(){
   if(R()<(N?1/55:1/600)){const dir=R()<.5?1:-1;s.shoot.push({x:RI(0,s.w),y:RI(2,Math.round(s.H0*.35)),vx:dir*(2+R()*1.5),vy:1+R()*.8,life:RI(10,20)})}
   s.shoot=s.shoot.filter(m=>{
     m.x+=m.vx;m.y+=m.vy;m.life--;
-    const tail=["#f6f2e4","#c8c6d8","#8e90b0","#5c6088","#3a4068"];
-    tail.forEach((col,k)=>{c.fillStyle=col;c.fillRect(Math.round(m.x-m.vx*k*.6),Math.round(m.y-m.vy*k*.6),1,1)});
+    ["#f6f2e4","#c8c6d8","#8e90b0","#5c6088","#3a4068"].forEach((col,k)=>{c.fillStyle=col;c.fillRect(Math.round(m.x-m.vx*k*.6),Math.round(m.y-m.vy*k*.6),1,1)});
     return m.life>0&&m.y<s.H0;
   });
   // sun sinks and rises over ~6 minutes; the moon crosses the sky over ~10
   const now=performance.now()/1000,sr=s.sr;
   if(N){const t=(now%600)/600,mx=Math.round(s.w*(.12+.76*t)),my=Math.round(s.H0*(.14+.3*(2*t-1)**2));c.drawImage(s.layers.orb,mx-sr,my-sr)}
   else{const ph=now/360*Math.PI*2,sx=Math.round(s.w*.66+Math.sin(ph)*s.w*.03),sy=Math.round(s.H0-sr*.35+Math.sin(ph)*sr*1.15);c.drawImage(s.layers.orb,sx-sr,sy-sr)}
-  c.drawImage(s.layers.fg,0,0);
+  c.drawImage(s.layers.ground,0,0);
 
-  // actors go on their own layer so night can shade them like the landscape
-  const A=s.actors,a=A.getContext("2d");a.clearRect(0,0,s.w,s.h);
-  const eyes=[];
-  const o=s.owl;stepOwl(o,s);
-  if(o.nest){
-    if(o.state==="home"){const blink=o.blink>0;sprt(a,blink?CRITTERS.owlBlink:CRITTERS.owlHome,o.nest.x-4,o.nest.y-5);if(!blink)eyes.push([o.nest.x-3,o.nest.y-3],[o.nest.x+2,o.nest.y-3])}
-    else{const f=(s.t>>1)%2?CRITTERS.owlUp:CRITTERS.owlDown;sprt(a,f,o.x,o.y,o.face<0);eyes.push([Math.round(o.x)+5,Math.round(o.y)+(f===CRITTERS.owlUp?2:1)])}
-  }
-  if(!N)s.toads.forEach(t=>{stepToad(t,s.w);a.fillStyle="#6e5e4c";a.fillRect(Math.round(t.x)+1,t.y+5,10,1);sprt(a,CRITTERS.toad,t.x,t.y+t.bob,t.dir<0)});
+  // ground animals sit between the sand and the plants, so they always pass behind cacti
+  const G=s.groundA,g=G.getContext("2d");g.clearRect(0,0,s.w,s.h);
+  if(!N)s.toads.forEach(t=>{stepToad(t,s.w);g.fillStyle="#6e5e4c";g.fillRect(Math.round(t.x)+1,t.y+5,10,1);sprt(g,CRITTERS.toad,t.x,t.y+t.bob,t.dir<0)});
   s.scorps.forEach(p=>stepScorp(p,s));
-  if(!N)s.scorps.forEach(p=>{if(p.alive)sprt(a,CRITTERS.scorp[p.state==="walk"?(s.t>>1)%2:0],p.x,p.y-4,p.dir<0)});
+  if(!N)s.scorps.forEach(p=>{if(p.alive)sprt(g,CRITTERS.scorp[p.state==="walk"?(s.t>>1)%2:0],p.x,p.y-4,p.dir<0)});
   const rr=s.runner;stepRunner(rr,s);
   if(rr.state!=="away"&&rr.state!=="asleep"){
     const rs=rr.state==="run"||rr.state==="hunt"?CRITTERS.run[s.t%2]:rr.state==="peck"||(rr.state==="eat"&&s.t%4<2)?CRITTERS.peck:CRITTERS.stand;
-    a.fillStyle="#6e5e4c";a.fillRect(Math.round(rr.x)+4,Math.round(rr.y),9,1);sprt(a,rs,rr.x,rr.y-11,rr.dir<0);
+    g.fillStyle="#6e5e4c";g.fillRect(Math.round(rr.x)+4,Math.round(rr.y),9,1);sprt(g,rs,rr.x,rr.y-11,rr.dir<0);
   }
+  if(N)tint(G,"rgba(16,22,58,.5)");
+  c.drawImage(G,0,0);
+  if(N)s.scorps.forEach(p=>{if(p.alive)sprt(c,CRITTERS.scorp[p.state==="walk"?(s.t>>1)%2:0],p.x,p.y-4,p.dir<0,GLOW)});
+  c.drawImage(s.layers.plants,0,0);
+  if(N)c.drawImage(s.layers.bloom,0,0);
+
+  // things in the air (and the owl at its door) go in front of the plants
+  const A=s.airA,a=A.getContext("2d");a.clearRect(0,0,s.w,s.h);
+  const o=s.owl;stepOwl(o,s);let owlSprite=null,ox=0,oy=0;
+  if(o.state==="home"){owlSprite=o.blink>0?CRITTERS.owlBlink:CRITTERS.owlHome;ox=o.nest.x-8;oy=o.nest.top+3}
+  else{owlSprite=o.flap?((s.t>>1)%2?CRITTERS.owlUp:CRITTERS.owlDown):CRITTERS.owlGlide;ox=o.x-OWL_FW;oy=o.y-OWL_FH}
   s.ravens.forEach(r=>{
     stepRaven(r,s);if(r.state==="gone")return;
     const f=r.state==="roost"?CRITTERS.ravenSleep:r.state==="perch"?CRITTERS.ravenPerch:r.flap>0?((s.t>>1)%2?CRITTERS.ravenUp:CRITTERS.ravenDown):CRITTERS.ravenGlide;
     sprt(a,f,r.x,r.y,r.face<0);
   });
-  s.bats.forEach(b=>{stepBat(b,s);sprt(a,CRITTERS.bat[s.t%2],b.x,b.y)});
+  s.bats.forEach(b=>{stepBat(b,s);sprt(a,CRITTERS.bat[b.state==="feed"?s.t%2:(s.t>>1)%2],b.x,b.y)});
   if(N)tint(A,"rgba(16,22,58,.5)");
   c.drawImage(A,0,0);
-  // things that should still read in the dark
-  if(N){
-    s.scorps.forEach(p=>{if(p.alive)sprt(c,CRITTERS.scorp[p.state==="walk"?(s.t>>1)%2:0],p.x,p.y-4,p.dir<0,GLOW)});
+  if(o.state!=="home"){
+    o.chicks=o.chicks||[{b:0},{b:0}];
+    o.chicks.forEach((ch,i)=>{if(ch.b>0)ch.b--;else if(R()<.025)ch.b=RI(1,3);
+      sprt(c,ch.b>0?CRITTERS.chickBlink:CRITTERS.chick,o.nest.x+(i?1:-9),o.nest.top+(i?16:13),false,CHICKPAL)});
   }
-  eyes.forEach(([x,y])=>{c.fillStyle=N?"#ffe46a":CPAL.Y;c.fillRect(x,y,1,1)});
+  sprt(c,owlSprite,ox,oy,false,N?OWLPAL_N:OWLPAL); // lightly shaded at night, eyes always bright
 }
 
 /* ---------- Desert Map: pixel-rendered satellite/terrain with live weather ---------- */
@@ -761,8 +869,16 @@ function mapRender(){
     const y=lat2y(m.p.lat,MAP.z)-top;
     m.el.style.transform=`translate(${Math.round(x)}px,${Math.round(y)}px)`;
     m.el.hidden=x<-60||x>MAP.W+60||y<-30||y>MAP.H+40;
-    m.el.classList.toggle("sel",m.p.id===MAP.sel);
+    m.el.classList.toggle("sel",m.p.id===MAP.sel);m.x=x;m.y=y;
   });
+  // names sit beside the pins; when two would collide, the less important one drops its name
+  const placed=[],order=[...MAP.markers].sort((a,b)=>(b.p.id===MAP.sel)-(a.p.id===MAP.sel)||(b.p.home?1:0)-(a.p.home?1:0));
+  order.forEach(m=>{if(m.el.hidden)return;
+    m.el.classList.remove("nolabel");if(!m.full){m.full=m.el.offsetWidth;m.short=m.full-m.nm.offsetWidth-3}
+    const box=(wd)=>({l:m.x-10,r:m.x-10+wd,t:m.y-24,b:m.y-2});
+    let bx=box(m.full);
+    if(placed.some(q=>bx.l<q.r+2&&bx.r>q.l-2&&bx.t<q.b+2&&bx.b>q.t-2)){m.el.classList.add("nolabel");bx=box(m.short)}
+    placed.push(bx)});
   const zl=document.getElementById("mapZoom");if(zl)zl.textContent="z"+MAP.z;
 }
 function clampMap(){const ws=wsz(MAP.z);MAP.cy=Math.max(0,Math.min(ws,MAP.cy));MAP.cx=((MAP.cx%ws)+ws)%ws}
@@ -844,7 +960,7 @@ function renderMap(body,status){
   const wrap=MAP.wrap=body.querySelector(".mapwrap");MAP.cv=body.querySelector(".mapcv");MAP.lcv=body.querySelector(".maplabels");
   const marks=body.querySelector(".mapmarks");
   MAP.markers=PLACES.map(p=>{const el=document.createElement("button");el.className="mk"+(p.home?" home":"");el.setAttribute("aria-label",p.name);el.title=`${p.name} · ${p.region}`;
-    el.innerHTML=`<img alt="" src="${sprite(p.home?"flower":"cactus")}"><b>—</b>`;el.onclick=e=>{e.stopPropagation();selectPlace(p.id,false)};marks.appendChild(el);return {p,el,t:el.querySelector("b")}});
+    el.innerHTML=`<img alt="" src="${sprite(p.home?"flower":"cactus")}"><b>—</b><span class="nm">${esc(p.name)}</span>`;el.onclick=e=>{e.stopPropagation();selectPlace(p.id,false)};marks.appendChild(el);return {p,el,t:el.querySelector("b"),nm:el.querySelector(".nm")}});
   body.querySelectorAll("#placeList [data-id]").forEach(b=>b.onclick=()=>selectPlace(b.dataset.id,true));
   body.querySelector(".maptools").onclick=e=>{
     const b=e.target.closest("button");if(!b)return;
@@ -877,11 +993,11 @@ function renderMap(body,status){
   mapPaintWx();loadPlacesWx();
 }
 
-/* ---------- motion: on by default, off when the device asks for reduced motion, and the visitor's choice is remembered ---------- */
+/* ---------- motion: always plays on arrival; the tray button pauses it for the visit ---------- */
 const MOTION_KEY="xl-motion";
-function motionPref(){try{const v=localStorage.getItem(MOTION_KEY);if(v!==null)return v==="1"}catch(e){}return !matchMedia("(prefers-reduced-motion: reduce)").matches}
+function motionPref(){return true}
 function setMotion(on,save){
-  SCENE.motion=on;if(save){try{localStorage.setItem(MOTION_KEY,on?"1":"0")}catch(e){}}
+  SCENE.motion=on;
   document.body.classList.toggle("still",!on);clearInterval(SCENE.timer);if(on&&SCENE.ctx)SCENE.timer=setInterval(drawScene,125);
   const b=document.getElementById("motionbtn");if(b){b.textContent=on?"❚❚":"▶";b.title=on?"Pause the desert":"Animate the desert";b.setAttribute("aria-label",b.title)}
 }
@@ -964,11 +1080,17 @@ function defineWindow(id,{title,icon,w,x,y,render,menu,status}){
   WINS[id]={el,title,icon,x,y,render,status,placed:false};
   el.addEventListener("pointerdown",()=>focusWin(id));
   el.querySelector("[data-a=close]").onclick=e=>{e.stopPropagation();closeWin(id)};
-  el.querySelector("[data-a=min]").onclick=e=>{e.stopPropagation();el.hidden=true;WINS[id].min=true;renderTasks()};
+  el.querySelector("[data-a=min]").onclick=e=>{e.stopPropagation();minWin(id)};
   drag(el,el.querySelector(".bar"));
 }
+function minWin(id){
+  const W=WINS[id];W.min=true;
+  if(id==="radio")W.el.classList.add("stowed"); // keep the Spotify player running while tucked away
+  else W.el.hidden=true;
+  renderTasks();
+}
 function openWin(id){
-  const W=WINS[id];if(!W)return;
+  const W=WINS[id];if(!W)return;W.el.classList.remove("stowed");
   W.render(W.el.querySelector(".body"),W.el.querySelector(".status"));
   if(!W.placed){
     const off=(openOrder++%5)*22;
@@ -1000,9 +1122,10 @@ function renderTasks(active){
   const act=active||Object.keys(WINS).find(k=>WINS[k].el.classList.contains("active"));
   Object.entries(WINS).filter(([,w])=>w.open).forEach(([id,w])=>{
     const b=document.createElement("button");b.className="task"+(id===act&&!w.min?" on":"");b.textContent=w.title;
-    b.onclick=()=>{if(w.min||id!==act){w.min=false;w.el.hidden=false;focusWin(id)}else{w.el.hidden=true;w.min=true;renderTasks()}};
+    b.onclick=()=>{if(w.min||id!==act){w.min=false;w.el.hidden=false;w.el.classList.remove("stowed");focusWin(id)}else minWin(id)};
     t.appendChild(b);
   });
+  updateMini();
 }
 
 /* ---------- Xerophyte FM: retro skin around a Spotify embed ---------- */
@@ -1026,18 +1149,16 @@ function renderRadio(body,status){
     </div>
     <div class="seek" id="ampSeek" role="slider" aria-label="Song position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"><i id="ampBar"></i></div>
     <div class="amp-btns">
-      <button id="ampPrev" aria-label="Back to start">|◀</button><button id="ampPlay" aria-label="Play">▶</button><button id="ampPause" aria-label="Pause">❚❚</button><button id="ampStop" aria-label="Stop">■</button>
-      ${src?`<a class="amp-open" href="https://open.spotify.com/${src.type}/${src.id}" target="_blank" rel="noopener">Open in Spotify ↗</a>`:""}
+      <button id="ampPrev" aria-label="Back to start" title="Back to start">⏮</button><button id="ampPlay" aria-label="Play" title="Play">▶</button><button id="ampPause" aria-label="Pause" title="Pause">❚❚</button><button id="ampStop" aria-label="Stop" title="Stop">■</button>
+      ${src?`<a class="amp-eject" href="https://open.spotify.com/${src.type}/${src.id}" target="_blank" rel="noopener" title="Open in Spotify" aria-label="Open in Spotify">⏏</a>`:""}
+      <span class="amp-brand">XEROPHYTE<b>AMP</b></span>
     </div>
     <div class="deck">${src?`<div id="spotHost" class="tape-empty">Loading the tape…</div>`:`<div class="tape-empty">Paste a public Spotify playlist link into the <b>spotify_url</b> row of your sheet's Settings tab, then refresh.</div>`}</div>
   </div>`;
   if(status)status.innerHTML=`<span>${src?esc(src.type):"empty"}</span><span>${src?"Spotify":"—"}</span>`;
   ["ampPrev","ampPlay","ampPause","ampStop"].forEach(id=>document.getElementById(id).disabled=!src);
   const C=()=>SPOT.ctl;
-  document.getElementById("ampPlay").onclick=()=>{if(!C())return;SPOT.state.pos>0?C().resume():C().play()};
-  document.getElementById("ampPause").onclick=()=>C()&&C().pause();
-  document.getElementById("ampStop").onclick=()=>{if(!C())return;C().pause();C().seek(0);SPOT.state.pos=0;SPOT.stopped=true;ampUpdate()};
-  document.getElementById("ampPrev").onclick=()=>C()&&C().seek(0);
+  ["Prev","Play","Pause","Stop"].forEach(k=>document.getElementById("amp"+k).onclick=AMP[k.toLowerCase()]);
   const seekTo=f=>{if(C()&&SPOT.state.dur)C().seek(Math.floor(f*SPOT.state.dur/1000))};
   const sk=document.getElementById("ampSeek");
   sk.onclick=e=>{const r=sk.getBoundingClientRect();seekTo((e.clientX-r.left)/r.width)};
@@ -1066,7 +1187,21 @@ function loadSpotify(src){
   if(!SPOT.loading){SPOT.loading=true;const sc=document.createElement("script");sc.src="https://open.spotify.com/embed/iframe-api/v1";sc.async=true;sc.onerror=fallback;document.head.appendChild(sc)}
   clearTimeout(SPOT.fail);SPOT.fail=setTimeout(()=>{if(!SPOT.api)fallback()},7000);
 }
-function ampUpdate(){
+const AMP={
+  play(){const C=SPOT.ctl;if(!C)return;SPOT.state.pos>0?C.resume():C.play()},
+  pause(){SPOT.ctl&&SPOT.ctl.pause()},
+  stop(){const C=SPOT.ctl;if(!C)return;C.pause();C.seek(0);SPOT.state.pos=0;SPOT.stopped=true;ampUpdate()},
+  prev(){SPOT.ctl&&SPOT.ctl.seek(0)}
+};
+function updateMini(){
+  const m=document.getElementById("miniamp"),W=WINS.radio;if(!m)return;
+  m.hidden=!(W&&W.open&&W.min&&SPOT.src);
+  if(m.hidden)return;
+  const s=SPOT.state,st=s.buffering?"…":!s.paused?"▶":SPOT.stopped||!s.pos?"■":"❚❚";
+  document.getElementById("miniTime").textContent=`${st} ${fmtT(s.pos)}`;
+  document.getElementById("miniTitle").textContent=SET.radio_title||"Xerophyte FM";
+}
+function ampUpdate(){updateMini();
   const s=SPOT.state,$=id=>document.getElementById(id);if(!$("ampTime"))return;
   $("ampTime").textContent=fmtT(s.pos);
   $("ampState").textContent=s.buffering?"LOADING":!s.paused?"PLAY":SPOT.stopped||!s.pos?"STOP":"PAUSE";
@@ -1078,13 +1213,13 @@ function ampUpdate(){
 const VIZ=new Array(12).fill(0),PEAK=new Array(12).fill(0);
 function drawViz(flat){
   const cv=document.getElementById("ampViz");if(!cv)return;const c=cv.getContext("2d");
-  c.fillStyle="#1d2119";c.fillRect(0,0,38,16);
+  c.fillStyle="#000";c.fillRect(0,0,38,16);
   for(let i=0;i<12;i++){
     const target=flat?0:Math.max(1,Math.round((Math.random()**1.4)*15*(1-i/30)));
     VIZ[i]=flat?0:Math.round(VIZ[i]*.45+target*.55);PEAK[i]=flat?0:Math.max(VIZ[i],PEAK[i]-1);
-    for(let y=0;y<VIZ[i];y++){c.fillStyle=y>11?"#d9b46a":y>7?"#c9cf8a":"#9ec48a";c.fillRect(1+i*3,15-y,2,1)}
-    c.fillStyle="#e8dcc0";c.fillRect(1+i*3,15-PEAK[i],2,1);
-    c.fillStyle="#2c3226";if(flat)c.fillRect(1+i*3,15,2,1);
+    for(let y=0;y<VIZ[i];y++){c.fillStyle=y>12?"#e03c18":y>9?"#e0a018":y>5?"#c8d818":"#18c818";c.fillRect(1+i*3,15-y,2,1)}
+    c.fillStyle="#9aa0a8";c.fillRect(1+i*3,15-PEAK[i],2,1);
+    c.fillStyle="#103810";if(flat)c.fillRect(1+i*3,15,2,1);
   }
 }
 
@@ -1203,7 +1338,9 @@ function build(){
   document.getElementById("windows").innerHTML="";for(const k in WINS)delete WINS[k];openOrder=0;
   const L=document.getElementById("iconsLeft"),R=document.getElementById("iconsRight");L.innerHTML=R.innerHTML="";
   const t=[SET.title_line_1,SET.title_line_2,SET.title_line_3].filter(Boolean);
-  document.getElementById("title").innerHTML=t.map(s=>`<span>${esc(s)}</span>`).join("");
+  const lines=t.map((s,i)=>`<span>${esc(s)}${i===t.length-1?'<b class="cursor"></b>':''}</span>`).join("");
+  document.getElementById("title").innerHTML=lines+`<span class="glint" aria-hidden="true">${lines}</span>`;
+  shimmerTitle();
   document.getElementById("tagline").textContent=SET.tagline||"";
   document.title=t.join(" ").replace(/,/g,"")||"Xerophyte Labs";
   const words=(SET.marquee||"Always under construction").split("|").map(s=>s.trim()).filter(Boolean);
@@ -1213,7 +1350,7 @@ function build(){
   const mob=innerWidth<=700,cx=w=>Math.max(130,(innerWidth-w)/2);
   defineWindow("cacti",{title:"My Cacti",icon:"cactus",w:640,x:mob?16:120,y:84,render:renderCacti,menu:["File","View","Water"],status:true});
   defineWindow("map",{title:"Desert Map",icon:"map",w:Math.min(860,innerWidth-40),x:mob?16:Math.max(110,(innerWidth-860)/2),y:70,render:renderMap,status:true});
-  defineWindow("radio",{title:"Xerophyte FM",icon:"radio",w:380,x:innerWidth-450,y:300,render:renderRadio,status:true});
+  defineWindow("radio",{title:"Xerophyte AMP",icon:"radio",w:380,x:innerWidth-450,y:300,render:renderRadio,status:true});
   defineWindow("today",{title:"Weather Now",icon:"sun",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
   defineWindow("log",{title:"Weather Log",icon:"chart",w:640,x:cx(640),y:110,render:renderLog,menu:["File","Edit","Chart"],status:true});
   const thirsty=(DATA.cacti||[]).filter(c=>c.name&&cactusState(c).status==="thirsty").length;
@@ -1230,6 +1367,10 @@ function build(){
   const rl=document.createElement("li");rl.innerHTML=`<button><img alt="" src="${sprite("globe")}">Refresh from sheet</button>`;rl.firstChild.onclick=()=>{toggleStart(false);boot(true)};ul.appendChild(rl);
   if(CONFIG.SHEET_ID){const ed=document.createElement("li");ed.innerHTML=`<a href="https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/edit" target="_blank" rel="noopener"><img alt="" src="${sprite("book")}">Open the sheet</a>`;ul.appendChild(ed)}
   updateTray();
+}
+function shimmerTitle(){
+  const h=document.getElementById("title");if(!h)return;
+  h.classList.remove("shimmer");void h.offsetWidth;h.classList.add("shimmer");
 }
 function updateTray(){
   let t="--";if(LIVE&&LIVE.current)t=Math.round(LIVE.current.temperature_2m);else{const r=weatherRows();if(r.length)t=Math.round(r[r.length-1].high)}
