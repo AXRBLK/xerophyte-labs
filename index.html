@@ -97,7 +97,7 @@ body.still .hero h1 .cursor{animation:none}
 .cform textarea{resize:vertical;min-height:96px}
 /* make sure fields always take a tap and a caret on touch screens (iOS needs selectable text and a 16px font to type without zooming) */
 .cform input,.cform textarea{-webkit-user-select:text;user-select:text;touch-action:manipulation;pointer-events:auto;position:relative;z-index:1}
-@media (max-width:700px),(pointer:coarse){.cform input,.cform textarea{font-size:16px}}
+@media (pointer:coarse),(max-width:500px){.cform input,.cform textarea{font-size:16px}}
 .cform input:focus,.cform textarea:focus{outline:2px dotted var(--title-a);outline-offset:1px}
 .cform .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 .cform .crow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -285,8 +285,8 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 .turntable.on{transform:none;visibility:visible;transition:transform .9s cubic-bezier(.2,.8,.25,1),visibility 0s}
 .turntable.fromLeft{transform:translateX(-100vw)}.turntable.fromLeft.on{transform:none}
 /* phones: the icons fill the right, so the turntable parks top-left and glides in from the left edge */
-@media (max-width:700px){.miniamp{display:none!important}#discobtn{display:none!important}}   /* phones: no disco mode */   /* phones: the turntable is the mini player */
-@media (max-width:700px){
+@media (pointer:coarse),(max-width:500px){.miniamp{display:none!important}#discobtn{display:none!important}}   /* phones: no disco mode */   /* phones: the turntable is the mini player */
+@media (pointer:coarse),(max-width:500px){
   .turntable{position:fixed;left:12px;top:auto;bottom:calc(54px + env(safe-area-inset-bottom,0px));width:96px;height:84px;margin:0;z-index:3;transform:translateX(-100vw)}
   .turntable.on{transform:none}
   body .turntable canvas{width:96px;height:84px}
@@ -295,7 +295,7 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
   /* phones: the title block moves to the top of the screen, above the marquee and the icons */
   .hero{top:calc(10px + env(safe-area-inset-top,0px));bottom:auto;left:12px;right:12px;max-width:none}
 }
-@media (min-width:701px){.turntable{position:relative}}   /* phones pin it with position:fixed instead */
+@media (pointer:fine) and (min-width:501px),(pointer:none) and (min-width:501px){.turntable{position:relative}}   /* phones pin it with position:fixed instead */
 .turntable canvas{width:128px;height:112px;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 /* the album cover: a crisp circular label centred on the platter (canvas 26,26 → 52px,52px), spinning at 33⅓ rpm */
 .turntable .deck-art{position:absolute;left:35px;top:35px;width:36px;height:36px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px #17171d;animation:deckspin 1.8s linear infinite;animation-play-state:paused}
@@ -307,7 +307,7 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 .miniamp .mini-lcd{display:flex;gap:8px;align-items:center;max-width:300px;margin-left:2px;padding:0 8px;background:#000;color:#00e000;border-color:#14141e #6a6a86 #6a6a86 #14141e;font:11px var(--font-display);-webkit-font-smoothing:none;text-shadow:0 0 4px rgba(0,224,0,.45);overflow:hidden;white-space:nowrap}
 .miniamp .mini-title{overflow:hidden;max-width:220px;color:#00b000}.miniamp .mini-title span{display:inline-block;animation:scroll 16s linear infinite}
 .miniamp button:focus-visible{outline:1px dotted #e8d898;outline-offset:-3px}
-@media (max-width:700px){.miniamp .mini-title{display:none}.miniamp button{min-width:22px}}
+@media (pointer:coarse),(max-width:500px){.miniamp .mini-title{display:none}.miniamp button{min-width:22px}}
 
 /* night mode: moonlit desktop */
 .modebtn{background:none;border:0;padding:0 2px;color:inherit;font:15px var(--font-ui);cursor:pointer;line-height:1}
@@ -352,7 +352,7 @@ body.night .task.on{background:rgba(198,207,255,.16)}
 body.night .seek{background:repeating-linear-gradient(90deg,#2c3050 0 7px,#252840 7px 8px)}
 body.night .chip.thirsty{border-color:#e08aa2}
 
-@media (max-width:700px){
+@media (pointer:coarse),(max-width:500px){
   body{overflow:hidden}
   .hero h1{font-size:min(21.6px,calc((100vw - 56px) / 21))}
   .hero .sub,.hero .live{font-size:12px}
@@ -367,13 +367,13 @@ body.night .chip.thirsty{border-color:#e08aa2}
   .days{grid-template-columns:repeat(3,1fr)}
 }
 /* phones and touch screens: finger-sized minimize / close buttons */
-@media (max-width:700px),(pointer:coarse){
+@media (pointer:coarse),(max-width:500px){
   .bar{padding:4px 4px 4px 8px;gap:8px}
   .bar button,#w-radio .bar button{width:44px;height:38px;font-size:22px;flex:none;touch-action:manipulation}
   #w-radio .bar,#w-radio.active .bar{padding:4px 4px 4px 8px}
 }
 /* phones: no minimize; a big close box that closes from anywhere inside it */
-@media (max-width:700px){
+@media (pointer:coarse),(max-width:500px){
   .bar [data-a=min]{display:none}
   .bar [data-a=close],#w-radio .bar [data-a=close]{width:64px;height:44px;margin:-4px -4px -4px 0;font-size:26px}
   .bar{touch-action:manipulation}
@@ -383,9 +383,9 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 .hero h1,.hero .sub,.hero .live,body.night .hero h1,body.night .hero .sub,body.night .hero .live{background:none!important;color:#fff;text-shadow:none!important}
 .hero .live .wx{filter:none}
 .hero h1 .cursor{display:none}   /* no blinking cursor once the title has typed out (the typing caret is separate) */
-@media (min-width:701px){body.noMarquee .hero{top:calc(22px + 1vh)}}   /* no marquee: the header takes the very top */
+@media (pointer:fine) and (min-width:501px),(pointer:none) and (min-width:501px){body.noMarquee .hero{top:calc(22px + 1vh)}}   /* no marquee: the header takes the very top */
 /* desktop: centred across the top third of the sky, smaller and lighter */
-@media (min-width:701px){
+@media (pointer:fine) and (min-width:501px),(pointer:none) and (min-width:501px){
   .hero{left:0;right:0;top:calc(64px + 2vh);bottom:auto;max-width:none;align-items:center;text-align:center;gap:6px}
   .hero h1{font-size:22px;letter-spacing:.02em;padding:0}
   .hero .sub,.hero .live{font-size:12px;letter-spacing:.12em;padding:0;font-weight:400}
@@ -403,14 +403,14 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 .miniamp button:not(.mini-lcd){height:28px!important;min-width:30px!important;background:#2cff3c!important;border-color:#9dffa4 #12a01e #12a01e #9dffa4!important;box-shadow:none}
 .miniamp .pico{width:13px;height:13px}
 /* phones: mode switch and clock sit at the right end of the taskbar */
-@media (max-width:700px){.taskbar .tray{margin-left:auto}}
+@media (pointer:coarse),(max-width:500px){.taskbar .tray{margin-left:auto}}
 #w-radio .amp-btns button:disabled{filter:saturate(.3) brightness(.8)}#w-radio .amp-btns button:disabled .pico{color:#cfd8cf;filter:none}
 .amp-btns button,.amp-btns .amp-eject,.miniamp button:not(.mini-lcd){display:inline-flex;align-items:center;justify-content:center}
 /* tray: every item on one centre line */
 .tray>*{display:inline-flex;align-items:center;line-height:1;margin:0}
 .tray #clock{height:24px}
 /* phones: windows can't be minimised there, so the taskbar keeps no window buttons */
-@media (max-width:700px){#tasks{display:none!important}}
+@media (pointer:coarse),(max-width:500px){#tasks{display:none!important}}
 </style>
 </head>
 <body>
@@ -707,7 +707,7 @@ function setNight(n){
 const NIGHT_TINT="rgba(16,22,58,.58)";
 function paintSky(){
   const cv=document.getElementById("sky"),N=SCENE.night;
-  const S=innerWidth<=700?2:4;   // phones: smaller pixels, so the scene zooms out and shows more desert
+  const S=isMob()?2:4;   // phones: smaller pixels, so the scene zooms out and shows more desert
   const w=Math.ceil(innerWidth/S),h=Math.ceil(innerHeight/S);
   // a frame can report zero size while it's still being laid out (previews, background tabs): wait for a real size
   if(w<8||h<8){clearInterval(SCENE.timer);SCENE.ctx=null;clearTimeout(paintSky.retry);paintSky.retry=setTimeout(paintSky,250);return}
@@ -893,7 +893,7 @@ function paintSky(){
     else opuntia(it[1],it[2],it[3],it[4]);
   });
   c=plantCtx;
-  const GW=Math.max(29,Math.min(36,Math.round(h*.144)));   // the owl's giant saguaro (20% wider than before)
+  const GW=Math.max(35,Math.min(43,Math.round(h*.173)));   // the owl's giant saguaro (widened twice by 20%)
   const nest=giantSaguaro(Math.max(Math.round(w*.14),(GW>>1)+4),GW);
   // the far skyline (top of the mountain ranges in each column), smoothed: the day-disco ripples echo it
   {const gd=gc.getImageData(0,0,w,H0).data,top=new Array(w).fill(H0);
@@ -922,6 +922,10 @@ function paintSky(){
   drawScene();
   if(SCENE.motion)SCENE.timer=setInterval(drawScene,SCENE.disco?90:125);
 }
+/* phone layout: decided mainly by the hardware (a touch screen as the main pointer means phone/tablet; a mouse or
+   trackpad means desktop, whatever the window size), with screen size only as a fallback for very narrow screens */
+const MOB_Q=matchMedia("(pointer:coarse),(max-width:500px)");
+const isMob=()=>MOB_Q.matches;
 const R=Math.random,RI=(a,b)=>Math.floor(a+R()*(b-a+1));
 function stepRunner(rr,s){
   // roadrunner: sprint, stop, look around, peck; hunts scorpions it spots
@@ -1170,7 +1174,7 @@ function discoMusic(){
   if(!(SPOT.src||spotifySrc(SET.spotify_url||SET.spotify_playlist)))return;
   // tuck the player into the taskbar whether it was closed, open on screen or never loaded
   const W=WINS.radio;
-  if(innerWidth<=700){                                // phones: no player window at all, just music and the turntable
+  if(isMob()){                                // phones: no player window at all, just music and the turntable
     if(!W.open||!W.min){openWin("radio");minWin("radio")}
     if(!SPOT.ctl)SPOT.autoplay=true;else if(SPOT.state.paused||SPOT.stopped||!SPOT.state.pos)kickPlay();
     return}
@@ -1181,7 +1185,7 @@ function discoMusic(){
   clearTimeout(discoMusic.t);discoMusic.t=setTimeout(()=>{if(W.open&&!W.min)shrinkWin("radio")},900);  // …then tuck it away
 }
 function setDisco(on,user){
-  if(on&&innerWidth<=700)on=false;                    // disco is a desktop-only treat
+  if(on&&isMob())on=false;                    // disco is a desktop-only treat
   if(on&&user)discoMusic();
   SCENE.disco=on;document.body.classList.toggle("disco",on);
   const b=document.getElementById("discobtn");if(b){b.setAttribute("aria-pressed",on);b.title=on?"Disable Disco-mode":"Enable Disco-mode";b.setAttribute("aria-label",b.title)}
@@ -1711,7 +1715,7 @@ function defineWindow(id,{title,icon,w,x,y,render,menu,status}){
 function shrinkWin(id){
   const W=WINS[id],el=W.el;if(!W.open||W.min)return;
   let btn=[...document.querySelectorAll("#tasks .task")].find(b=>b.textContent===W.title)||document.getElementById("tasks");
-  if(id==="radio"&&innerWidth<=700){const t=document.getElementById("turntable");if(t)btn=t}
+  if(id==="radio"&&isMob()){const t=document.getElementById("turntable");if(t)btn=t}
   else if(id==="radio"){const m=document.getElementById("miniamp");if(m){m.hidden=false;m.style.visibility="hidden";btn=m;requestAnimationFrame(()=>m.style.visibility="")}}
   if(!el.animate||document.body.classList.contains("still")||!btn){minWin(id);return}
   const a=el.getBoundingClientRect(),b=btn.getBoundingClientRect();
@@ -1732,7 +1736,7 @@ function openWin(id){
   if(!W.placed){
     const ww=Math.min(W.el.offsetWidth||parseInt(W.el.style.width),innerWidth-32);
     // desktop: open beside the icon that launched it (to the right of a left-column icon, to the left of a right-column one)
-    const ic=innerWidth>700&&document.querySelector(`.icon[data-win="${id}"]`);
+    const ic=!isMob()&&document.querySelector(`.icon[data-win="${id}"]`);
     if(ic){const r=ic.getBoundingClientRect(),left=r.left<innerWidth/2,col=ic.parentElement.getBoundingClientRect();
       W.el.style.left=Math.max(16,Math.min(innerWidth-ww-16,left?Math.max(r.right,col.right)+14:Math.min(r.left,col.left)-ww-14))+"px";
       W.el.style.top=Math.max(60,Math.min(innerHeight-260,r.top-8))+"px"}
@@ -1745,7 +1749,7 @@ function openWin(id){
 }
 // keep a window's bottom edge above the taskbar: cap its height to the room below its top (the body scrolls inside)
 function fitWin(W){
-  if(innerWidth<=700){W.el.style.maxHeight="";return}
+  if(isMob()){W.el.style.maxHeight="";return}
   const top=parseInt(W.el.style.top)||W.el.offsetTop,bar=(document.querySelector(".taskbar")||{}).offsetHeight||44;
   W.el.style.maxHeight=Math.max(180,innerHeight-bar-12-top)+"px";
 }
@@ -1753,7 +1757,7 @@ addEventListener("resize",()=>Object.values(WINS).forEach(W=>{if(W.open)fitWin(W
 // on phones, closing the radio while it plays just tucks it away: the turntable keeps spinning and reopens it
 document.addEventListener("pointerdown",e=>{const a=document.activeElement;
   if(a&&a.matches&&a.matches("input,textarea")&&!e.target.closest("input,textarea,select,label,button"))a.blur()},true);
-function closeOrTuck(id){if(id==="radio"&&innerWidth<=700&&deckPlaying())minWin(id);else closeWin(id)}
+function closeOrTuck(id){if(id==="radio"&&isMob()&&deckPlaying())minWin(id);else closeWin(id)}
 function closeWin(id){if(WINS[id])WINS[id].placed=false;if(id==="radio"&&SPOT.ctl){try{SPOT.ctl.pause()}catch(e){}}const W=WINS[id];W.el.hidden=true;W.open=false;W.min=false;renderTasks()}
 function focusWin(id){
   Object.values(WINS).forEach(w=>w.el.classList.remove("active"));
@@ -1762,7 +1766,7 @@ function focusWin(id){
 function drag(el,handle){
   let sx,sy,ox,oy,on=false;
   handle.addEventListener("pointerdown",e=>{
-    if(e.target.closest("button")||innerWidth<=700)return;
+    if(e.target.closest("button")||isMob())return;
     on=true;sx=e.clientX;sy=e.clientY;ox=el.offsetLeft;oy=el.offsetTop;handle.setPointerCapture(e.pointerId);handle.style.cursor="grabbing";
   });
   handle.addEventListener("pointermove",e=>{if(!on)return;
@@ -2180,7 +2184,7 @@ function build(){
   const run=words.join(" · ")+" · ";document.getElementById("marquee").textContent=(run.repeat(Math.ceil(30/words.length))).repeat(2);
   document.getElementById("startside").textContent=SET.start_label||"Xerophyte Labs";
 
-  const mob=innerWidth<=700,cx=w=>Math.max(130,(innerWidth-w)/2);
+  const mob=isMob(),cx=w=>Math.max(130,(innerWidth-w)/2);
   defineWindow("cacti",{title:"My Cacti",icon:"saguaro",w:640,x:mob?16:120,y:84,render:renderCacti,menu:["File","View","Water"],status:true});
   defineWindow("map",{title:"Desert Map",icon:"map",w:Math.min(860,innerWidth-40),x:mob?16:Math.max(110,(innerWidth-860)/2),y:70,render:renderMap,status:true});
   defineWindow("radio",{title:radioName(),icon:"radio",w:380,x:innerWidth-595,y:64,render:renderRadio,status:true});
@@ -2225,7 +2229,7 @@ function build(){
 // phones: shrink the icon grid just enough that it never runs into the title block at the bottom right
 function fitIcons(){
   const nav=document.getElementById("iconsLeft"),hero=document.querySelector(".hero");if(!nav||!hero)return;
-  if(innerWidth>700){nav.style.removeProperty("--k");nav.style.width="";nav.style.top="";const mq=document.querySelector(".marquee");if(mq)mq.style.top="";return}
+  if(!isMob()){nav.style.removeProperty("--k");nav.style.width="";nav.style.top="";const mq=document.querySelector(".marquee");if(mq)mq.style.top="";return}
   // phones: title on top, then the marquee (if shown), then the icons, which must stop above the taskbar
   const mq=document.querySelector(".marquee"),hb=hero.getBoundingClientRect().bottom;
   if(mq)mq.style.top=Math.round(hb+8)+"px";
@@ -2293,7 +2297,7 @@ setDisco(false);
 document.getElementById("discobtn").onclick=()=>setDisco(!SCENE.disco,true);
 tick();setInterval(tick,30000);
 document.getElementById("modebtn").onclick=()=>{SCENE.override=!SCENE.night;setNight(SCENE.override)};
-let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{if(SCENE.disco&&innerWidth<=700)setDisco(false);paintSky()},150)});
+let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{if(SCENE.disco&&isMob())setDisco(false);paintSky()},150)});
 document.body.classList.toggle("admin",ADMIN);boot();
 </script>
 </body>
