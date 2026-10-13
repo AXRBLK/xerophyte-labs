@@ -395,12 +395,12 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 /* vector player buttons (no emoji fallbacks on phones) */
 .pico{display:block;width:12px;height:12px;margin:auto;pointer-events:none}
 /* the button icons glow the same LCD green as the player's display */
-#w-radio .amp-btns .pico,.miniamp .pico{color:#fff;filter:drop-shadow(0 0 1px rgba(0,40,0,.8)) drop-shadow(0 0 3px rgba(190,255,190,.45))}
-/* bigger, recessed player buttons: a soft inner shadow so the green reads clearly */
-#w-radio .amp-btns button,#w-radio .amp-eject{min-width:42px!important;height:32px!important;background:linear-gradient(180deg,#2ec83a,#11801d)!important;border-color:#8af08f #0a4a12 #0a4a12 #8af08f!important;box-shadow:inset 0 3px 7px rgba(10,10,24,.55),inset 0 -1px 0 rgba(255,255,255,.35)}
-#w-radio .amp-btns button:active,#w-radio .amp-eject:active{box-shadow:inset 0 4px 10px rgba(10,10,24,.75)}
+#w-radio .amp-btns .pico,.miniamp .pico{color:#fff;filter:none}
+/* bigger player buttons: flat bright neon green with white icons */
+#w-radio .amp-btns button,#w-radio .amp-eject{min-width:42px!important;height:32px!important;background:#2cff3c!important;border-color:#9dffa4 #12a01e #12a01e #9dffa4!important;box-shadow:none}
+#w-radio .amp-btns button:active,#w-radio .amp-eject:active{background:#1fd92e!important;border-color:#12a01e #9dffa4 #9dffa4 #12a01e!important}
 #w-radio .amp-btns .pico{width:16px;height:16px}
-.miniamp button:not(.mini-lcd){height:28px!important;min-width:30px!important;background:linear-gradient(180deg,#2ec83a,#11801d)!important;border-color:#8af08f #0a4a12 #0a4a12 #8af08f!important;box-shadow:inset 0 2px 6px rgba(10,10,24,.55),inset 0 -1px 0 rgba(255,255,255,.35)}
+.miniamp button:not(.mini-lcd){height:28px!important;min-width:30px!important;background:#2cff3c!important;border-color:#9dffa4 #12a01e #12a01e #9dffa4!important;box-shadow:none}
 .miniamp .pico{width:13px;height:13px}
 /* phones: mode switch and clock sit at the right end of the taskbar */
 @media (max-width:700px){.taskbar .tray{margin-left:auto}}
