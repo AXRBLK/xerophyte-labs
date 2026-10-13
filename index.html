@@ -44,16 +44,22 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 .hero h1{margin:0;font-family:var(--font-display);font-weight:400;font-size:24px;line-height:1.15;letter-spacing:0;-webkit-font-smoothing:none;font-smooth:never;color:#f4ece0;text-shadow:2px 2px 0 rgba(40,36,58,.6)}
 .hero h1 span{display:block}
 .hero h1{position:relative}
-/* load shimmer: one hard-edged band of light sweeps across the whole title */
-.hero h1 .glint{position:absolute;inset:0;color:transparent;text-shadow:none;pointer-events:none;opacity:0;
-  background:linear-gradient(100deg,transparent 0 42%,rgba(255,248,214,.95) 42% 50%,rgba(232,200,104,.9) 50% 56%,transparent 56%);
-  background-size:400% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text}
-.hero h1 .glint .cursor{visibility:hidden}
-.hero h1.shimmer .glint{animation:glint .7s steps(10) .3s 1 both}
-@keyframes glint{0%{background-position:100% 0;opacity:1}99%{background-position:0 0;opacity:1}100%{opacity:0}}
+/* load: a block cursor types the title, then the tagline flickers on in neon */
+.hero h1 .ch{font-style:normal;white-space:pre}
+.hero h1.typing .ch{visibility:hidden}
+.hero h1.typing .ch.on{visibility:visible}
+.hero h1.typing .ch.caret{visibility:visible;color:transparent;background:#f4ece0;text-shadow:none;box-shadow:2px 2px 0 rgba(40,36,58,.6)}
+.hero h1.typing .cursor{visibility:hidden}
 .hero h1 .cursor{display:inline-block;width:.5em;height:.82em;margin-left:.18em;vertical-align:-.04em;background:currentColor;box-shadow:2px 2px 0 rgba(40,36,58,.6);animation:blink 1.06s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
-body.still .hero h1.shimmer .glint{animation:none}
+.hero .sub.neon{animation:neon 2.4s steps(1,end) 1 both}
+@keyframes neon{
+  0%,6%,12%{color:#7dff7a;text-shadow:0 0 3px #39ff3a,0 0 9px #39ff3a;background:rgba(8,20,10,.88)}
+  3%,9%{color:#2e6a2e;text-shadow:none}
+  70%{color:#7dff7a;text-shadow:0 0 3px #39ff3a,0 0 9px #39ff3a;background:rgba(8,20,10,.88)}
+}
+.hero .sub{transition:color .6s,text-shadow .6s,background-color .6s}
+body.still .hero h1 .cursor{animation:none}
 .hero .sub,.hero .live{display:inline-block;padding:2px 8px;background:rgba(40,36,58,.7);font-family:var(--font-ui);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#efe2cc}
 .hero .live{text-transform:none;letter-spacing:.02em;font-variant-numeric:tabular-nums}
 .hero .live i{display:inline-block;width:6px;height:6px;margin-right:6px;background:#9ec48a;vertical-align:1px}
@@ -62,7 +68,7 @@ body.still .hero h1.shimmer .glint{animation:none}
 .icons{position:fixed;top:calc(64px + env(safe-area-inset-top,0px));bottom:56px;display:flex;flex-direction:column;flex-wrap:wrap;gap:6px;z-index:3;align-content:flex-start}
 .icons.left{left:10px}.icons.right{right:10px;align-content:flex-end}
 .icon{width:88px;padding:6px 2px;border:1px dotted transparent;background:none;color:#fff;font-family:var(--font-ui);font-size:14px;line-height:1.15;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;text-shadow:1px 1px 0 rgba(0,0,0,.55)}
-.icon img{width:44px;height:44px;image-rendering:pixelated}
+.icon img{width:48px;height:48px;image-rendering:pixelated}
 .icon:hover span,.icon:focus-visible span{background:var(--title-a)}
 .icon:focus-visible{outline:none;border-color:#fff}
 .icon .badge{position:relative}
@@ -73,7 +79,7 @@ body.still .hero h1.shimmer .glint{animation:none}
 .win[hidden]{display:none!important}
 .bar{display:flex;align-items:center;gap:6px;padding:3px 3px 3px 6px;background:linear-gradient(90deg,var(--chrome-lo),#9b908a);color:var(--chrome-hi);cursor:grab;user-select:none;touch-action:none}
 .win.active .bar{background:linear-gradient(90deg,var(--title-a),var(--title-b));color:#fff}
-.bar img{width:16px;height:16px;image-rendering:pixelated}
+.bar img{width:16px;height:16px;image-rendering:auto}
 .bar b{flex:1;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bar button{width:22px;height:20px;padding:0;font:600 13px/1 var(--font-ui);background:var(--chrome);color:var(--ink);border:2px solid;border-color:var(--chrome-hi) var(--chrome-lo) var(--chrome-lo) var(--chrome-hi);cursor:pointer}
 .bar button:active{border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}
@@ -93,8 +99,8 @@ body.still .hero h1.shimmer .glint{animation:none}
 .chip.soon{background:#e8d29c;color:#1c1218}
 .chip.fine{background:#d4dfc8;color:#1c1218}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:10px}
-.cactus{display:grid;grid-template-columns:52px 1fr;gap:4px 10px;padding:10px;background:var(--card);border:1px solid var(--line);min-width:0}
-.cactus img.sp{width:52px;height:52px;image-rendering:pixelated;grid-row:span 3;object-fit:cover}
+.cactus{display:grid;grid-template-columns:48px 1fr;gap:4px 10px;padding:10px;background:var(--card);border:1px solid var(--line);min-width:0}
+.cactus img.sp{width:48px;height:48px;image-rendering:pixelated;grid-row:span 3;object-fit:cover}
 .cactus .nm{font-family:var(--font-ui);font-weight:600;font-size:16px;line-height:1.1;display:flex;justify-content:space-between;gap:6px;align-items:start}
 .cactus .sci{font-style:italic;color:var(--mute);font-size:12px;line-height:1.3}
 .cactus .meta{font-size:12px;color:var(--ink2)}
@@ -144,7 +150,7 @@ td.wrap{white-space:normal;min-width:140px}
 .startmenu ul{list-style:none;margin:0;padding:4px;flex:1}
 .startmenu li button,.startmenu li a{display:flex;align-items:center;gap:8px;width:100%;padding:5px 8px;font:14px var(--font-ui);color:var(--ink);background:none;border:0;text-align:left;cursor:pointer;text-decoration:none}
 .startmenu li button:hover,.startmenu li a:hover,.startmenu li button:focus-visible{background:var(--title-a);color:#fff;outline:none}
-.startmenu li img{width:18px;height:18px;image-rendering:pixelated}
+.startmenu li img{width:18px;height:18px;image-rendering:auto}
 .startmenu hr{border:0;border-top:1px solid var(--chrome-lo);border-bottom:1px solid var(--chrome-hi);margin:3px 0}
 
 .muted{color:var(--mute)}
@@ -190,9 +196,9 @@ td.wrap{white-space:normal;min-width:140px}
 .mapnight{background:#141c48;mix-blend-mode:multiply;opacity:0}
 body.night .mapnight{opacity:.55}
 body.night .mapcv{filter:saturate(.5) brightness(.8)}
-.mk{position:absolute;left:0;top:0;margin:-24px 0 0 -10px;display:flex;align-items:flex-end;gap:2px;padding:0;background:none;border:0;cursor:pointer;pointer-events:auto}
-.mk img{width:20px;height:20px;image-rendering:pixelated;filter:drop-shadow(1px 1px 0 rgba(0,0,0,.6))}
-.mk.home{margin:-28px 0 0 -12px}.mk.home img{width:24px;height:24px}
+.mk{position:absolute;left:0;top:0;margin:-24px 0 0 -12px;display:flex;align-items:flex-end;gap:2px;padding:0;background:none;border:0;cursor:pointer;pointer-events:auto}
+.mk img{width:24px;height:24px;image-rendering:pixelated;filter:drop-shadow(1px 1px 0 rgba(0,0,0,.6))}
+.mk.home img{filter:drop-shadow(1px 1px 0 rgba(0,0,0,.6)) drop-shadow(0 0 2px #ffe48a)}
 .mk b{font:600 11px var(--font-ui);color:#1c1218;background:#f4ece0;border:1px solid #1c1218;padding:0 3px;margin-bottom:2px;font-variant-numeric:tabular-nums}
 .mk.sel{z-index:2}
 .mk.sel b{background:#e6c868}
@@ -265,6 +271,7 @@ body.night{
   --link:#aebcff; --card:#282c46; --line:#3e4468; --line2:#31365a; --mute:#a4a8c6; --ink2:#cfd1e4; --band:#2c3356;
 }
 body.night .bar{background:linear-gradient(90deg,var(--chrome-lo),#2e3250)}
+body.night .hero h1.typing .ch.caret{background:#eef0ff}
 body.night .hero h1{color:#eef0ff;text-shadow:2px 2px 0 rgba(4,6,18,.8)}
 body.night .hero .sub,body.night .hero .live{background:rgba(8,10,26,.78);color:#d8dcf4}
 body.night .marquee{background:rgba(8,10,26,.45)}
@@ -372,7 +379,7 @@ const SAMPLE = {
 };
 
 /* ---------- pixel sprites ---------- */
-const PAL={k:"#1c1218",g:"#5fa05a",G:"#2f6b3a",y:"#ffd24a",o:"#e0913a",w:"#ffffff",s:"#c9c2bb",S:"#6d625b",r:"#e0413a",b:"#4d86c9",n:"#b0603a",p:"#ff4f8b",l:"#9fd18a",R:"#d8b47c",D:"#6a4a30"};
+const PAL={k:"#2a2420",g:"#6f8c5c",G:"#3f5a3c",y:"#d4b45e",o:"#b87c48",w:"#ece6da",s:"#bdb6aa",S:"#6a6258",r:"#a24a3a",b:"#5a7896",n:"#8a5a3c",p:"#b8708a",l:"#a4b88e",R:"#b09068",D:"#5a3f28"};
 const SPRITES={
 cactus:["......kk........",".....kgGk.......",".....kgGk.......","..kk.kgGk.......",".kgGkkgGk..kk...",".kgGkkgGk.kgGk..",".kgGkkgGk.kgGk..",".kgggggGkkkgGk..","..kkGgggggggGk..","....kkkgGkkkk...","......kgGk......","......DgGD......",".....RDRRDR.....","....R.R..R.R....","...R..R...R.R...","..R..R.....R..R."],
 flower:["......kpk.......",".....kpppk......","......kkk.......",".....kgGk.......","....kgggGk......","...kggggGGk.....","...kgkggGkGk....","...kggggGGGk....","...kgkgggkGk....","...kggggGGGk....","....kgggGGk.....","....kDDDDDDk....","....R.RDDR.R....","...R..R..R..R...","..R...R...R..R..",".R...R.....R...R"],
@@ -388,7 +395,65 @@ computer:["................","..kkkkkkkkkkkk..","..ksssssssssSk..","..kskkkkkkkk
 globe:["................",".....kkkkkk.....","...kkbbggbbkk...","..kbbggggbbbbk..","..kbgggggbbggk..",".kbbbggbbbgggbk.",".kbbbbgbbbbggbk.",".kbbbbbbbbbbbbk.",".kbbggbbbbbbbbk.",".kbgggggbbbgbbk.","..kbgggbbbgggk..","..kbbggbbbbbbk..","...kkbbbbbbkk...",".....kkkkkk.....","......kSSk......","....kkkkkkkk...."]
 };
 const spriteCache={};
+/* botanical specimen icons, drawn at 24×24: a cactus lifted from the ground with its taproot and roots */
+function drawSpecimen(c,kind){
+  const px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)};
+  const walk=(x0,y0,x1,y1,f)=>{const n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0));for(let i=0;i<=n;i++){const t=n?i/n:0;f(Math.round(x0+(x1-x0)*t),Math.round(y0+(y1-y0)*t),t,i)}};
+  const poly=(pts,f)=>{let k=0;for(let i=1;i<pts.length;i++)walk(pts[i-1][0],pts[i-1][1],pts[i][0],pts[i][1],(x,y,t)=>f(x,y,k++))};
+  // roots: fine strands that droop and fork, under a tapering brown taproot
+  const ROOT="#b39670",ROOT_D="#94765a";
+  [[[12,18],[10,19],[8,20],[6,22],[5,23]],[[12,18],[14,19],[16,20],[18,22],[19,23]],[[12,18],[12,21],[11,23]],
+   [[11,16],[9,17],[6,18],[3,19],[1,21]],[[12,16],[15,17],[18,18],[21,19],[23,21]],
+   [[8,20],[8,23]],[[16,20],[16,22]],[[3,19],[2,21],[2,23]],[[21,19],[22,22]],[[6,18],[5,20]]]
+   .forEach((p,i)=>poly(p,(x,y)=>px(x,y,i<3?ROOT_D:ROOT)));
+  const TOP=kind==="barrel"?15:kind==="saguaro"||kind==="opuntia"?17:11;
+  for(let y=TOP;y<=18;y++){const wd=y<17?2:1;for(let i=0;i<wd;i++)px(11+i,y,i===0?"#7a5638":"#5a3f28")}
+  const blob=(cx,cy,rx,ry,shade)=>{for(let y=Math.floor(cy-ry);y<=Math.ceil(cy+ry);y++)for(let x=Math.floor(cx-rx);x<=Math.ceil(cx+rx);x++){const v=((x-cx)/rx)**2+((y-cy)/ry)**2;if(v<=1)px(x,y,shade(x,y,v,(x-cx)/rx))}};
+  if(kind==="saguaro"){
+    // carnegiea: one tall ribbed column, two arms that turn upward, spine rows on the ribs
+    const rib=(x0,w,y0,y1)=>{for(let y=y0;y<=y1;y++)for(let i=0;i<w;i++){const top=y===y0&&(i===0||i===w-1);if(top)continue;
+      px(x0+i,y,i===0||i===w-1||y===y0?"#3a4e32":i===1?"#86a06c":i%2?"#6c8858":"#4c6640");
+      if(i%2===0&&i>0&&i<w-1&&(y-y0)%3===1)px(x0+i,y,"#ddd2b4")}};
+    for(let x=6;x<=10;x++)for(let y=11;y<=13;y++)px(x,y,y===11||y===13?"#3a4e32":"#5a7448");   // left elbow
+    for(let x=14;x<=17;x++)for(let y=8;y<=10;y++)px(x,y,y===8||y===10?"#3a4e32":"#5a7448");    // right elbow
+    rib(4,4,4,13);rib(16,4,2,10);rib(9,6,1,17);
+    return;
+  }
+  if(kind==="opuntia"){
+    // opuntia: flat jointed pads stacked edge to edge, areoles with glochids, a few yellow blooms
+    const pad=(cx,cy,rx,ry)=>{blob(cx,cy,rx,ry,(x,y,v,f)=>v>.72?"#3a4e32":f<-.3?"#86a06c":f>.35?"#5a7448":"#6c8858");
+      for(let y=Math.ceil(cy-ry+1);y<cy+ry-.5;y+=2)for(let x=Math.ceil(cx-rx+1)+((y&2)?1:0);x<cx+rx-.5;x+=2)if(((x-cx)/rx)**2+((y-cy)/ry)**2<.6)px(x,y,"#d6caa6")};
+    pad(5,3.2,2.3,2.8);pad(7.5,8.6,3.2,4.6);pad(16.5,7.2,3.3,4.8);pad(12,13.6,3.9,4.6);
+    [[16,1],[9,3],[4,0]].forEach(([x,y])=>{px(x,y,"#d0a038");px(x+1,y,"#e0b858");px(x,y+1,"#b88030")});
+    return;
+  }
+  if(kind==="barrel"){
+    // ferocactus: ribbed barrel, pale spines, a crown of yellow flowers
+    const cx=11.5,cy=9,rx=5.6,ry=6.4;
+    for(let y=2;y<=15;y++)for(let x=5;x<=18;x++){const v=((x-cx)/rx)**2+((y-cy)/ry)**2;if(v>1)continue;
+      const edge=v>.78,groove=(x-6)%3===0,f=(x-cx)/rx;
+      px(x,y,edge?"#3a4e32":groove?"#4c6640":f<-.35?"#86a06c":f>.35?"#5a7448":"#6c8858")}
+    for(let y=4;y<=14;y+=2)for(let x=7;x<=17;x+=3)if(((x-cx)/rx)**2+((y-cy)/ry)**2<.85)px(x,y,"#ddd2b4");
+    [[9,3],[12,2],[14,3]].forEach(([x,y])=>{px(x,y,"#d0a038");px(x+1,y,"#d0a038");px(x,y-1,"#e0b858");px(x+1,y-1,"#b88030");px(x,y+1,"#8a5424")});
+    return;
+  }
+  // cylindropuntia: thick jointed arms bending out of a central crown, tubercles and pale spines
+  const arms=[[[12,10],[9,6],[6,3]],[[12,10],[12,5],[12,1]],[[12,10],[15,6],[18,3]],[[12,10],[7,9],[3,7]],[[12,10],[17,9],[21,7]],[[12,10],[8,12],[5,15]],[[12,10],[16,12],[19,15]]];
+  arms.forEach(a=>poly(a,(x,y)=>{for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(Math.abs(dx)+Math.abs(dy)<2)px(x+dx,y+dy,"#3a4e32")}));
+  arms.forEach(a=>{const [x0,y0]=a[0],[x1,y1]=a[a.length-1],len=Math.hypot(x1-x0,y1-y0),nx=-(y1-y0)/len,ny=(x1-x0)/len;
+    poly(a,(x,y,i)=>{px(x,y,i%3===0?"#56703f":"#6c8858");
+      const hx=Math.round(x+nx*.7),hy=Math.round(y+ny*.7);px(hx,hy,"#88a270");
+      if(i%3===2&&i>1){const sg=i%2?1:-1;px(Math.round(x+nx*2*sg),Math.round(y+ny*2*sg),"#e2dac4")}});
+    px(x1,y1,"#9cb07e")});
+  px(12,10,"#4c6640");
+}
 function sprite(name){
+  const SPEC={cactus:"cholla",cholla:"cholla",flower:"barrel",barrel:"barrel",saguaro:"saguaro",opuntia:"opuntia"};
+  if(SPEC[name]){
+    if(spriteCache[name])return spriteCache[name];
+    const c=document.createElement("canvas");c.width=c.height=24;drawSpecimen(c.getContext("2d"),SPEC[name]);
+    return spriteCache[name]=c.toDataURL();
+  }
   if(!SPRITES[name]) name="folder";
   if(spriteCache[name]) return spriteCache[name];
   const rows=SPRITES[name],c=document.createElement("canvas");c.width=c.height=16;
@@ -469,7 +534,7 @@ function disc(r,pal,craters){
 }
 function isNightNow(){const h=new Date().getHours();return h>=19||h<6}
 function setNight(n){
-  SCENE.night=n;document.body.classList.toggle("night",n);if(document.getElementById("title").textContent)shimmerTitle();
+  SCENE.night=n;document.body.classList.toggle("night",n);if(document.getElementById("title").textContent)neonTagline();
   const b=document.getElementById("modebtn");if(b){b.textContent=n?"☾":"☀";b.title=n?"Night mode · click for day":"Day mode · click for night";b.setAttribute("aria-label",b.title)}
   paintSky();
 }
@@ -960,7 +1025,7 @@ function renderMap(body,status){
   const wrap=MAP.wrap=body.querySelector(".mapwrap");MAP.cv=body.querySelector(".mapcv");MAP.lcv=body.querySelector(".maplabels");
   const marks=body.querySelector(".mapmarks");
   MAP.markers=PLACES.map(p=>{const el=document.createElement("button");el.className="mk"+(p.home?" home":"");el.setAttribute("aria-label",p.name);el.title=`${p.name} · ${p.region}`;
-    el.innerHTML=`<img alt="" src="${sprite(p.home?"flower":"cactus")}"><b>—</b><span class="nm">${esc(p.name)}</span>`;el.onclick=e=>{e.stopPropagation();selectPlace(p.id,false)};marks.appendChild(el);return {p,el,t:el.querySelector("b"),nm:el.querySelector(".nm")}});
+    el.innerHTML=`<img alt="" src="${sprite(p.home?"flower":"saguaro")}"><b>—</b><span class="nm">${esc(p.name)}</span>`;el.onclick=e=>{e.stopPropagation();selectPlace(p.id,false)};marks.appendChild(el);return {p,el,t:el.querySelector("b"),nm:el.querySelector(".nm")}});
   body.querySelectorAll("#placeList [data-id]").forEach(b=>b.onclick=()=>selectPlace(b.dataset.id,true));
   body.querySelector(".maptools").onclick=e=>{
     const b=e.target.closest("button");if(!b)return;
@@ -1224,6 +1289,14 @@ function drawViz(flat){
 }
 
 /* ---------- renderers ---------- */
+// which specimen drawing fits a plant: the sheet's optional "type" column wins, then the species and common name
+function cactusKind(c){
+  const t=`${c.type||""} ${c.species||""} ${c.common_name||""}`.toLowerCase();
+  if(/saguaro|carnegiea/.test(t))return "saguaro";
+  if(/cholla|cylindropuntia/.test(t))return "cholla";
+  if(/opuntia|prickly|beavertail|nopal/.test(t))return "opuntia";
+  return "barrel";
+}
 const exampleTag=()=>USING_SAMPLE?`<span class="example">Example data · connect your sheet to replace</span>`:"";
 
 function renderCacti(body,status){
@@ -1235,7 +1308,7 @@ function renderCacti(body,status){
   <div class="grid">${list.map(c=>{const s=c.st;
     const lbl=s.status==="thirsty"?(s.left===0?"Water today":`${-s.left}d overdue`):s.status==="soon"?`Water in ${s.left}d`:"Happy";
     return `<article class="cactus">
-      <img class="sp" alt="" src="${c.image_url?esc(c.image_url):sprite(s.status==="thirsty"?"cactus":"flower")}">
+      <img class="sp" alt="" src="${c.image_url?esc(c.image_url):sprite(cactusKind(c))}">
       <div class="nm"><span>${esc(c.name)}</span><span class="chip ${s.status}">${lbl}</span></div>
       <div class="sci">${esc(c.species)}${c.common_name?` · ${esc(c.common_name)}`:""}</div>
       <div class="meta">${esc(c.location||"")}${s.since!=null?` · watered ${s.since===0?"today":s.since+"d ago"}`:""} · every ${s.every}d</div>
@@ -1338,9 +1411,10 @@ function build(){
   document.getElementById("windows").innerHTML="";for(const k in WINS)delete WINS[k];openOrder=0;
   const L=document.getElementById("iconsLeft"),R=document.getElementById("iconsRight");L.innerHTML=R.innerHTML="";
   const t=[SET.title_line_1,SET.title_line_2,SET.title_line_3].filter(Boolean);
-  const lines=t.map((s,i)=>`<span>${esc(s)}${i===t.length-1?'<b class="cursor"></b>':''}</span>`).join("");
-  document.getElementById("title").innerHTML=lines+`<span class="glint" aria-hidden="true">${lines}</span>`;
-  shimmerTitle();
+  // every character gets a fixed cell so the right-aligned title never shifts while it types
+  const h1=document.getElementById("title");h1.setAttribute("aria-label",t.join(" "));
+  h1.innerHTML=t.map((s,i)=>`<span aria-hidden="true">${[...s].map((ch,j)=>`<i class="ch${j===s.length-1?" eol":""}">${esc(ch)}</i>`).join("")}${i===t.length-1?'<b class="cursor"></b>':''}</span>`).join("");
+  typeTitle();
   document.getElementById("tagline").textContent=SET.tagline||"";
   document.title=t.join(" ").replace(/,/g,"")||"Xerophyte Labs";
   const words=(SET.marquee||"Always under construction").split("|").map(s=>s.trim()).filter(Boolean);
@@ -1348,13 +1422,13 @@ function build(){
   document.getElementById("startside").textContent=SET.start_label||"Xerophyte Labs";
 
   const mob=innerWidth<=700,cx=w=>Math.max(130,(innerWidth-w)/2);
-  defineWindow("cacti",{title:"My Cacti",icon:"cactus",w:640,x:mob?16:120,y:84,render:renderCacti,menu:["File","View","Water"],status:true});
+  defineWindow("cacti",{title:"My Cacti",icon:"saguaro",w:640,x:mob?16:120,y:84,render:renderCacti,menu:["File","View","Water"],status:true});
   defineWindow("map",{title:"Desert Map",icon:"map",w:Math.min(860,innerWidth-40),x:mob?16:Math.max(110,(innerWidth-860)/2),y:70,render:renderMap,status:true});
   defineWindow("radio",{title:"Xerophyte AMP",icon:"radio",w:380,x:innerWidth-450,y:300,render:renderRadio,status:true});
   defineWindow("today",{title:"Weather Now",icon:"sun",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
   defineWindow("log",{title:"Weather Log",icon:"chart",w:640,x:cx(640),y:110,render:renderLog,menu:["File","Edit","Chart"],status:true});
   const thirsty=(DATA.cacti||[]).filter(c=>c.name&&cactusState(c).status==="thirsty").length;
-  L.append(iconBtn("cacti","My Cacti","cactus",thirsty||""),iconBtn("log","Weather Log","chart"));
+  L.append(iconBtn("cacti","My Cacti","saguaro",thirsty||""),iconBtn("log","Weather Log","chart"));
   (mob?L:R).append(iconBtn("today","Weather Now","sun"),iconBtn("map","Desert Map","map"),iconBtn("radio","Xerophyte FM","radio"));
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
     const id="p"+i;defineWindow(id,{title:p.title,icon:(p.icon||"folder").toLowerCase(),w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
@@ -1368,9 +1442,23 @@ function build(){
   if(CONFIG.SHEET_ID){const ed=document.createElement("li");ed.innerHTML=`<a href="https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/edit" target="_blank" rel="noopener"><img alt="" src="${sprite("book")}">Open the sheet</a>`;ul.appendChild(ed)}
   updateTray();
 }
-function shimmerTitle(){
-  const h=document.getElementById("title");if(!h)return;
-  h.classList.remove("shimmer");void h.offsetWidth;h.classList.add("shimmer");
+function typeTitle(){
+  const h=document.getElementById("title"),chars=[...h.querySelectorAll(".ch")];
+  clearTimeout(typeTitle.t);
+  if(document.body.classList.contains("still")){chars.forEach(c=>c.className="ch on");h.classList.remove("typing");return}
+  chars.forEach(c=>c.classList.remove("on","caret"));h.classList.add("typing");
+  let i=0;
+  const step=()=>{
+    if(i>0){chars[i-1].classList.remove("caret");chars[i-1].classList.add("on")}
+    if(i<chars.length){chars[i].classList.add("caret");const eol=i>0&&chars[i-1].classList.contains("eol");i++;
+      typeTitle.t=setTimeout(step,(eol?220:0)+38+Math.random()*52)}
+    else{h.classList.remove("typing");typeTitle.t=setTimeout(neonTagline,250)}
+  };
+  typeTitle.t=setTimeout(step,450);
+}
+function neonTagline(){
+  const t=document.getElementById("tagline");if(!t||document.body.classList.contains("still"))return;
+  t.classList.remove("neon");void t.offsetWidth;t.classList.add("neon");
 }
 function updateTray(){
   let t="--";if(LIVE&&LIVE.current)t=Math.round(LIVE.current.temperature_2m);else{const r=weatherRows();if(r.length)t=Math.round(r[r.length-1].high)}
