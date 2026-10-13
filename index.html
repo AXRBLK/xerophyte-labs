@@ -863,12 +863,17 @@ function paintSky(){
   add(2.5*area,"cho",H0+3,H0+Math.round(span*.45),7,()=>[.95+rnd()*.3,true]);
   add(2.5*area,"cho",H0+Math.round(span*.5),H0+span-2,12,()=>[1.05+rnd()*.45,false]);
   fixed.forEach(([fx,fy,fh])=>items.push(["sag",Math.round(w*fx),Math.round(h*fy),Math.round(Math.min(h,w*.8)*fh),2]));
+  // the farthest row (right at the horizon) is painted onto the ground layer, so the night truck on the far road
+  // drives in front of it while every nearer plant still passes in front of the truck
+  const plantCtx=c,FAR=H0+5;
   items.sort((a,b)=>a[2]-b[2]).forEach(it=>{
+    c=it[2]<=FAR?gc:plantCtx;
     if(it[0]==="cre")creosote(it[1],it[2]);
     else if(it[0]==="sag")saguaro(it[1],it[2],it[3],SAG[it[4]],it[4]);
     else if(it[0]==="cho")cholla(it[1],it[2],it[3],it[4]);
     else opuntia(it[1],it[2],it[3],it[4]);
   });
+  c=plantCtx;
   const GW=Math.max(24,Math.min(30,Math.round(h*.12)));
   const nest=giantSaguaro(Math.max(Math.round(w*.14),(GW>>1)+4),GW);
   // the far skyline (top of the mountain ranges in each column), smoothed: the day-disco ripples echo it
