@@ -162,7 +162,7 @@ td.wrap{white-space:normal;min-width:140px}
 .tasks{flex:1;display:flex;gap:4px;overflow:hidden;min-width:0}
 .task{max-width:160px;padding:4px 10px;color:var(--sand);background:transparent;border:1px solid rgba(243,201,160,.45);font:13px var(--font-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
 .task.on{background:rgba(243,201,160,.18);border-color:var(--sand);color:#fff}
-.tray{display:flex;gap:16px;padding:4px 12px;border:1px solid rgba(243,201,160,.45);font-size:13px;color:#fff;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tray{display:flex;align-items:center;gap:16px;padding:4px 12px;border:1px solid rgba(243,201,160,.45);font-size:13px;color:#fff;white-space:nowrap;font-variant-numeric:tabular-nums}
 .startmenu .adm{display:none}body.admin .startmenu .adm{display:block}
 .startmenu .chk{margin-left:auto;padding-left:8px;font-weight:700}.startmenu .chk.ok{color:#2f8a3a}.startmenu .chk.warn{color:#b07a18}.startmenu .chk.off{color:#a83a2a}
 body.night .startmenu .chk.ok{color:#6ade74}body.night .startmenu .chk.warn{color:#f0b84a}body.night .startmenu .chk.off{color:#ff7a66}
@@ -283,8 +283,9 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 .turntable{width:128px;height:112px;margin:2px auto 0;cursor:pointer;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.35));
   transform:translateX(calc(100vw));visibility:hidden;transition:transform .9s cubic-bezier(.2,.8,.25,1),visibility 0s linear .9s}
 .turntable.on{transform:none;visibility:visible;transition:transform .9s cubic-bezier(.2,.8,.25,1),visibility 0s}
+.turntable.fromLeft{transform:translateX(-100vw)}.turntable.fromLeft.on{transform:none}
 /* phones: the icons fill the right, so the turntable parks top-left and glides in from the left edge */
-@media (max-width:700px){.miniamp{display:none!important}}   /* phones: the turntable is the mini player */
+@media (max-width:700px){.miniamp{display:none!important}#discobtn{display:none!important}}   /* phones: no disco mode */   /* phones: the turntable is the mini player */
 @media (max-width:700px){
   .turntable{position:fixed;left:12px;top:auto;bottom:calc(54px + env(safe-area-inset-bottom,0px));width:96px;height:84px;margin:0;z-index:3;transform:translateX(-100vw)}
   .turntable.on{transform:none}
@@ -314,7 +315,7 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 .modebtn img{width:16px;height:16px;image-rendering:pixelated;vertical-align:-3px}
 #modebtn{display:inline-flex;align-items:center;gap:5px;padding:0 4px}
 #modebtn .mico{width:16px;height:16px;display:block}
-#modebtn .mlab{font:300 11px/1 var(--font-data);letter-spacing:.14em;text-transform:lowercase;opacity:.75}
+#modebtn .mlab{font:300 11px/1 var(--font-data);letter-spacing:.14em;text-transform:uppercase;opacity:.75}
 #discobtn{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;padding:0}
 #discobtn .ball{font-size:15px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;display:inline-block}
 #discobtn[aria-pressed="true"]{background:#4169e1;outline:3px solid #2a4cc0;outline-offset:1px;box-shadow:0 0 10px rgba(65,105,225,.85)}
@@ -391,6 +392,14 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
   .hero .live{letter-spacing:.04em}
 }
 .hero h1 .cursor,.hero h1.typing .ch.caret{background:#fff}
+/* vector player buttons (no emoji fallbacks on phones) */
+.pico{display:block;width:12px;height:12px;margin:auto;pointer-events:none}
+.amp-btns button,.amp-btns .amp-eject,.miniamp button:not(.mini-lcd){display:inline-flex;align-items:center;justify-content:center}
+/* tray: every item on one centre line */
+.tray>*{display:inline-flex;align-items:center;line-height:1;margin:0}
+.tray #clock{height:24px}
+/* phones: windows can't be minimised there, so the taskbar keeps no window buttons */
+@media (max-width:700px){#tasks{display:none!important}}
 </style>
 </head>
 <body>
@@ -415,7 +424,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
   <button class="start" id="startbtn" aria-expanded="false" aria-controls="startmenu">Start</button>
   <div class="tasks" id="tasks"></div>
   <div class="miniamp" id="miniamp" role="group" aria-label="Radio player" hidden>
-    <button type="button" onclick="AMP.prev()" aria-label="Previous / restart" title="Previous (restarts the song)">⏮</button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play">▶</button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause">❚❚</button><button type="button" onclick="AMP.stop()" aria-label="Stop" title="Stop">■</button><button type="button" onclick="AMP.next()" aria-label="Next song" title="Next song">⏭</button>
+    <button type="button" onclick="AMP.prev()" aria-label="Previous / restart" title="Previous (restarts the song)"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="1" y="2" width="2" height="8"/><path d="M11 2v8L4 6z"/></svg></button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><path d="M3 1.5v9L10.5 6z"/></svg></button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="2" width="3" height="8"/><rect x="7" y="2" width="3" height="8"/></svg></button><button type="button" onclick="AMP.stop()" aria-label="Stop" title="Stop"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2.5" y="2.5" width="7" height="7"/></svg></button><button type="button" onclick="AMP.next()" aria-label="Next song" title="Next song"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="9" y="2" width="2" height="8"/><path d="M1 2v8l7-4z"/></svg></button>
     <button type="button" class="mini-lcd" onclick="openWin('radio')" title="Show the player"><span id="miniTime">■ 00:00</span><span class="mini-title" id="miniTitle"></span></button>
   </div>
   <div class="tray"><button class="modebtn" id="modebtn" type="button"></button><button class="modebtn" id="discobtn" type="button" aria-pressed="false" title="Enable Disco-mode" aria-label="Enable Disco-mode"><span class="ball" aria-hidden="true">🪩</span></button><span id="clock"></span></div>
@@ -687,7 +696,7 @@ function setNight(n){
 const NIGHT_TINT="rgba(16,22,58,.58)";
 function paintSky(){
   const cv=document.getElementById("sky"),N=SCENE.night;
-  const S=innerWidth<=700?3:4;
+  const S=innerWidth<=700?2:4;   // phones: smaller pixels, so the scene zooms out and shows more desert
   const w=Math.ceil(innerWidth/S),h=Math.ceil(innerHeight/S);
   // a frame can report zero size while it's still being laid out (previews, background tabs): wait for a real size
   if(w<8||h<8){clearInterval(SCENE.timer);SCENE.ctx=null;clearTimeout(paintSky.retry);paintSky.retry=setTimeout(paintSky,250);return}
@@ -702,7 +711,7 @@ function paintSky(){
   if(N){for(let i=0;i<w*2.2;i++){const t=rnd(),x=Math.round(t*w),y=Math.round(H0*(.05+.5*t)+(rnd()-.5)*H0*.16);if(y<H0){skc.fillStyle=rnd()<.5?"#2a3158":"#232a4e";skc.fillRect(x,y,1,1)}}}
 
   // sun (day) or moon (night)
-  const sr=Math.round(h*(N?.084:.12));
+  const sr=Math.round(Math.min(h,w*1.2)*(N?.084:.12));   // tall phone screens: size the sun and moon by width too
   let orb;
   if(N)orb=moonDisc(sr);
   else{
@@ -862,20 +871,25 @@ function paintSky(){
   });
   const GW=Math.max(24,Math.min(30,Math.round(h*.12)));
   const nest=giantSaguaro(Math.max(Math.round(w*.14),(GW>>1)+4),GW);
+  // the far skyline (top of the mountain ranges in each column), smoothed: the day-disco ripples echo it
+  {const gd=gc.getImageData(0,0,w,H0).data,top=new Array(w).fill(H0);
+   for(let x=0;x<w;x++)for(let y=0;y<H0;y++)if(gd[(y*w+x)*4+3]>0){top[x]=y;break}
+   const sm=top.map((_,x)=>{let t=0,n=0;for(let j=-6;j<=6;j++){const v=top[Math.max(0,Math.min(w-1,x+j))];t+=v;n++}return t/n});
+   SCENE.ridge=sm;SCENE.ridgeMean=sm.reduce((a,b)=>a+b,0)/w}
   if(N){tint(ground,NIGHT_TINT);tint(plants,NIGHT_TINT);tint(clouds,NIGHT_TINT);tint(flowerCv,NIGHT_TINT)}
   // the lip of the cavity, copied so it can be drawn over the owl's lower body
 
 
   // the living
   const stars=[];for(let i=0;i<w*(N?.75:.3);i++)stars.push({x:ri(0,w),y:ri(0,Math.round(H0*(N?.7:.34))),ph:rnd()*6.28,sp:.04+rnd()*.12,big:rnd()<(N?.08:.12)});
-  const toads=[];for(let i=0;i<Math.max(3,Math.round(2*area));i++)toads.push({x:ri(10,w-20),y:H0+ri(Math.round(span*.6),span-4),dir:rnd()<.5?1:-1,state:"still",timer:ri(10,80),bob:0});
+  const toads=[];for(let i=0;i<wildCount("horned_lizards",Math.max(3,Math.round(2*area)));i++)toads.push({x:ri(10,w-20),y:H0+ri(Math.round(span*.6),span-4),dir:rnd()<.5?1:-1,state:"still",timer:ri(10,80),bob:0});
   const usable=perches.filter(p=>p.y>8);
-  const ravens=[0,1,2].map(i=>({x:ri(0,w),y:0,cy:ri(Math.round(H0*.14),Math.round(H0*.5)),vx:(i%2?-1:1)*(.5+rnd()*.4),state:"soar",flap:0,ph:i*40,timer:0,face:1}));
+  const ravens=[...Array(wildCount("ravens",3)).keys()].map(i=>({x:ri(0,w),y:0,cy:ri(Math.round(H0*.14),Math.round(H0*.5)),vx:(i%2?-1:1)*(.5+rnd()*.4),state:"soar",flap:0,ph:i*40,timer:0,face:1}));
   if(N)ravens.forEach((r,i)=>{const p=usable[(i*7)%Math.max(1,usable.length)];if(p){r.state="roost";r.target=p;r.x=p.x-6;r.y=p.y-13;r.face=i%2?1:-1}else r.state="gone"});
   const groundY=()=>H0+ri(Math.round(span*.42),span-6);
-  const scorps=[];for(let i=0;i<(N?4:2);i++)scorps.push({x:ri(10,w-20),y:groundY(),dir:rnd()<.5?1:-1,state:"pause",timer:ri(10,60),alive:true});
-  const mice=N?[0,1,2].map(i=>({x:ri(20,w-30),y:H0+ri(Math.round(span*.45),span-6),dir:rnd()<.5?1:-1,state:"pause",timer:ri(10,60),yo:0})):[];
-  const bats=N?[0,1,2,3].map(i=>({x:ri(0,w),y:ri(Math.round(H0*.2),Math.round(H0*.7)),vx:(i%2?-1:1)*1.2,vy:0,state:"roam",timer:ri(10,80)})):[];
+  const scorps=[];for(let i=0;i<wildCount("scorpions",N?4:2);i++)scorps.push({x:ri(10,w-20),y:groundY(),dir:rnd()<.5?1:-1,state:"pause",timer:ri(10,60),alive:true});
+  const mice=N?[...Array(wildCount("desert_mice",3)).keys()].map(i=>({x:ri(20,w-30),y:H0+ri(Math.round(span*.45),span-6),dir:rnd()<.5?1:-1,state:"pause",timer:ri(10,60),yo:0})):[];
+  const bats=N?[...Array(wildCount("bats",4)).keys()].map(i=>({x:ri(0,w),y:ri(Math.round(H0*.2),Math.round(H0*.7)),vx:(i%2?-1:1)*1.2,vy:0,state:"roam",timer:ri(10,80)})):[];
   SCENE.ridge=ridge;SCENE.bikes=null;SCENE.dust=[];
   Object.assign(SCENE,{layers:{sky,orb,clouds,ground,plants,bloom:bloomCv,flowers:flowerCv},flowers,sr,H0,span,ctx:cv.getContext("2d"),groundA:layer(w,h),airA:layer(w,h),w,h,t:0,stars,toads,ravens,perches:usable,scorps,bats,mice,shoot:[],groundY,blooms:N?blooms:[]});
   SCENE.owl={nest,state:"home",blink:0,timer:RI(40,120),path:[],x:0,y:0,face:1};
@@ -1087,7 +1101,8 @@ function bikeSprite(i,frame){
 }
 function drawBikes(c,s){
   const lineup=()=>{ // 2–3 riders picked at random, strung out at random distances
-    const pick=RIDERS.map((_,i)=>i).sort(()=>R()-.5).slice(0,RI(2,3));let off=0;
+    const want=wildCount("dirt_bikes",0),n=want?Math.min(RIDERS.length,want):RI(2,3);
+    const pick=RIDERS.map((_,i)=>i).sort(()=>R()-.5).slice(0,n);let off=0;
     return pick.map((ri,k)=>{if(k)off+=RI(14,70);return {ri,off,sp:1.5+R()*.5}})};
   if(!s.bikes||s.bikes.x===undefined)s.bikes={x:-40,wait:0,riders:lineup()};
   const g=s.bikes;if(!g.riders)g.riders=lineup();
@@ -1142,6 +1157,7 @@ function discoMusic(){
   clearTimeout(discoMusic.t);discoMusic.t=setTimeout(()=>{if(W.open&&!W.min)shrinkWin("radio")},900);  // …then tuck it away
 }
 function setDisco(on,user){
+  if(on&&innerWidth<=700)on=false;                    // disco is a desktop-only treat
   if(on&&user)discoMusic();
   SCENE.disco=on;document.body.classList.toggle("disco",on);
   const b=document.getElementById("discobtn");if(b){b.setAttribute("aria-pressed",on);b.title=on?"Disable Disco-mode":"Enable Disco-mode";b.setAttribute("aria-label",b.title)}
@@ -1170,16 +1186,17 @@ function orbPos(s,N,rad){
 // mountains so they slip behind the ridgeline, and left where they started so they trail the moving sun
 const RIPPLES=[];
 function sunRipples(c,s){
-  const now=performance.now();
-  // new rings only during day disco, at loose, slightly random intervals; rings already out finish fading
-  // each ring starts at a random spot along the far ridgeline and swells up out of the mountains
-  if(s.disco&&(!RIPPLES.next||now>=RIPPLES.next)){RIPPLES.next=now+1500+Math.random()*2200;RIPPLES.push({x:Math.round(s.w*(.08+Math.random()*.84)),y:Math.round(s.H0-2-Math.random()*6),t0:now})}
-  const life=6500,sr=s.sr;
+  const now=performance.now(),ridge=s.ridge;if(!ridge)return;
+  // day disco only: a new ripple at loose, random intervals (sometimes two close together); ones already out finish fading
+  if(s.disco&&(!RIPPLES.next||now>=RIPPLES.next)){RIPPLES.next=now+(Math.random()<.25?500+Math.random()*700:1400+Math.random()*3600);RIPPLES.push({t0:now,ph:Math.random()*6.28})}
+  const life=7000,rise=s.H0*.55;
   for(let i=RIPPLES.length-1;i>=0;i--){const R0=RIPPLES[i],k=(now-R0.t0)/life;if(k>=1){RIPPLES.splice(i,1);continue}
-    // a bright crest with a faint rosy shadow just inside it, so the ring shows against the pale sky near the horizon
-    const r=3+k*sr*2.4,fade=(1-k)*(1-k),n=Math.ceil(r*6.3);
-    [[r,`rgba(255,246,226,${(.34*fade).toFixed(3)})`],[r-1,`rgba(150,84,110,${(.2*fade).toFixed(3)})`]].forEach(([rr,col])=>{if(rr<1)return;c.fillStyle=col;
-      for(let j=0;j<n;j++){const a=j/n*6.2832,y=Math.round(R0.y+Math.sin(a)*rr);if(y>s.H0)continue;c.fillRect(Math.round(R0.x+Math.cos(a)*rr),y,1,1)}})}
+    // each ripple is an echo of the mountain skyline that lifts off the ridge, softens and fades as it climbs
+    const d=2+k*rise,fade=Math.sin(Math.min(1,k*6)*Math.PI/2)*(1-k)*(1-k),flat=Math.min(.85,k*1.4);
+    const crest=`rgba(255,246,226,${(.42*fade).toFixed(3)})`,shade=`rgba(150,84,110,${(.18*fade).toFixed(3)})`;
+    for(let x=0;x<s.w;x++){if((x+Math.round(R0.ph*7))%5===4)continue;           // a broken, shimmering line
+      const base=ridge[x]+(s.ridgeMean-ridge[x])*flat,y=Math.round(base-d+Math.sin(x*.09+R0.ph+k*5)*1.2);if(y<1)continue;
+      c.fillStyle=crest;c.fillRect(x,y,1,1);c.fillStyle=shade;c.fillRect(x,y+1,1,1)}}
 }
 
 /* ---------- night: a baja trophy truck crossing the far flats, lights blazing ---------- */
@@ -1588,6 +1605,11 @@ document.addEventListener("click",e=>{
 /* ---------- sheet switches: Desktop and Wildlife tabs ---------- */
 const isNo=v=>/^(no|off|false|hide|hidden|0)$/i.test(String(v??"").trim());
 let HIDE_WILD=new Set();
+// Wildlife tab › count: how many of a creature live in the scene (blank keeps the default, 0 empties it, capped at 20)
+function wildCount(name,def){
+  const r=((typeof DATA!=="undefined"&&DATA&&DATA.wildlife)||[]).find(r=>String(r.animal||"").trim().toLowerCase()===name);
+  const n=r?parseInt(String(r.count??"").trim(),10):NaN;return Number.isFinite(n)?Math.max(0,Math.min(20,n)):def;
+}
 const shown=name=>!HIDE_WILD.has(name);
 function deskRow(id,label){
   const keys=[String(id).toLowerCase(),String(label).toLowerCase()];
@@ -1684,10 +1706,16 @@ function openWin(id){
   const W=WINS[id];if(!W)return;W.el.classList.remove("stowed");
   W.render(W.el.querySelector(".body"),W.el.querySelector(".status"));
   if(!W.placed){
-    const off=id==="radio"?0:(openOrder++%5)*22;   // the radio always opens in the same spot, up by the right-hand icons
     const ww=Math.min(W.el.offsetWidth||parseInt(W.el.style.width),innerWidth-32);
-    W.el.style.left=Math.max(16,Math.min(innerWidth-ww-16,(W.x??(innerWidth-ww)/2)+off))+"px";
-    W.el.style.top=Math.max(60,(W.y??90)+off)+"px";W.placed=true;
+    // desktop: open beside the icon that launched it (to the right of a left-column icon, to the left of a right-column one)
+    const ic=innerWidth>700&&document.querySelector(`.icon[data-win="${id}"]`);
+    if(ic){const r=ic.getBoundingClientRect(),left=r.left<innerWidth/2,col=ic.parentElement.getBoundingClientRect();
+      W.el.style.left=Math.max(16,Math.min(innerWidth-ww-16,left?Math.max(r.right,col.right)+14:Math.min(r.left,col.left)-ww-14))+"px";
+      W.el.style.top=Math.max(60,Math.min(innerHeight-260,r.top-8))+"px"}
+    else{const off=(openOrder++%5)*22;
+      W.el.style.left=Math.max(16,Math.min(innerWidth-ww-16,(W.x??(innerWidth-ww)/2)+off))+"px";
+      W.el.style.top=Math.max(60,(W.y??90)+off)+"px"}
+    W.placed=true;
   }
   W.el.hidden=false;W.open=true;W.min=false;fitWin(W);focusWin(id);renderTasks();
 }
@@ -1699,8 +1727,10 @@ function fitWin(W){
 }
 addEventListener("resize",()=>Object.values(WINS).forEach(W=>{if(W.open)fitWin(W)}));
 // on phones, closing the radio while it plays just tucks it away: the turntable keeps spinning and reopens it
+document.addEventListener("pointerdown",e=>{const a=document.activeElement;
+  if(a&&a.matches&&a.matches("input,textarea")&&!e.target.closest("input,textarea,select,label,button"))a.blur()},true);
 function closeOrTuck(id){if(id==="radio"&&innerWidth<=700&&deckPlaying())minWin(id);else closeWin(id)}
-function closeWin(id){if(id==="radio"&&SPOT.ctl){try{SPOT.ctl.pause()}catch(e){}}const W=WINS[id];W.el.hidden=true;W.open=false;W.min=false;renderTasks()}
+function closeWin(id){if(WINS[id])WINS[id].placed=false;if(id==="radio"&&SPOT.ctl){try{SPOT.ctl.pause()}catch(e){}}const W=WINS[id];W.el.hidden=true;W.open=false;W.min=false;renderTasks()}
 function focusWin(id){
   Object.values(WINS).forEach(w=>w.el.classList.remove("active"));
   const W=WINS[id];W.el.style.zIndex=++Z;W.el.classList.add("active");renderTasks(id);
@@ -1798,8 +1828,8 @@ function renderRadio(body,status){
     </div>
     <div class="seek" id="ampSeek" role="slider" aria-label="Song position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"><i id="ampBar"></i></div>
     <div class="amp-btns">
-      <button id="ampPrev" aria-label="Back to start" title="Back to start">⏮</button><button id="ampPlay" aria-label="Play" title="Play">▶</button><button id="ampPause" aria-label="Pause" title="Pause">❚❚</button><button id="ampStop" aria-label="Stop" title="Stop">■</button><button id="ampNext" aria-label="Next song" title="Next song">⏭</button>
-      ${src?`<a class="amp-eject" href="https://open.spotify.com/${src.type}/${src.id}" target="_blank" rel="noopener" title="Open in Spotify" aria-label="Open in Spotify">⏏</a>`:""}
+      <button id="ampPrev" aria-label="Back to start" title="Back to start"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="1" y="2" width="2" height="8"/><path d="M11 2v8L4 6z"/></svg></button><button id="ampPlay" aria-label="Play" title="Play"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><path d="M3 1.5v9L10.5 6z"/></svg></button><button id="ampPause" aria-label="Pause" title="Pause"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="2" width="3" height="8"/><rect x="7" y="2" width="3" height="8"/></svg></button><button id="ampStop" aria-label="Stop" title="Stop"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2.5" y="2.5" width="7" height="7"/></svg></button><button id="ampNext" aria-label="Next song" title="Next song"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="9" y="2" width="2" height="8"/><path d="M1 2v8l7-4z"/></svg></button>
+      ${src?`<a class="amp-eject" href="https://open.spotify.com/${src.type}/${src.id}" target="_blank" rel="noopener" title="Open in Spotify" aria-label="Open in Spotify"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><path d="M6 1.5L11 7H1z"/><rect x="1" y="8.5" width="10" height="2"/></svg></a>`:""}
       <span class="amp-brand">${ampBrand(title)}</span>
     </div>
     <div class="deck">${src?`<div id="spotHost" class="tape-empty">Loading the tape…</div>`:`<div class="tape-empty">Paste a public Spotify playlist link into the <b>spotify_url</b> row of your sheet's Settings tab, then refresh.</div>`}</div>
@@ -1920,7 +1950,7 @@ function updateMini(){
   m.hidden=!(W&&W.open&&W.min&&SPOT.src);
   document.body.classList.toggle("miniOn",!m.hidden);
   if(m.hidden)return;
-  const s=SPOT.state,st=s.buffering?"…":!s.paused?"▶":SPOT.stopped||!s.pos?"■":"❚❚";
+  const s=SPOT.state,st=s.buffering?"…":!s.paused?"▶\uFE0E":SPOT.stopped||!s.pos?"■\uFE0E":"❚❚";   // \uFE0E keeps phones from swapping in emoji
   document.getElementById("miniTime").textContent=`${st} ${fmtT(s.pos)}`;
   ampText();
 }
@@ -2065,17 +2095,20 @@ function renderPage(p){return body=>{
 function contactForm(body){
   const to=String(SET.contact_email||"").trim();
   const f=document.createElement("form");f.className="cform";f.noValidate=true;
-  f.innerHTML=`<label><span>Email <b>*</b></span><input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+  f.innerHTML=`<label><span>Email <b>*</b></span><input name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" required placeholder="you@example.com"></label>
     <label><span>Phone</span><input name="phone" type="tel" autocomplete="tel" placeholder="optional"></label>
     <label><span>Subject</span><input name="subject" type="text" maxlength="120" placeholder="Cuttings, pups, rainfall…"></label>
     <label><span>Message <b>*</b></span><textarea name="message" rows="6" required></textarea></label>
     <input name="_honey" type="text" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
     <div class="crow"><button type="submit">Send ✉</button><span class="cmsg" role="status"></span></div>`;
   body.appendChild(f);
-  const msg=f.querySelector(".cmsg"),btn=f.querySelector("button"),say=(t,cls)=>{msg.textContent=t;msg.className="cmsg "+(cls||"")};
+  // every status line scrolls into view, so on a phone it isn't left hidden under the keyboard or below the fold
+  const msg=f.querySelector(".cmsg"),btn=f.querySelector("button"),say=(t,cls)=>{msg.textContent=t;msg.className="cmsg "+(cls||"");try{msg.scrollIntoView({block:"nearest",behavior:"smooth"})}catch(e){}};
   if(!to){say("Not set up yet: add a contact_email row to the Settings tab.","err");btn.disabled=true;return}
   f.onsubmit=async e=>{
-    e.preventDefault();const d=Object.fromEntries(new FormData(f));
+    e.preventDefault();if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();   // drop the phone keyboard
+    // phone keyboards often add a trailing space (predictive text) or capitals: tidy every field before checking it
+    const d=Object.fromEntries([...new FormData(f)].map(([k,v])=>[k,String(v).trim()]));if(d.email)d.email=d.email.replace(/\s+/g,"");
     if(d._honey)return;                                                   // a bot filled the hidden field
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email||"")){say("Please enter a valid email.","err");f.email.focus();return}
     if(!String(d.message||"").trim()){say("Please write a message.","err");f.message.focus();return}
@@ -2104,7 +2137,7 @@ function contactForm(body){
 function iconBtn(id,label,icon,badge){
   const b=document.createElement("button");b.className="icon";
   b.innerHTML=`<span class="badge"><img alt="" src="${sprite(icon)}">${badge?`<i>${badge}</i>`:""}</span><span>${esc(label)}</span>`;
-  b.onclick=()=>openWin(id);return b;
+  b.dataset.win=id;b.onclick=()=>openWin(id);return b;
 }
 function build(){
   document.getElementById("windows").innerHTML="";for(const k in WINS)delete WINS[k];openOrder=0;
@@ -2131,6 +2164,9 @@ function build(){
   defineWindow("log",{title:"Weather Log",icon:"chart",w:640,x:cx(640),y:110,render:renderLog,menu:["File","Edit","Chart"],status:true});
   const thirsty=(DATA.cacti||[]).filter(c=>c.name&&cactusState(c).status==="thirsty").length;
   HIDE_WILD=new Set((DATA.wildlife||[]).filter(r=>isNo(r.show)).map(r=>String(r.animal||"").trim().toLowerCase()));
+  // a count column changes how many creatures there are, so repaint the scene with the sheet's numbers
+  const sig=JSON.stringify((DATA.wildlife||[]).map(r=>[r.animal,r.count]));if(sig!==build.wildSig){const first=build.wildSig===undefined;build.wildSig=sig;
+    if(SCENE.ctx&&(!first||(DATA.wildlife||[]).some(r=>String(r.count??"").trim()!=="")))paintSky()}
   // Desktop tab: show = no hides an icon (and its Start menu entry); label renames it
   const HIDDEN=new Set(),ICONS=[];
   const place=(col,id,label,icon,badge)=>{const r=deskRow(id,label);if(r&&isNo(r.show)){HIDDEN.add(id);return}
@@ -2149,7 +2185,7 @@ function build(){
   const half=Math.ceil(ICONS.length/2);
   ICONS.forEach((ic,i)=>{(mob||i<half?L:R).append(ic.el);
     if(ic.id==="radio"){const tt=document.createElement("div");tt.className="turntable";tt.id="turntable";tt.title="Now spinning";
-    tt.innerHTML='<canvas width="64" height="56" aria-hidden="true"></canvas><img class="deck-art" alt="" hidden><i class="deck-pin"></i>';tt.onclick=()=>openWin("radio");if(DECK.art){const im=tt.querySelector(".deck-art");im.src=DECK.artSrc;im.hidden=false}(mob||i<half?L:R).append(tt);spinDeck()}});
+    tt.innerHTML='<canvas width="64" height="56" aria-hidden="true"></canvas><img class="deck-art" alt="" hidden><i class="deck-pin"></i>';tt.onclick=()=>openWin("radio");if(DECK.art){const im=tt.querySelector(".deck-art");im.src=DECK.artSrc;im.hidden=false}(mob||i<half?L:R).append(tt);if(!mob&&i<half)tt.classList.add("fromLeft");spinDeck()}});
   // warm up the Spotify player API in the background so the radio and disco start fast
   if(spotifySrc(SET.spotify_url||SET.spotify_playlist))setTimeout(preloadSpotify,1200);
   // start menu
@@ -2233,7 +2269,7 @@ setDisco(false);
 document.getElementById("discobtn").onclick=()=>setDisco(!SCENE.disco,true);
 tick();setInterval(tick,30000);
 document.getElementById("modebtn").onclick=()=>{SCENE.override=!SCENE.night;setNight(SCENE.override)};
-let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(paintSky,150)});
+let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{if(SCENE.disco&&innerWidth<=700)setDisco(false);paintSky()},150)});
 document.body.classList.toggle("admin",ADMIN);boot();
 </script>
 </body>
