@@ -271,6 +271,8 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 #w-radio .tape-empty{background:#101018;color:#a8a8c0}
 /* mini player in the taskbar while the window is minimized */
 .miniamp{display:flex;align-items:center;gap:2px;padding:2px;background:#24243a;border:1px solid #6a6a86;flex-shrink:0}
+.turntable{width:128px;height:112px;margin:2px auto 0;cursor:pointer;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.35))}
+.turntable canvas{width:128px;height:112px;image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 .miniamp button{height:22px;min-width:24px;padding:0 4px;font:12px/1 var(--font-ui);color:#202030;background:linear-gradient(180deg,#d8d8e4,#9c9cb0);border:1px solid;border-color:#f0f0f8 #50506a #50506a #f0f0f8;cursor:pointer}
 .miniamp button:active{border-color:#50506a #f0f0f8 #f0f0f8 #50506a}
 .miniamp .mini-lcd{display:flex;gap:8px;align-items:center;max-width:300px;margin-left:2px;padding:0 8px;background:#000;color:#00e000;border-color:#14141e #6a6a86 #6a6a86 #14141e;font:11px var(--font-display);-webkit-font-smoothing:none;text-shadow:0 0 4px rgba(0,224,0,.45);overflow:hidden;white-space:nowrap}
@@ -367,7 +369,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
   <button class="start" id="startbtn" aria-expanded="false" aria-controls="startmenu">Start</button>
   <div class="tasks" id="tasks"></div>
   <div class="miniamp" id="miniamp" role="group" aria-label="Radio player" hidden>
-    <button type="button" onclick="AMP.prev()" aria-label="Back to start" title="Back to start">⏮</button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play">▶</button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause">❚❚</button><button type="button" onclick="AMP.stop()" aria-label="Stop" title="Stop">■</button>
+    <button type="button" onclick="AMP.prev()" aria-label="Previous / restart" title="Previous (restarts the song)">⏮</button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play">▶</button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause">❚❚</button><button type="button" onclick="AMP.stop()" aria-label="Stop" title="Stop">■</button><button type="button" onclick="AMP.next()" aria-label="Next song" title="Next song">⏭</button>
     <button type="button" class="mini-lcd" onclick="openWin('radio')" title="Show the player"><span id="miniTime">■ 00:00</span><span class="mini-title" id="miniTitle"></span></button>
   </div>
   <div class="tray"><button class="modebtn" id="modebtn" type="button">☀</button><button class="modebtn" id="discobtn" type="button" aria-pressed="false" title="Enable Disco-mode" aria-label="Enable Disco-mode"><span class="ball" aria-hidden="true">🪩</span></button><span id="clock"></span></div>
@@ -385,7 +387,7 @@ const CONFIG = {
 };
 
 /* ---------- sample data (shown when no sheet is connected) ---------- */
-const WILDLIFE=["desert_mice","owl","owl_chicks","roadrunner","ravens","horned_lizards","scorpions","bats","night_blooms","shooting_stars","dirt_bikes"];
+const WILDLIFE=["desert_mice","owl","owl_chicks","roadrunner","ravens","horned_lizards","scorpions","bats","night_blooms","shooting_stars","dirt_bikes","baja_truck"];
 const SAMPLE = {
   desktop: [],
   wildlife: WILDLIFE.map(a=>({animal:a,show:"yes"})),
@@ -515,6 +517,7 @@ function sprite(name){
 const SCENE={timer:null,night:false,override:null};
 const BAYER=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]].map(r=>r.map(v=>(v+.5)/16));
 const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+const RAVENPAL={K:"#0e0c14",k:"#1f1a2c",v:"#3d3769",e:"#d42f3a"};
 const CPAL={k:"#29232c",K:"#0b0a12",N:"#5c4838",n:"#8a6e52",c:"#ddcfb8",b:"#7088aa",v:"#463e54",t:"#c4ab8a",T:"#a48d70",d:"#76624c",w:"#ece2d0",S:"#a8824e",s:"#6e5434"};
 const GLOW={S:"#8fe0cc",s:"#4c9a8c"}; // scorpions fluoresce under moonlight
 const OWLPAL={k:"#241a14",D:"#3e2c20",B:"#5c4230",L:"#8a6a4c",T:"#b08a5a",r:"#b8743e",w:"#d8d0c0",W:"#efe8da",Y:"#e8b828",p:"#0c0806",d:"#2e241c"};
@@ -542,11 +545,12 @@ const CRITTERS={
   ],
   stand:["kk................",".kN.......kk......","..kN.....kNNk.....","...kN...kNbNkkkkk.","....kN.kNNcNk.....",".....kNNNNcc......","....kNnNnNcc......",".....kNNNNk.......","......k..k........","......k..k........",".....kk..kk......."],
   peck:["..................","kk................",".kN...............","..kN..............","...kNNNNnNNk......","....kNnNnNnNk.....",".....kNNNNkNbk....",".......k.k.kNNkkk.","......k...k.......","......k...k.......",".....kk...kk......"],
-  ravenUp:["kk........kk.",".kk......kk..","..kkvkkkvk...","...kkkkkkkkkk","....kk......."],
-  ravenDown:[".............","...kkkkkkk...","kkkkvkkkvkkkk","k..kkkk...k..","...k........."],
-  ravenGlide:[".............",".............","kkkkkvkkvkkkk","...kkkkkkkk..","....k........"],
-  ravenPerch:["....kk.","...kkkk","..kvkk.",".kkkkk.","kkkk...","..k.k.."],
-  ravenSleep:[".......","....kk.","..kkkkk",".kkkkkk","kkkkk..","..k.k.."],
+  // common raven, facing right: heavy bill, red eye, wedge tail, fingered primaries, blue-violet sheen
+  ravenUp:["............K.K.K.......","...........KK.KKK.......","...........KKKKK........","..........KKvKKK........",".........KKvKKK.........","........KKvvKK..........",".......KKKvKKK..........","..KK..KKKKKKKKKKKKK.....",".KKKKKKKkvvvkKKKKKKKK...","KKKKKKKKKkkkkKKKKKKeKKKK",".KKK....KKKKKKKKKKKKKK..","...........K..K........."],
+  ravenGlide:["........................","........................","..........K.K.K.........",".........KKKKKK.........",".........KKKvKKK........","........KKKvvKKKK.......","..KK..KKKKKvKKKKKKK.....",".KKKKKKKkvvvvkKKKKKKK...","KKKKKKKKKkkkkKKKKKKeKKKK",".KKK....KKKKKKKKKKKKKK..","..........K..K..........","........................"],
+  ravenDown:["........................","........................","........................","........................","........................","........................","..KK...KKKKKKKKKKKK.....",".KKKKKKKKkvvvvkKKKKKK...","KKKKKKKKKkkkkKKKKKKeKKKK",".KKK....KKvvKKKKKKKKKK..",".......KKvvKKK..........","......KKvKKK............",".....KKKKKK.............","....K.K.KK.............."],
+  ravenPerch:["..............","........KKK...",".......KKKeK..","......KKKKKKKK","......KKKKKK..",".....KKKKKK...","....KKkvvKK...","...KKkvvvKK...","..KKkvvvKKK...",".KKKkvvKKK....","KKKKKKKKKK....","KK..KKKKK.....","K....K..K.....","....KKKKKK...."],
+  ravenSleep:["..............","..............","........KKK...",".......KKKkK..","......KKKKKKKK","......KKKKKK..",".....KKKKKK...","....KKkvvKK...","...KKkvvvKK...","..KKkvvvKKK...",".KKKkvvKKK....","KKKKKKKKKK....","KK..KKKKK.....","....KKKKKK...."],
   toad:["......w.w..","..tdtdtTTT.",".tTtTtTTkTt","tdtTtdtTTT.","..t..t..t.."],
   owlHome:owlFace(OWL_EYES),
   owlBlink:owlFace(OWL_SHUT),
@@ -589,6 +593,39 @@ function disc(r,pal,craters){
   if(craters){c.fillStyle=craters;[[-.3,-.2,.22],[.25,.15,.16],[-.05,.4,.12],[.35,-.35,.1]].forEach(([fx,fy,fr])=>{const cr=Math.max(1,Math.round(r*fr)),cx=r+Math.round(fx*r),cy=r+Math.round(fy*r);for(let yy=-cr;yy<=cr;yy++)for(let xx=-cr;xx<=cr;xx++)if(xx*xx+yy*yy<=cr*cr+cr*.5)c.fillRect(cx+xx,cy+yy,1,1)})}
   return cv;
 }
+/* the moon: lit from the upper left, dark maria, rimmed craters (shadowed on the sunward wall, bright on the far one)
+   and pockmarks; drawn at any radius from the same map so it can swell smoothly in disco */
+const MOON_CACHE={};
+function moonDisc(r){
+  if(MOON_CACHE[r])return MOON_CACHE[r];
+  const d=r*2+1,cv=layer(d,d),c=cv.getContext("2d"),img=c.createImageData(d,d),D=img.data;
+  const BASE=["#fbf8ec","#f2edda","#e7e0c8","#d9d1b6","#c9c0a3","#b4ab8f"].map(hex),MARE=["#d6cdb0","#c8bfa2","#bab192","#a9a084"].map(hex);
+  const L=[-.52,-.6,.6],ln=Math.hypot(...L);L.forEach((v,i)=>L[i]=v/ln);
+  const maria=[[-.28,-.18,.34],[-.05,-.34,.2],[.12,.05,.26],[.3,.32,.18],[-.36,.24,.16]];
+  const craters=[[.4,-.12,.15],[-.12,.5,.13],[.06,-.62,.1],[-.58,-.06,.09],[.52,.42,.08],[.2,.62,.07],[-.3,-.52,.07]];
+  let seed=r*7919+13;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  const pits=[...Array(Math.round(r*1.2))].map(()=>{const a=rnd()*6.28,m=Math.sqrt(rnd())*.9;return [Math.cos(a)*m,Math.sin(a)*m]});
+  const put=(x,y,col)=>{const p=(y*d+x)*4;D[p]=col[0];D[p+1]=col[1];D[p+2]=col[2];D[p+3]=255};
+  for(let y=-r;y<=r;y++){const half=Math.floor(Math.sqrt(r*r-y*y)+.35);for(let x=-half;x<=half;x++){
+    const nx=x/r,ny=y/r,nz=Math.sqrt(Math.max(0,1-nx*nx-ny*ny)),lit=Math.max(0,nx*L[0]+ny*L[1]+nz*L[2]);
+    let shade=1-(.25+.75*lit);                                                    // 0 bright … 1 dark limb
+    // maria: soft blotches with ragged edges
+    let mare=0;maria.forEach(([fx,fy,fr])=>{const q=Math.hypot(nx-fx,ny-fy)/fr+.18*Math.sin(nx*17+ny*11);if(q<1)mare=Math.max(mare,1-q)});
+    const pal=mare>.12?MARE:BASE,t=Math.min(.999,mare>.12?shade*.7+mare*.5:shade)*(pal.length-1),i=Math.floor(t);
+    let col=pal[Math.min(pal.length-1,(t-i)>BAYER[(y+r)&3][(x+r)&3]?i+1:i)];
+    // craters: floor, a shadow on the upper-left inner wall, a lit rim lower-right
+    for(const [fx,fy,fr] of craters){const dx=nx-fx,dy=ny-fy,q=Math.hypot(dx,dy)/fr;if(q>1.18)continue;
+      if(q<=1){const side=(dx*L[0]+dy*L[1])/Math.max(.001,Math.hypot(dx,dy));
+        col=q>.62&&side>.25?hex("#9e957c"):q>.7&&side<-.35?hex("#fffdf2"):hex(q<.45?"#c3ba9e":"#cfc6aa")}
+      else if((dx*L[0]+dy*L[1])<0)col=hex("#f8f4e6");                          // bright ejecta lip on the far side
+      break}
+    // pockmarks
+    for(const [px2,py2] of pits)if(Math.abs(nx-px2)*r<.6&&Math.abs(ny-py2)*r<.6){col=hex(lit>.5?"#bdb497":"#a89f86");break}
+    if(r*r-(x*x+y*y)<r*1.6)col=hex(lit>.55?"#e9e2cb":"#beb59a");                // a thin limb line
+    put(x+r,y+r,col)}}
+  c.putImageData(img,0,0);
+  return MOON_CACHE[r]=cv;
+}
 function isNightNow(){const h=new Date().getHours();return h>=19||h<6}
 function setNight(n){
   SCENE.night=n;document.body.classList.toggle("night",n);if(document.getElementById("title").textContent)neonTagline();
@@ -614,9 +651,9 @@ function paintSky(){
   if(N){for(let i=0;i<w*2.2;i++){const t=rnd(),x=Math.round(t*w),y=Math.round(H0*(.05+.5*t)+(rnd()-.5)*H0*.16);if(y<H0){skc.fillStyle=rnd()<.5?"#2a3158":"#232a4e";skc.fillRect(x,y,1,1)}}}
 
   // sun (day) or moon (night)
-  const sr=Math.round(h*(N?.07:.12));
+  const sr=Math.round(h*(N?.084:.12));
   let orb;
-  if(N)orb=disc(sr,["#f4f0e0","#e8e2cc","#d8d0b6"],"#c6bea4");
+  if(N)orb=moonDisc(sr);
   else{
     orb=layer(sr*2+1,sr*2+1);const sc=orb.getContext("2d");
     const sunPal=["#f2e4bc","#ecd2a4","#e4bc90","#d8a47e","#c98c70"].map(hex);
@@ -780,7 +817,7 @@ function paintSky(){
   const toads=[];for(let i=0;i<Math.max(3,Math.round(2*area));i++)toads.push({x:ri(10,w-20),y:H0+ri(Math.round(span*.6),span-4),dir:rnd()<.5?1:-1,state:"still",timer:ri(10,80),bob:0});
   const usable=perches.filter(p=>p.y>8);
   const ravens=[0,1,2].map(i=>({x:ri(0,w),y:0,cy:ri(Math.round(H0*.14),Math.round(H0*.5)),vx:(i%2?-1:1)*(.5+rnd()*.4),state:"soar",flap:0,ph:i*40,timer:0,face:1}));
-  if(N)ravens.forEach((r,i)=>{const p=usable[(i*7)%Math.max(1,usable.length)];if(p){r.state="roost";r.target=p;r.x=p.x-3;r.y=p.y-6;r.face=i%2?1:-1}else r.state="gone"});
+  if(N)ravens.forEach((r,i)=>{const p=usable[(i*7)%Math.max(1,usable.length)];if(p){r.state="roost";r.target=p;r.x=p.x-6;r.y=p.y-13;r.face=i%2?1:-1}else r.state="gone"});
   const groundY=()=>H0+ri(Math.round(span*.42),span-6);
   const scorps=[];for(let i=0;i<(N?4:2);i++)scorps.push({x:ri(10,w-20),y:groundY(),dir:rnd()<.5?1:-1,state:"pause",timer:ri(10,60),alive:true});
   const mice=N?[0,1,2].map(i=>({x:ri(20,w-30),y:H0+ri(Math.round(span*.45),span-6),dir:rnd()<.5?1:-1,state:"pause",timer:ri(10,60),yo:0})):[];
@@ -839,13 +876,20 @@ function stepRaven(r,s){
   const w=s.w,H0=s.H0;
   if(r.state==="roost"||r.state==="gone")return;
   if(r.state==="soar"){
-    r.x+=r.vx;r.y=r.cy+Math.sin((s.t+r.ph)/14)*5;r.face=r.vx>0?1:-1;
-    if(r.flap>0)r.flap--;else if(R()<.04)r.flap=RI(4,8);
-    if(r.x>w+16||r.x<-16){r.vx=-r.vx*(.8+R()*.4);r.cy=RI(Math.round(H0*.14),Math.round(H0*.5));r.x=r.vx>0?-15:w+15}
+    // ravens mostly hang on the air: long glides, lazy thermal circles, now and then a few slow wingbeats
+    if(r.circ){const C=r.circ;C.a+=C.sp;r.x=C.cx+Math.cos(C.a)*C.R;r.y=C.cy+Math.sin(C.a)*C.R*.32;
+      r.face=-Math.sin(C.a)*Math.sign(C.sp)>0?1:-1;C.cy-=.03;                 // each loop climbs a little
+      if(Math.abs(C.a-C.a0)>C.turns){r.circ=null;r.vx=r.face*Math.abs(r.vx);r.cy=r.y}}
+    else{r.x+=r.vx;r.y=r.cy+Math.sin((s.t+r.ph)/22)*3;r.face=r.vx>0?1:-1;
+      if(R()<.006&&r.x>20&&r.x<w-44){const sp=(r.vx>0?-1:1)*(.03+R()*.015),R0=RI(16,30),a0=r.vx>0?Math.PI/2:Math.PI/2;
+        r.circ={R:R0,sp,a:a0,a0,turns:Math.PI*2*(1+R()*1.2),cx:r.x,cy:r.y-R0*.32}}}
+    if(r.flap>0)r.flap--;else if(!r.circ&&R()<.006)r.flap=RI(6,10);
+    r.y=Math.max(4,r.y);
+    if(r.x>w+28||r.x<-28){r.circ=null;r.vx=-r.vx*(.8+R()*.4);r.cy=RI(Math.round(H0*.14),Math.round(H0*.5));r.x=r.vx>0?-27:w+27}
     const free=s.perches.filter(p=>!s.ravens.some(o=>o.target===p));
     if(free.length&&R()<.006&&r.x>0&&r.x<w){r.target=free[RI(0,free.length-1)];r.state="descend"}
   }else if(r.state==="descend"){
-    const tx=r.target.x-3,ty=r.target.y-6,dx=tx-r.x,dy=ty-r.y,d=Math.hypot(dx,dy);
+    const tx=r.target.x-6,ty=r.target.y-13,dx=tx-r.x,dy=ty-r.y,d=Math.hypot(dx,dy);
     r.face=dx>=0?1:-1;r.flap=d<20?2:0;
     if(d<1.5){r.x=tx;r.y=ty;r.state="perch";r.timer=RI(60,260)}
     else{const sp=Math.min(1.4,d);r.x+=dx/d*sp;r.y+=dy/d*sp}
@@ -1017,8 +1061,8 @@ const SKY_PULSE=[[255,120,170],[190,130,255],[255,176,90],[120,200,255]];
 function pulseSky(c,s){
   const st=SPOT.state,playing=!!SPOT.ctl&&!st.paused&&!st.buffering,now=performance.now();
   const pos=playing?st.pos+(now-(SPOT.at||now)):now*.6;           // with no music it just breathes slowly
-  const ph=(pos/937.5)%1,bar=Math.floor(pos/3750);
-  const [r,g,b]=SKY_PULSE[bar%SKY_PULSE.length],a=(playing?.07:.05)+(playing?.13:.06)*Math.exp(-ph*3.2);
+  const ph=(pos/1875)%1,bar=Math.floor(pos/7500);
+  const [r,g,b]=SKY_PULSE[bar%SKY_PULSE.length],a=(playing?.07:.05)+(playing?.12:.06)*Math.exp(-ph*2.2);
   const gr=c.createLinearGradient(0,0,0,s.H0);
   gr.addColorStop(0,`rgba(${r},${g},${b},${a.toFixed(3)})`);gr.addColorStop(1,`rgba(${r},${g},${b},${(a*.35).toFixed(3)})`);
   c.fillStyle=gr;c.fillRect(0,0,s.w,s.H0);
@@ -1054,19 +1098,80 @@ function arcStart(N){
   else{const hn=h>=12?h-19:h+5;p=hn<5?.5*hn/5:.5+.5*(hn-5)/6}  // 7pm rise · midnight top · 6am set
   return Math.min(.92,Math.max(.06,p));
 }
-function orbPos(s,N){
+function orbPos(s,N,rad){
   const now=performance.now()/1000;
   if(ORB.night!==N){ORB.night=N;ORB.t0=now;ORB.p0=arcStart(N)}
   const ARC=420,REST=40;                                     // seconds to cross the sky, seconds spent below the ridge
   let p=ORB.p0+(now-ORB.t0)/ARC;
   const cyc=1+REST/ARC;if(p>cyc)p=(p%cyc);                   // round again: rise from the left
   if(p>1)return null;
-  const sr=s.sr,top=Math.round(s.H0*.1)+sr,low=s.H0+sr+2;   // low = fully hidden behind the ranges
+  const sr=rad||s.sr,top=Math.round(s.H0*.1)+sr,low=s.H0+sr+2;   // low = fully hidden behind the ranges
   return {x:Math.round(s.w*(.06+.88*p)),y:Math.round(low-(low-top)*Math.pow(Math.sin(Math.PI*p),.7))};
+}
+// day disco only: faint heat ripples, pixel rings that leave the sun every couple of seconds, widen and fade; drawn before the
+// mountains so they slip behind the ridgeline, and left where they started so they trail the moving sun
+const RIPPLES=[];
+function sunRipples(c,s,o){
+  const now=performance.now();
+  // new rings only during day disco, at loose, slightly random intervals; rings already out finish fading
+  if(s.disco&&(!RIPPLES.next||now>=RIPPLES.next)){RIPPLES.next=now+1500+Math.random()*2200;RIPPLES.push({x:o.x,y:o.y,t0:now})}
+  const life=6500,sr=s.sr;
+  for(let i=RIPPLES.length-1;i>=0;i--){const R0=RIPPLES[i],k=(now-R0.t0)/life;if(k>=1){RIPPLES.splice(i,1);continue}
+    const r=sr*(1.05+k*1.9),al=.28*(1-k)*(1-k);c.fillStyle=`rgba(250,228,190,${al.toFixed(3)})`;
+    const n=Math.ceil(r*6.3);for(let j=0;j<n;j++){const a=j/n*6.2832,y=Math.round(R0.y+Math.sin(a)*r);if(y>s.H0)continue;c.fillRect(Math.round(R0.x+Math.cos(a)*r),y,1,1)}}
+}
+
+/* ---------- night: a baja trophy truck crossing the far flats, lights blazing ---------- */
+// pickup-style trophy truck facing right: spare tyre in the open bed, cab, long hood, light bar on the front of the roof
+const TRUCK=[
+"...........LLL....",
+"..........kkkk....",
+"..TTT....kggggk...",
+"kkkkkkkkkkkkkkkkk.",
+"bbbbbbbbbbbbbbbbbh",
+"Rbbbbbbbbbbbbbbbbb",
+".kTTTk.....kTTTk..",
+"..TTT.......TTT..."];
+const TRUCKPAL={k:"#3c3438",b:"#b89a6a",g:"#16141c",T:"#121014"};
+function stepTruck(s){
+  const T=s.truck||(s.truck={on:false,wait:RI(30,160)});
+  if(!T.on){if(--T.wait>0)return null;T.on=true;T.dir=R()<.5?1:-1;T.sp=.28+R()*.12;T.x=T.dir>0?-16:s.w+2;T.y=s.H0+RI(1,3)-TRUCK.length+5;T.jig=0}
+  T.x+=T.dir*T.sp;T.jig=(s.t%7===0&&R()<.5)?1:0;                                       // washboard road: an occasional bounce
+  if(T.x<-20||T.x>s.w+20){T.on=false;T.wait=RI(260,800);return null}
+  return {x:T.x,y:T.y-T.jig,dir:T.dir};
+}
+function truckLights(c,t){
+  const x0=Math.round(t.x),y0=Math.round(t.y),W=TRUCK[0].length,flip=t.dir<0;
+  const at=(i,j)=>[flip?x0+W-1-i:x0+i,y0+j];
+  // headlight beams fanning out ahead over the sand
+  const find=ch=>{let best=null;TRUCK.forEach((r,j)=>[...r].forEach((q,i)=>{if(q===ch&&(!best||i>best[0]))best=[i,j]}));return at(...best)};
+  const [hx,hy]=find("h"),dir=t.dir,len=34;
+  const beam=(x,y,L,up,down,a)=>{const g=c.createLinearGradient(x,0,x+dir*L,0);g.addColorStop(0,`rgba(255,244,196,${a})`);g.addColorStop(1,"rgba(255,244,196,0)");
+    c.fillStyle=g;c.beginPath();c.moveTo(x,y-1);c.lineTo(x+dir*L,y-up);c.lineTo(x+dir*L,y+down);c.lineTo(x,y+1);c.closePath();c.fill()};
+  beam(hx+dir,hy,len,2,4,.34);                                   // headlights: low, straight ahead
+  // roof light bar: points dead ahead from the front of the roof, a longer, wider, fainter throw
+  const [bx,by]=find("L");beam(bx+dir,by,len+18,2,7,.26);
+  const glow=(x,y,rgb,a)=>{c.fillStyle=`rgba(${rgb},${a*.18})`;c.fillRect(x-2,y-2,5,5);c.fillStyle=`rgba(${rgb},${a*.4})`;c.fillRect(x-1,y-1,3,3)};
+  TRUCK.forEach((row,j)=>[...row].forEach((ch,i)=>{const [x,y]=at(i,j);
+    if(ch==="L"){glow(x,y,"255,246,200",.4);c.fillStyle="#fff8d8";c.fillRect(x,y,1,1)}
+    else if(ch==="h"){glow(x,y,"255,240,180",1);c.fillStyle="#fffbe8";c.fillRect(x,y,1,1)}
+    else if(ch==="R"){const pulse=.85+.15*Math.sin(performance.now()/260);glow(x,y,"255,40,40",pulse);c.fillStyle="#ff4a3a";c.fillRect(x,y,1,1)}}));
+}
+// night: the moon; in disco it slowly swells to 130% and hangs in front of the northern lights
+function drawMoon(c,s){
+  s.moonK=s.moonK||1;const want=s.disco?1.3:1;s.moonK+=Math.sign(want-s.moonK)*Math.min(.0035,Math.abs(want-s.moonK));
+  const r=Math.round(s.sr*s.moonK),o=orbPos(s,true,r);if(o)c.drawImage(moonDisc(r),o.x-r,o.y-r);
+}
+// scorpion; with a beat, the head and pincers (front three columns) nod while body and tail stay put
+function drawScorp(ctx,p,frame,bob,pal){
+  const f=CRITTERS.scorp[frame];
+  if(!bob){sprt(ctx,f,p.x,p.y-4,p.dir<0,pal);return}
+  const front=r=>r.slice(0,3),back=r=>r.slice(3);
+  sprt(ctx,f.map(back),p.dir<0?p.x:p.x+3,p.y-4,p.dir<0,pal);sprt(ctx,f.map(front),p.dir<0?p.x+6:p.x,p.y-5,p.dir<0,pal);
 }
 function drawScene(){
   const s=SCENE,c=s.ctx;if(!c)return;s.t++;const N=s.night;
-  if(s.disco&&N){drawDisco(c,s)}else{
+  if(s.disco&&N){drawDisco(c,s);drawMoon(c,s)}else{
   c.drawImage(s.layers.sky,0,0);
   // twinkling stars
   const sp=N?["#2a3150","#5c6690","#aeb6d8","#f4f2e8"]:["#4a4458","#7a7088","#bcb2c6","#f2ead8"];
@@ -1085,7 +1190,8 @@ function drawScene(){
   // sun sinks and rises over ~6 minutes; the moon crosses the sky over ~10
   const now=performance.now()/1000,sr=s.sr;
   if(N)c.drawImage(s.layers.clouds,0,0);                 // night: clouds behind the moon
-  {const o=orbPos(s,N);if(o)c.drawImage(s.layers.orb,o.x-sr,o.y-sr)}
+  if(N)drawMoon(c,s);
+  else{const o=orbPos(s,N);if(o){if(s.disco||RIPPLES.length)sunRipples(c,s,o);c.drawImage(s.layers.orb,o.x-sr,o.y-sr)}}
   }
   if(!N)c.drawImage(s.layers.clouds,0,0);                // day: sunset streaks in front of the sun
   if(s.disco&&!N)pulseSky(c,s);
@@ -1095,27 +1201,28 @@ function drawScene(){
 
   // ground animals sit between the sand and the plants, so they always pass behind cacti
   const G=s.groundA,g=G.getContext("2d");g.clearRect(0,0,s.w,s.h);
-  if(!N&&shown("horned_lizards"))s.toads.forEach(t=>{stepToad(t,s.w);g.fillStyle="#6e5e4c";g.fillRect(Math.round(t.x)+1,t.y+5,10,1);
+  // disco (day or night): every ground creature stops where it is and nods along
+  const hold=s.disco;
+  if(!N&&shown("horned_lizards"))s.toads.forEach(t=>{if(hold)t.bob=0;else stepToad(t,s.w);g.fillStyle="#6e5e4c";g.fillRect(Math.round(t.x)+1,t.y+5,10,1);
     // disco: the head (front columns) nods on the beat while the body stays put
     if(bob)sprt(g,TOAD_BODY,t.x,t.y+t.bob,t.dir<0),sprt(g,TOAD_HEAD,t.x,t.y+t.bob+1,t.dir<0);else sprt(g,CRITTERS.toad,t.x,t.y+t.bob,t.dir<0)});
   const scorpOn=shown("scorpions");if(!scorpOn)s.scorps.forEach(p=>p.alive=false);
-  if(scorpOn)s.scorps.forEach(p=>stepScorp(p,s));
-  if(!N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)sprt(g,CRITTERS.scorp[p.state==="walk"?(s.t>>1)%2:0],p.x,p.y-4,p.dir<0)});
-  const rr=s.runner;if(shown("roadrunner"))stepRunner(rr,s);
+  if(scorpOn&&!hold)s.scorps.forEach(p=>stepScorp(p,s));
+  if(!N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)drawScorp(g,p,hold?0:p.state==="walk"?(s.t>>1)%2:0,bob)});
+  const rr=s.runner;if(shown("roadrunner")&&!hold)stepRunner(rr,s);
   if(shown("roadrunner")&&rr.state!=="away"&&rr.state!=="asleep"){
-    const rs=rr.state==="run"||rr.state==="hunt"?CRITTERS.run[s.t%2]:rr.state==="peck"||(rr.state==="eat"&&s.t%4<2)?CRITTERS.peck:CRITTERS.stand;
-    g.fillStyle="#6e5e4c";g.fillRect(Math.round(rr.x)+4,Math.round(rr.y),9,1);(rr.state==="stand"||rr.state==="peck")?sprtBob(g,rs,rr.x,rr.y-11,5,bob,rr.dir<0):sprt(g,rs,rr.x,rr.y-11,rr.dir<0);
+    const rs=hold?CRITTERS.stand:rr.state==="run"||rr.state==="hunt"?CRITTERS.run[s.t%2]:rr.state==="peck"||(rr.state==="eat"&&s.t%4<2)?CRITTERS.peck:CRITTERS.stand;
+    g.fillStyle="#6e5e4c";g.fillRect(Math.round(rr.x)+4,Math.round(rr.y),9,1);(hold||rr.state==="stand"||rr.state==="peck")?sprtBob(g,rs,rr.x,rr.y-11,5,bob,rr.dir<0):sprt(g,rs,rr.x,rr.y-11,rr.dir<0);
   }
-  if(N&&shown("desert_mice"))(s.mice||[]).forEach(m=>{stepMouse(m,s);
-    const f=m.state==="hop"&&m.yo<0?CRITTERS.mouseHop:CRITTERS.mouseSit;
-    sprtBob(g,f,m.x,m.y-10+m.yo,5,m.state==="nibble"&&s.t%4<2?1:0,m.dir<0,MOUSE)});
+  if(N&&shown("desert_mice"))(s.mice||[]).forEach(m=>{if(hold)m.yo=0;else stepMouse(m,s);
+    const f=!hold&&m.state==="hop"&&m.yo<0?CRITTERS.mouseHop:CRITTERS.mouseSit;
+    sprtBob(g,f,m.x,m.y-10+m.yo,5,hold?bob:m.state==="nibble"&&s.t%4<2?1:0,m.dir<0,MOUSE)});
+  const tk=N&&shown("baja_truck")?stepTruck(s):null;
+  if(tk)sprt(g,TRUCK,tk.x,tk.y,tk.dir<0,TRUCKPAL,"kbgT");
   if(N)tint(G,"rgba(16,22,58,.42)");
   c.drawImage(G,0,0);
-  if(N&&scorpOn)s.scorps.forEach(p=>{if(!p.alive)return;const f=CRITTERS.scorp[p.state==="walk"?(s.t>>1)%2:0];
-    if(!bob){sprt(c,f,p.x,p.y-4,p.dir<0,GLOW);return}
-    // head and pincers (the front three columns) nod on the beat; body and tail stay put
-    const front=r=>r.slice(0,3),back=r=>r.slice(3);
-    sprt(c,f.map(back),p.dir<0?p.x:p.x+3,p.y-4,p.dir<0,GLOW);sprt(c,f.map(front),p.dir<0?p.x+6:p.x,p.y-5,p.dir<0,GLOW)});
+  if(tk)truckLights(c,tk);
+  if(N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)drawScorp(c,p,hold?0:p.state==="walk"?(s.t>>1)%2:0,bob,GLOW)});
   c.drawImage(s.layers.plants,0,0);
   if(N&&shown("night_blooms"))c.drawImage(s.layers.bloom,0,0);
 
@@ -1126,8 +1233,8 @@ function drawScene(){
   else{owlSprite=o.flap?((s.t>>1)%2?CRITTERS.owlUp:CRITTERS.owlDown):CRITTERS.owlGlide;ox=o.x-OWL_FW;oy=o.y-OWL_FH}
   if(shown("ravens"))s.ravens.forEach(r=>{
     stepRaven(r,s);if(r.state==="gone")return;
-    const f=r.state==="roost"?CRITTERS.ravenSleep:r.state==="perch"?CRITTERS.ravenPerch:r.flap>0?((s.t>>1)%2?CRITTERS.ravenUp:CRITTERS.ravenDown):CRITTERS.ravenGlide;
-    (r.state==="perch"||r.state==="roost")?sprtBob(a,f,r.x,r.y,3,bob,r.face<0):sprt(a,f,r.x,r.y,r.face<0);
+    const f=r.state==="roost"?CRITTERS.ravenSleep:r.state==="perch"?CRITTERS.ravenPerch:r.flap>0?(Math.floor(s.t/3)%2?CRITTERS.ravenUp:CRITTERS.ravenDown):CRITTERS.ravenGlide;
+    (r.state==="perch"||r.state==="roost")?sprtBob(a,f,r.x,r.y,5,bob,r.face<0,RAVENPAL):sprt(a,f,r.x,r.y,r.face<0,RAVENPAL);
   });
   if(shown("bats"))s.bats.forEach(b=>{stepBat(b,s);sprt(a,CRITTERS.bat[b.state==="feed"?s.t%2:(s.t>>1)%2],b.x,b.y)});
   if(N)tint(A,"rgba(16,22,58,.5)");
@@ -1549,12 +1656,12 @@ const radioName=()=>String(SET.radio_title||"").trim()||"Xerophyte FM";
    Spotify's public oEmbed and the artist from an iTunes search matched on title and length */
 // the skin's maker stamp: the radio name with its last word picked out, e.g. CHOLLA HUGGER RADIO
 const ampBrand=t=>{const w=String(t).trim().split(/\s+/);const last=w.length>1?w.pop():"";return esc(w.join(" "))+(last?` <b>${esc(last)}</b>`:"")};
-const NOW={uri:null,title:"",artist:"",started:false};
+const NOW={uri:null,title:"",artist:"",started:false,art:""};
 function lookupTrack(uri,dur){
   const m=String(uri||"").match(/^spotify:(track|episode):([A-Za-z0-9]+)$/);if(!m||uri===NOW.uri)return;
   NOW.uri=uri;NOW.title=NOW.artist="";ampText();
   fetch(`https://open.spotify.com/oembed?url=https://open.spotify.com/${m[1]}/${m[2]}`).then(r=>r.ok?r.json():null).then(j=>{
-    if(!j||NOW.uri!==uri)return;NOW.title=String(j.title||"").trim();ampText();
+    if(!j||NOW.uri!==uri)return;NOW.title=String(j.title||"").trim();NOW.art=j.thumbnail_url||"";loadArt(NOW.art);ampText();
     if(NOW.title&&m[1]==="track")findArtist(NOW.title,dur).then(a=>{if(NOW.uri===uri&&a){NOW.artist=a;ampText()}});
   }).catch(()=>{});
 }
@@ -1600,16 +1707,16 @@ function renderRadio(body,status){
     </div>
     <div class="seek" id="ampSeek" role="slider" aria-label="Song position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"><i id="ampBar"></i></div>
     <div class="amp-btns">
-      <button id="ampPrev" aria-label="Back to start" title="Back to start">⏮</button><button id="ampPlay" aria-label="Play" title="Play">▶</button><button id="ampPause" aria-label="Pause" title="Pause">❚❚</button><button id="ampStop" aria-label="Stop" title="Stop">■</button>
+      <button id="ampPrev" aria-label="Back to start" title="Back to start">⏮</button><button id="ampPlay" aria-label="Play" title="Play">▶</button><button id="ampPause" aria-label="Pause" title="Pause">❚❚</button><button id="ampStop" aria-label="Stop" title="Stop">■</button><button id="ampNext" aria-label="Next song" title="Next song">⏭</button>
       ${src?`<a class="amp-eject" href="https://open.spotify.com/${src.type}/${src.id}" target="_blank" rel="noopener" title="Open in Spotify" aria-label="Open in Spotify">⏏</a>`:""}
       <span class="amp-brand">${ampBrand(title)}</span>
     </div>
     <div class="deck">${src?`<div id="spotHost" class="tape-empty">Loading the tape…</div>`:`<div class="tape-empty">Paste a public Spotify playlist link into the <b>spotify_url</b> row of your sheet's Settings tab, then refresh.</div>`}</div>
   </div>`;
   if(status)status.innerHTML=`<span>${src?esc(src.type):"empty"}</span><span>${src?"Spotify":"—"}</span>`;
-  ["ampPrev","ampPlay","ampPause","ampStop"].forEach(id=>document.getElementById(id).disabled=!src);
+  ["ampPrev","ampPlay","ampPause","ampStop","ampNext"].forEach(id=>document.getElementById(id).disabled=!src);
   const C=()=>SPOT.ctl;
-  ["Prev","Play","Pause","Stop"].forEach(k=>document.getElementById("amp"+k).onclick=AMP[k.toLowerCase()]);
+  ["Prev","Play","Pause","Stop","Next"].forEach(k=>document.getElementById("amp"+k).onclick=AMP[k.toLowerCase()]);
   const seekTo=f=>{if(C()&&SPOT.state.dur)C().seek(Math.floor(f*SPOT.state.dur/1000))};
   const sk=document.getElementById("ampSeek");
   sk.onclick=e=>{const r=sk.getBoundingClientRect();seekTo((e.clientX-r.left)/r.width)};
@@ -1654,11 +1761,61 @@ function kickPlay(){
     try{SPOT.state.pos>0&&!SPOT.stopped?C.resume():C.play()}catch(e){}};
   go();SPOT.kick=setInterval(go,700);
 }
+/* ---------- the turntable: appears under the radio while music plays; the record spins with the album art on its label ---------- */
+const DECK={art:null,artSrc:"",raf:0,last:0,th:0};
+function loadArt(src){
+  if(!src||src===DECK.artSrc)return;DECK.artSrc=src;DECK.art=null;
+  const im=new Image();im.onload=()=>{if(DECK.artSrc!==src)return;const c=document.createElement("canvas");c.width=c.height=17;
+    const x=c.getContext("2d");x.imageSmoothingEnabled=true;x.drawImage(im,0,0,17,17);DECK.art=c};im.src=src;
+}
+function deckPlaying(){const st=SPOT.state;return !!SPOT.ctl&&!st.paused&&!SPOT.stopped&&!st.buffering}
+function spinDeck(){
+  const el=document.getElementById("turntable");if(!el)return;
+  const on=deckPlaying();el.hidden=!on;
+  if(on&&!DECK.raf){const loop=t=>{DECK.raf=requestAnimationFrame(loop);if(t-DECK.last<70)return;
+      const dt=DECK.last?Math.min(200,t-DECK.last):0;DECK.last=t;if(!document.body.classList.contains("still"))DECK.th+=dt/1000*Math.PI*2*.555;drawDeck()};
+    DECK.raf=requestAnimationFrame(loop)}
+  if(!on&&DECK.raf){cancelAnimationFrame(DECK.raf);DECK.raf=0;DECK.last=0}
+  if(on)drawDeck();
+}
+function drawDeck(){
+  const cv=document.querySelector("#turntable canvas");if(!cv)return;const c=cv.getContext("2d"),W=64,H=56;c.imageSmoothingEnabled=false;
+  const P=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)};
+  c.clearRect(0,0,W,H);
+  // plinth: chunky orange box with a dark outline, light top edge and shadowed base
+  c.fillStyle="#2a1814";c.fillRect(1,1,W-2,H-2);c.fillStyle="#c75a30";c.fillRect(2,2,W-4,H-4);
+  c.fillStyle="#e07a44";c.fillRect(2,2,W-4,1);c.fillRect(2,2,1,H-4);c.fillStyle="#9a3e22";c.fillRect(2,H-3,W-4,1);c.fillRect(W-3,2,1,H-4);
+  c.fillStyle="#b04c28";c.fillRect(3,H-14,W-6,2);
+  // the record: dark grooves, with two pale glare wedges that sweep round as it turns
+  const cx=26,cy=26,R=22,th=DECK.th;
+  for(let y=-R-1;y<=R+1;y++)for(let x=-R-1;x<=R+1;x++){const d=Math.hypot(x,y);if(d>R+.5)continue;
+    if(d>R-.6){P(cx+x,cy+y,"#121218");continue}
+    if(d<9)continue;
+    let a=Math.atan2(y,x)-th;a=((a%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+    const inGlare=(a<.55||(a>Math.PI&&a<Math.PI+.55)),ring=Math.round(d)%3===0;
+    P(cx+x,cy+y,inGlare?(ring?"#5c5c66":d>15?"#9a9aa4":"#7c7c86"):(ring?"#24242c":"#17171d"))}
+  // label: the album art, turning with the record (a warm orange label until the art arrives)
+  const L=document.createElement("canvas");L.width=L.height=17;const l=L.getContext("2d");l.imageSmoothingEnabled=false;
+  l.save();l.translate(8.5,8.5);l.rotate(th);
+  if(DECK.art)l.drawImage(DECK.art,-8.5,-8.5);else{l.fillStyle="#e8a050";l.fillRect(-9,-9,18,18);l.fillStyle="#f4c27a";l.fillRect(-9,-9,18,4)}
+  l.restore();l.globalCompositeOperation="destination-in";l.beginPath();l.arc(8.5,8.5,8.4,0,Math.PI*2);l.fill();
+  c.drawImage(L,cx-8,cy-8);
+  P(cx,cy,"#d8d8e0");P(cx+1,cy,"#9a9aa4");
+  // tonearm resting on the outer grooves
+  const px=56,py=7,sx=40,sy=30;c.fillStyle="#2a1814";c.fillRect(px-3,py-3,7,7);c.fillStyle="#b8b8c4";c.fillRect(px-2,py-2,5,5);c.fillStyle="#e4e4ec";c.fillRect(px-1,py-2,2,1);
+  const n=Math.ceil(Math.hypot(sx-px,sy-py));for(let i=0;i<=n;i++){const t=i/n,x=Math.round(px+(sx-px)*t),y=Math.round(py+(sy-py)*t);P(x,y,"#d4d4dc");P(x+1,y,"#7c7c88")}
+  c.fillStyle="#d4d4dc";c.fillRect(sx-2,sy,4,3);c.fillStyle="#e8803a";c.fillRect(sx-1,sy+1,2,1);
+  // two knobs and a pitch slider
+  [[7,H-8],[13,H-8]].forEach(([x,y])=>{c.fillStyle="#2a1814";c.fillRect(x-2,y-2,5,5);c.fillStyle="#c8c8d2";c.fillRect(x-1,y-1,3,3);P(x-1,y-1,"#f0f0f6")});
+  c.fillStyle="#2a1814";c.fillRect(W-19,H-8,15,4);c.fillStyle="#9a9aa4";c.fillRect(W-18,H-7,6,2);c.fillStyle="#e8803a";c.fillRect(W-11,H-7,6,2);
+}
 const AMP={
   play(){const C=SPOT.ctl;if(!C)return;SPOT.state.pos>0?C.resume():C.play()},
   pause(){SPOT.ctl&&SPOT.ctl.pause()},
   stop(){const C=SPOT.ctl;if(!C)return;C.pause();C.seek(0);SPOT.state.pos=0;SPOT.stopped=true;ampUpdate()},
-  prev(){SPOT.ctl&&SPOT.ctl.seek(0)}
+  prev(){SPOT.ctl&&SPOT.ctl.seek(0)},
+  // Spotify's embed has no "next track" call, so jump to the last moment of the song and let the playlist roll on
+  next(){const C=SPOT.ctl,st=SPOT.state;if(!C||!st.dur)return;C.seek(Math.max(0,st.dur/1000-.4));if(st.paused)setTimeout(()=>{try{C.resume()}catch(e){}},250)}
 };
 function updateMini(){
   const m=document.getElementById("miniamp"),W=WINS.radio;if(!m)return;
@@ -1668,7 +1825,7 @@ function updateMini(){
   document.getElementById("miniTime").textContent=`${st} ${fmtT(s.pos)}`;
   ampText();
 }
-function ampUpdate(){updateMini();ampText();
+function ampUpdate(){updateMini();ampText();spinDeck();
   const s=SPOT.state,$=id=>document.getElementById(id);if(!$("ampTime"))return;
   $("ampTime").textContent=fmtT(s.pos);
   $("ampState").textContent=s.buffering?"LOADING":!s.paused?"PLAY":SPOT.stopped||!s.pos?"STOP":"PAUSE";
@@ -1877,6 +2034,8 @@ function build(){
     const name=lab||label;if(WINS[id]&&lab){WINS[id].title=lab;WINS[id].el.querySelector(".bar b").textContent=lab;WINS[id].el.setAttribute("aria-label",lab)}col.append(iconBtn(id,name,icon,badge))};
   place(L,"cacti","My Cacti","saguaro",thirsty||"");place(L,"log","Weather Log","chart");
   place(mob?L:R,"today","Weather Now","sun");place(mob?L:R,"map","Desert Map","map");place(mob?L:R,"radio",radioName(),"radio");
+  if(!HIDDEN.has("radio")){const tt=document.createElement("div");tt.className="turntable";tt.id="turntable";tt.hidden=true;tt.title="Now spinning";
+    tt.innerHTML='<canvas width="64" height="56" aria-hidden="true"></canvas>';tt.onclick=()=>openWin("radio");(mob?L:R).append(tt);spinDeck()}
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
     const id="p"+i;defineWindow(id,{title:p.title,icon:(p.icon||"folder").toLowerCase(),w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
     place((p.side||"").toLowerCase()==="right"&&!mob?R:L,id,p.title,(p.icon||"folder").toLowerCase());
