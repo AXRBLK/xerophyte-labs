@@ -359,7 +359,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
     <button type="button" onclick="AMP.prev()" aria-label="Back to start" title="Back to start">⏮</button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play">▶</button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause">❚❚</button><button type="button" onclick="AMP.stop()" aria-label="Stop" title="Stop">■</button>
     <button type="button" class="mini-lcd" onclick="openWin('radio')" title="Show the player"><span id="miniTime">■ 00:00</span><span class="mini-title" id="miniTitle"></span></button>
   </div>
-  <div class="tray"><button class="modebtn" id="modebtn" type="button">☀</button><button class="modebtn" id="discobtn" type="button" aria-pressed="false"><span class="ball" aria-hidden="true">🪩</span></button><span id="traytemp">--°</span><span id="clock"></span></div>
+  <div class="tray"><button class="modebtn" id="modebtn" type="button">☀</button><button class="modebtn" id="discobtn" type="button" aria-pressed="false" title="Enable Disco-mode" aria-label="Enable Disco-mode"><span class="ball" aria-hidden="true">🪩</span></button><span id="clock"></span></div>
 </footer>
 
 <script>
@@ -1009,6 +1009,8 @@ function pulseSky(c,s){
   gr.addColorStop(0,`rgba(${r},${g},${b},${a.toFixed(3)})`);gr.addColorStop(1,`rgba(${r},${g},${b},${(a*.35).toFixed(3)})`);
   c.fillStyle=gr;c.fillRect(0,0,s.w,s.H0);
 }
+// horned lizard split into body and head (columns 6+, horns included) so the head can nod
+const TOAD_COLS=6,TOAD_BODY=CRITTERS.toad.map(r=>r.slice(0,TOAD_COLS)+".".repeat(r.length-TOAD_COLS)),TOAD_HEAD=CRITTERS.toad.map((r,i)=>i>=4?".".repeat(r.length):".".repeat(TOAD_COLS)+r.slice(TOAD_COLS));
 function sprtBob(c,rows,x,y,split,dy,flip,pal){
   if(!dy)return sprt(c,rows,x,y,flip,pal);
   sprt(c,rows.slice(split),x,y+split,flip,pal);sprt(c,rows.slice(0,split),x,y+dy,flip,pal);
@@ -1026,7 +1028,7 @@ function discoMusic(){
 function setDisco(on,user){
   if(on&&user)discoMusic();
   SCENE.disco=on;document.body.classList.toggle("disco",on);
-  const b=document.getElementById("discobtn");if(b){b.setAttribute("aria-pressed",on);b.title=on?"Northern lights on · click to turn off":"Disco sky: northern lights that pulse with the radio";b.setAttribute("aria-label",b.title)}
+  const b=document.getElementById("discobtn");if(b){b.setAttribute("aria-pressed",on);b.title=on?"Disable Disco-mode":"Enable Disco-mode";b.setAttribute("aria-label",b.title)}
   clearInterval(SCENE.timer);if(SCENE.motion&&SCENE.ctx)SCENE.timer=setInterval(drawScene,on?90:125);else drawScene();
 }
 function drawScene(){
@@ -1059,7 +1061,9 @@ function drawScene(){
 
   // ground animals sit between the sand and the plants, so they always pass behind cacti
   const G=s.groundA,g=G.getContext("2d");g.clearRect(0,0,s.w,s.h);
-  if(!N&&shown("horned_lizards"))s.toads.forEach(t=>{stepToad(t,s.w);g.fillStyle="#6e5e4c";g.fillRect(Math.round(t.x)+1,t.y+5,10,1);sprt(g,CRITTERS.toad,t.x,t.y+t.bob,t.dir<0)});
+  if(!N&&shown("horned_lizards"))s.toads.forEach(t=>{stepToad(t,s.w);g.fillStyle="#6e5e4c";g.fillRect(Math.round(t.x)+1,t.y+5,10,1);
+    // disco: the head (front columns) nods on the beat while the body stays put
+    if(bob)sprt(g,TOAD_BODY,t.x,t.y+t.bob,t.dir<0),sprt(g,TOAD_HEAD,t.x,t.y+t.bob+1,t.dir<0);else sprt(g,CRITTERS.toad,t.x,t.y+t.bob,t.dir<0)});
   const scorpOn=shown("scorpions");if(!scorpOn)s.scorps.forEach(p=>p.alive=false);
   if(scorpOn)s.scorps.forEach(p=>stepScorp(p,s));
   if(!N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)sprt(g,CRITTERS.scorp[p.state==="walk"?(s.t>>1)%2:0],p.x,p.y-4,p.dir<0)});
@@ -1837,8 +1841,7 @@ function neonTagline(){
   t.classList.remove("neon");void t.offsetWidth;t.classList.add("neon");
 }
 function updateTray(){
-  let t="--";if(LIVE&&LIVE.current)t=Math.round(LIVE.current.temperature_2m);else{const r=weatherRows();if(r.length)t=Math.round(r[r.length-1].high)}
-  document.getElementById("traytemp").textContent=t+"°";
+
   const ll=document.getElementById("liveLine");
   if(LIVE&&LIVE.current){const c=LIVE.current,F=(SET.units||"F").toUpperCase().startsWith("F");
     ll.innerHTML=`<img class="wx" src="${wxIcon(c.weather_code,SCENE.night)}" alt="${esc(WMO[c.weather_code]??"")}" title="${esc(SET.location_name||"")}"><span>${Math.round(c.temperature_2m)}° · ${esc(WMO[c.weather_code]??"")} · wind ${Math.round(c.wind_speed_10m)} ${F?"mph":"km/h"}</span>`;ll.hidden=false}
