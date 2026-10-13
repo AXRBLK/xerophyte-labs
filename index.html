@@ -86,6 +86,17 @@ body.still .hero h1 .cursor{animation:none}
 .bar button:active{border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}
 .menu{display:flex;gap:14px;padding:3px 8px;font-size:13px;border-bottom:1px solid var(--chrome-lo)}
 .menu u{text-decoration:none;border-bottom:1px solid currentColor}
+.cform{display:grid;gap:10px;margin-top:6px}
+.cform label{display:grid;gap:3px;font:13px var(--font-ui);color:var(--ink)}.cform label b{color:#a83a2a;font-weight:400}
+.cform input,.cform textarea{width:100%;box-sizing:border-box;padding:6px 7px;font:14px var(--font-data);color:var(--ink);background:#fffdf8;border:2px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo);border-radius:0}
+.cform textarea{resize:vertical;min-height:96px}
+.cform input:focus,.cform textarea:focus{outline:2px dotted var(--title-a);outline-offset:1px}
+.cform .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.cform .crow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cform button{padding:6px 16px;font:14px var(--font-ui);color:var(--ink);background:var(--chrome);border:2px solid;border-color:var(--chrome-hi) var(--chrome-lo) var(--chrome-lo) var(--chrome-hi);cursor:pointer}
+.cform button:active{border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}.cform button:disabled{opacity:.6;cursor:default}
+.cform .cmsg{font:13px var(--font-ui)}.cform .cmsg.ok{color:#2f7a3a}.cform .cmsg.err{color:#a83a2a}
+body.night .cform input,body.night .cform textarea{background:#14162a}body.night .cform .cmsg.ok{color:#6ade74}body.night .cform .cmsg.err{color:#ff8a76}
 .body{margin:6px;flex:1;overflow:auto;background:var(--paper);border:2px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo);padding:14px;font-family:var(--font-data);font-size:13px;line-height:1.55;min-height:0}
 .status{display:flex;gap:4px;padding:0 6px 5px;font-size:12px}
 .status span{flex:1;padding:1px 6px;border:1px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1764,9 +1775,45 @@ function renderLog(body,status){
 }
 
 function renderPage(p){return body=>{
+  const isContact=/^contact/i.test(String(p.title||"").trim());
+  if(isContact&&body.dataset.built)return;          // keep a half-written message when the window is reopened
   body.innerHTML=String(p.body||"").split(/\n\s*\n/).map(par=>`<p>${linkify(par).replace(/\n/g,"<br>")}</p>`).join("")
     +(p.link?`<p><a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.link)}</a></p>`:"");
+  if(isContact){body.dataset.built="1";contactForm(body)}
 }}
+/* ---------- contact form: sends to Settings › contact_email through FormSubmit (no server needed) ---------- */
+function contactForm(body){
+  const to=String(SET.contact_email||"").trim();
+  const f=document.createElement("form");f.className="cform";f.noValidate=true;
+  f.innerHTML=`<label><span>Email <b>*</b></span><input name="email" type="email" autocomplete="email" required placeholder="you@example.com"></label>
+    <label><span>Phone</span><input name="phone" type="tel" autocomplete="tel" placeholder="optional"></label>
+    <label><span>Subject</span><input name="subject" type="text" maxlength="120" placeholder="Cuttings, pups, rainfall…"></label>
+    <label><span>Message <b>*</b></span><textarea name="message" rows="6" required></textarea></label>
+    <input name="_honey" type="text" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+    <div class="crow"><button type="submit">Send ✉</button><span class="cmsg" role="status"></span></div>`;
+  body.appendChild(f);
+  const msg=f.querySelector(".cmsg"),btn=f.querySelector("button"),say=(t,cls)=>{msg.textContent=t;msg.className="cmsg "+(cls||"")};
+  if(!to){say("Not set up yet: add a contact_email row to the Settings tab.","err");btn.disabled=true;return}
+  f.onsubmit=async e=>{
+    e.preventDefault();const d=Object.fromEntries(new FormData(f));
+    if(d._honey)return;                                                   // a bot filled the hidden field
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(d.email||"")){say("Please enter a valid email.","err");f.email.focus();return}
+    if(!String(d.message||"").trim()){say("Please write a message.","err");f.message.focus();return}
+    btn.disabled=true;say("Sending…");
+    try{
+      const r=await fetch("https://formsubmit.co/ajax/"+to.replace(/[^\w@.+-]/g,""),{method:"POST",headers:{"Content-Type":"application/json",Accept:"application/json"},
+        body:JSON.stringify({email:d.email,phone:d.phone||"—",subject:d.subject||"—",message:d.message,
+          _subject:"Xerophyte Labs: "+(d.subject||"new message"),_replyto:d.email,_template:"table",_captcha:"false"})});
+      const j=await r.json().catch(()=>({}));
+      if(r.ok&&String(j.success)!=="false"){f.reset();say("Sent! Thanks, I'll write back soon.","ok")}
+      else throw new Error(j.message||r.status);
+    }catch(err){
+      // fall back to the visitor's own mail app with everything filled in
+      const q=`mailto:${to}?subject=${encodeURIComponent("Xerophyte Labs: "+(d.subject||"hello"))}&body=${encodeURIComponent(d.message+"\n\n"+d.email+(d.phone?"\n"+d.phone:""))}`;
+      msg.innerHTML=`Couldn't send from here. <a href="${q}">Open it in your mail app</a> instead.`;msg.className="cmsg err";
+    }finally{btn.disabled=false}
+  };
+}
 
 /* ---------- build desktop ---------- */
 function iconBtn(id,label,icon,badge){
