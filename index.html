@@ -257,8 +257,8 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 .miniamp{display:flex;align-items:center;gap:2px;padding:2px;background:#24243a;border:1px solid #6a6a86;flex-shrink:0}
 .miniamp button{height:22px;min-width:24px;padding:0 4px;font:12px/1 var(--font-ui);color:#202030;background:linear-gradient(180deg,#d8d8e4,#9c9cb0);border:1px solid;border-color:#f0f0f8 #50506a #50506a #f0f0f8;cursor:pointer}
 .miniamp button:active{border-color:#50506a #f0f0f8 #f0f0f8 #50506a}
-.miniamp .mini-lcd{display:flex;gap:8px;align-items:center;max-width:220px;margin-left:2px;padding:0 8px;background:#000;color:#00e000;border-color:#14141e #6a6a86 #6a6a86 #14141e;font:11px var(--font-display);-webkit-font-smoothing:none;text-shadow:0 0 4px rgba(0,224,0,.45);overflow:hidden;white-space:nowrap}
-.miniamp .mini-title{overflow:hidden;text-overflow:ellipsis;color:#00b000}
+.miniamp .mini-lcd{display:flex;gap:8px;align-items:center;max-width:300px;margin-left:2px;padding:0 8px;background:#000;color:#00e000;border-color:#14141e #6a6a86 #6a6a86 #14141e;font:11px var(--font-display);-webkit-font-smoothing:none;text-shadow:0 0 4px rgba(0,224,0,.45);overflow:hidden;white-space:nowrap}
+.miniamp .mini-title{overflow:hidden;max-width:220px;color:#00b000}.miniamp .mini-title span{display:inline-block;animation:scroll 16s linear infinite}
 .miniamp button:focus-visible{outline:1px dotted #e8d898;outline-offset:-3px}
 @media (max-width:700px){.miniamp .mini-title{display:none}.miniamp button{min-width:22px}}
 
@@ -314,7 +314,7 @@ body.night .chip.thirsty{border-color:#e08aa2}
   .tray .src{display:none}
   .days{grid-template-columns:repeat(3,1fr)}
 }
-body.still .marquee .track,body.still .lcd-scroll span{animation:none}
+body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title span{animation:none}
 </style>
 </head>
 <body>
@@ -337,7 +337,7 @@ body.still .marquee .track,body.still .lcd-scroll span{animation:none}
 <footer class="taskbar">
   <button class="start" id="startbtn" aria-expanded="false" aria-controls="startmenu">Start ☀</button>
   <div class="tasks" id="tasks"></div>
-  <div class="miniamp" id="miniamp" role="group" aria-label="Xerophyte FM" hidden>
+  <div class="miniamp" id="miniamp" role="group" aria-label="Radio player" hidden>
     <button type="button" onclick="AMP.prev()" aria-label="Back to start" title="Back to start">⏮</button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play">▶</button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause">❚❚</button><button type="button" onclick="AMP.stop()" aria-label="Stop" title="Stop">■</button>
     <button type="button" class="mini-lcd" onclick="openWin('radio')" title="Show the player"><span id="miniTime">■ 00:00</span><span class="mini-title" id="miniTitle"></span></button>
   </div>
@@ -995,7 +995,7 @@ function discoMusic(){
 function setDisco(on,user){
   if(on&&user)discoMusic();
   SCENE.disco=on;document.body.classList.toggle("disco",on);
-  const b=document.getElementById("discobtn");if(b){b.setAttribute("aria-pressed",on);b.title=on?"Northern lights on · click to turn off":"Disco sky: northern lights that pulse with Xerophyte FM";b.setAttribute("aria-label",b.title)}
+  const b=document.getElementById("discobtn");if(b){b.setAttribute("aria-pressed",on);b.title=on?"Northern lights on · click to turn off":"Disco sky: northern lights that pulse with the radio";b.setAttribute("aria-label",b.title)}
   clearInterval(SCENE.timer);if(SCENE.motion&&SCENE.ctx)SCENE.timer=setInterval(drawScene,on?90:125);else drawScene();
 }
 function drawScene(){
@@ -1412,6 +1412,41 @@ function renderTasks(active){
 }
 
 /* ---------- Xerophyte FM: retro skin around a Spotify embed ---------- */
+// the player's name everywhere (icon, window, Start menu, LCD) comes from Settings › radio_title
+const radioName=()=>String(SET.radio_title||"").trim()||"Xerophyte FM";
+/* now playing: Spotify's embed only reports the track's URI, so the song title comes from
+   Spotify's public oEmbed and the artist from an iTunes search matched on title and length */
+const NOW={uri:null,title:"",artist:"",started:false};
+function lookupTrack(uri,dur){
+  const m=String(uri||"").match(/^spotify:(track|episode):([A-Za-z0-9]+)$/);if(!m||uri===NOW.uri)return;
+  NOW.uri=uri;NOW.title=NOW.artist="";ampText();
+  fetch(`https://open.spotify.com/oembed?url=https://open.spotify.com/${m[1]}/${m[2]}`).then(r=>r.ok?r.json():null).then(j=>{
+    if(!j||NOW.uri!==uri)return;NOW.title=String(j.title||"").trim();ampText();
+    if(NOW.title&&m[1]==="track")findArtist(NOW.title,dur).then(a=>{if(NOW.uri===uri&&a){NOW.artist=a;ampText()}});
+  }).catch(()=>{});
+}
+function findArtist(title,dur){
+  return new Promise(res=>{
+    const cb="itcb"+Date.now()+Math.floor(Math.random()*1e4),sc=document.createElement("script");
+    const done=a=>{delete window[cb];sc.remove();res(a)};
+    const norm=t=>String(t).toLowerCase().replace(/\s*[-(\[].*(remaster|version|edit|mix|live|feat|mono|stereo).*$/,"").replace(/[^a-z0-9]+/g," ").trim();
+    window[cb]=d=>{const want=norm(title),hits=(d&&d.results||[]).filter(r=>norm(r.trackName)===want);
+      // full-length plays must match the track length; 30-second previews fall back to the top match
+      const full=dur>35000,pick=full?hits.find(r=>Math.abs((r.trackTimeMillis||0)-dur)<3000):hits[0];
+      done(pick?pick.artistName:"")};
+    sc.src=`https://itunes.apple.com/search?term=${encodeURIComponent(title)}&entity=song&limit=50&callback=${cb}`;
+    sc.onerror=()=>done("");document.head.appendChild(sc);setTimeout(()=>window[cb]&&done(""),6000);
+  });
+}
+function nowLine(){if(!NOW.started||!NOW.title)return "";return (NOW.artist?NOW.artist+" - ":"")+NOW.title}
+function setScroll(el,text){if(!el)return;
+  if(el.dataset.t!==text){el.dataset.t=text;el.innerHTML=`<span>${esc(text+text)}</span>`}}
+function ampText(){
+  const name=radioName(),line=nowLine();
+  const big=document.querySelector("#w-radio .lcd-scroll");
+  if(big&&SPOT.src){const unit=line?`${line} *** ${name} *** `:`${name} *** ${!SPOT.state.paused?"On air":SPOT.stopped||!SPOT.state.pos?"Press play":"Paused"} *** `;setScroll(big,unit)}
+  const mini=document.getElementById("miniTitle");if(mini)setScroll(mini,(line?`${line} · ${name}`:name)+" · ");
+}
 const SPOT={api:null,ctl:null,loading:false,src:null,viz:null,state:{paused:true,pos:0,dur:0}};
 function spotifySrc(v){
   v=String(v||"").trim();
@@ -1422,7 +1457,7 @@ const fmtT=ms=>{const s=Math.max(0,Math.floor((ms||0)/1000));return String(Math.
 function renderRadio(body,status){
   if(body.dataset.built)return;body.dataset.built="1";body.classList.add("amp-body");
   const src=SPOT.src=spotifySrc(SET.spotify_url||SET.spotify_playlist);
-  const title=SET.radio_title||"Xerophyte FM";
+  const title=radioName();
   const msg=src?"Press play":"No tape loaded. Add a Spotify link to the spotify_url row of the Settings tab";
   body.innerHTML=`<div class="amp">
     <div class="lcd">
@@ -1463,7 +1498,8 @@ function loadSpotify(src){
       if(SPOT.autoplay){const go=()=>{if(SPOT.autoplay){SPOT.autoplay=false;try{ctl.play()}catch(e){}}};ctl.addListener("ready",go);setTimeout(go,1500)}
       ctl.addListener("playback_update",e=>{const d=e.data||{};
         SPOT.state={paused:!!d.isPaused,pos:d.position||0,dur:d.duration||0,buffering:!!d.isBuffering};SPOT.at=performance.now();
-        if(!d.isPaused)SPOT.stopped=false;ampUpdate()});
+        if(!d.isPaused){SPOT.stopped=false;NOW.started=true}
+        if(d.playingURI)lookupTrack(d.playingURI,d.duration||0);ampUpdate()});
     });
   };
   if(SPOT.api){mount();return}
@@ -1483,9 +1519,9 @@ function updateMini(){
   if(m.hidden)return;
   const s=SPOT.state,st=s.buffering?"…":!s.paused?"▶":SPOT.stopped||!s.pos?"■":"❚❚";
   document.getElementById("miniTime").textContent=`${st} ${fmtT(s.pos)}`;
-  document.getElementById("miniTitle").textContent=SET.radio_title||"Xerophyte FM";
+  ampText();
 }
-function ampUpdate(){updateMini();
+function ampUpdate(){updateMini();ampText();
   const s=SPOT.state,$=id=>document.getElementById(id);if(!$("ampTime"))return;
   $("ampTime").textContent=fmtT(s.pos);
   $("ampState").textContent=s.buffering?"LOADING":!s.paused?"PLAY":SPOT.stopped||!s.pos?"STOP":"PAUSE";
@@ -1645,7 +1681,7 @@ function build(){
   const mob=innerWidth<=700,cx=w=>Math.max(130,(innerWidth-w)/2);
   defineWindow("cacti",{title:"My Cacti",icon:"saguaro",w:640,x:mob?16:120,y:84,render:renderCacti,menu:["File","View","Water"],status:true});
   defineWindow("map",{title:"Desert Map",icon:"map",w:Math.min(860,innerWidth-40),x:mob?16:Math.max(110,(innerWidth-860)/2),y:70,render:renderMap,status:true});
-  defineWindow("radio",{title:"Xerophyte AMP",icon:"radio",w:380,x:innerWidth-450,y:300,render:renderRadio,status:true});
+  defineWindow("radio",{title:radioName(),icon:"radio",w:380,x:innerWidth-450,y:300,render:renderRadio,status:true});
   defineWindow("today",{title:"Weather Now",icon:"sun",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
   defineWindow("log",{title:"Weather Log",icon:"chart",w:640,x:cx(640),y:110,render:renderLog,menu:["File","Edit","Chart"],status:true});
   const thirsty=(DATA.cacti||[]).filter(c=>c.name&&cactusState(c).status==="thirsty").length;
@@ -1653,9 +1689,9 @@ function build(){
   // Desktop tab: show = no hides an icon (and its Start menu entry); label renames it
   const HIDDEN=new Set();
   const place=(col,id,label,icon,badge)=>{const r=deskRow(id,label);if(r&&isNo(r.show)){HIDDEN.add(id);return}
-    const name=r&&r.label?r.label:label;if(WINS[id]&&r&&r.label)WINS[id].title=r.label;col.append(iconBtn(id,name,icon,badge))};
+    const name=r&&r.label?r.label:label;if(WINS[id]&&r&&r.label){WINS[id].title=r.label;WINS[id].el.querySelector(".bar b").textContent=r.label;WINS[id].el.setAttribute("aria-label",r.label)}col.append(iconBtn(id,name,icon,badge))};
   place(L,"cacti","My Cacti","saguaro",thirsty||"");place(L,"log","Weather Log","chart");
-  place(mob?L:R,"today","Weather Now","sun");place(mob?L:R,"map","Desert Map","map");place(mob?L:R,"radio","Xerophyte FM","radio");
+  place(mob?L:R,"today","Weather Now","sun");place(mob?L:R,"map","Desert Map","map");place(mob?L:R,"radio",radioName(),"radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
     const id="p"+i;defineWindow(id,{title:p.title,icon:(p.icon||"folder").toLowerCase(),w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
     place((p.side||"").toLowerCase()==="right"&&!mob?R:L,id,p.title,(p.icon||"folder").toLowerCase());
