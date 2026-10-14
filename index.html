@@ -126,6 +126,11 @@ body.still .hero h1 .cursor{animation:none}
 @keyframes stampNudge{0%,100%{transform:rotate(2deg)}25%{transform:rotate(-6deg) scale(1.06)}75%{transform:rotate(7deg) scale(1.06)}}
 .postcard .cmsg{font:13px var(--font-ui);color:#4a3a2c}
 .postcard .cmsg.ok{color:#2f7a3a}.postcard .cmsg.err{color:#a83a2a}
+/* postcard type: the same thin, letter-spaced face as the taskbar's MODE label */
+.postcard .pc-caption,.postcard .pc-line,.postcard .pc-to,.postcard .cmsg,.postcard .pc-line input,.postcard .pc-msg textarea{font-family:var(--font-data);font-weight:300}
+.postcard .pc-caption,.postcard .pc-line>span,.postcard .pc-to{text-transform:uppercase;letter-spacing:.14em;font-size:11px}
+.postcard .pc-to{font-size:12px;line-height:1.7}.postcard .pc-to b{font-family:var(--font-data);font-weight:400;font-size:11px}
+.postcard .pc-line input{font-size:14px;letter-spacing:.02em}.postcard .pc-msg textarea{font-size:14px;letter-spacing:.02em}
 body.night .cform.postcard input,body.night .cform.postcard textarea{background:transparent}
 body.night .postcard .pc-msg textarea{background:transparent repeating-linear-gradient(180deg,transparent 0 21px,#c9d6e6 21px 22px)}
 body.night .postcard .cmsg.ok{color:#2f7a3a}body.night .postcard .cmsg.err{color:#a83a2a}
