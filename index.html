@@ -962,7 +962,7 @@ function paintSky(){
   }
   // ocotillo in bloom: a fan of long, whippy grey canes, leafed in tiny green, every tip a spike of scarlet flowers
   function ocotillo(x,base,s,far){
-    const mute=c=>far?mixHex(c,"#9a8e7a",.35):c,n=far?7:Math.round(11+rnd()*5),L=Math.round((far?16:32+rnd()*10)*s);
+    const mute=c=>far?mixHex(c,"#9a8e7a",.35):c,n=far?7:Math.round(11+rnd()*5),L=Math.round((far?32:64+rnd()*20)*s);
     for(let k=0;k<n;k++){const a=(k/(n-1)-.5)*(far?.7:.95)+(rnd()-.5)*.12,len=Math.round(L*(.72+rnd()*.32)),bend=(rnd()-.5)*.25;
       for(let t=0;t<len;t++){const f=t/len,ang=a+bend*f*f,X=Math.round(x+Math.sin(ang)*t),Y=Math.round(base-Math.cos(ang)*t);
         if(f<.72){px(X,Y,mute(t%5===0?"#4e4838":"#6e6652"));if(!far&&rnd()<.18)px(X+(rnd()<.5?-1:1),Y,mute("#6a8a44"))}         // cane with little leaves
@@ -1120,7 +1120,7 @@ function paintSky(){
      const flower=(x,y)=>{px(x,y,"#e8a830");px(x-1,y,"#ffd84a");px(x+1,y,"#ffd84a");px(x,y-1,"#ffd84a");px(x-1,y-1,"#fff0a0");px(x+1,y-1,"#fff0a0");px(x-2,y-1,"#ffd84a");px(x+2,y-1,"#ffd84a");px(x,y-2,"#fff0a0")};
      flower(21,8);flower(16,17);flower(28,15);
      for(let x=12;x<34;x++)px(x,H-1,"#8a7458")});
-   mk("oco",40,44,(W,H)=>ocotillo(20,H-1,1.4,false));
+   mk("oco",56,80,(W,H)=>ocotillo(28,H-1,.85,false));
    mk("cre",14,9,(W,H)=>{for(let k=0;k<4;k++)creosote(7+ri(-2,2),H-1-k)});
    [c,bcx,fcx]=sv;perches.length=pl;blooms.length=bl;flowers.length=fl;SCENE.plantArt=P;
    if(typeof BIO_IMG!=="undefined")Object.keys(P).forEach(k=>delete BIO_IMG[k])}
