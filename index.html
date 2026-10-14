@@ -279,6 +279,7 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 #w-radio .amp-eject{margin-left:6px}
 .amp-brand{margin-left:auto;font:400 8px var(--font-display);letter-spacing:.14em;color:#8a8aa8;white-space:nowrap;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;max-width:150px}
 .amp-brand b{color:#e8d898;font-weight:400}
+#w-radio .deck.cropped{border-radius:0 0 12px 12px}
 #w-radio .deck{background:#000;border-color:#14141e #6a6a86 #6a6a86 #14141e}
 #w-radio .tape-empty{background:#101018;color:#a8a8c0}
 /* mini player in the taskbar while the window is minimized */
@@ -510,6 +511,7 @@ folder:["................","..kkkkk.........",".kyyyyyk........","kyyyyyyykkkkkk
 letter:["................","................","................","kkkkkkkkkkkkkkkk","kwkwwwwwwwwwwkwk","kwwkwwwwwwwwkwwk","kwwwkwwwwwwkwwwk","kwwwwkwwwwkwwwwk","kwwwwwkkkkwwwwwk","kwwwwkwwwwkwwwwk","kwwwkwwwwwwkwwwk","kwwkwwwwwwwwkwwk","kkkkkkkkkkkkkkkk","................","................","................"],
 book:["................",".kkkkkkkkkkkk...",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSSwwwk..",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSwwwwk..",".krrkwwwwwwwwk..",".krrkwwwwwwwwk..",".kkkkkkkkkkkkk..","................","................","................"],
 radio:["................","....kkkkkkkk....","....k......k....","kkkkkkkkkkkkkkkk","kssssssssssssssk","ksSSSssyyssSSSsk","kSkkkSsyysSkkkSk","kSkSkSssssSkSkSk","kSkkkSsrbsSkkkSk","ksSSSssssssSSSsk","kssssssssssssssk","kkkkkkkkkkkkkkkk","................","................","................","................"],
+infosign:["................","...kkkkkkkkkk...","..knnnnnnnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnnnnnnnnk..","..knnnwwwnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnwwwwnnnk..","...kkkkkkkkkk...","......knnk......","......knnk......","....kkkkkkkk....","................"],
 tower:["..w....r....w...",".w.w..krk..w.w..","w...w.kSk.w...w.",".......k........","......kSk.......","......kSk.......",".....kSkSk......",".....kSkSk......","....kSkkkSk.....","....kSk.kSk.....","...kSkkkkkSk....","...kSk...kSk....","..kSkkkkkkkSk...","..kSk.....kSk...",".kkkkkkkkkkkkk..","................"],
 trailcam:["................","..kkkkkkkkkkkk..",".kGGnGGGGGGgGGk.",".kGgGGkkkkGGnGk.",".kGGGkbbbbkGGGk.",".kGnkbbwbbbkGgk.",".kGGkbbbbbbkGGk.",".kGGkbbbbbbkGGk.",".kgGGkbbbbkGGnk.",".kGGnGkkkkGGrGk.",".kGGGGGgGGGGGGk.",".kGGkkkkkkkkGGk.",".kGGksssssskGgk.",".kGnGGGGgGGGGGk.","..kkkkkkkkkkkk..","................"],
 map:["................",".kkkkkkkkkkkkkk.",".kbbbkgggkbbbbk.",".kbbgkgggkbbbbk.",".kbggkgyykbbgbk.",".kgggkgyykbgggk.",".kggykyyykggggk.",".kgyykyyrkgggyk.",".kyyykyrykggyyk.",".kyyykyyrkgyyyk.",".kyybkyyykyyybk.",".kybbkyyykyybbk.",".kbbbkyybkybbbk.",".kkkkkkkkkkkkkk.","................","................"],
@@ -1891,6 +1893,15 @@ function renderRadio(body,status){
   drawViz(true);
   if(src)loadSpotify(src);
 }
+// our green buttons do everything Spotify's bottom control bar does, so the embed is trimmed just above that bar;
+// the cover, track list, playlist title and Spotify logo stay in view
+const DECK_BAR=h=>h>=230?58:40;
+function cropDeck(){
+  const deck=document.querySelector("#w-radio .deck"),fr=deck&&deck.querySelector("iframe");if(!fr)return setTimeout(cropDeck,400);
+  const fit=()=>{const h=fr.getBoundingClientRect().height;
+    if(h>=120){deck.style.height=(h-DECK_BAR(h))+"px";deck.style.overflow="hidden";deck.classList.add("cropped")}else{deck.style.height="";deck.classList.remove("cropped")}};
+  fit();if(window.ResizeObserver&&!fr.dataset.watch){fr.dataset.watch=1;new ResizeObserver(fit).observe(fr)}
+}
 function loadSpotify(src){
   const fallback=()=>{
     const host=document.getElementById("spotHost");if(!host||SPOT.ctl)return;
@@ -1900,6 +1911,7 @@ function loadSpotify(src){
   const mount=()=>{
     const host=document.getElementById("spotHost");if(!host)return;
     SPOT.api.createController(host,{uri:src.uri,width:"100%",height:152},ctl=>{
+      cropDeck();
       SPOT.ctl=ctl;
       if(SPOT.autoplay){SPOT.autoplay=false;ctl.addListener("ready",()=>kickPlay());kickPlay()}
       ctl.addListener("playback_update",e=>{const d=e.data||{};
@@ -2314,8 +2326,9 @@ function build(){
   place(L,"cacti","My Cacti","saguaro",thirsty||"");place(L,"log","Weather Log","chart");
   place(L,"today","Weather Now","sun");place(L,"bio","Biodiversity Report","trailcam");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
-    const id="p"+i;defineWindow(id,{title:p.title,icon:/^contact/i.test(String(p.title).trim())?"tower":(p.icon||"folder").toLowerCase(),w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
-    place(L,id,p.title,/^contact/i.test(String(p.title).trim())?"tower":(p.icon||"folder").toLowerCase());
+    const pic=/^contact/i.test(String(p.title).trim())?"tower":/^about/i.test(String(p.title).trim())?"infosign":(p.icon||"folder").toLowerCase();
+    const id="p"+i;defineWindow(id,{title:p.title,icon:pic,w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
+    place(L,id,p.title,pic);
   });
   // icons run alphabetically: down the left column, then down the right (one grid on phones)
   ICONS.sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:"base"}));
