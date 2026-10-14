@@ -2778,7 +2778,10 @@ const AMP={
   play(){const C=SPOT.ctl;if(!C)return;SPOT.state.pos>0?C.resume():C.play()},
   pause(){SPOT.ctl&&SPOT.ctl.pause()},
   stop(){const C=SPOT.ctl;if(!C)return;C.pause();C.seek(0);SPOT.state.pos=0;SPOT.stopped=true;ampUpdate()},
-  prev(){SPOT.ctl&&SPOT.ctl.seek(0)},
+  // back to the start of the song. The embed quietly ignores seek(0), so aim a hair past it, and check it took
+  prev(){const C=SPOT.ctl;if(!C)return;const go=()=>{try{C.seek(.05)}catch(e){}};go();
+    SPOT.state.pos=0;SPOT.at=performance.now();ampUpdate();
+    setTimeout(()=>{if(SPOT.state.pos>2500)go();if(SPOT.state.paused)try{C.resume()}catch(e){}},700)},
   // Spotify's embed has no "next track" call, so jump to the last moment of the song and let the playlist roll on
   next(){const C=SPOT.ctl,st=SPOT.state;if(!C||!st.dur)return;C.seek(Math.max(0,st.dur/1000-.4));if(st.paused)setTimeout(()=>{try{C.resume()}catch(e){}},250)}
 };
