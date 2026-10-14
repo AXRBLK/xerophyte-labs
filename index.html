@@ -955,6 +955,14 @@ function paintSky(){
       fuzz(cx,base-H-3,far?3:5,far?4:10);
     }
   }
+  // ocotillo in bloom: a fan of long, whippy grey canes, leafed in tiny green, every tip a spike of scarlet flowers
+  function ocotillo(x,base,s,far){
+    const mute=c=>far?mixHex(c,"#9a8e7a",.35):c,n=far?7:Math.round(11+rnd()*5),L=Math.round((far?16:32+rnd()*10)*s);
+    for(let k=0;k<n;k++){const a=(k/(n-1)-.5)*(far?.7:.95)+(rnd()-.5)*.12,len=Math.round(L*(.72+rnd()*.32)),bend=(rnd()-.5)*.25;
+      for(let t=0;t<len;t++){const f=t/len,ang=a+bend*f*f,X=Math.round(x+Math.sin(ang)*t),Y=Math.round(base-Math.cos(ang)*t);
+        if(f<.72){px(X,Y,mute(t%5===0?"#4e4838":"#6e6652"));if(!far&&rnd()<.18)px(X+(rnd()<.5?-1:1),Y,mute("#6a8a44"))}         // cane with little leaves
+        else{px(X,Y,mute(f>.9?"#ff7a4a":"#e8402a"));if(rnd()<.55)px(X+(rnd()<.5?-1:1),Y+(rnd()<.5?0:1),mute(rnd()<.5?"#ff5a32":"#c82a1e"))}}}   // scarlet flower spike
+  }
   function creosote(x,base){for(let i=0;i<6;i++)px(x+ri(-3,3),base-ri(0,3),rnd()<.6?"#6e7452":"#545a40")}
   // the owl's home: a giant saguaro right up close, cropped by the top and bottom of the screen
   function giantSaguaro(gx,GW){
@@ -1033,16 +1041,19 @@ function paintSky(){
   add(2.5*area,"opu",H0+Math.round(span*.55),H0+span,14,()=>[.95+rnd()*.5,false]);
   add(2.5*area,"cho",H0+3,H0+Math.round(span*.45),7,()=>[.95+rnd()*.3,true]);
   add(2.5*area,"cho",H0+Math.round(span*.5),H0+span-2,12,()=>[1.05+rnd()*.45,false]);
+  add(1.2*area,"oco",H0+3,H0+Math.round(span*.45),9,()=>[.75+rnd()*.3,true]);
+  add(1*area,"oco",H0+Math.round(span*.5),H0+span-2,14,()=>[1+rnd()*.35,false]);
   fixed.forEach(([fx,fy,fh])=>items.push(["sag",Math.round(w*fx),Math.round(h*fy),Math.round(Math.min(h,w*.8)*fh),2]));
   // the farthest row (right at the horizon) is painted onto the ground layer, so the night truck on the far road
   // drives in front of it while every nearer plant still passes in front of the truck
   const plantCtx=c,FAR=H0+5;
-  SCENE.flora={sag:1,cho:0,opu:0,cre:0};items.forEach(it=>{SCENE.flora[it[0]]=(SCENE.flora[it[0]]||0)+1});   // census for the Biodiversity Report (+1: the owl's giant saguaro)
+  SCENE.flora={sag:1,cho:0,opu:0,cre:0,oco:0};items.forEach(it=>{SCENE.flora[it[0]]=(SCENE.flora[it[0]]||0)+1});   // census for the Biodiversity Report (+1: the owl's giant saguaro)
   items.sort((a,b)=>a[2]-b[2]).forEach(it=>{
     c=it[2]<=FAR?gc:plantCtx;
     if(it[0]==="cre")creosote(it[1],it[2]);
     else if(it[0]==="sag")saguaro(it[1],it[2],it[3],SAG[it[4]],it[4]);
     else if(it[0]==="cho")cholla(it[1],it[2],it[3],it[4]);
+    else if(it[0]==="oco")ocotillo(it[1],it[2],it[3],it[4]);
     else opuntia(it[1],it[2],it[3],it[4]);
   });
   c=plantCtx;
@@ -1104,6 +1115,7 @@ function paintSky(){
      const flower=(x,y)=>{px(x,y,"#e8a830");px(x-1,y,"#ffd84a");px(x+1,y,"#ffd84a");px(x,y-1,"#ffd84a");px(x-1,y-1,"#fff0a0");px(x+1,y-1,"#fff0a0");px(x-2,y-1,"#ffd84a");px(x+2,y-1,"#ffd84a");px(x,y-2,"#fff0a0")};
      flower(21,8);flower(16,17);flower(28,15);
      for(let x=12;x<34;x++)px(x,H-1,"#8a7458")});
+   mk("oco",40,44,(W,H)=>ocotillo(20,H-1,1.4,false));
    mk("cre",14,9,(W,H)=>{for(let k=0;k<4;k++)creosote(7+ri(-2,2),H-1-k)});
    [c,bcx,fcx]=sv;perches.length=pl;blooms.length=bl;flowers.length=fl;SCENE.plantArt=P;
    if(typeof BIO_IMG!=="undefined")Object.keys(P).forEach(k=>delete BIO_IMG[k])}
@@ -2623,6 +2635,7 @@ const FLORA=[
   {key:"sag",common:"Saguaro",sci:"Carnegiea gigantea",fam:"Cactaceae"},
   {key:"cho",common:"Teddybear cholla",sci:"Cylindropuntia bigelovii",fam:"Cactaceae"},
   {key:"opu",common:"Engelmann prickly pear",sci:"Opuntia engelmannii",fam:"Cactaceae"},
+  {key:"oco",common:"Ocotillo",sci:"Fouquieria splendens",fam:"Fouquieriaceae"},
   {key:"cre",common:"Creosote bush",sci:"Larrea tridentata",fam:"Zygophyllaceae"}
 ];
 function diversity(counts){
