@@ -374,10 +374,12 @@ body.night .chip.thirsty{border-color:#e08aa2}
   .bar{cursor:default}
   .days{grid-template-columns:repeat(3,1fr)}
 }
+body.landicons .icons.left{flex-direction:column;flex-wrap:wrap;align-content:flex-start;justify-content:flex-start;right:calc(10px + env(safe-area-inset-right,0px))}
+body.landicons .hero,body.landicons .marquee{right:calc(var(--iconsW,0px) + 22px + env(safe-area-inset-right,0px))}
 /* phones held sideways: windows don't span the whole width (the icons stay visible on the right), they sit higher
    to use the short screen, and the taskbar drops most of the home-indicator padding */
 @media (pointer:coarse) and (orientation:landscape){
-  .win{left:calc(16px + env(safe-area-inset-left,0px))!important;right:auto;width:min(640px,calc(100vw - 220px))!important;top:calc(10px + env(safe-area-inset-top,0px))!important;max-height:calc(100% - 64px)}
+  .win{left:calc(16px + env(safe-area-inset-left,0px))!important;right:auto;width:min(640px,calc(100vw - var(--iconsW,200px) - 48px))!important;top:calc(10px + env(safe-area-inset-top,0px))!important;max-height:calc(100% - 64px)}
   .taskbar{padding-bottom:max(3px,calc(env(safe-area-inset-bottom,0px) - 14px))}
   .startmenu{bottom:calc(40px + max(0px,env(safe-area-inset-bottom,0px) - 14px))}
 }
@@ -2637,7 +2639,20 @@ function build(){
 // phones: shrink the icon grid just enough that it never runs into the title block at the bottom right
 function fitIcons(){
   const nav=document.getElementById("iconsLeft"),hero=document.querySelector(".hero");if(!nav||!hero)return;
+  const land=isMob()&&innerWidth>innerHeight;document.body.classList.toggle("landicons",land);
+  if(!land)nav.style.height="";
   if(!isMob()){nav.style.removeProperty("--k");nav.style.width="";nav.style.top="";const mq=document.querySelector(".marquee");if(mq)mq.style.top="";return}
+  if(land){
+    // phone on its side: the icons stack in columns down the upper-right corner, and the title + marquee keep to the left of them
+    const safeTop=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--sat"))||0;
+    nav.style.top=(8+safeTop)+"px";
+    const bar=document.querySelector(".taskbar").getBoundingClientRect().top,room=bar-8-(8+safeTop),icons=[...nav.querySelectorAll(".icon")].filter(i=>i.offsetParent!==null||!i.hidden);
+    for(let k=1;k>=.6;k=Math.round((k-.05)*100)/100){nav.style.setProperty("--k",k);nav.style.height=room+"px";
+      const ih=Math.max(1,...icons.map(i=>i.offsetHeight))+6*k,per=Math.max(1,Math.floor(room/ih)),cols=Math.ceil(icons.length/per),wd=cols*(78*k+4);
+      nav.style.width=wd+"px";document.body.style.setProperty("--iconsW",wd+"px");
+      if(wd<=innerWidth*.42)break}
+    const mq=document.querySelector(".marquee"),hb=hero.getBoundingClientRect().bottom;if(mq)mq.style.top=Math.round(hb+8)+"px";
+    return}
   // phones: title on top, then the marquee (if shown), then the icons, which must stop above the taskbar
   const mq=document.querySelector(".marquee"),hb=hero.getBoundingClientRect().bottom;
   if(mq)mq.style.top=Math.round(hb+8)+"px";
