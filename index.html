@@ -510,6 +510,7 @@ folder:["................","..kkkkk.........",".kyyyyyk........","kyyyyyyykkkkkk
 letter:["................","................","................","kkkkkkkkkkkkkkkk","kwkwwwwwwwwwwkwk","kwwkwwwwwwwwkwwk","kwwwkwwwwwwkwwwk","kwwwwkwwwwkwwwwk","kwwwwwkkkkwwwwwk","kwwwwkwwwwkwwwwk","kwwwkwwwwwwkwwwk","kwwkwwwwwwwwkwwk","kkkkkkkkkkkkkkkk","................","................","................"],
 book:["................",".kkkkkkkkkkkk...",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSSwwwk..",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSwwwwk..",".krrkwwwwwwwwk..",".krrkwwwwwwwwk..",".kkkkkkkkkkkkk..","................","................","................"],
 radio:["................","....kkkkkkkk....","....k......k....","kkkkkkkkkkkkkkkk","kssssssssssssssk","ksSSSssyyssSSSsk","kSkkkSsyysSkkkSk","kSkSkSssssSkSkSk","kSkkkSsrbsSkkkSk","ksSSSssssssSSSsk","kssssssssssssssk","kkkkkkkkkkkkkkkk","................","................","................","................"],
+trailcam:["................","..kkkkkkkkkkkk..",".kGGnGGGGGGgGGk.",".kGgGGkkkkGGnGk.",".kGGGkbbbbkGGGk.",".kGnkbbwbbbkGgk.",".kGGkbbbbbbkGGk.",".kGGkbbbbbbkGGk.",".kgGGkbbbbkGGnk.",".kGGnGkkkkGGrGk.",".kGGGGGgGGGGGGk.",".kGGkkkkkkkkGGk.",".kGGksssssskGgk.",".kGnGGGGgGGGGGk.","..kkkkkkkkkkkk..","................"],
 map:["................",".kkkkkkkkkkkkkk.",".kbbbkgggkbbbbk.",".kbbgkgggkbbbbk.",".kbggkgyykbbgbk.",".kgggkgyykbgggk.",".kggykyyykggggk.",".kgyykyyrkgggyk.",".kyyykyrykggyyk.",".kyyykyyrkgyyyk.",".kyybkyyykyyybk.",".kybbkyyykyybbk.",".kbbbkyybkybbbk.",".kkkkkkkkkkkkkk.","................","................"],
 disco:[".......k........",".......k........","......kkk.......",".....kwswk......","....kswswsk.....","...kswbwswsk....","...kwswswpwk....","..kswswbwswsk...","..kwswswswswk...","..kswpwswbwsk...","...kwswswswk....","...kswswswsk....","....kswswsk.....",".....kkkkk......","................","................"],
 computer:["................","..kkkkkkkkkkkk..","..ksssssssssSk..","..kskkkkkkkksSk.","..kskbbbbbbksSk.","..kskblbbbbksSk.","..kskbbbbbbksSk.","..kskkkkkkkksSk.","..ksssssssssSk..","..kkkkkkkkkkkk..",".....kSSSSk.....","..kkkkkkkkkkkk..",".kssssssssssssk.",".kSsSsSsSsSsSsk.",".kkkkkkkkkkkkkk.","................"],
@@ -913,7 +914,9 @@ function paintSky(){
   const stars=[];for(let i=0;i<w*(N?.75:.3);i++)stars.push({x:ri(0,w),y:ri(0,Math.round(H0*(N?.7:.34))),ph:rnd()*6.28,sp:.04+rnd()*.12,big:rnd()<(N?.08:.12)});
   const toads=[];for(let i=0;i<wildCount("horned_lizards",Math.max(3,Math.round(2*area)));i++)toads.push({x:ri(10,w-20),y:H0+ri(Math.round(span*.6),span-4),dir:rnd()<.5?1:-1,state:"still",timer:ri(10,80),bob:0});
   const usable=perches.filter(p=>p.y>8);
-  const ravens=[...Array(wildCount("ravens",3)).keys()].map(i=>({x:ri(0,w),y:0,cy:ri(Math.round(H0*.14),Math.round(H0*.5)),vx:(i%2?-1:1)*(.5+rnd()*.4),state:"soar",flap:0,ph:i*40,timer:0,face:1}));
+  const RAVEN_K=[1,.72,.86,.64,1,.72];   // near ravens full size, farther ones smaller and slower
+  const ravens=[...Array(wildCount("ravens",3)).keys()].map(i=>{const k=RAVEN_K[i%RAVEN_K.length];
+    return {k,x:ri(0,w),y:0,cy:ri(Math.round(H0*(k<1?.1:.14)),Math.round(H0*(k<1?.42:.5))),vx:(i%2?-1:1)*(.5+rnd()*.4)*(.55+.45*k),state:"soar",flap:0,ph:i*40,timer:0,face:1}});
   if(N)ravens.forEach((r,i)=>{const p=usable[(i*7)%Math.max(1,usable.length)];if(p){r.state="roost";r.target=p;r.x=p.x-6;r.y=p.y-13;r.face=i%2?1:-1}else r.state="gone"});
   const groundY=()=>H0+ri(Math.round(span*.42),span-6);
   const scorps=[];for(let i=0;i<wildCount("scorpions",N?4:2);i++)scorps.push({x:ri(10,w-20),y:groundY(),dir:rnd()<.5?1:-1,state:"pause",timer:ri(10,60),alive:true});
@@ -988,7 +991,7 @@ function stepRaven(r,s){
     r.y=Math.max(4,r.y);
     if(r.x>w+28||r.x<-28){r.circ=null;r.vx=-r.vx*(.8+R()*.4);r.cy=RI(Math.round(H0*.14),Math.round(H0*.5));r.x=r.vx>0?-27:w+27}
     const free=s.perches.filter(p=>!s.ravens.some(o=>o.target===p));
-    if(free.length&&R()<.006&&r.x>0&&r.x<w){r.target=free[RI(0,free.length-1)];r.state="descend";r.circ=null}
+    if(free.length&&(r.k||1)>=1&&R()<.006&&r.x>0&&r.x<w){r.target=free[RI(0,free.length-1)];r.state="descend";r.circ=null}
   }else if(r.state==="descend"){
     const tx=r.target.x-6,ty=r.target.y-13,dx=tx-r.x,dy=ty-r.y,d=Math.hypot(dx,dy);
     r.face=dx>=0?1:-1;r.flap=d<20?2:0;
@@ -1171,6 +1174,14 @@ function pulseSky(c,s){
 }
 // horned lizard split into body and head (columns 6+, horns included) so the head can nod
 const TOAD_COLS=6,TOAD_BODY=CRITTERS.toad.map(r=>r.slice(0,TOAD_COLS)+".".repeat(r.length-TOAD_COLS)),TOAD_HEAD=CRITTERS.toad.map((r,i)=>i>=4?".".repeat(r.length):".".repeat(TOAD_COLS)+r.slice(TOAD_COLS));
+// a sprite drawn smaller (for things farther away): rendered once, shrunk with hard pixel edges, then cached
+const SCALED={};
+function sprtScaled(c,rows,x,y,flip,pal,k){
+  const key=rows.join("")+(flip?1:0)+k;let cv=SCALED[key];
+  if(!cv){const w=rows[0].length,h=rows.length,src=layer(w,h);sprt(src.getContext("2d"),rows,0,0,flip,pal);
+    cv=SCALED[key]=layer(Math.max(1,Math.round(w*k)),Math.max(1,Math.round(h*k)));const x2=cv.getContext("2d");x2.imageSmoothingEnabled=false;x2.drawImage(src,0,0,cv.width,cv.height)}
+  c.drawImage(cv,Math.round(x),Math.round(y));
+}
 function sprtBob(c,rows,x,y,split,dy,flip,pal){
   if(!dy)return sprt(c,rows,x,y,flip,pal);
   sprt(c,rows.slice(split),x,y+split,flip,pal);sprt(c,rows.slice(0,split),x,y+dy,flip,pal);
@@ -1352,7 +1363,7 @@ function drawScene(){
   if(shown("ravens"))s.ravens.forEach(r=>{
     stepRaven(r,s);if(r.state==="gone")return;
     const f=r.state==="roost"?CRITTERS.ravenSleep:r.state==="perch"?CRITTERS.ravenPerch:r.flap>0?(Math.floor(s.t/3)%2?CRITTERS.ravenUp:CRITTERS.ravenDown):CRITTERS.ravenGlide;
-    (r.state==="perch"||r.state==="roost")?sprtBob(a,f,r.x,r.y,5,bob,r.face<0,RAVENPAL):sprt(a,f,r.x,r.y,r.face<0,RAVENPAL);
+    (r.state==="perch"||r.state==="roost")?sprtBob(a,f,r.x,r.y,5,bob,r.face<0,RAVENPAL):(r.k||1)<1?sprtScaled(a,f,r.x,r.y,r.face<0,RAVENPAL,r.k):sprt(a,f,r.x,r.y,r.face<0,RAVENPAL);
   });
   if(shown("bats"))s.bats.forEach(b=>{stepBat(b,s);sprt(a,CRITTERS.bat[b.state==="feed"?s.t%2:(s.t>>1)%2],b.x,b.y)});
   if(N)tint(A,"rgba(16,22,58,.5)");
@@ -2252,7 +2263,7 @@ function build(){
   defineWindow("map",{title:"Desert Map",icon:"map",w:Math.min(860,innerWidth-40),x:mob?16:Math.max(110,(innerWidth-860)/2),y:70,render:renderMap,status:true});
   defineWindow("radio",{title:radioName(),icon:"radio",w:380,x:innerWidth-595,y:64,render:renderRadio,status:true});
   defineWindow("today",{title:"Weather Now",icon:"sun",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
-  defineWindow("bio",{title:"Biodiversity Report",icon:"flower",w:660,x:cx(660),y:100,render:renderBio,menu:["File","Survey","Help"],status:true});
+  defineWindow("bio",{title:"Biodiversity Report",icon:"trailcam",w:660,x:cx(660),y:100,render:renderBio,menu:["File","Survey","Help"],status:true});
   defineWindow("log",{title:"Weather Log",icon:"chart",w:640,x:cx(640),y:110,render:renderLog,menu:["File","Edit","Chart"],status:true});
   const thirsty=(DATA.cacti||[]).filter(c=>c.name&&cactusState(c).status==="thirsty").length;
   HIDE_WILD=new Set((DATA.wildlife||[]).filter(r=>isNo(r.show)).map(r=>String(r.animal||"").trim().toLowerCase()));
@@ -2267,7 +2278,7 @@ function build(){
     const name=lab||label;if(WINS[id]&&lab){WINS[id].title=lab;WINS[id].el.querySelector(".bar b").textContent=lab;WINS[id].el.setAttribute("aria-label",lab)}
     ICONS.push({id,name,el:iconBtn(id,name,icon,badge)})};
   place(L,"cacti","My Cacti","saguaro",thirsty||"");place(L,"log","Weather Log","chart");
-  place(L,"today","Weather Now","sun");place(L,"bio","Biodiversity Report","flower");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
+  place(L,"today","Weather Now","sun");place(L,"bio","Biodiversity Report","trailcam");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
     const id="p"+i;defineWindow(id,{title:p.title,icon:(p.icon||"folder").toLowerCase(),w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
     place(L,id,p.title,(p.icon||"folder").toLowerCase());
