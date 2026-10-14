@@ -1060,14 +1060,15 @@ function stepRaven(r,s){
     r.y=Math.max(4,r.y);
     if(r.x>w+28||r.x<-28){r.circ=null;r.vx=-r.vx*(.8+R()*.4);r.cy=RI(Math.round(H0*.14),Math.round(H0*.5));r.x=r.vx>0?-27:w+27}
     const free=s.perches.filter(p=>!s.ravens.some(o=>o.target===p));
-    if(free.length&&(r.k||1)>=1&&R()<.006&&r.x>0&&r.x<w){r.target=free[RI(0,free.length-1)];r.state="descend";r.circ=null}
+    if(free.length&&(r.k||1)>=.85&&R()<.025&&r.x>0&&r.x<w){r.target=free[RI(0,free.length-1)];r.state="descend";r.circ=null}
   }else if(r.state==="descend"){
     const tx=r.target.x-6,ty=r.target.y-13,dx=tx-r.x,dy=ty-r.y,d=Math.hypot(dx,dy);
     r.face=dx>=0?1:-1;r.flap=d<20?2:0;
-    if(d<1.5){r.x=tx;r.y=ty;r.state="perch";r.timer=RI(60,260)}
+    if(d<1.5){r.x=tx;r.y=ty;r.state="perch";r.timer=RI(80,320)}
     else{const sp=Math.min(1.4,d);r.x+=dx/d*sp;r.y+=dy/d*sp}
   }else if(r.state==="perch"){
     if(R()<.03)r.face*=-1;
+    if(r.caw>0)r.caw--;else if(R()<.02)r.caw=RI(2,4);                       // a croak now and then: the head dips
     if(--r.timer<=0){r.state="takeoff";r.timer=14;r.vx=r.face*(.6+R()*.4);r.target=null}
   }else if(r.state==="takeoff"){
     r.x+=r.vx;r.y-=.9;r.flap=2;
@@ -1581,10 +1582,10 @@ function drawScene(){
   else{owlSprite=o.flap?((s.t>>1)%2?CRITTERS.owlUp:CRITTERS.owlDown):CRITTERS.owlGlide;ox=o.x-OWL_FW;oy=o.y-OWL_FH}
   const carry=owlOn&&o.prey&&o.state==="fly";
   const fade=owlOn&&o.state==="settle"&&o.timer<OWL_FADE?o.timer/OWL_FADE:null;   // last few frames: cross-fade the folded, sitting owl in
-  if(shown("ravens"))s.ravens.forEach(r=>{
+  if(shown("ravens")&&!N)s.ravens.forEach(r=>{                                  // ravens roost out of sight at night
     stepRaven(r,s);if(r.state==="gone")return;
     const f=r.state==="roost"?CRITTERS.ravenSleep:r.state==="perch"?CRITTERS.ravenPerch:r.flap>0?(Math.floor(s.t/3)%2?CRITTERS.ravenUp:CRITTERS.ravenDown):CRITTERS.ravenGlide;
-    (r.state==="perch"||r.state==="roost")?sprtBob(a,f,r.x,r.y,5,bob,r.face<0,RAVENPAL):(r.k||1)<1?sprtScaled(a,f,r.x,r.y,r.face<0,RAVENPAL,r.k):sprt(a,f,r.x,r.y,r.face<0,RAVENPAL);
+    (r.state==="perch"||r.state==="roost")?sprtBob(a,f,r.x,r.y,5,bob||(r.caw>0?1:0),r.face<0,RAVENPAL):(r.k||1)<1?sprtScaled(a,f,r.x,r.y,r.face<0,RAVENPAL,r.k):sprt(a,f,r.x,r.y,r.face<0,RAVENPAL);
   });
   if(shown("bats"))s.bats.forEach(b=>{stepBat(b,s);sprt(a,CRITTERS.bat[b.state==="feed"?s.t%2:(s.t>>1)%2],b.x,b.y)});
   if(N)tint(A,"rgba(16,22,58,.5)");
@@ -2384,7 +2385,7 @@ const FAUNA=[
   {key:"owl",common:"Great horned owl",sci:"Bubo virginianus",fam:"Strigidae",cls:"Aves",n:s=>1+(s.night&&s.owl2&&shown("owl")?1:0),when:"nocturnal; roosts in the saguaro cavity by day; a second bird hoots from a neighbouring saguaro"},
   {key:"owl_chicks",common:"Great horned owl (owlets)",sci:"Bubo virginianus",fam:"Strigidae",cls:"Aves",n:s=>owlChickN(),when:"nestlings; visible while the parent hunts"},
   {key:"roadrunner",common:"Greater roadrunner",sci:"Geococcyx californianus",fam:"Cuculidae",cls:"Aves",n:s=>1,when:"diurnal; hunts scorpions and lizards"},
-  {key:"ravens",common:"Common raven",sci:"Corvus corax",fam:"Corvidae",cls:"Aves",n:s=>(s.ravens||[]).length,when:"diurnal; soars, perches and roosts on saguaros"},
+  {key:"ravens",common:"Common raven",sci:"Corvus corax",fam:"Corvidae",cls:"Aves",n:s=>s.night?0:(s.ravens||[]).length,when:"diurnal; soars and perches on saguaro tops, croaking; roosts out of sight at night"},
   {key:"horned_lizards",common:"Flat-tailed horned lizard",sci:"Phrynosoma mcallii",fam:"Phrynosomatidae",cls:"Reptilia",n:s=>(s.toads||[]).length,when:"diurnal; buries in sand after dark"},
   {key:"scorpions",common:"Desert hairy scorpion",sci:"Hadrurus arizonensis",fam:"Caraboctonidae",cls:"Arachnida",n:s=>(s.scorps||[]).filter(p=>p.alive).length,when:"mostly nocturnal; fluoresces under moonlight"},
   {key:"bats",common:"Lesser long-nosed bat",sci:"Leptonycteris yerbabuenae",fam:"Phyllostomidae",cls:"Mammalia",n:s=>(s.bats||[]).length,when:"nocturnal; pollinates saguaro blooms"},
