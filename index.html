@@ -108,21 +108,30 @@ body.still .hero h1 .cursor{animation:none}
 .postcard .pc-line input{background:transparent;border:0;border-bottom:2px dotted #b8a888;padding:4px 2px 2px;font:15px var(--font-ui);color:#23304a}
 .postcard input:focus,.postcard textarea:focus{outline:2px dotted #a83a2a;outline-offset:2px}
 .postcard .sr{position:absolute;left:-9999px}
-.postcard .stamp{align-self:flex-end;position:relative;width:86px;height:104px;padding:7px 7px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;background:#fffdf6;border:5px dotted #f6efdc;outline:1px solid #e2d4b2;outline-offset:-5px;box-shadow:2px 2px 0 rgba(58,46,38,.18);cursor:pointer;transform:rotate(2deg);transition:transform .15s}
+.postcard .stamp{align-self:flex-end;position:relative;width:96px;height:112px;padding:7px;display:flex;background:repeating-linear-gradient(-45deg,#c8202f 0 7px,#fff 7px 14px,#1f3f8f 14px 21px,#fff 21px 28px);border:5px dotted #f6efdc;outline:1px solid #e2d4b2;outline-offset:-5px;box-shadow:2px 2px 0 rgba(58,46,38,.18);cursor:pointer;transform:rotate(2deg);transition:transform .15s}
 .postcard .stamp:hover{transform:rotate(-1deg) translateY(-2px)}.postcard .stamp:active{transform:rotate(0) translateY(1px)}
-.postcard .stamp canvas{width:60px;height:68px;image-rendering:pixelated}
-.postcard .stamp-val{position:absolute;right:9px;top:9px;font:400 10px var(--font-display);color:#fff6e0;text-shadow:1px 1px 0 #5a2a40}
-.postcard .stamp-send{font:400 11px var(--font-display);color:#a83a2a;letter-spacing:.1em}
+.postcard .stamp-in{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:#fff;padding:4px 3px}
+.postcard .stamp canvas{width:60px;height:44px;image-rendering:pixelated}
+.postcard .stamp-air{font:400 8px var(--font-display);color:#1f3f8f;letter-spacing:.14em}
+.postcard .stamp-send{font:400 15px/1 var(--font-display);color:#c8202f;letter-spacing:.06em}
 .postcard .stamp:disabled{opacity:.7}
 .postcard .postmark{position:absolute;left:-30px;top:18px;width:66px;height:66px;border:2px solid rgba(40,50,90,.7);border-radius:50%;display:none;align-items:center;justify-content:center;flex-direction:column;font:400 12px/1.1 var(--font-display);color:rgba(40,50,90,.75);transform:rotate(-14deg);text-align:center;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 6px,rgba(40,50,90,.0) 6px 7px)}
 .postcard .postmark small{font-size:8px}
 .postcard .stamp.posted .postmark{display:flex}
+/* the unsent-card nudge: the bottom-right corner folds up, a pencilled note appears, and the stamp wiggles */
+.postcard::after{content:"";position:absolute;right:-1px;bottom:-1px;width:0;height:0;background:linear-gradient(315deg,#3a2e2600 0 50%,#d9caa6 50%,#cdbd96 100%);box-shadow:-2px -2px 3px rgba(58,46,38,.18);transition:width .35s,height .35s;pointer-events:none}
+.postcard.hint::after{width:54px;height:54px}
+.postcard .pc-hint{display:none;margin-top:auto;align-self:flex-end;margin-right:46px;font:14px/1.3 var(--font-ui);color:#a83a2a;transform:rotate(-4deg);text-align:right}
+.postcard.hint .pc-hint{display:block;animation:hintIn .4s ease-out}
+.postcard.hint .stamp{animation:stampNudge .5s ease-in-out 3}
+@keyframes hintIn{from{opacity:0;transform:rotate(-4deg) translateY(6px)}to{opacity:1;transform:rotate(-4deg)}}
+@keyframes stampNudge{0%,100%{transform:rotate(2deg)}25%{transform:rotate(-6deg) scale(1.06)}75%{transform:rotate(7deg) scale(1.06)}}
 .postcard .cmsg{font:13px var(--font-ui);color:#4a3a2c}
 .postcard .cmsg.ok{color:#2f7a3a}.postcard .cmsg.err{color:#a83a2a}
 body.night .cform.postcard input,body.night .cform.postcard textarea{background:transparent}
 body.night .postcard .pc-msg textarea{background:transparent repeating-linear-gradient(180deg,transparent 0 21px,#c9d6e6 21px 22px)}
 body.night .postcard .cmsg.ok{color:#2f7a3a}body.night .postcard .cmsg.err{color:#a83a2a}
-@media (max-width:640px){.cform.postcard{grid-template-columns:1fr}.postcard .pc-left{padding:0 0 12px;border-right:0;border-bottom:2px solid #cdbd96}.postcard .pc-right{padding:12px 0 0}.postcard .stamp{width:70px;height:86px}.postcard .stamp canvas{width:46px;height:52px}}
+@media (max-width:640px){.cform.postcard{grid-template-columns:1fr}.postcard .pc-left{padding:0 0 12px;border-right:0;border-bottom:2px solid #cdbd96}.postcard .pc-right{padding:12px 0 0}.postcard .stamp{width:84px;height:100px}.postcard .stamp canvas{width:50px;height:36px}}
 .cform label{display:grid;gap:3px;font:13px var(--font-ui);color:var(--ink)}.cform label b{color:#a83a2a;font-weight:400}
 .cform input,.cform textarea{width:100%;box-sizing:border-box;padding:6px 7px;font:14px var(--font-data);color:var(--ink);background:#fffdf8;border:2px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo);border-radius:0}
 .cform textarea{resize:vertical;min-height:96px}
@@ -2109,7 +2118,11 @@ addEventListener("resize",()=>Object.values(WINS).forEach(W=>{if(W.open)fitWin(W
 document.addEventListener("pointerdown",e=>{const a=document.activeElement;
   if(a&&a.matches&&a.matches("input,textarea")&&!e.target.closest("input,textarea,select,label,button"))a.blur()},true);
 function closeOrTuck(id){if(id==="radio"&&isMob()&&deckPlaying())minWin(id);else closeWin(id)}
-function closeWin(id){if(WINS[id])WINS[id].placed=false;if(id==="radio"&&SPOT.ctl){try{SPOT.ctl.pause()}catch(e){}}const W=WINS[id];W.el.hidden=true;W.open=false;W.min=false;renderTasks()}
+function closeWin(id){
+  // a filled-in postcard that's about to be closed unsent: fold a corner up with a note pointing at the stamp, once
+  const pcf=WINS[id]&&WINS[id].el.querySelector("form.postcard");
+  if(pcf&&!pcf.dataset.hinted&&pcf.email.value.trim()&&pcf.message.value.trim()){pcf.dataset.hinted="1";pcf.classList.add("hint");setTimeout(()=>pcf.classList.remove("hint"),5200);return}
+  if(WINS[id])WINS[id].placed=false;if(id==="radio"&&SPOT.ctl){try{SPOT.ctl.pause()}catch(e){}}const W=WINS[id];W.el.hidden=true;W.open=false;W.min=false;renderTasks()}
 function focusWin(id){
   Object.values(WINS).forEach(w=>w.el.classList.remove("active"));
   const W=WINS[id];W.el.style.zIndex=++Z;W.el.classList.add("active");renderTasks(id);
@@ -2679,12 +2692,13 @@ function contactForm(body,caption){
       <label class="pc-msg"><span class="sr">Message (required)</span><textarea name="message" rows="6" required placeholder="Dear Xerophyte Labs,"></textarea></label>
     </div>
     <div class="pc-right">
-      <button type="submit" class="stamp" title="Send" aria-label="Send"><canvas width="30" height="34" aria-hidden="true"></canvas><span class="stamp-val">29¢</span><span class="stamp-send">SEND</span><span class="postmark" aria-hidden="true">SENT<br><small></small></span></button>
+      <button type="submit" class="stamp" title="Send" aria-label="Send"><span class="stamp-in"><span class="stamp-air">AIR MAIL</span><canvas width="30" height="22" aria-hidden="true"></canvas><span class="stamp-send">SEND</span></span><span class="postmark" aria-hidden="true">SENT<br><small></small></span></button>
       <div class="pc-to"><b>TO:</b> Xerophyte Labs<br>Field Station<br>${esc(SET.location_name||"Anza-Borrego Desert, CA")}</div>
       <label class="pc-line"><span>From <b>*</b></span><input name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" required placeholder="you@example.com"></label>
       <label class="pc-line"><span>Phone</span><input name="phone" type="tel" autocomplete="tel" placeholder="optional"></label>
       <label class="pc-line"><span>Re:</span><input name="subject" type="text" maxlength="120" placeholder="Cuttings, pups, rainfall…"></label>
       <span class="cmsg" role="status"></span>
+      <span class="pc-hint" aria-live="polite">psst! press the stamp<br>to send your card ↑</span>
     </div>
     <input name="_honey" type="text" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">`;
   body.appendChild(f);
@@ -2744,13 +2758,14 @@ function paintPostcard(cv,st){
     pad(120,92,7,6);pad(112,84,5,6);pad(128,82,5,7);pad(121,76,4,5);
     [[110,77],[113,77],[127,74],[130,74],[121,70]].forEach(([x,y])=>{rect(x,y,2,2,"#c83a5a");px(x,y,"#e86a8a")});   // ripe tunas
     for(let i=0;i<6;i++){const x=70+i*3;rect(x,90-i%2,2,6,"#e8dca8");px(x-1,92,"#f4ecc8");px(x+2,91,"#f4ecc8")}  // a little cholla
+    // wildlife: a raven riding the evening air, a roadrunner mid-dash, a horned lizard on a sunny rock
+    sprt(c,CRITTERS.ravenGlide,74,14,false,RAVENPAL);sprt(c,CRITTERS.ravenGlide,94,24,true,RAVENPAL);
+    sprt(c,CRITTERS.run[0],86,79,false);
+    rect(140,92,10,4,"#a88a6a");rect(141,91,8,1,"#c4a682");sprt(c,CRITTERS.toad,140,87,true);
   }
   if(st){const c=st.getContext("2d"),px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)};
-    for(let y=0;y<34;y++)for(let x=0;x<30;x++)px(x,y,y<12?"#f0b060":y<20?"#e08a58":"#c86a50");
-    for(let y=8;y<16;y++)for(let x=8;x<22;x++)if((x-15)**2+(y-16)**2<=36)px(x,y,"#ffe08a");
-    for(let y=20;y<34;y++)for(let x=0;x<30;x++)px(x,y,y<26?"#9a6048":"#7a4838");
-    const g="#2e5a2c",G2="#4a8a44";for(let y=6;y<32;y++){px(13,y,g);px(14,y,G2);px(15,y,G2);px(16,y,g)}
-    for(let x=9;x<13;x++)px(x,18,g);for(let y=12;y<19;y++){px(9,y,g);px(10,y,G2)}for(let x=17;x<21;x++)px(x,14,g);for(let y=9;y<15;y++){px(20,y,g);px(19,y,G2)}}
+    for(let y=0;y<22;y++)for(let x=0;x<30;x++)px(x,y,x<13&&y<11?"#1f3f8f":(y>>1)%2?"#ffffff":"#c8202f");    // a blue canton and red & white stripes
+    [[3,2],[8,2],[5,5],[10,5],[3,8],[8,8]].forEach(([x,y])=>{px(x,y,"#fff");px(x+1,y,"#fff");px(x,y+1,"#fff");px(x+1,y+1,"#fff")})}
 }
 
 /* ---------- build desktop ---------- */
