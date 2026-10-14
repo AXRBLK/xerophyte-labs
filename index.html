@@ -219,7 +219,7 @@ body.night .startmenu .chk.ok{color:#6ade74}body.night .startmenu .chk.warn{colo
 .maptools button:focus-visible{outline:1px dotted var(--ink);outline-offset:-4px}
 .maptools .sep{width:1px;height:20px;background:var(--chrome-lo)}
 .mapgrid{display:grid;grid-template-columns:minmax(0,1fr) 230px;min-height:0}
-.mapwrap{position:relative;height:440px;overflow:hidden;cursor:grab;touch-action:none;background:#b8a684;outline:none;min-width:0}
+.mapwrap{position:relative;height:clamp(240px,calc(100vh - 230px),440px);overflow:hidden;cursor:grab;touch-action:none;background:#b8a684;outline:none;min-width:0}
 .mapwrap.grabbing{cursor:grabbing}
 .mapwrap:focus-visible{box-shadow:inset 0 0 0 2px var(--link)}
 .mapcv,.maplabels,.mapnight,.mapmarks{position:absolute;inset:0;width:100%;height:100%}
@@ -650,6 +650,7 @@ const CRITTERS={
   toad:["......w.w..","..tdtdtTTT.",".tTtTtTTkTt","tdtTtdtTTT.","..t..t..t.."],
   owlHome:owlFace(OWL_EYES),
   owlBlink:owlFace(OWL_SHUT),
+  owlHoot:owlFace(OWL_EYES).map((r,j,a)=>j===a.indexOf("..kBWWWWWWWWBk..")+1?".kBWWWWWWWWWWBk.":r),   // throat puffed out white
   owlPeekL:owlFace(OWL_PEEK_L,OWL_BROW_L),owlPeekR:owlFace(OWL_PEEK_R,OWL_BROW_R),
   // front view in flight: both eyes stay visible on every wingbeat
   owlUp:OWL_FLY.up,
@@ -950,6 +951,9 @@ function paintSky(){
   SCENE.ridge=ridge;SCENE.bikes=null;SCENE.dust=[];
   Object.assign(SCENE,{layers:{sky,orb,clouds,ground,plants,bloom:bloomCv,flowers:flowerCv},flowers,sr,H0,span,ctx:cv.getContext("2d"),groundA:layer(w,h),airA:layer(w,h),w,h,t:0,stars,toads,ravens,perches:usable,scorps,bats,mice,shoot:[],groundY,blooms:N?blooms:[]});
   SCENE.owl={nest,state:"home",blink:0,timer:RI(40,120),path:[],x:0,y:0,face:1};
+  // night: a second owl just sits on top of a neighbouring saguaro, watching and hooting now and then
+  {const used=new Set(ravens.map(r=>r.target)),cand=usable.filter(p=>!used.has(p)&&Math.abs(p.x-nest.x)>60&&p.x>10&&p.x<w-14).sort((a,b)=>a.y-b.y);
+   SCENE.owl2=N&&cand.length?{p:cand[Math.min(cand.length-1,ri(0,1))],timer:ri(20,90),hoot:0,blink:0,notes:[]}:null}
   SCENE.runner={x:Math.round(w*.4),y:H0+Math.round(span*.52),dir:1,state:N?"asleep":"stand",timer:20};
   // portraits of each plant for the Biodiversity Report, drawn with the same brushes as the scene (side effects undone afterwards)
   {const sv=[c,bcx,fcx],pl=perches.length,bl=blooms.length,fl=flowers.length,P={};
@@ -1045,6 +1049,18 @@ const CHICK_SPOTS=[[],[[-4,15]],[[-9,13],[1,16]],[[-10,12],[2,12],[-4,17]],[[-10
   [[-10,10],[2,10],[-4,13],[-10,17],[2,17]],[[-11,10],[-4,10],[3,10],[-11,17],[-4,17],[3,17]]];
 // resting rattlesnake, coiled with its head up, for the Biodiversity Report
 const SNAKE_COIL=["......HH....","....HHeHt...","....dHH.....","..crcdrc....",".rdcrrdcrc..","crrdcrrdcrrW","rdcrrdcrrdKW",".ccrrdccrcc."],SNAKEPAL={H:"#8a4a36",e:"#1a1210",t:"#d03838",d:"#5c3426",c:"#d8b48e",r:"#a8644a",K:"#2a2018",W:"#e8dcc0"};
+// the hooting neighbour: three-quarter size; a hoot = a little bow, the white throat puffs, and a ring floats off
+const OWL2_K=.75,HOOTS=[0,1,1,1,0,0,0,1,1,0,1,1,0,1,1,1];                    // hoo, h'hoo, hoo, hoo
+function drawOwl2(c,s,o,hold){
+  const p=o.p,w=Math.round(16*OWL2_K),h=Math.round(25*OWL2_K),x=p.x-(w>>1),y=p.y-h+2;
+  if(!hold){if(o.hoot>0)o.hoot--;else if(--o.timer<=0){o.hoot=HOOTS.length;o.timer=RI(40,140)}
+    if(o.blink>0)o.blink--;else if(R()<.02)o.blink=RI(1,2)}
+  const on=o.hoot>0&&HOOTS[HOOTS.length-o.hoot];
+  if(on&&(o.hoot===HOOTS.length||!HOOTS[HOOTS.length-o.hoot-1]))o.notes.push({x:x+w-2,y:y+5,life:12});
+  sprtScaled(c,on?CRITTERS.owlHoot:o.blink?CRITTERS.owlBlink:CRITTERS.owlHome,x,y+(on?1:0),false,OWLPAL_N,OWL2_K);
+  o.notes=o.notes.filter(n=>{n.life--;if(!hold){n.x+=.5;n.y-=.45}const a=n.life/12,X=Math.round(n.x),Y=Math.round(n.y);
+    c.fillStyle=`rgba(230,234,255,${.55*a})`;c.fillRect(X,Y-1,2,1);c.fillRect(X,Y+2,2,1);c.fillRect(X-1,Y,1,2);c.fillRect(X+2,Y,1,2);return n.life>0});
+}
 const PREY=["....PPp....","..BBBBBBk..",".BBBBBBBWWk","tBBBBBBWWW.","t..BW..BW..",".t........."];   // a mouse dangling from the owl's talons
 // by day the owl dozes, now and then cracking one eye open; the peeks come oftener as the afternoon wears on toward sunset (7pm)
 function dayPeek(o){
@@ -1207,10 +1223,8 @@ function drawDisco(c,s){
 /* daytime disco: a gang of dirt bikes tearing along the ridge of the near range, kicking up dust */
 const RIDERS=[["#c8503c","#7a3428"],["#d8b048","#8a6a28"],["#4a86b8","#2a4e70"],["#e8e4dc","#8a8680"],["#5aa058","#2e6034"]];
 const BIKE_CACHE={};
-// little motocross bike: helmet and visor, rider leaning on the bars, high front fender, number plate, knobby wheels
-const MINI_BIKE=[
-  [".......HH....","......HHHV...","......JJ.....",".....JJJJk...","..bbbkkLbbP..",".bbbbssLbbbb.","..kk..s...kk.",".k..k....k..k","..kk......kk."],
-  [".......HH....","......HHHV...","......JJ.....",".....JJJJk...","..bbbkkLbbP..",".bbbbssLbbbb.",".k.k..s...k.k","..kk.....k.k.",".k.k......kk."]];
+// rally raider: tall windscreen and headlight fairing, big tank, rear rack, side number plate, big knobby wheels
+const MINI_BIKE=[[".........HH........", "........HHHV..G....", "........JJ....GG...", ".......JJJJk.bbbW..", "..ss....JJ.kbbbbW..", ".bbbbbbbbbbbbbb....", "...bPPbsLLssb.s....", ".kkkkPPkL....kksk..", "kk..kk...L..kk..kk.", "k.ss.k...k..k.ss.k.", "k.ss.k......k.ss.k.", "kk..kk......kk..kk.", ".kkkk........kkkk.."],[".........HH........", "........HHHV..G....", "........JJ....GG...", ".......JJJJk.bbbW..", "..ss....JJ.kbbbbW..", ".bbbbbbbbbbbbbb....", "...bPPbsLLssb.s....", ".kkkkPPkL....kkkk..", "kk..kk...L..kk..kk.", "k.s..k...k..k.s..k.", "k..s.k......k..s.k.", "kk..kk......kk..kk.", ".kkkk........kkkk.."]];
 function bikeSprite(i,frame){
   const key=i+":"+frame;if(BIKE_CACHE[key])return BIKE_CACHE[key];
   const cv=layer(24,18),c=cv.getContext("2d"),[hc,jc]=RIDERS[i];
@@ -1250,12 +1264,12 @@ function drawBikes(c,s){
   if(g.wait>0){g.wait--;return}
   g.x+=1.7;
   g.riders.forEach(({ri:i,off})=>{const [hc,jc]=RIDERS[i];
-    const x=Math.round(g.x-off);if(x<-14||x>s.w+2)return;
-    const rl=s.ridge[Math.max(0,Math.min(s.w-1,x+2))],rr=s.ridge[Math.max(0,Math.min(s.w-1,x+10))];
+    const x=Math.round(g.x-off);if(x<-20||x>s.w+2)return;
+    const rl=s.ridge[Math.max(0,Math.min(s.w-1,x+3))],rr=s.ridge[Math.max(0,Math.min(s.w-1,x+15))];
     const hop=(Math.floor(s.t/3)+i*5)%17===0?2:(Math.floor(s.t/3)+i*5)%17===1?1:0;
-    const y=Math.round((rl+rr)/2)-9-hop;
-    if(s.t%2===0)s.dust.push({x:x,y:y+8,life:5});
-    sprt(c,MINI_BIKE[s.t%2],x,y,false,{H:hc,V:"#1c1814",J:jc,b:hc,s:"#c8c4bc",L:"#3a3634",P:"#f0ece4",k:"#1c1814"});
+    const y=Math.round((rl+rr)/2)-13-hop;
+    if(s.t%2===0)s.dust.push({x:x,y:y+12,life:5});
+    sprt(c,MINI_BIKE[s.t%2],x,y,false,{H:hc,V:"#1c1814",J:jc,b:hc,s:"#c8c4bc",L:"#3a3634",P:"#f0ece4",k:"#1c1814",G:"#9cc0d4",W:"#fff4c8"});
   });
   s.dust=s.dust.filter(d=>{d.life--;d.x-=.6;d.y-=.2;c.fillStyle=d.life>3?"#d8c0a0":"#b8a088";c.fillRect(Math.round(d.x),Math.round(d.y),d.life>3?2:1,1);return d.life>0});
   if(g.x-g.riders[g.riders.length-1].off>s.w+20){g.x=-30;g.wait=RI(60,160);g.riders=lineup()}
@@ -1349,17 +1363,9 @@ function sunRipples(c,s){
 }
 
 /* ---------- night: a baja trophy truck crossing the far flats, lights blazing ---------- */
-// pickup-style trophy truck facing right: spare tyre in the open bed, cab, long hood, light bar on the front of the roof
-const TRUCK=[
-"...........LLL....",
-"..........kkkk....",
-"..TTT....kggggk...",
-"kkkkkkkkkkkkkkkkk.",
-"bbbbbbbbbbbbbbbbbh",
-"Rbbbbbbbbbbbbbbbbb",
-".kTTTk.....kTTTk..",
-"..TTT.......TTT..."];
-const TRUCKPAL={k:"#3c3438",b:"#b89a6a",g:"#16141c",T:"#121014"};
+// lifted pickup facing right: big off-road tyres, spare in the open bed, two-window cab, light bar on the roof
+const TRUCK=["...........LLL........", ".........kkkkkkk......", "........kggkgggkk.....", ".kk.TT..kggkggggkk....", "kkkkkkkkkkkkkkkkkkkkk.", "kbbbbbbbbbbbbbbbbbbbbk", "Rbbbbbbbbbbbbbbbbbbbbh", "kbbkTTTkbbbbbbbkTTTkbk", "kkkTTTTTkkkkkkkTTTTTkk", "..TTTwTTT.....TTTwTTT.", "..TTwwwTT.....TTwwwTT.", "..TTTwTTT.....TTTwTTT.", "...TTTTT.......TTTTT.."];
+const TRUCKPAL={k:"#3c3438",b:"#b89a6a",g:"#16141c",T:"#121014",w:"#5a5650",R:"#8a2a22"};
 function stepTruck(s){
   const T=s.truck||(s.truck={on:false,wait:RI(30,160)});
   if(!T.on){if(--T.wait>0)return null;T.on=true;T.marked=R()<.4;T.dir=R()<.5?1:-1;T.sp=.28+R()*.12;T.x=T.dir>0?-16:s.w+2;T.y=s.H0+RI(1,3)-TRUCK.length+5;T.jig=0}
@@ -1514,7 +1520,7 @@ function drawScene(){
     const f=!hold&&m.state==="hop"&&m.yo<0?CRITTERS.mouseHop:CRITTERS.mouseSit;
     sprtBob(g,f,m.x,m.y-10+m.yo,5,hold?bob:m.state==="nibble"&&s.t%4<2?1:0,m.dir<0,MOUSE)});
   const tk=N&&shown("baja_truck")?stepTruck(s):null;
-  if(tk)sprt(g,TRUCK,tk.x,tk.y,tk.dir<0,TRUCKPAL,"kbgT");
+  if(tk)sprt(g,TRUCK,tk.x,tk.y,tk.dir<0,TRUCKPAL,"kbgTwR");
   if(N)tint(G,"rgba(16,22,58,.42)");
   c.drawImage(G,0,0);
   if(tk&&!(s.truck&&s.truck.lift))truckLights(c,tk);
@@ -1548,6 +1554,7 @@ function drawScene(){
     if(feeding){const f=1-o.timer/o.feedT;                                     // lowered from the talons, then gobbled
       if(f<.8){const k=Math.min(1,f/.45),py=Math.round(o.nest.top+4+k*6);c.globalAlpha=f<.5?1:1-(f-.5)/.3;sprt(c,PREY,o.nest.x-6,py,false,MOUSE);c.globalAlpha=1}}
   }
+  if(N&&shown("owl")&&s.owl2)drawOwl2(c,s,s.owl2,s.disco);
   if(fade!==null)c.globalAlpha=Math.max(.15,fade);
   if(owlOn)(o.state==="home"?sprtBob:(c,r,x,y,sp,dy,f,p)=>sprt(c,r,x,y,f,p))(c,owlSprite,ox,oy,10,bob,false,N?OWLPAL_N:o.state==="home"&&o.peek>0?OWLPAL_PEEK:OWLPAL_DAY); // asleep and shadowed by day; awake with bright eyes at night
   c.globalAlpha=1;if(fade!==null){c.globalAlpha=1-fade;sprt(c,CRITTERS.owlHome,o.nest.x-8,o.nest.top+3,false,OWLPAL_N);c.globalAlpha=1}
@@ -1934,7 +1941,9 @@ function openWin(id){
     const ic=!isMob()&&document.querySelector(`.icon[data-win="${id}"]`);
     if(ic){const r=ic.getBoundingClientRect(),left=r.left<innerWidth/2,col=ic.parentElement.getBoundingClientRect();
       W.el.style.left=Math.max(16,Math.min(innerWidth-ww-16,left?Math.max(r.right,col.right)+14:Math.min(r.left,col.left)-ww-14))+"px";
-      W.el.style.top=Math.max(60,Math.min(innerHeight-260,r.top-8))+"px"}
+      // ...but lifted as far as needed (up to just under the banner) so the whole window fits above the taskbar
+      const bar=(document.querySelector(".taskbar")||{}).offsetHeight||44;W.el.style.maxHeight="";const wasH=W.el.hidden;W.el.hidden=false;const wh=W.el.offsetHeight||300;W.el.hidden=wasH;
+      W.el.style.top=Math.max(56,Math.min(innerHeight-260,r.top-8,innerHeight-bar-12-wh))+"px"}
     else{const off=(openOrder++%5)*22;
       W.el.style.left=Math.max(16,Math.min(innerWidth-ww-16,(W.x??(innerWidth-ww)/2)+off))+"px";
       W.el.style.top=Math.max(60,(W.y??90)+off)+"px"}
@@ -2319,7 +2328,7 @@ async function loadHistory(){
 }
 /* ---------- Biodiversity Report: a field census of the scene's wildlife and flora, plus the Cacti tab collection ---------- */
 const FAUNA=[
-  {key:"owl",common:"Great horned owl",sci:"Bubo virginianus",fam:"Strigidae",cls:"Aves",n:s=>1,when:"nocturnal; roosts in the saguaro cavity by day"},
+  {key:"owl",common:"Great horned owl",sci:"Bubo virginianus",fam:"Strigidae",cls:"Aves",n:s=>1+(s.night&&s.owl2&&shown("owl")?1:0),when:"nocturnal; roosts in the saguaro cavity by day; a second bird hoots from a neighbouring saguaro"},
   {key:"owl_chicks",common:"Great horned owl (owlets)",sci:"Bubo virginianus",fam:"Strigidae",cls:"Aves",n:s=>owlChickN(),when:"nestlings; visible while the parent hunts"},
   {key:"roadrunner",common:"Greater roadrunner",sci:"Geococcyx californianus",fam:"Cuculidae",cls:"Aves",n:s=>1,when:"diurnal; hunts scorpions and lizards"},
   {key:"ravens",common:"Common raven",sci:"Corvus corax",fam:"Corvidae",cls:"Aves",n:s=>(s.ravens||[]).length,when:"diurnal; soars, perches and roosts on saguaros"},
