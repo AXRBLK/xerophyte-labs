@@ -1768,7 +1768,7 @@ function moonFace(c,ox,oy,r,wink,a){
    const B=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
    const g=(u,v,cu,cv,ru,rv)=>Math.exp(-(((u-cu)/ru)**2+((v-cv)/rv)**2));
    {for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){const d=Math.hypot(x,y)/r;if(d>.86)continue;   // the craters soften away under the face
-       const f=Math.min(1,(.86-d)/.2)*a*.85,lit=.5-.5*((x+y)/(r*1.4));c.fillStyle=`rgba(${Math.round(226+20*lit)},${Math.round(218+20*lit)},${Math.round(190+20*lit)},${f.toFixed(2)})`;c.fillRect(ox+x,oy+y,1,1)}}
+       const f=Math.min(1,(.86-d)/.2)*a*.5,lit=.5-.5*((x+y)/(r*1.4));c.fillStyle=`rgba(${Math.round(226+20*lit)},${Math.round(218+20*lit)},${Math.round(190+20*lit)},${f.toFixed(2)})`;c.fillRect(ox+x,oy+y,1,1)}}
    for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){if(x*x+y*y>(r-1.5)*(r-1.5))continue;const u=x/r,v=y/r;
      let sh=0,hi=0;
      sh+=.9*g(u,v,-.3,-.2,.2,.11)+.9*g(u,v,.3,-.2,.2,.11);          // eye sockets under the brows
@@ -1780,11 +1780,11 @@ function moonFace(c,ox,oy,r,wink,a){
      sh+=.6*g(u,v,-.27,.33,.06,.16)+.6*g(u,v,.3,.3,.06,.16);          // folds from nose to mouth corners
      sh+=.5*g(u,v,-.45,.38,.18,.08)+.5*g(u,v,.45,.36,.18,.08);         // under the cheeks
      sh+=.55*g(u,v,0,.66,.28,.08);hi+=.4*g(u,v,0,.55,.18,.07);          // chin
-     sh*=1.6;hi*=1.4;const th=B[(y+r)&3][(x+r)&3]/16;
-     if(sh*a>th*.7+.1)c.fillStyle=sh*a>.7?"rgba(112,112,78,.7)":sh*a>.4?"rgba(138,136,98,.55)":"rgba(160,156,116,.4)";else if(hi*a>th*.7+.15)c.fillStyle="rgba(255,253,236,.7)";else continue;
+     sh*=1.15;hi*=1.1;const th=B[(y+r)&3][(x+r)&3]/16;
+     if(sh*a>th*.8+.18)c.fillStyle=sh*a>.7?"rgba(128,128,124,.42)":"rgba(150,150,146,.3)";else if(hi*a>th*.8+.22)c.fillStyle="rgba(252,252,246,.35)";else continue;   // soft greys, barely there
      c.fillRect(ox+x,oy+y,1,1)}
    const P=(x,y,col)=>{c.fillStyle=col;c.fillRect(Math.round(ox+x*r),Math.round(oy+y*r),1,1)};
-   const ink=`rgba(70,58,44,${(.85*a).toFixed(2)})`,white=`rgba(255,253,244,${(.9*a).toFixed(2)})`;
+   const ink=`rgba(104,104,100,${(.55*a).toFixed(2)})`,white=`rgba(252,252,248,${(.5*a).toFixed(2)})`;
    // eyes: almond whites with the irises glancing to the right; the wink squeezes the right eye shut
    [[-.3,-.2],[.3,-.2]].forEach(([ex,ey],k)=>{const px=Math.max(3,Math.round(r*.16));
      if(wink&&k===1){for(let i=-px;i<=px;i++)P(ex+i/r,ey+(Math.abs(i)<px-1?0:-1/r),ink);return}
@@ -1792,9 +1792,9 @@ function moonFace(c,ox,oy,r,wink,a){
      for(let i=-px;i<=px;i++)P(ex+i/r,ey-1/r-(Math.abs(i)>=px-1?-1/r:0),ink);   // upper lid
      P(ex+(px-2)/r,ey,ink);P(ex+(px-3)/r,ey,ink)});                             // irises, looking right
    // the smile: closed, sly, lifting more on the right
-   const m=Math.round(r*.27),Y0=.45;for(let i=-m;i<=m;i++){const t=i/m,yy=Y0-.2*t*t-(t>0?.03*t*t:0);   // a rounder, tighter smile, only a hint lopsided
-     P(i/r,yy,ink);if(Math.abs(t)<.55)P(i/r,yy+1/r,`rgba(110,94,70,${(.5*a).toFixed(2)})`)}
-   P(-(m+1)/r,Y0-.24,ink);P((m+1)/r,Y0-.27,ink);   // corners tucked into the cheeks
+   const m=Math.round(r*.27),Y0=.44;for(let i=-m;i<=m;i++){const t=i/m,yy=Y0-.07*t*t;   // a flat, contented line, just lifting at the ends
+     P(i/r,yy,ink)}
+   P(-(m+1)/r,Y0-.1,ink);P((m+1)/r,Y0-.1,ink);
  }
 // scorpion; with a beat, the head and pincers (front three columns) nod while body and tail stay put
 function drawScorp(ctx,p,frame,bob,pal){
