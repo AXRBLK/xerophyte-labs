@@ -92,6 +92,37 @@ body.still .hero h1 .cursor{animation:none}
 .menu{display:flex;gap:14px;padding:3px 8px;font-size:13px;border-bottom:1px solid var(--chrome-lo)}
 .menu u{text-decoration:none;border-bottom:1px solid currentColor}
 .cform{display:grid;gap:10px;margin-top:6px}
+/* contact: a picture postcard. Picture and message on the left, stamp (the send button), address and sender lines on the right */
+.cform.postcard{grid-template-columns:1.12fr 1fr;gap:0;margin:0;padding:16px 16px 14px;background:#f6efdc;color:#3a2e26;border:1px solid #d6c7a4;box-shadow:inset 0 0 0 6px #f6efdc,inset 0 0 0 7px #e2d4b2;position:relative}
+.postcard .pc-left{padding-right:16px;border-right:2px solid #cdbd96;display:flex;flex-direction:column;gap:8px;min-width:0}
+.postcard .pc-right{padding-left:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.postcard .pc-art{position:relative;border:3px solid #fff;box-shadow:1px 1px 0 #cdbd96,2px 2px 0 rgba(0,0,0,.08);line-height:0}
+.postcard .pc-art canvas{width:100%;height:auto;image-rendering:pixelated;display:block}
+.postcard .pc-greet{position:absolute;left:8px;top:6px;font:400 15px/1 var(--font-display);color:#fff6e0;text-shadow:1px 1px 0 #5a2a40,2px 2px 0 #5a2a40;text-transform:uppercase;letter-spacing:.02em}
+.postcard .pc-greet small{display:block;font:400 9px/1.4 var(--font-display);letter-spacing:.12em}
+.postcard .pc-caption{margin:0;font:13px/1.35 var(--font-ui);color:#6a5a48}
+.postcard .pc-msg textarea{min-height:120px;background:transparent repeating-linear-gradient(180deg,transparent 0 21px,#c9d6e6 21px 22px);border:0;padding:2px 2px;font:15px/22px var(--font-ui);color:#23304a;resize:vertical}
+.postcard .pc-to{font:13px/1.5 var(--font-data);color:#4a3a2c;padding:2px 0 4px 10px;border-left:2px solid #e2d4b2}
+.postcard .pc-to b{font-family:var(--font-display);font-weight:400;font-size:11px;color:#a83a2a}
+.postcard .pc-line{display:grid;grid-template-columns:auto 1fr;align-items:end;gap:8px;font:13px var(--font-ui);color:#6a5a48}
+.postcard .pc-line input{background:transparent;border:0;border-bottom:2px dotted #b8a888;padding:4px 2px 2px;font:15px var(--font-ui);color:#23304a}
+.postcard input:focus,.postcard textarea:focus{outline:2px dotted #a83a2a;outline-offset:2px}
+.postcard .sr{position:absolute;left:-9999px}
+.postcard .stamp{align-self:flex-end;position:relative;width:86px;height:104px;padding:7px 7px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;background:#fffdf6;border:5px dotted #f6efdc;outline:1px solid #e2d4b2;outline-offset:-5px;box-shadow:2px 2px 0 rgba(58,46,38,.18);cursor:pointer;transform:rotate(2deg);transition:transform .15s}
+.postcard .stamp:hover{transform:rotate(-1deg) translateY(-2px)}.postcard .stamp:active{transform:rotate(0) translateY(1px)}
+.postcard .stamp canvas{width:60px;height:68px;image-rendering:pixelated}
+.postcard .stamp-val{position:absolute;right:9px;top:9px;font:400 10px var(--font-display);color:#fff6e0;text-shadow:1px 1px 0 #5a2a40}
+.postcard .stamp-send{font:400 11px var(--font-display);color:#a83a2a;letter-spacing:.1em}
+.postcard .stamp:disabled{opacity:.7}
+.postcard .postmark{position:absolute;left:-30px;top:18px;width:66px;height:66px;border:2px solid rgba(40,50,90,.7);border-radius:50%;display:none;align-items:center;justify-content:center;flex-direction:column;font:400 12px/1.1 var(--font-display);color:rgba(40,50,90,.75);transform:rotate(-14deg);text-align:center;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0 6px,rgba(40,50,90,.0) 6px 7px)}
+.postcard .postmark small{font-size:8px}
+.postcard .stamp.posted .postmark{display:flex}
+.postcard .cmsg{font:13px var(--font-ui);color:#4a3a2c}
+.postcard .cmsg.ok{color:#2f7a3a}.postcard .cmsg.err{color:#a83a2a}
+body.night .cform.postcard input,body.night .cform.postcard textarea{background:transparent}
+body.night .postcard .pc-msg textarea{background:transparent repeating-linear-gradient(180deg,transparent 0 21px,#c9d6e6 21px 22px)}
+body.night .postcard .cmsg.ok{color:#2f7a3a}body.night .postcard .cmsg.err{color:#a83a2a}
+@media (max-width:640px){.cform.postcard{grid-template-columns:1fr}.postcard .pc-left{padding:0 0 12px;border-right:0;border-bottom:2px solid #cdbd96}.postcard .pc-right{padding:12px 0 0}.postcard .stamp{width:70px;height:86px}.postcard .stamp canvas{width:46px;height:52px}}
 .cform label{display:grid;gap:3px;font:13px var(--font-ui);color:var(--ink)}.cform label b{color:#a83a2a;font-weight:400}
 .cform input,.cform textarea{width:100%;box-sizing:border-box;padding:6px 7px;font:14px var(--font-data);color:var(--ink);background:#fffdf8;border:2px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo);border-radius:0}
 .cform textarea{resize:vertical;min-height:96px}
@@ -2631,21 +2662,31 @@ function renderLog(body,status){
 function renderPage(p){return body=>{
   const isContact=/^contact/i.test(String(p.title||"").trim());
   if(isContact&&body.dataset.built)return;          // keep a half-written message when the window is reopened
+  if(isContact){body.innerHTML="";body.dataset.built="1";contactForm(body,String(p.body||"").trim());return}
   body.innerHTML=String(p.body||"").split(/\n\s*\n/).map(par=>`<p>${linkify(par).replace(/\n/g,"<br>")}</p>`).join("")
     +(p.link?`<p><a href="${esc(p.link)}" target="_blank" rel="noopener">${esc(p.link)}</a></p>`:"");
   if(isContact){body.dataset.built="1";contactForm(body)}
 }}
 /* ---------- contact form: sends to Settings › contact_email through FormSubmit (no server needed) ---------- */
-function contactForm(body){
+function contactForm(body,caption){
   const to=String(SET.contact_email||"").trim();
-  const f=document.createElement("form");f.className="cform";f.noValidate=true;
-  f.innerHTML=`<label><span>Email <b>*</b></span><input name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" required placeholder="you@example.com"></label>
-    <label><span>Phone</span><input name="phone" type="tel" autocomplete="tel" placeholder="optional"></label>
-    <label><span>Subject</span><input name="subject" type="text" maxlength="120" placeholder="Cuttings, pups, rainfall…"></label>
-    <label><span>Message <b>*</b></span><textarea name="message" rows="6" required></textarea></label>
-    <input name="_honey" type="text" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
-    <div class="crow"><button type="submit">Send ✉</button><span class="cmsg" role="status"></span></div>`;
+  const f=document.createElement("form");f.className="cform postcard";f.noValidate=true;
+  f.innerHTML=`<div class="pc-left">
+      <div class="pc-art"><canvas width="160" height="100" aria-hidden="true"></canvas><span class="pc-greet"><small>Greetings from</small>${esc(SET.location_short||"Anza-Borrego")}</span></div>
+      ${caption?`<p class="pc-caption">${esc(caption)}</p>`:""}
+      <label class="pc-msg"><span class="sr">Message (required)</span><textarea name="message" rows="6" required placeholder="Dear Xerophyte Labs,"></textarea></label>
+    </div>
+    <div class="pc-right">
+      <button type="submit" class="stamp" title="Send" aria-label="Send"><canvas width="30" height="34" aria-hidden="true"></canvas><span class="stamp-val">29¢</span><span class="stamp-send">SEND</span><span class="postmark" aria-hidden="true">SENT<br><small></small></span></button>
+      <div class="pc-to"><b>TO:</b> Xerophyte Labs<br>Field Station<br>${esc(SET.location_name||"Anza-Borrego Desert, CA")}</div>
+      <label class="pc-line"><span>From <b>*</b></span><input name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" required placeholder="you@example.com"></label>
+      <label class="pc-line"><span>Phone</span><input name="phone" type="tel" autocomplete="tel" placeholder="optional"></label>
+      <label class="pc-line"><span>Re:</span><input name="subject" type="text" maxlength="120" placeholder="Cuttings, pups, rainfall…"></label>
+      <span class="cmsg" role="status"></span>
+    </div>
+    <input name="_honey" type="text" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">`;
   body.appendChild(f);
+  paintPostcard(f.querySelector(".pc-art canvas"),f.querySelector(".stamp canvas"));
   // every status line scrolls into view, so on a phone it isn't left hidden under the keyboard or below the fold
   const msg=f.querySelector(".cmsg"),btn=f.querySelector("button"),say=(t,cls)=>{msg.textContent=t;msg.className="cmsg "+(cls||"");try{msg.scrollIntoView({block:"nearest",behavior:"smooth"})}catch(e){}};
   if(!to){say("Not set up yet: add a contact_email row to the Settings tab.","err");btn.disabled=true;return}
@@ -2662,7 +2703,8 @@ function contactForm(body){
         body:JSON.stringify({email:d.email,phone:d.phone||"—",subject:d.subject||"—",message:d.message,
           _subject:"Xerophyte Labs: "+(d.subject||"new message"),_replyto:d.email,_template:"table",_captcha:"false"})});
       const j=await r.json().catch(()=>({}));
-      if(r.ok&&String(j.success)!=="false"){f.reset();say("Sent! Thanks, I'll write back soon.","ok")}
+      if(r.ok&&String(j.success)!=="false"){f.reset();say("Sent! Thanks, I'll write back soon.","ok");
+        const st=f.querySelector(".stamp");st.querySelector(".postmark small").textContent=new Date().toLocaleDateString(undefined,{month:"short",day:"numeric"}).toUpperCase();st.classList.add("posted")}
       else if(/activat/i.test(j.message||"")){
         // FormSubmit holds messages until the owner clicks the one-time activation link it emails them
         say("Almost there: this form is waiting for a one-time activation by the site owner. Your message wasn't delivered yet, so please try again later.","err");
@@ -2675,6 +2717,38 @@ function contactForm(body){
       msg.innerHTML=`Couldn't send from here${err&&err.message&&!/^\d+$/.test(err.message)?` (${esc(err.message)})`:""}. <a href="${q}">Open it in your mail app</a> instead.`;msg.className="cmsg err";
     }finally{btn.disabled=false}
   };
+}
+
+/* the postcard's picture: a sunset over the Anza-Borrego badlands, a big saguaro, prickly pear with fruit; and a tiny stamp */
+function paintPostcard(cv,st){
+  if(cv){const c=cv.getContext("2d"),W=160,H=100,R=(a,b)=>a+Math.random()*(b-a),px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)},rect=(x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h)};
+    const sky=["#2a2142","#3d2a55","#5a3563","#7f4268","#a8546a","#cf6a64","#e8885c","#f2a85c","#f7c46c"];
+    for(let y=0;y<70;y++){const t=y/70*(sky.length-1),i=Math.floor(t),fr=t-i;for(let x=0;x<W;x++)px(x,y,((x+y)%2&&fr>.5)||fr>.75?sky[Math.min(sky.length-1,i+1)]:sky[i])}
+    for(let i=0;i<28;i++)px(Math.floor(R(0,W)),Math.floor(R(0,22)),"#e8dcf0");
+    const sx=112,sy=60,sr=17;for(let y=-sr;y<=0;y++)for(let x=-sr;x<=sr;x++)if(x*x+y*y<=sr*sr&&!((y>-8)&&(y%3===0)))px(sx+x,sy+y,y<-10?"#ffe9a0":"#ffd27a");   // striped setting sun
+    const ridge=(base,amp,fq,col,ph)=>{for(let x=0;x<W;x++){const y=Math.round(base-amp*(Math.sin(x*fq+ph)*.6+Math.sin(x*fq*2.7+ph*2)*.4));rect(x,y,1,H-y,col)}};
+    ridge(62,6,.045,"#8a5a78",1);ridge(68,4,.07,"#6a4462",3);ridge(73,3,.11,"#9a6a52",5);
+    for(let y=74;y<H;y++)for(let x=0;x<W;x++)px(x,y,(x*7+y*13)%11===0?"#c8965e":(y>88?"#d8ac72":"#e2bc84"));
+    for(let i=0;i<40;i++)px(Math.floor(R(0,W)),Math.floor(R(76,H)),"#b8865a");
+    const sag=(x,base,h,w,pal)=>{for(let i=0;i<w;i++)rect(x+i,base-h,1,h,i===0?pal[2]:i===w-1?pal[0]:i%2?pal[1]:pal[2]);rect(x+1,base-h-1,w-2,1,pal[2]);
+      for(let i=1;i<w-1;i+=2)for(let y=base-h+2;y<base;y+=3)px(x+i,y,pal[3])};
+    const G=["#2e4a2c","#3e6a3c","#5a8a50","#8ab47a"];
+    sag(18,78,9,3,["#5a4a62","#6a5872","#7a6a82","#8a7a92"]);sag(140,76,7,2,["#5a4a62","#6a5872","#7a6a82","#8a7a92"]);   // far saguaros in the haze
+    sag(40,96,64,10,G);                                                   // the big one
+    const arm=(x0,y0,out,up,w,dir)=>{for(let k=0;k<out;k++)rect(dir>0?x0+k:x0-k-w+1,y0,1,w,G[1]);const ax=dir>0?x0+out:x0-out-w+1;sag(ax,y0+w,up+w,w,G)};
+    arm(50,52,6,18,6,1);arm(40,62,5,14,6,-1);arm(50,40,4,10,5,1);
+    for(let y=34;y<96;y+=4){px(39,y,"#c8d8b0");px(50,y+2,"#c8d8b0")}    // spines catching the light
+    const pad=(cx,cy,rx,ry)=>{for(let y=-ry;y<=ry;y++)for(let x=-rx;x<=rx;x++){const v=x*x/(rx*rx)+y*y/(ry*ry);if(v<=1)px(cx+x,cy+y,v>.7?"#3e6a3c":x<0?"#7aa860":"#5a8a50")}};
+    pad(120,92,7,6);pad(112,84,5,6);pad(128,82,5,7);pad(121,76,4,5);
+    [[110,77],[113,77],[127,74],[130,74],[121,70]].forEach(([x,y])=>{rect(x,y,2,2,"#c83a5a");px(x,y,"#e86a8a")});   // ripe tunas
+    for(let i=0;i<6;i++){const x=70+i*3;rect(x,90-i%2,2,6,"#e8dca8");px(x-1,92,"#f4ecc8");px(x+2,91,"#f4ecc8")}  // a little cholla
+  }
+  if(st){const c=st.getContext("2d"),px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)};
+    for(let y=0;y<34;y++)for(let x=0;x<30;x++)px(x,y,y<12?"#f0b060":y<20?"#e08a58":"#c86a50");
+    for(let y=8;y<16;y++)for(let x=8;x<22;x++)if((x-15)**2+(y-16)**2<=36)px(x,y,"#ffe08a");
+    for(let y=20;y<34;y++)for(let x=0;x<30;x++)px(x,y,y<26?"#9a6048":"#7a4838");
+    const g="#2e5a2c",G2="#4a8a44";for(let y=6;y<32;y++){px(13,y,g);px(14,y,G2);px(15,y,G2);px(16,y,g)}
+    for(let x=9;x<13;x++)px(x,18,g);for(let y=12;y<19;y++){px(9,y,g);px(10,y,G2)}for(let x=17;x<21;x++)px(x,14,g);for(let y=9;y<15;y++){px(20,y,g);px(19,y,G2)}}
 }
 
 /* ---------- build desktop ---------- */
@@ -2723,7 +2797,7 @@ function build(){
   place(L,"today","Weather Now","sunthermo");place(L,"bio","Biodiversity Report","journal");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
     const pic=/^contact/i.test(String(p.title).trim())?"postcard":/^about/i.test(String(p.title).trim())?"campfire":/^field\s*notes/i.test(String(p.title).trim())?"binoculars":(p.icon||"folder").toLowerCase();
-    const id="p"+i;defineWindow(id,{title:p.title,icon:pic,w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
+    const id="p"+i;defineWindow(id,{title:p.title,icon:pic,w:pic==="postcard"?760:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
     place(L,id,p.title,pic);
   });
   // icons run alphabetically: down the left column, then down the right (one grid on phones)
