@@ -1551,7 +1551,7 @@ function drawDisco(c,s){
 const RIDERS=[["#c8503c","#7a3428","#f4f0e8"],["#d8b048","#8a6a28","#1c1814"],["#4a86b8","#2a4e70","#f08a2a"],["#e8e4dc","#8a8680","#d83a3a"],["#5aa058","#2e6034","#f0d040"]];
 const BIKE_CACHE={};
 // dirt bike: kicked-up rear fender, long flat seat, tall forks, high front fender, number plate, big wheels; rider standing on the pegs
-const MINI_BIKE=[[".........AHHHVV.....", ".........HHHGg......", "..........HHHV......", ".........JJJJ.......", ".........JJ.kkk.....", "bb......L....P......", ".bbbkkkkLkbbbP......", "ssbbbbbbbLbbbPs...b.", "......SsSL....sbbbb.", ".kkkkssSLS....kskkk.", "kk..skkkk....kks..kk", "k..s..k......k..s..k", "k.sss.k......k.sss.k", "k..s..k......k..s..k", "kk...kk......kk...kk", ".kkkkk........kkkkk."],[".........AHHHVV.....", ".........HHHGg......", "..........HHHV......", ".........JJJJ.......", ".........JJ.kkk.....", "bb......L....P......", ".bbbkkkkLkbbbP......", "ssbbbbbbbLbbbPs...b.", "......SsSL....sbbbb.", ".kkkkssSLS....kskkk.", "kk..skkkk....kks..kk", "k.s.s.k......k.sss.k", "k..s..k......k..s..k", "k.s.s.k......k.s.s.k", "kk...kk......kk...kk", ".kkkkk........kkkkk."]];
+const MINI_BIKE=[[".......AHHHVV.......", ".......HHHGg........", "........HHHV........", ".......JJJJ.........", ".......JJ.kkkk......", "bb......L....P......", ".bbbkkkkLkbbbP......", "ssbbbbbbbLbbbPs...b.", "......SsSL....sbbbb.", ".kkkkssSLS....kskkk.", "kk..skkkk....kks..kk", "k..s..k......k..s..k", "k.sss.k......k.sss.k", "k..s..k......k..s..k", "kk...kk......kk...kk", ".kkkkk........kkkkk."],[".......AHHHVV.......", ".......HHHGg........", "........HHHV........", ".......JJJJ.........", ".......JJ.kkkk......", "bb......L....P......", ".bbbkkkkLkbbbP......", "ssbbbbbbbLbbbPs...b.", "......SsSL....sbbbb.", ".kkkkssSLS....kskkk.", "kk..skkkk....kks..kk", "k.s.s.k......k.sss.k", "k..s..k......k..s..k", "k.s.s.k......k.s.s.k", "kk...kk......kk...kk", ".kkkkk........kkkkk."]];
 function bikeSprite(i,frame){
   const key=i+":"+frame;if(BIKE_CACHE[key])return BIKE_CACHE[key];
   const cv=layer(24,18),c=cv.getContext("2d"),[hc,jc]=RIDERS[i];
@@ -1590,13 +1590,26 @@ function drawBikes(c,s){
   const g=s.bikes;if(!g.riders)g.riders=lineup();
   if(g.wait>0){g.wait--;return}
   g.x+=1.7;
-  g.riders.forEach(({ri:i,off})=>{const [hc,jc,ac]=RIDERS[i];
+  // each rider rides the ridge: up a steep climb the front wheel lifts (a wheelie), and cresting it they launch,
+  // fly a short arc and land; the bike is drawn tilted about its rear wheel
+  g.riders.forEach(r=>{const i=r.ri,off=r.off,[hc,jc,ac]=RIDERS[i];
     const x=Math.round(g.x-off);if(x<-20||x>s.w+2)return;
-    const rl=s.ridge[Math.max(0,Math.min(s.w-1,x+3))],rr=s.ridge[Math.max(0,Math.min(s.w-1,x+16))];
-    const hop=(Math.floor(s.t/3)+i*5)%17===0?2:(Math.floor(s.t/3)+i*5)%17===1?1:0;
-    const y=Math.round((rl+rr)/2)-16-hop;
-    if(s.t%2===0)s.dust.push({x:x,y:y+15,life:5});
-    sprt(c,MINI_BIKE[s.t%2],x,y,false,{H:hc,V:hc,A:ac,G:"#3a78c8",g:"#8ad0f0",J:jc,b:hc,s:"#c8c4bc",L:"#3a3634",P:"#f0ece4",k:"#1c1814",S:"#8a8680"});
+    const rg=k=>s.ridge[Math.max(0,Math.min(s.w-1,k))];
+    const rl=rg(x+4),rr=rg(x+19),ground=(rl+rr)/2,climb=(rg(x+4)-rg(x+24))/20;   // positive going uphill
+    if(r.h==null){r.h=0;r.vy=0;r.ang=0;r.wasClimb=0}
+    if(r.h<0||r.vy<0){r.vy+=.32;r.h=Math.min(0,r.h+r.vy);if(r.h>=0){r.h=0;r.vy=0;s.dust.push({x:x+2,y:ground-1,life:6},{x:x+14,y:ground-1,life:6})}}
+    else if(r.wasClimb>.32&&climb<.12){r.vy=-2.1-Math.min(1.4,r.wasClimb*2.5);r.h=-.01}             // off the lip!
+    r.wasClimb=r.h<0?0:Math.max(climb,r.wasClimb*.8);
+    const air=r.h<0,target=air?(r.vy<0?-.32:-.08):climb>.25?-.42:climb>.12?-.18:climb<-.25?.12:0;   // nose up on climbs and in flight
+    r.ang+=(target-r.ang)*.35;
+    const hop=!air&&(Math.floor(s.t/3)+i*5)%17===0?1:0;
+    const y=Math.round(ground)-16-hop+Math.round(r.h);
+    if(s.t%2===0&&!air)s.dust.push({x:x,y:y+15,life:5});
+    const pal={H:hc,V:hc,A:ac,G:"#3a78c8",g:"#8ad0f0",J:jc,b:hc,s:"#c8c4bc",L:"#3a3634",P:"#f0ece4",k:"#1c1814",S:"#8a8680"};
+    if(Math.abs(r.ang)<.04){sprt(c,MINI_BIKE[s.t%2],x,y,false,pal);return}
+    const key="b"+i+":"+(s.t%2);let cv=BIKE_CACHE[key];
+    if(!cv){cv=BIKE_CACHE[key]=layer(20,16);sprt(cv.getContext("2d"),MINI_BIKE[s.t%2],0,0,false,pal)}
+    c.save();c.imageSmoothingEnabled=false;c.translate(x+4,y+13);c.rotate(r.ang);c.drawImage(cv,-4,-13);c.restore();   // pivot on the rear axle
   });
   s.dust=s.dust.filter(d=>{d.life--;d.x-=.6;d.y-=.2;c.fillStyle=d.life>3?"#d8c0a0":"#b8a088";c.fillRect(Math.round(d.x),Math.round(d.y),d.life>3?2:1,1);return d.life>0});
   if(g.x-g.riders[g.riders.length-1].off>s.w+20){g.x=-30;g.wait=RI(60,160);g.riders=lineup()}
