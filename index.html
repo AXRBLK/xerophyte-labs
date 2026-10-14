@@ -406,6 +406,8 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 #w-radio .amp-btns .pico,.miniamp .pico{color:#0c1a0c;filter:none}
 /* bigger player buttons: flat bright neon green with black icons */
 #w-radio .amp-btns button,#w-radio .amp-eject{min-width:42px!important;height:32px!important;background:#2cff3c!important;border-color:#9dffa4 #12a01e #12a01e #9dffa4!important;box-shadow:none}
+.miniamp button.on:not(.mini-lcd){background:#14b824!important;border-color:#0a6a14 #7af084 #7af084 #0a6a14!important;box-shadow:inset 1px 1px 0 rgba(0,0,0,.25)}
+.miniamp button.on .pico{transform:translate(1px,1px)}
 #w-radio .amp-btns button.on{background:#14b824!important;border-color:#0a6a14 #7af084 #7af084 #0a6a14!important;box-shadow:inset 1px 1px 0 rgba(0,0,0,.25)}
 #w-radio .amp-btns button.on .pico{transform:translate(1px,1px)}
 #w-radio .amp-btns button:active,#w-radio .amp-eject:active{background:#1fd92e!important;border-color:#12a01e #9dffa4 #9dffa4 #12a01e!important}
@@ -445,7 +447,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
   <button class="start" id="startbtn" aria-expanded="false" aria-controls="startmenu">Start</button>
   <div class="tasks" id="tasks"></div>
   <div class="miniamp" id="miniamp" role="group" aria-label="Radio player" hidden>
-    <button type="button" onclick="AMP.prev()" aria-label="Previous / restart" title="Previous (restarts the song)"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="1" y="2" width="2" height="8"/><path d="M11 2v8L4 6z"/></svg></button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><path d="M3 1.5v9L10.5 6z"/></svg></button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="2" width="3" height="8"/><rect x="7" y="2" width="3" height="8"/></svg></button><button type="button" onclick="AMP.next()" aria-label="Next song" title="Next song"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="9" y="2" width="2" height="8"/><path d="M1 2v8l7-4z"/></svg></button>
+    <button type="button" onclick="AMP.prev()" aria-label="Previous / restart" title="Previous (restarts the song)"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="1" y="2" width="2" height="8"/><path d="M11 2v8L4 6z"/></svg></button><button type="button" id="miniPlay" onclick="AMP.play()" aria-label="Play" title="Play"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><path d="M3 1.5v9L10.5 6z"/></svg></button><button type="button" id="miniPause" onclick="AMP.pause()" aria-label="Pause" title="Pause"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="2" width="3" height="8"/><rect x="7" y="2" width="3" height="8"/></svg></button><button type="button" onclick="AMP.next()" aria-label="Next song" title="Next song"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="9" y="2" width="2" height="8"/><path d="M1 2v8l7-4z"/></svg></button>
     <button type="button" class="mini-lcd" onclick="openWin('radio')" title="Show the player"><span id="miniTime">■ 00:00</span><span class="mini-title" id="miniTitle"></span></button>
   </div>
   <div class="tray"><button class="modebtn" id="modebtn" type="button"></button><button class="modebtn" id="discobtn" type="button" aria-pressed="false" title="Enable Disco-mode" aria-label="Enable Disco-mode"><span class="ball" aria-hidden="true">🪩</span></button><span id="clock"></span></div>
@@ -838,7 +840,7 @@ function paintSky(){
       // the near (second-layer) saguaros get just a hint of spines: faint dots down every other rib
       if(depth===2&&ww>=4)for(let i=1;i<ww-1;i+=2)for(let y=y0+3+((i*2)%4);y<y0+len-1;y+=4)px(x0+i,y,i<ww/2?"#93a684":"#6e8262")};
     column(x-(tw>>1),base-hh,tw,hh);
-    if(depth>0&&hh>=16)perches.push({x:x,y:base-hh});
+    if(depth>0&&hh>=16)perches.push({x:x,y:base-hh,top:true,hh});
     if(depth>0&&rnd()<.8)crown={x:x,y:base-hh,big:depth===2,tw};
     const arms=hh>40?ri(2,3):hh>18?ri(1,2):hh>10?ri(0,1):0;
     let side=rnd()<.5?-1:1;
@@ -957,6 +959,9 @@ function paintSky(){
   const stars=[];for(let i=0;i<w*(N?.75:.3);i++)stars.push({x:ri(0,w),y:ri(0,Math.round(H0*(N?.7:.34))),ph:rnd()*6.28,sp:.04+rnd()*.12,big:rnd()<(N?.08:.12)});
   const toads=[];for(let i=0;i<wildCount("horned_lizards",Math.max(3,Math.round(2*area)));i++)toads.push({x:ri(10,w-20),y:H0+ri(Math.round(span*.6),span-4),dir:rnd()<.5?1:-1,state:"still",timer:ri(10,80),bob:0});
   const usable=perches.filter(p=>p.y>8);
+  // the hooting neighbour claims the crown of the biggest saguaro (away from the nest) before the ravens pick their roosts
+  const owlPerch=N?usable.filter(p=>p.top&&Math.abs(p.x-nest.x)>60&&p.x>10&&p.x<w-14).sort((a,b)=>b.hh-a.hh)[0]:null;
+  if(owlPerch)usable.splice(usable.indexOf(owlPerch),1);
   const RAVEN_K=[1,.72,.86,.64,1,.72];   // near ravens full size, farther ones smaller and slower
   const ravens=[...Array(wildCount("ravens",3)).keys()].map(i=>{const k=RAVEN_K[i%RAVEN_K.length];
     return {k,x:ri(0,w),y:0,cy:ri(Math.round(H0*(k<1?.1:.14)),Math.round(H0*(k<1?.42:.5))),vx:(i%2?-1:1)*(.5+rnd()*.4)*(.55+.45*k),state:"soar",flap:0,ph:i*40,timer:0,face:1}});
@@ -969,8 +974,7 @@ function paintSky(){
   Object.assign(SCENE,{layers:{sky,orb,clouds,ground,plants,bloom:bloomCv,flowers:flowerCv},flowers,sr,H0,span,ctx:cv.getContext("2d"),groundA:layer(w,h),airA:layer(w,h),w,h,t:0,stars,toads,ravens,perches:usable,scorps,bats,mice,shoot:[],groundY,blooms:N?blooms:[]});
   SCENE.owl={nest,state:"home",blink:0,timer:RI(40,120),path:[],x:0,y:0,face:1};
   // night: a second owl just sits on top of a neighbouring saguaro, watching and hooting now and then
-  {const used=new Set(ravens.map(r=>r.target)),cand=usable.filter(p=>!used.has(p)&&Math.abs(p.x-nest.x)>60&&p.x>10&&p.x<w-14).sort((a,b)=>a.y-b.y);
-   SCENE.owl2=N&&cand.length?{p:cand[Math.min(cand.length-1,ri(0,1))],timer:ri(20,90),hoot:0,blink:0,notes:[]}:null}
+  SCENE.owl2=owlPerch?{p:owlPerch,timer:ri(20,90),hoot:0,blink:0,notes:[]}:null;
   SCENE.runner={x:Math.round(w*.4),y:H0+Math.round(span*.52),dir:1,state:N?"asleep":"stand",timer:20};
   SCENE.key=key;
   if(prev){["toads","ravens","scorps","mice","bats"].forEach(k=>{if(prev[k]&&SCENE[k])SCENE[k]=SCENE[k].map((c,i)=>prev[k][i]||c)});
@@ -1126,8 +1130,9 @@ function stepOwl(o,s){
     const tg=o.path[0];if(!tg){o.state="home";o.timer=RI(40,160);return}
     if(tg.prey&&!tg.prey.caught){tg.x=tg.prey.x+6;tg.y=tg.prey.y-14}                 // track the frozen mouse
     if(tg.prey&&tg.prey.escape&&Math.hypot(tg.x-o.x,tg.y-o.y)<22){const m=tg.prey;    // ...which bolts: the owl swoops on empty sand
-      m.marked=false;m.escape=false;m.state="hop";m.fast=true;m.hops=RI(6,9);m.ht=0;m.dir=m.x<o.x?-1:1;tg.prey=null}
+      m.marked=false;m.escape=false;m.state="hop";m.fast=true;m.hops=RI(6,9);m.ht=0;m.dir=m.x<o.x?-1:1;tg.prey=null;tg.swoop=true}
     const dx=tg.x-o.x,dy=tg.y-o.y,d=Math.hypot(dx,dy);
+    o.strike=!!(tg.prey||tg.swoop)&&d<34;                                             // legs swing down, talons open, for the last stretch
     if(d<1.6){
       if(tg.prey){const m=tg.prey;m.marked=false;
         if(!m.caught&&Math.hypot(m.x+6-o.x,m.y-14-o.y)<6){m.caught=true;m.respawn=RI(500,1100);o.prey=true;
@@ -1592,7 +1597,12 @@ function drawScene(){
   if(fade!==null)c.globalAlpha=Math.max(.15,fade);
   if(owlOn)(o.state==="home"?sprtBob:(c,r,x,y,sp,dy,f,p)=>sprt(c,r,x,y,f,p))(c,owlSprite,ox,oy,10,bob,false,N?OWLPAL_N:o.state==="home"&&o.peek>0?OWLPAL_PEEK:OWLPAL_DAY); // asleep and shadowed by day; awake with bright eyes at night
   c.globalAlpha=1;if(fade!==null){c.globalAlpha=1-fade;sprt(c,CRITTERS.owlHome,o.nest.x-8,o.nest.top+3,false,OWLPAL_N);c.globalAlpha=1}
-  if(carry)sprt(c,PREY,Math.round(o.x)-5,Math.round(o.y)+8,false,MOUSE);
+  if(owlOn&&o.state==="fly"&&(o.strike||carry)){                                // feathered legs reaching down, talons spread (or gripping)
+    const x=Math.round(o.x),y=Math.round(o.y)+8,P=N?OWLPAL_N:OWLPAL;
+    [-3,2].forEach(dx=>{c.fillStyle=P.T;c.fillRect(x+dx,y,2,3);c.fillStyle=P.B;c.fillRect(x+dx,y+2,2,1);c.fillStyle=P.k;
+      if(carry){c.fillRect(x+dx-1,y+3,1,2);c.fillRect(x+dx+2,y+3,1,2)}                // curled round the mouse
+      else{c.fillRect(x+dx-1,y+3,4,1);c.fillStyle=P.c;c.fillRect(x+dx-2,y+4,1,1);c.fillRect(x+dx,y+4,1,1);c.fillRect(x+dx+2,y+4,1,1);c.fillRect(x+dx+3,y+4,1,1)}})}   // toes spread wide, pale hooked claws
+  if(carry)sprt(c,PREY,Math.round(o.x)-5,Math.round(o.y)+11,false,MOUSE);
 }
 
 /* ---------- Desert Map: pixel-rendered satellite/terrain with live weather ---------- */
@@ -2266,6 +2276,8 @@ function updateMini(){
   ampText();
 }
 function ampUpdate(){updateMini();ampText();spinDeck();syncMedia();
+  {const st=SPOT.state,mp=document.getElementById("miniPlay"),mz=document.getElementById("miniPause");     // the mini player's play/pause stay held down too
+   if(mp)mp.classList.toggle("on",!!SPOT.ctl&&!st.paused);if(mz)mz.classList.toggle("on",!!SPOT.ctl&&st.paused&&!SPOT.stopped&&st.pos>0)}
   const s=SPOT.state,$=id=>document.getElementById(id);if(!$("ampTime"))return;
   $("ampTime").textContent=fmtT(s.pos);
   $("ampState").textContent=s.buffering?"LOADING":!s.paused?"PLAY":SPOT.stopped||!s.pos?"STOP":"PAUSE";
