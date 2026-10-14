@@ -1238,8 +1238,8 @@ function drawDisco(c,s){
 /* daytime disco: a gang of dirt bikes tearing along the ridge of the near range, kicking up dust */
 const RIDERS=[["#c8503c","#7a3428"],["#d8b048","#8a6a28"],["#4a86b8","#2a4e70"],["#e8e4dc","#8a8680"],["#5aa058","#2e6034"]];
 const BIKE_CACHE={};
-// rally raider: tall windscreen and headlight fairing, big tank, rear rack, side number plate, big knobby wheels
-const MINI_BIKE=[[".........HH........", "........HHHV..G....", "........JJ....GG...", ".......JJJJk.bbbW..", "..ss....JJ.kbbbbW..", ".bbbbbbbbbbbbbb....", "...bPPbsLLssb.s....", ".kkkkPPkL....kksk..", "kk..kk...L..kk..kk.", "k.ss.k...k..k.ss.k.", "k.ss.k......k.ss.k.", "kk..kk......kk..kk.", ".kkkk........kkkk.."],[".........HH........", "........HHHV..G....", "........JJ....GG...", ".......JJJJk.bbbW..", "..ss....JJ.kbbbbW..", ".bbbbbbbbbbbbbb....", "...bPPbsLLssb.s....", ".kkkkPPkL....kkkk..", "kk..kk...L..kk..kk.", "k.s..k...k..k.s..k.", "k..s.k......k..s.k.", "kk..kk......kk..kk.", ".kkkk........kkkk.."]];
+// dirt bike: kicked-up rear fender, long flat seat, tall forks, high front fender, number plate, big wheels; rider standing on the pegs
+const MINI_BIKE=[["..........HHV.......", "..........HHH.......", ".........JJJJ.......", ".........JJ.kkk.....", "bb......L....P......", ".bbbkkkkLkbbbP......", "ssbbbbbbbLbbbPs...b.", "......SsSL....sbbbb.", ".kkkkssSLS....kskkk.", "kk..skkkk....kks..kk", "k..s..k......k..s..k", "k.sss.k......k.sss.k", "k..s..k......k..s..k", "kk...kk......kk...kk", ".kkkkk........kkkkk."],["..........HHV.......", "..........HHH.......", ".........JJJJ.......", ".........JJ.kkk.....", "bb......L....P......", ".bbbkkkkLkbbbP......", "ssbbbbbbbLbbbPs...b.", "......SsSL....sbbbb.", ".kkkkssSLS....kskkk.", "kk..skkkk....kks..kk", "k.s.s.k......k.sss.k", "k..s..k......k..s..k", "k.s.s.k......k.s.s.k", "kk...kk......kk...kk", ".kkkkk........kkkkk."]];
 function bikeSprite(i,frame){
   const key=i+":"+frame;if(BIKE_CACHE[key])return BIKE_CACHE[key];
   const cv=layer(24,18),c=cv.getContext("2d"),[hc,jc]=RIDERS[i];
@@ -1280,11 +1280,11 @@ function drawBikes(c,s){
   g.x+=1.7;
   g.riders.forEach(({ri:i,off})=>{const [hc,jc]=RIDERS[i];
     const x=Math.round(g.x-off);if(x<-20||x>s.w+2)return;
-    const rl=s.ridge[Math.max(0,Math.min(s.w-1,x+3))],rr=s.ridge[Math.max(0,Math.min(s.w-1,x+15))];
+    const rl=s.ridge[Math.max(0,Math.min(s.w-1,x+3))],rr=s.ridge[Math.max(0,Math.min(s.w-1,x+16))];
     const hop=(Math.floor(s.t/3)+i*5)%17===0?2:(Math.floor(s.t/3)+i*5)%17===1?1:0;
-    const y=Math.round((rl+rr)/2)-13-hop;
-    if(s.t%2===0)s.dust.push({x:x,y:y+12,life:5});
-    sprt(c,MINI_BIKE[s.t%2],x,y,false,{H:hc,V:"#1c1814",J:jc,b:hc,s:"#c8c4bc",L:"#3a3634",P:"#f0ece4",k:"#1c1814",G:"#9cc0d4",W:"#fff4c8"});
+    const y=Math.round((rl+rr)/2)-15-hop;
+    if(s.t%2===0)s.dust.push({x:x,y:y+14,life:5});
+    sprt(c,MINI_BIKE[s.t%2],x,y,false,{H:hc,V:"#1c1814",J:jc,b:hc,s:"#c8c4bc",L:"#3a3634",P:"#f0ece4",k:"#1c1814",S:"#8a8680"});
   });
   s.dust=s.dust.filter(d=>{d.life--;d.x-=.6;d.y-=.2;c.fillStyle=d.life>3?"#d8c0a0":"#b8a088";c.fillRect(Math.round(d.x),Math.round(d.y),d.life>3?2:1,1);return d.life>0});
   if(g.x-g.riders[g.riders.length-1].off>s.w+20){g.x=-30;g.wait=RI(60,160);g.riders=lineup()}
