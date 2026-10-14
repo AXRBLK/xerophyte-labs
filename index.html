@@ -1471,7 +1471,7 @@ function swayLayer(c,cv,list,s,box){
   list.forEach((f,i)=>{const [x,y,w,h]=box(f),dx=Math.round(Math.sin(t*.8+i*1.7+f.x*.13)*1.15);c.drawImage(cv,x,y,w,h,x+dx,y,w,h)});
 }
 // night: Saturn, a tiny ringed dot very far off, steady (planets don't twinkle); it slips behind the clouds and the moon
-const SATURN=["......................",".........YYyy.........","........YYyyyy........",".....rrYYbbbbbbrr.....",".rrRR..Yyyyyyyy..RRrr.","rRRR..Yyyyyyyydd..RRRr",".rrrr..yyyyyydd..rrrr.",".....rrrrrrrrrrrr.....","........yyyddd........",".........yddd.........","......................"],SATPAL={y:"#e2cf98",Y:"#fff0c8",d:"#b8a272",b:"#c8a874",r:"#b4b0c8",R:"#dcd8ec"};
+const SATURN=["......................",".........YYyy.........","........YYyyyy........",".....rrYYyyyyyyrr.....",".rrRR..Yyyyyyyy..RRrr.","rRRR..Yyyyyyyydd..RRRr",".rrrr..yyyyyydd..rrrr.",".....rrrrrrrrrrrr.....","........yyyddd........",".........yddd.........","......................"],SATPAL={y:"#e2cf98",Y:"#fff0c8",d:"#b8a272",b:"#c8a874",r:"#b4b0c8",R:"#dcd8ec"};
 function drawSaturn(c,s){
   if(!shown("saturn"))return;
   if(!s.saturn||s.saturn.w!==s.w)s.saturn={w:s.w,x:Math.round(s.w*(.5+R()*.36)),y:Math.round(s.H0*(.18+R()*.14))};
