@@ -444,7 +444,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 .hero .live .wx{filter:none}
 .hero .sub,body.night .hero .sub{color:#7dff7a}
 .hero .live{opacity:0;transition:opacity .6s}
-.hero .live .fan{margin-left:8px;vertical-align:-5px;color:#7dff7a}.hero .live .fan .rotor{animation:fanspin 1s linear infinite;transform-box:view-box;transform-origin:8px 6px}
+.hero .live .fan{margin-left:8px;vertical-align:-4px;color:#7dff7a}.hero .live .fan .rotor{animation:fanspin 1s linear infinite;transform-box:view-box;transform-origin:8px 8px}
 @keyframes fanspin{to{transform:rotate(360deg)}}body.heroLit .hero .live{opacity:1}
 .hero .sub:not(.x)::before{visibility:hidden}body.heroLit .hero .sub::before{visibility:visible}
 .hero .sub::before{content:"";display:inline-block;width:6px;height:6px;margin:0 8px 1px 0;border-radius:50%;background:#ff3b30;box-shadow:0 0 6px 1px rgba(255,59,48,.7);vertical-align:middle;animation:beacon 2.4s ease-in-out infinite}
@@ -653,7 +653,7 @@ function sprite(name){
   }
   if(!SPRITES[name]) name="folder";
   if(spriteCache[name]) return spriteCache[name];
-  const rows=SPRITES[name],c=document.createElement("canvas");c.width=c.height=16;
+  const rows=SPRITES[name],c=document.createElement("canvas");c.width=c.height=rows.length;
   const x=c.getContext("2d");
   rows.forEach((row,j)=>[...row].forEach((ch,i)=>{if(PAL[ch]){x.fillStyle=PAL[ch];x.fillRect(i,j,1,1)}}));
   return spriteCache[name]=c.toDataURL();
@@ -1242,12 +1242,12 @@ function stepRaven(r,s){
 // the perched owl's faces, built 20% larger at native size: columns 2,5,10,13 (incl. both pupils) and five body rows are
 // doubled, so the eyes stay level, symmetric and 2px-pupilled instead of being unevenly stretched
 const OWL_BIG_CACHE=new Map();
-const owlBig=rows=>{let b=OWL_BIG_CACHE.get(rows);if(!b){b=rows.map(r=>[...r].flatMap((ch,i)=>[2,5,10,13].includes(i)?[ch,ch]:[ch]).join("")).flatMap((r,j)=>[12,14,16,18,20].includes(j)?[r,r]:[r]);OWL_BIG_CACHE.set(rows,b)}return b};
+const owlBig=rows=>{let b=OWL_BIG_CACHE.get(rows);if(!b){b=rows.map(r=>[...r].flatMap((ch,i)=>[2,5,10,13].includes(i)?[ch,ch]:[ch]).join("")).flatMap((r,j)=>[4,9,12,14,16,18,20].includes(j)?[r,r]:[r]);OWL_BIG_CACHE.set(rows,b)}return b};   // rows 4 and 9 (forehead, under the eyes) doubled: a rounder, taller head
 // in flight: only the wings are widened (paired columns either side) and the body stretched two rows, so the chest's
 // soft lattice and the face stay crisp instead of going round and mushy under scaling
 const owlBigFly=rows=>{let b=OWL_BIG_CACHE.get(rows);if(!b){b=rows.map(r=>[...r].flatMap((ch,i)=>[3,7,11,14,29,32,36,40].includes(i)?[ch,ch]:[ch]).join("")).flatMap((r,j)=>[11,13].includes(j)?[r,r]:[r]);
     b=b.map((r,j)=>j<3?r.slice(0,16)+".".repeat(20)+r.slice(36):r);OWL_BIG_CACHE.set(rows,b)}return b};
-let OWL_FH_CACHE=null;const OWL_FLYHEAD=()=>OWL_FH_CACHE||(OWL_FH_CACHE=owlBig(CRITTERS.owlHome).slice(0,11));
+let OWL_FH_CACHE=null;const OWL_FLYHEAD=()=>OWL_FH_CACHE||(OWL_FH_CACHE=owlBig(CRITTERS.owlHome).slice(0,13));
 const OWL_K=1.2,OWL_FW=26,OWL_FH=Math.round(8*1.2),OWL_SETTLE=6,OWL_FADE=3;   // both owls drawn 20% larger
 // where the owlets sit in the cavity for each brood size (back row first)
 const CHICK_SPOTS=[[],[[-4,15]],[[-9,13],[1,16]],[[-10,12],[2,12],[-4,17]],[[-10,11],[2,11],[-8,17],[0,17]],
@@ -1808,7 +1808,7 @@ function drawScene(){
   // things in the air (and the owl at its door) go in front of the plants
   const A=s.airA,a=A.getContext("2d");a.clearRect(0,0,s.w,s.h);
   const o=s.owl,owlOn=shown("owl");if(owlOn)stepOwl(o,s);let owlSprite=null,ox=0,oy=0;
-  if(o.state==="home"){owlSprite=!N?(o.peek>0?CRITTERS["owlPeek"+o.peekEye]:CRITTERS.owlBlink):o.blink>0?CRITTERS.owlBlink:CRITTERS.owlHome;ox=o.nest.x-10;oy=o.nest.top+(N?4:5)}
+  if(o.state==="home"){owlSprite=!N?(o.peek>0?CRITTERS["owlPeek"+o.peekEye]:CRITTERS.owlBlink):o.blink>0?CRITTERS.owlBlink:CRITTERS.owlHome;ox=o.nest.x-10;oy=o.nest.top+(N?2:3)}
   else{owlSprite=o.flap?((s.t>>1)%2?CRITTERS.owlUp:CRITTERS.owlDown):CRITTERS.owlGlide;ox=o.x-OWL_FW;oy=o.y-OWL_FH}
   const carry=owlOn&&o.prey&&o.state==="fly";
   const fade=owlOn&&o.state==="settle"&&o.timer<OWL_FADE?o.timer/OWL_FADE:null;   // last few frames: cross-fade the folded, sitting owl in
@@ -1836,7 +1836,7 @@ function drawScene(){
   {const pal=N?OWLPAL_N:o.state==="home"&&o.peek>0?OWLPAL_PEEK:OWLPAL_DAY;
    if(owlOn){if(o.state==="home")sprtBob(c,owlBig(owlSprite),ox,oy,12,bob,false,pal);
      else{sprt(c,owlBigFly(owlSprite),ox,oy,false,pal);sprt(c,OWL_FLYHEAD(),Math.round(o.x)-10,oy,false,pal)}}}   // in flight it wears the same face as when perched // asleep and shadowed by day; awake with bright eyes at night
-  c.globalAlpha=1;if(fade!==null){c.globalAlpha=1-fade;sprt(c,owlBig(CRITTERS.owlHome),o.nest.x-10,o.nest.top+4,false,OWLPAL_N);c.globalAlpha=1}
+  c.globalAlpha=1;if(fade!==null){c.globalAlpha=1-fade;sprt(c,owlBig(CRITTERS.owlHome),o.nest.x-10,o.nest.top+2,false,OWLPAL_N);c.globalAlpha=1}
   if(owlOn&&o.state==="fly"&&(o.strike||carry)){                                // feathered legs reaching down, talons spread (or gripping)
     const x=Math.round(o.x),y=Math.round(o.y)+10,P=N?OWLPAL_N:OWLPAL;
     [-3,2].forEach(dx=>{c.fillStyle=P.T;c.fillRect(x+dx,y,2,3);c.fillStyle=P.B;c.fillRect(x+dx,y+2,2,1);c.fillStyle=P.k;
@@ -3031,11 +3031,11 @@ function neonTagline(){
   clearTimeout(neonTagline.t);neonTagline.t=setTimeout(lit,2400);
 }
 // a little three-blade fan beside the weather that spins with the wind: still air barely turns it, a gale whirls it
-function windFan(v,F){const mph=F?v:v/1.609,dur=mph<.5?0:Math.max(.18,4.2/Math.pow(mph,.8));   // a little wind turbine: the tower stands, the rotor turns with the wind
-  return `<svg class="fan" viewBox="0 0 16 16" width="22" height="22" aria-hidden="true">
-    <line x1="8" y1="6" x2="8" y2="15.5" stroke="currentColor" stroke-width=".9"/>
-    <g class="rotor" fill="currentColor" style="${dur?`animation-duration:${dur.toFixed(2)}s`:"animation:none"}">${[0,120,240].map(r=>`<path d="M8 6 L7.5 .9 Q8 .5 8.5 .9 Z" transform="rotate(${r} 8 6)"/>`).join("")}</g>
-    <circle cx="8" cy="6" r=".9" fill="#ff3b30"/></svg>`}
+function windFan(v,F){const mph=F?v:v/1.609,dur=mph<.5?0:Math.max(.18,4.2/Math.pow(mph,.8));   // a chunky 8-bit three-blade fan that spins with the wind
+  const blade=[[7,2],[8,2],[7,3],[8,3],[9,3],[7,4],[8,4],[9,4],[7,5],[8,5],[7,6]].map(([x,y])=>`<rect x="${x}" y="${y}" width="1.02" height="1.02"/>`).join("");
+  return `<svg class="fan" viewBox="0 0 16 16" width="20" height="20" aria-hidden="true">
+    <g class="rotor" fill="currentColor" style="${dur?`animation-duration:${dur.toFixed(2)}s`:"animation:none"}">${[0,120,240].map(r=>`<g transform="rotate(${r} 8 8)">${blade}</g>`).join("")}
+    <rect x="7" y="7" width="2" height="2" fill="#ff3b30"/></g></svg>`}
 function updateTray(){
 
   const ll=document.getElementById("liveLine");
