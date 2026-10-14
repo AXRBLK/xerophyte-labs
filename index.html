@@ -403,6 +403,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 #w-radio .amp-btns .pico,.miniamp .pico{color:#0c1a0c;filter:none}
 /* bigger player buttons: flat bright neon green with black icons */
 #w-radio .amp-btns button,#w-radio .amp-eject{min-width:42px!important;height:32px!important;background:#2cff3c!important;border-color:#9dffa4 #12a01e #12a01e #9dffa4!important;box-shadow:none}
+#w-radio .amp-btns button.on{background:#12b022!important;border-color:#0a6a14 #7af084 #7af084 #0a6a14!important}
 #w-radio .amp-btns button:active,#w-radio .amp-eject:active{background:#1fd92e!important;border-color:#12a01e #9dffa4 #9dffa4 #12a01e!important}
 #w-radio .amp-btns .pico{width:16px;height:16px}
 .miniamp button:not(.mini-lcd){height:28px!important;min-width:30px!important;background:#2cff3c!important;border-color:#9dffa4 #12a01e #12a01e #9dffa4!important;box-shadow:none}
@@ -500,7 +501,7 @@ const SAMPLE = {
 };
 
 /* ---------- pixel sprites ---------- */
-const PAL={k:"#2a2420",g:"#6f8c5c",G:"#3f5a3c",y:"#d4b45e",o:"#b87c48",w:"#ece6da",s:"#bdb6aa",S:"#6a6258",r:"#a24a3a",b:"#5a7896",n:"#8a5a3c",p:"#b8708a",l:"#a4b88e",R:"#b09068",D:"#5a3f28"};
+const PAL={k:"#2a2420",g:"#6f8c5c",G:"#3f5a3c",y:"#d4b45e",o:"#b87c48",w:"#ece6da",s:"#bdb6aa",S:"#6a6258",r:"#a24a3a",b:"#5a7896",n:"#8a5a3c",p:"#b8708a",l:"#a4b88e",R:"#b09068",D:"#5a3f28",t:"#d6be96",B:"#a0bed6"};
 const SPRITES={
 cactus:["......kk........",".....kgGk.......",".....kgGk.......","..kk.kgGk.......",".kgGkkgGk..kk...",".kgGkkgGk.kgGk..",".kgGkkgGk.kgGk..",".kgggggGkkkgGk..","..kkGgggggggGk..","....kkkgGkkkk...","......kgGk......","......DgGD......",".....RDRRDR.....","....R.R..R.R....","...R..R...R.R...","..R..R.....R..R."],
 flower:["......kpk.......",".....kpppk......","......kkk.......",".....kgGk.......","....kgggGk......","...kggggGGk.....","...kgkggGkGk....","...kggggGGGk....","...kgkgggkGk....","...kggggGGGk....","....kgggGGk.....","....kDDDDDDk....","....R.RDDR.R....","...R..R..R..R...","..R...R...R..R..",".R...R.....R...R"],
@@ -512,9 +513,9 @@ letter:["................","................","................","kkkkkkkkkkkkkk
 book:["................",".kkkkkkkkkkkk...",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSSwwwk..",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSwwwwk..",".krrkwwwwwwwwk..",".krrkwwwwwwwwk..",".kkkkkkkkkkkkk..","................","................","................"],
 radio:["................","....kkkkkkkk....","....k......k....","kkkkkkkkkkkkkkkk","kssssssssssssssk","ksSSSssyyssSSSsk","kSkkkSsyysSkkkSk","kSkSkSssssSkSkSk","kSkkkSsrbsSkkkSk","ksSSSssssssSSSsk","kssssssssssssssk","kkkkkkkkkkkkkkkk","................","................","................","................"],
 infosign:["................","...kkkkkkkkkk...","..knnnnnnnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnnnnnnnnk..","..knnnwwwnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnwwwwnnnk..","...kkkkkkkkkk...","......knnk......","......knnk......","....kkkkkkkk....","................"],
-tower:["..w....r....w...",".w.w..krk..w.w..","w...w.kSk.w...w.",".......k........","......kSk.......","......kSk.......",".....kSkSk......",".....kSkSk......","....kSkkkSk.....","....kSk.kSk.....","...kSkkkkkSk....","...kSk...kSk....","..kSkkkkkkkSk...","..kSk.....kSk...",".kkkkkkkkkkkkk..","................"],
+tower:["..w..w.r.w..w...",".w..w.krk.w..w..",".w..w.kSk.w..w..","..w..w.k.w..w...","......kSk.......","......kSk.......",".....kSkSk......",".....kSkSk......","....kSkkkSk.....","....kSk.kSk.....","...kSkkkkkSk....","...kSk...kSk....","..kSkkkkkkkSk...","..kSk.....kSk...",".kkkkkkkkkkkkk..","................"],
 trailcam:["................","..kkkkkkkkkkkk..",".kGGnGGGGGGgGGk.",".kGgGGkkkkGGnGk.",".kGGGkbbbbkGGGk.",".kGnkbbwbbbkGgk.",".kGGkbbbbbbkGGk.",".kGGkbbbbbbkGGk.",".kgGGkbbbbkGGnk.",".kGGnGkkkkGGrGk.",".kGGGGGgGGGGGGk.",".kGGkkkkkkkkGGk.",".kGGksssssskGgk.",".kGnGGGGgGGGGGk.","..kkkkkkkkkkkk..","................"],
-map:["................",".kkkkkkkkkkkkkk.",".kbbbkgggkbbbbk.",".kbbgkgggkbbbbk.",".kbggkgyykbbgbk.",".kgggkgyykbgggk.",".kggykyyykggggk.",".kgyykyyrkgggyk.",".kyyykyrykggyyk.",".kyyykyyrkgyyyk.",".kyybkyyykyyybk.",".kybbkyyykyybbk.",".kbbbkyybkybbbk.",".kkkkkkkkkkkkkk.","................","................"],
+map:["kkkkkkkkkkkk....","kttltttblttk....","ktlllttbtttk....","kttlltkkkkk.....","kttttkBBBBBk....","ktttkBBwBBBBk...","kbbbkBwrBBBBk...","ktttkBBBBBBBk...","ktttkBBBBBBBk...","kttttkBBBBBk....","kttltkkkkkknk...","kkkkkkkkkk.knk..","............knk.",".............knk","..............kk","................"],
 disco:[".......k........",".......k........","......kkk.......",".....kwswk......","....kswswsk.....","...kswbwswsk....","...kwswswpwk....","..kswswbwswsk...","..kwswswswswk...","..kswpwswbwsk...","...kwswswswk....","...kswswswsk....","....kswswsk.....",".....kkkkk......","................","................"],
 computer:["................","..kkkkkkkkkkkk..","..ksssssssssSk..","..kskkkkkkkksSk.","..kskbbbbbbksSk.","..kskblbbbbksSk.","..kskbbbbbbksSk.","..kskkkkkkkksSk.","..ksssssssssSk..","..kkkkkkkkkkkk..",".....kSSSSk.....","..kkkkkkkkkkkk..",".kssssssssssssk.",".kSsSsSsSsSsSsk.",".kkkkkkkkkkkkkk.","................"],
 globe:["................",".....kkkkkk.....","...kkbbggbbkk...","..kbbggggbbbbk..","..kbgggggbbggk..",".kbbbggbbbgggbk.",".kbbbbgbbbbggbk.",".kbbbbbbbbbbbbk.",".kbbggbbbbbbbbk.",".kbgggggbbbgbbk.","..kbgggbbbgggk..","..kbbggbbbbbbk..","...kkbbbbbbkk...",".....kkkkkk.....","......kSSk......","....kkkkkkkk...."]
@@ -600,12 +601,14 @@ const mixHex=(a,b,t)=>{const A=hex(a),B=hex(b);return "#"+A.map((v,i)=>Math.roun
 const OWLPAL_N=Object.fromEntries(Object.entries(OWLPAL).map(([k,v])=>[k,"WYp".includes(k)?v:mixHex(v,"#1a2250",.3)]));
 const CHICKPAL={g:"#9a98a2",G:"#6a6874",Y:"#f2c230",p:"#140c08",o:"#8a7040"};
 const OWLPAL_DAY=Object.fromEntries(Object.entries(OWLPAL).map(([k,v])=>[k,mixHex(v,"#1a1418",.4)]));
+const OWLPAL_PEEK={...OWLPAL_DAY,Y:mixHex(OWLPAL.Y,"#1a1418",.12),p:OWLPAL.p};
 const MOUSE={P:"#e0aeb0",p:"#b88494",B:"#8e6c5c",W:"#f6f0ea",k:"#1c1824",n:"#e0aeb0",t:"#d6a2a6"};
 const BLOOM={W:"#ffffff",w:"#e6ecf4",Y:"#ffd84a",O:"#e8a830",g:"#7e9a6a"};
 const BLOOM_TOP=["..W...W..",".WWW.WWW.","WWwWYWwWW",".WWYOYWW.","..WWWWW..","...ggg..."];
 const BLOOM_SIDE=[".WW....","WWWW...","WwYWWgg","WYOWggg","WwYWWgg","WWWW...",".WW...."];
 const OWL_EYES=[".kBrYYYwwYYYrBk.",".kBrYpYddYpYrBk."];
 const OWL_SHUT=[".kBrDDDwwDDDrBk.",".kBrrrrddrrrrBk."];
+const OWL_PEEK_L=[".kBrYYYwwDDDrBk.",".kBrYpYddrrrrBk."],OWL_PEEK_R=[".kBrDDDwwYYYrBk.",".kBrrrrddYpYrBk."];  // daytime: one eye cracked open
 const owlFace=eyes=>["..k..........k..","..Dk........kD..","...DBk....kBD...","...kDBkkkkBDk...","..kBLBLDDLBLBk..","..kDrrwDDwrrDk..",...eyes,".kDrrrkddkrrrDk.","..kDrrrkkrrrDk..","..kBWWWWWWWWBk..",".kBLwLwLLwLwLBk.",".kDBLBLBBLBLBDk.","kDBLTLTLLTLTLBDk","kDBBDBBDDBBDBBDk","kDBLTLTLLTLTLBDk","kDBBDBBDDBBDBBDk","kDBLTLTLLTLTLBDk","kDDBDBBDDBBDBDDk",".kDBLTLLLLTLBDk.",".kDBDBBDDBBDBDk.",".kDDBLTLLTLBDDk.","..kDBDBDDBDBDk..","..kDTLTkkTLTDk..","...kTTk..kTTk...","..kdkdk..kdkdk.."];
 const OWL_FLY={
   glide:["..................kk....kk..................", ".kk...............kDk..kDk...............kk.", "kBDkk............kDBBkkBBDk............kkDBk", "kLBDDkk.........kBLrrrrrrLBk.........kkDDBLk", ".kTLBBDkk.......kBrrwrrwrrBk.......kkDBBLTk.", ".kTLTLBBDkk.....kBrYYrrYYrBk.....kkDBBLTLTk.", "..kTLTLTBBDkk...kBrYprrpYrBk...kkDBBTLTLTk..", "..kTwTwTLBBDDkk.kBLrrddrrLBk.kkDDBBLTwTwTk..", "...kTwTwTLTBBDDkBkBLrddrLBkBkDDBBTLTwTwTk...", "...kkTwTwTLTLBBDBkBLLwwLLBkBDBBLTLTwTwTkk...", "....kkTwTwTLTLBBkDBLTLLTLBDkBBLTLTwTwTkk....", "......kkTkTkTLBkkDBTLTTLTBDkkBLTkTkTkk......", "........kk.k.kkkkDBLTLLTLBDkkkk.k.kk........", ".................kDBLTTLBDk.................", "..................kDBDDBDk..................", "..................kDkDDkDk..................", "...................kdkkdk...................", "............................................", "............................................", "............................................"],
@@ -629,6 +632,7 @@ const CRITTERS={
   toad:["......w.w..","..tdtdtTTT.",".tTtTtTTkTt","tdtTtdtTTT.","..t..t..t.."],
   owlHome:owlFace(OWL_EYES),
   owlBlink:owlFace(OWL_SHUT),
+  owlPeekL:owlFace(OWL_PEEK_L),owlPeekR:owlFace(OWL_PEEK_R),
   // front view in flight: both eyes stay visible on every wingbeat
   owlUp:OWL_FLY.up,
   owlDown:OWL_FLY.down,
@@ -1008,10 +1012,20 @@ function stepRaven(r,s){
     if(--r.timer<=0){r.state="soar";r.cy=Math.max(H0*.12,r.y)}
   }
 }
-const OWL_FW=22,OWL_FH=8; // half size of the flying sprite
+const OWL_FW=22,OWL_FH=8;
+// by day the owl dozes, now and then cracking one eye open; the peeks come oftener as the afternoon wears on toward sunset (7pm)
+function dayPeek(o){
+  const d=new Date(),h=d.getHours()+d.getMinutes()/60,pd=Math.min(1,Math.max(0,(h-6)/13));
+  if(o.peek>0){o.peek--;return}
+  if(o.peekWait==null)o.peekWait=RI(40,160);
+  if(--o.peekWait>0)return;
+  o.peek=RI(14,40);o.peekEye=R()<.5?"L":"R";                        // 2–5s at 8fps
+  const gap=(110-95*pd*pd)*8;                                         // ~110s apart in the morning, ~15s by dusk
+  o.peekWait=Math.round(gap*(.5+R()));
+} // half size of the flying sprite
 function stepOwl(o,s){
   const n=o.nest;
-  if(!s.night){o.state="home";return} // owls sleep through the day
+  if(!s.night){o.state="home";dayPeek(o);return} // owls sleep through the day
   if(o.state==="home"){
     if(o.blink>0)o.blink--;else if(R()<(s.night?.03:.02))o.blink=RI(1,2);
     if(--o.timer<=0&&R()<(s.night?1/90:1/600)){
@@ -1361,7 +1375,7 @@ function drawScene(){
   // things in the air (and the owl at its door) go in front of the plants
   const A=s.airA,a=A.getContext("2d");a.clearRect(0,0,s.w,s.h);
   const o=s.owl,owlOn=shown("owl");if(owlOn)stepOwl(o,s);let owlSprite=null,ox=0,oy=0;
-  if(o.state==="home"){owlSprite=!N||o.blink>0?CRITTERS.owlBlink:CRITTERS.owlHome;ox=o.nest.x-8;oy=o.nest.top+(N?3:4)}
+  if(o.state==="home"){owlSprite=!N?(o.peek>0?CRITTERS["owlPeek"+o.peekEye]:CRITTERS.owlBlink):o.blink>0?CRITTERS.owlBlink:CRITTERS.owlHome;ox=o.nest.x-8;oy=o.nest.top+(N?3:4)}
   else{owlSprite=o.flap?((s.t>>1)%2?CRITTERS.owlUp:CRITTERS.owlDown):CRITTERS.owlGlide;ox=o.x-OWL_FW;oy=o.y-OWL_FH}
   if(shown("ravens"))s.ravens.forEach(r=>{
     stepRaven(r,s);if(r.state==="gone")return;
@@ -1376,7 +1390,7 @@ function drawScene(){
     o.chicks.forEach((ch,i)=>{if(ch.b>0)ch.b--;else if(R()<.025)ch.b=RI(1,3);
       sprt(c,ch.b>0?CRITTERS.chickBlink:CRITTERS.chick,o.nest.x+(i?1:-9),o.nest.top+(i?16:13),false,CHICKPAL)});
   }
-  if(owlOn)(o.state==="home"?sprtBob:(c,r,x,y,sp,dy,f,p)=>sprt(c,r,x,y,f,p))(c,owlSprite,ox,oy,10,bob,false,N?OWLPAL_N:OWLPAL_DAY); // asleep and shadowed by day; awake with bright eyes at night
+  if(owlOn)(o.state==="home"?sprtBob:(c,r,x,y,sp,dy,f,p)=>sprt(c,r,x,y,f,p))(c,owlSprite,ox,oy,10,bob,false,N?OWLPAL_N:o.state==="home"&&o.peek>0?OWLPAL_PEEK:OWLPAL_DAY); // asleep and shadowed by day; awake with bright eyes at night
 }
 
 /* ---------- Desert Map: pixel-rendered satellite/terrain with live weather ---------- */
@@ -1855,7 +1869,19 @@ function ampText(){
   if(big&&SPOT.src){const unit=line?`${line} *** ${name} *** `:`${name} *** ${!SPOT.state.paused?"On air":SPOT.stopped||!SPOT.state.pos?"Press play":"Paused"} *** `;setScroll(big,unit)}
   const mini=document.getElementById("miniTitle");if(mini)setScroll(mini,(line?`${line} · ${name}`:name)+" · ");
 }
-const SPOT={api:null,ctl:null,loading:false,src:null,viz:null,state:{paused:true,pos:0,dur:0}};
+const SPOT={api:null,ctl:null,loading:false,src:null,viz:null,state:{paused:true,pos:0,dur:0},shuffle:false,chain:null,uri:""};
+try{SPOT.shuffle=localStorage.getItem("xl-shuffle")==="1"}catch(e){}
+/* shuffle: Spotify's embed can't shuffle or pick a track by number, so whenever a new song comes up we hop ahead a random
+   0–4 songs (each hop = jump to the song's last moment, the same trick as Next) before settling */
+function shuffleHop(){
+  if(!SPOT.shuffle||!SPOT.ctl){SPOT.chain=null;return}
+  if(SPOT.chain==null)SPOT.chain=RI(0,4);
+  if(SPOT.chain<=0){SPOT.chain=null;return}
+  SPOT.chain--;let n=0;
+  const t=setInterval(()=>{const st=SPOT.state;
+    if(++n>25){clearInterval(t);SPOT.chain=null;return}                 // gave up waiting for the song to load
+    if(st.dur>0&&st.pos>0&&!st.buffering){clearInterval(t);try{SPOT.ctl.seek(Math.max(0,st.dur/1000-.4))}catch(e){SPOT.chain=null}}},150);
+}
 function spotifySrc(v){
   v=String(v||"").trim();
   const m=v.match(/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(?:embed\/)?(playlist|album|track|episode|show|artist)\/([A-Za-z0-9]+)/)||v.match(/^spotify:(playlist|album|track|episode|show|artist):([A-Za-z0-9]+)$/);
@@ -1875,14 +1901,17 @@ function renderRadio(body,status){
     </div>
     <div class="seek" id="ampSeek" role="slider" aria-label="Song position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"><i id="ampBar"></i></div>
     <div class="amp-btns">
-      <button id="ampPrev" aria-label="Back to start" title="Back to start"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="1" y="2" width="2" height="8"/><path d="M11 2v8L4 6z"/></svg></button><button id="ampPlay" aria-label="Play" title="Play"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><path d="M3 1.5v9L10.5 6z"/></svg></button><button id="ampPause" aria-label="Pause" title="Pause"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="2" width="3" height="8"/><rect x="7" y="2" width="3" height="8"/></svg></button><button id="ampStop" aria-label="Stop" title="Stop"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2.5" y="2.5" width="7" height="7"/></svg></button><button id="ampNext" aria-label="Next song" title="Next song"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="9" y="2" width="2" height="8"/><path d="M1 2v8l7-4z"/></svg></button>
+      <button id="ampPrev" aria-label="Back to start" title="Back to start"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="1" y="2" width="2" height="8"/><path d="M11 2v8L4 6z"/></svg></button><button id="ampPlay" aria-label="Play" title="Play"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><path d="M3 1.5v9L10.5 6z"/></svg></button><button id="ampPause" aria-label="Pause" title="Pause"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="2" width="3" height="8"/><rect x="7" y="2" width="3" height="8"/></svg></button><button id="ampStop" aria-label="Stop" title="Stop"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2.5" y="2.5" width="7" height="7"/></svg></button><button id="ampNext" aria-label="Next song" title="Next song"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="9" y="2" width="2" height="8"/><path d="M1 2v8l7-4z"/></svg></button><button id="ampShuffle" aria-label="Shuffle" aria-pressed="false" title="Shuffle"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="0" y="2" width="3" height="2"/><rect x="3" y="3" width="2" height="2"/><rect x="5" y="5" width="2" height="2"/><rect x="7" y="7" width="2" height="2"/><rect x="0" y="8" width="3" height="2"/><rect x="3" y="7" width="2" height="2"/><rect x="7" y="3" width="2" height="2"/><path d="M9 1v5l3-2.5zM9 6v5l3-2.5z"/></svg></button>
       ${src?`<a class="amp-eject" href="https://open.spotify.com/${src.type}/${src.id}" target="_blank" rel="noopener" title="Open in Spotify" aria-label="Open in Spotify"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><path d="M6 1.5L11 7H1z"/><rect x="1" y="8.5" width="10" height="2"/></svg></a>`:""}
       <span class="amp-brand">${ampBrand(title)}</span>
     </div>
     <div class="deck">${src?`<div id="spotHost" class="tape-empty">Loading the tape…</div>`:`<div class="tape-empty">Paste a public Spotify playlist link into the <b>spotify_url</b> row of your sheet's Settings tab, then refresh.</div>`}</div>
   </div>`;
   if(status)status.innerHTML=`<span>${src?esc(src.type):"empty"}</span><span>${src?"Spotify":"—"}</span>`;
-  ["ampPrev","ampPlay","ampPause","ampStop","ampNext"].forEach(id=>document.getElementById(id).disabled=!src);
+  ["ampPrev","ampPlay","ampPause","ampStop","ampNext","ampShuffle"].forEach(id=>document.getElementById(id).disabled=!src);
+  const shb=document.getElementById("ampShuffle"),shSet=()=>{shb.classList.toggle("on",SPOT.shuffle);shb.setAttribute("aria-pressed",SPOT.shuffle)};shSet();
+  shb.onclick=()=>{SPOT.shuffle=!SPOT.shuffle;SPOT.chain=null;try{localStorage.setItem("xl-shuffle",SPOT.shuffle?"1":"0")}catch(e){}shSet();
+    if(SPOT.shuffle&&deckPlaying())AMP.next()};                      // turning it on jumps somewhere random right away
   const C=()=>SPOT.ctl;
   ["Prev","Play","Pause","Stop","Next"].forEach(k=>document.getElementById("amp"+k).onclick=AMP[k.toLowerCase()]);
   const seekTo=f=>{if(C()&&SPOT.state.dur)C().seek(Math.floor(f*SPOT.state.dur/1000))};
@@ -1917,6 +1946,7 @@ function loadSpotify(src){
       ctl.addListener("playback_update",e=>{const d=e.data||{};
         SPOT.state={paused:!!d.isPaused,pos:d.position||0,dur:d.duration||0,buffering:!!d.isBuffering};SPOT.at=performance.now();
         if(!d.isPaused){SPOT.stopped=false;NOW.started=true}
+        if(d.playingURI&&d.playingURI!==SPOT.uri){SPOT.uri=d.playingURI;if(!d.isPaused||SPOT.chain!=null)shuffleHop()}
         if(d.playingURI)lookupTrack(d.playingURI,d.duration||0);ampUpdate()});
     });
   };
