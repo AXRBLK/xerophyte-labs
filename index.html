@@ -507,7 +507,7 @@ const SAMPLE = {
 };
 
 /* ---------- pixel sprites ---------- */
-const PAL={k:"#2a2420",g:"#6f8c5c",G:"#3f5a3c",y:"#d4b45e",o:"#b87c48",w:"#ece6da",s:"#bdb6aa",S:"#6a6258",r:"#a24a3a",b:"#5a7896",n:"#8a5a3c",p:"#b8708a",l:"#a4b88e",R:"#b09068",D:"#5a3f28",t:"#d6be96",B:"#a0bed6"};
+const PAL={k:"#2a2420",g:"#6f8c5c",G:"#3f5a3c",y:"#d4b45e",o:"#b87c48",w:"#ece6da",s:"#bdb6aa",S:"#6a6258",r:"#a24a3a",b:"#5a7896",n:"#8a5a3c",p:"#b8708a",l:"#a4b88e",R:"#b09068",D:"#5a3f28",t:"#d6be96",B:"#a0bed6",O:"#d6955f",Y:"#f0d682"};
 const SPRITES={
 cactus:["......kk........",".....kgGk.......",".....kgGk.......","..kk.kgGk.......",".kgGkkgGk..kk...",".kgGkkgGk.kgGk..",".kgGkkgGk.kgGk..",".kgggggGkkkgGk..","..kkGgggggggGk..","....kkkgGkkkk...","......kgGk......","......DgGD......",".....RDRRDR.....","....R.R..R.R....","...R..R...R.R...","..R..R.....R..R."],
 flower:["......kpk.......",".....kpppk......","......kkk.......",".....kgGk.......","....kgggGk......","...kggggGGk.....","...kgkggGkGk....","...kggggGGGk....","...kgkgggkGk....","...kggggGGGk....","....kgggGGk.....","....kDDDDDDk....","....R.RDDR.R....","...R..R..R..R...","..R...R...R..R..",".R...R.....R...R"],
@@ -518,6 +518,8 @@ folder:["................","..kkkkk.........",".kyyyyyk........","kyyyyyyykkkkkk
 letter:["................","................","................","kkkkkkkkkkkkkkkk","kwkwwwwwwwwwwkwk","kwwkwwwwwwwwkwwk","kwwwkwwwwwwkwwwk","kwwwwkwwwwkwwwwk","kwwwwwkkkkwwwwwk","kwwwwkwwwwkwwwwk","kwwwkwwwwwwkwwwk","kwwkwwwwwwwwkwwk","kkkkkkkkkkkkkkkk","................","................","................"],
 book:["................",".kkkkkkkkkkkk...",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSSwwwk..",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSwwwwk..",".krrkwwwwwwwwk..",".krrkwwwwwwwwk..",".kkkkkkkkkkkkk..","................","................","................"],
 radio:["................","....kkkkkkkk....","....k......k....","kkkkkkkkkkkkkkkk","kssssssssssssssk","ksSSSssyyssSSSsk","kSkkkSsyysSkkkSk","kSkSkSssssSkSkSk","kSkkkSsrbsSkkkSk","ksSSSssssssSSSsk","kssssssssssssssk","kkkkkkkkkkkkkkkk","................","................","................","................"],
+campfire:["................","................",".......r........","......rr........","......rOr..r....",".....rOOr.rr....","....rOYOrrOr....","....rOYYOOOr....","....rOYYYYOr....",".....rOYYOr.....","..kn..rrrr..nk..","...knnnnnnnnk...","..knnkkkkkknnk..","...kk......kk...","................","................"],
+hilo:["................","kkkkkkkkkkkkkkkk","kwwwwwwwwwwwwwwk","kwwwwwwwwwrwwwwk","kwwwwrwwwwrwwwwk","kwrwwrwwrwrwwrwk","kwrwwrwwrwrwwrwk","kwrwwrwwrwbwwrwk","kwbwwbwwbwbwwbwk","kwbwwbwwbwbwwbwk","kwbwwbwwbwwwwbwk","kwwwwwwwwwwwwwwk","kkkkkkkkkkkkkkkk","................","................","................"],
 binoculars:["................","................","...kkk....kkk...","..kSSSk..kSSSk..","..kSSSkkkkSSSk..",".kSSSSkSSkSSSSk.",".kSSSSkSSkSSSSk.",".kSSSSkkkkSSSSk.","kSSSSSk..kSSSSSk","kSSSSSk..kSSSSSk","kkkkkkk..kkkkkkk","kBBwBBk..kBBwBBk","kBbbbBk..kBbbbBk","kkkkkkk..kkkkkkk","................","................"],
 journal:["................","................",".kkkkkk..kkkkkk.","kwwwwwwkkwwwwwwk","kwkkkkwkkwwgwwwk","kwwwwwwkkwgggwgk","kwkkkkwkkwwgwggk","kwwwwwwkkwwgggwk","kwkkkwwkkwwgwwwk","kwwwwwwkkwwgwwwk","kwkkkkwkkwtttttk","kwwwwwwkkwwwwwwk","knnnnnnkknnnnnnk",".kkkkkkkkkkkkkk.","................","................"],
 postcard:["................","................","kkkkkkkkkkkkkkkk","kwwwwwwwkwwwkrrk","kwBBBBBwkwwwkrrk","kwBByBBwkwwwkkkk","kwBBBgBwkwwwwwwk","kwBgBgBwkwkkkkwk","kwttgttwkwwwwwwk","kwwwwwwwkwwwwwwk","kwwkkwwwkwkkkkwk","kwwwwwwwkwwwwwwk","kwwwwwwwkwkkkkwk","kkkkkkkkkkkkkkkk","................","................"],
@@ -2541,7 +2543,7 @@ function build(){
   defineWindow("radio",{title:radioName(),icon:"radio",w:380,x:innerWidth-595,y:64,render:renderRadio,status:true});
   defineWindow("today",{title:"Weather Now",icon:"sun",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
   defineWindow("bio",{title:"Biodiversity Report",icon:"journal",w:660,x:cx(660),y:100,render:renderBio,menu:["File","Survey","Help"],status:true});
-  defineWindow("log",{title:"Weather Log",icon:"chart",w:640,x:cx(640),y:110,render:renderLog,menu:["File","Edit","Chart"],status:true});
+  defineWindow("log",{title:"Weather Log",icon:"hilo",w:640,x:cx(640),y:110,render:renderLog,menu:["File","Edit","Chart"],status:true});
   const thirsty=(DATA.cacti||[]).filter(c=>c.name&&cactusState(c).status==="thirsty").length;
   HIDE_WILD=new Set((DATA.wildlife||[]).filter(r=>isNo(r.show)).map(r=>String(r.animal||"").trim().toLowerCase()));
   // a count column changes how many creatures there are, so repaint the scene with the sheet's numbers
@@ -2554,10 +2556,10 @@ function build(){
     const lab=id==="radio"&&String(SET.radio_title||"").trim()?"":r&&r.label;
     const name=lab||label;if(WINS[id]&&lab){WINS[id].title=lab;WINS[id].el.querySelector(".bar b").textContent=lab;WINS[id].el.setAttribute("aria-label",lab)}
     ICONS.push({id,name,el:iconBtn(id,name,icon,badge)})};
-  place(L,"cacti","My Cacti","saguaro",thirsty||"");place(L,"log","Weather Log","chart");
+  place(L,"cacti","My Cacti","saguaro",thirsty||"");place(L,"log","Weather Log","hilo");
   place(L,"today","Weather Now","sun");place(L,"bio","Biodiversity Report","journal");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
-    const pic=/^contact/i.test(String(p.title).trim())?"postcard":/^about/i.test(String(p.title).trim())?"infosign":/^field\s*notes/i.test(String(p.title).trim())?"binoculars":(p.icon||"folder").toLowerCase();
+    const pic=/^contact/i.test(String(p.title).trim())?"postcard":/^about/i.test(String(p.title).trim())?"campfire":/^field\s*notes/i.test(String(p.title).trim())?"binoculars":(p.icon||"folder").toLowerCase();
     const id="p"+i;defineWindow(id,{title:p.title,icon:pic,w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
     place(L,id,p.title,pic);
   });
