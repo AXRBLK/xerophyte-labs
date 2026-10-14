@@ -1828,6 +1828,11 @@ function stepUfo(s,tk){
       if(T.y-T.lift<=u.y+UFO_H-3){T.on=false;T.held=false;T.lift=0;u.taken=true;T.wait=RI(400,900);u.state="leave";u.hold=10}}
     else if(!T||!T.on){u.state="leave";u.hold=10}
   }else if(u.state==="leave"){if(u.beam!=null)u.beam++;
+    // disco: a second after scooping up the truck it spins on the spot for three seconds, then heads home
+    const now=performance.now();
+    if(s.disco&&u.taken&&!u.spun){if(!u.spinAt){u.spinAt=now+1000;u.spinEnd=now+4000}
+      u.spin=now<u.spinAt?0:(now-u.spinAt)/1000*Math.PI*2*1.6;u.y+=Math.sin(u.t*.2)*.08;
+      if(now>=u.spinEnd){u.spun=true;u.spin=0;u.hold=0}return u}
     if(u.hold>0){u.hold--;u.y+=Math.sin(u.t*.2)*.08}
     else if(s.saturn&&shown("saturn")&&u.taken){                              // with its prize aboard, it heads home toward Saturn, dwindling into the distance
       const tx=s.saturn.x+11-UFO_W*(u.k||1)/2,ty=s.saturn.y+5-UFO_H*(u.k||1)/2,dx=tx-u.x,dy=ty-u.y,d=Math.hypot(dx,dy);
@@ -1845,7 +1850,7 @@ function drawUfo(c,u,s){
   if(s.disco){if(!UFO_CV){UFO_CV=layer(UFO_W,UFO_H);sprt(UFO_CV.getContext("2d"),UFO,0,0,false,UFOPAL)}
     const g=UFO_CV.getContext("2d"),lights=["#ff6a5a","#ffe070","#7ad0ff"];let k=0;
     UFO.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==="L"){g.fillStyle=lights[(k+++(u.t>>1))%3];g.fillRect(i,j,1,1)}}));
-    c.save();c.imageSmoothingEnabled=false;c.translate(Math.round(u.x)+UFO_W/2,Math.round(u.y)+UFO_H/2);c.drawImage(UFO_CV,-UFO_W/2,-UFO_H/2);c.restore();return}
+    c.save();c.imageSmoothingEnabled=false;c.translate(Math.round(u.x)+UFO_W/2,Math.round(u.y)+UFO_H/2);if(u.spin)c.rotate(u.spin);c.drawImage(UFO_CV,-UFO_W/2,-UFO_H/2);c.restore();return}
   const x=Math.round(u.x),y=Math.round(u.y);
   if((u.state==="beam"||u.state==="leave")&&u.beam!=null&&s.truck&&u.beam<90){              // no beam: dark rings ripple out across the sand, then the truck simply rises
     const T=s.truck,gx=Math.round(T.x+TRUCK[0].length/2),gy=Math.round(T.y)+TRUCK.length;
