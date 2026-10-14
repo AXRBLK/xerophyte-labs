@@ -1196,6 +1196,8 @@ function stepRunner(rr,s){
 function stepScorp(p,s){
   if(!p.alive){if(--p.timer<=0){p.alive=true;p.dir=R()<.5?1:-1;p.x=p.dir>0?-8:s.w+2;p.y=s.groundY();p.state="walk";p.timer=RI(40,120)}return}
   p.timer--;
+  if(p.marked){p.state="freeze";return}
+  if(p.flee>0){p.flee--;p.x+=p.dir*1.6;return}
   const rr=s.runner;if(rr.state==="hunt"&&rr.target===p){p.state="freeze";return}
   if(p.state==="walk"){p.x+=p.dir*(s.night?.6:.4);if(p.x<-10||p.x>s.w+4)p.dir*=-1;if(p.timer<=0){p.state="pause";p.timer=RI(20,90)}}
   else if(p.timer<=0){p.state="walk";p.timer=RI(20,80);if(R()<.4)p.dir*=-1}
@@ -1280,7 +1282,20 @@ function hooBox(){let b=document.getElementById("hoos");if(!b){b=document.create
 function clearHoo(){const b=document.getElementById("hoos");if(b&&b.childElementCount)b.innerHTML=""}
 // a whole, fluffy owlet for the Biodiversity Report hover
 const OWLET_BODY=["..wwwwww..", ".wwYYYYww.", "wwYppwppYw", "wwYppYppYw", "wwwYooYwww", "wwwwwwwwww", "wgwgwwgwgw", "wwgwggwgww", "wgwgwwgwgw", "wwwwwwwwww", ".wwgwwgww.", "..wwwwww..", "..oo..oo..", ".o.o..o.o."],OWLETPAL={w:"#d6d2dc",g:"#9a98a2",Y:"#f2c230",p:"#140c08",o:"#8a7040"};
-const PREY=["....PPp....","..BBBBBBk..",".BBBBBBBWWk","tBBBBBBWWW.","t..BW..BW..",".t........."];   // a mouse dangling from the owl's talons
+// a mouse gripped across the back: body sagging, head drooping, feet and tail hanging (same coat as the live mice)
+const PREY=["......DDBBBB......",
+            "....DDBBBBBBBB.PP.",
+            "...DBBBBBBBBBBPppP",
+            "..DBBBBBBBBBBLBpP.",
+            ".tDBBBBBBBBBLLkLw.",
+            ".tDBBBWWWWWLLLLLnw",
+            "t..DBWW..WWWLLL.w.",
+            "t...P.P....P.P....",
+            "t....P.......P....",
+            ".t................",
+            "..t..............."];
+// out of the ground layer the mouse misses the night wash the ground creatures get, so it carries its own
+const MOUSE_N=Object.fromEntries(Object.entries(MOUSE).map(([k,v])=>{const [r,g,b]=[1,3,5].map(i=>parseInt(v.slice(i,i+2),16)),m=(a,t)=>Math.round(a*.58+t*.42);return [k,`rgb(${m(r,16)},${m(g,22)},${m(b,58)})`]}));
 // by day the owl dozes, now and then cracking one eye open; the peeks come oftener as the afternoon wears on toward sunset (7pm)
 function dayPeek(o){
   const d=new Date(),h=d.getHours()+d.getMinutes()/60,pd=Math.min(1,Math.max(0,(h-6)/13));
@@ -1298,8 +1313,11 @@ function stepOwl(o,s){
     if(o.blink>0)o.blink--;else if(R()<(s.night?.03:.02))o.blink=RI(1,2);
     if(--o.timer<=0&&R()<(s.night?1/90:1/600)){
       // a sortie: flap out of the cavity, glide down to swoop at the ground, ride a thermal, then glide home
-      const prey=shown("desert_mice")&&R()<.7?(s.mice||[]).filter(m=>!m.caught&&m.x>(s.giant?s.giant.tx1+8:20)&&m.x<s.w-30).sort(()=>R()-.5)[0]:null;
-      if(prey){prey.marked=true;prey.escape=R()<.4}                       // about 2 in 5 mice bolt at the last moment
+      const okX=v=>v>(s.giant?s.giant.tx1+8:20)&&v<s.w-30;
+      const cands=[...(shown("desert_mice")?(s.mice||[]).filter(m=>!m.caught&&okX(m.x)).map(m=>(m.kind="mouse",m)):[]),
+                   ...(shown("scorpions")?(s.scorps||[]).filter(p=>p.alive&&okX(p.x)).map(p=>(p.kind="scorp",p)):[])];
+      const prey=R()<.75?cands.sort(()=>R()-.5)[0]:null;                  // a mouse or a glowing scorpion
+      if(prey){prey.marked=true;prey.escape=R()<.4}                       // about 2 in 5 bolt at the last moment
       const gx=prey?prey.x+6:Math.max(20,Math.min(s.w-20,n.x+RI(30,Math.round(s.w*.6)))),gy=prey?prey.y-14:s.groundY()-8;
       const cx=Math.max(30,Math.min(s.w-30,gx+RI(-30,30))),cy=s.H0*.3+RI(-8,8),r=RI(16,28),dir=R()<.5?1:-1,a0=R()*6.28,steps=Math.round(14*(1+R()*.6));
       const loop=[];for(let k=0;k<=steps;k++){const a=a0+dir*k*Math.PI*2/14;loop.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r*.5})}
@@ -1313,14 +1331,17 @@ function stepOwl(o,s){
     if(--o.timer<=0){o.state="home";o.timer=RI(40,160)}
   }else{
     const tg=o.path[0];if(!tg){o.state="home";o.timer=RI(40,160);return}
-    if(tg.prey&&!tg.prey.caught){tg.x=tg.prey.x+6;tg.y=tg.prey.y-14}                 // track the frozen mouse
+    if(tg.prey&&!tg.prey.caught&&(tg.prey.kind!=="scorp"||tg.prey.alive)){tg.x=tg.prey.x+6;tg.y=tg.prey.y-14}   // track the frozen prey
     if(tg.prey&&tg.prey.escape&&Math.hypot(tg.x-o.x,tg.y-o.y)<7){const m=tg.prey;    // ...which bolts: the owl swoops on empty sand
-      m.marked=false;m.escape=false;m.state="hop";m.fast=true;m.hops=RI(6,9);m.ht=0;m.dir=m.x<o.x?-1:1;tg.prey=null;tg.swoop=true}
+      m.marked=false;m.escape=false;m.flee=RI(26,40);m.dir=m.x+6<o.x?-1:1;
+      if(m.kind==="scorp"){m.state="walk";m.timer=40}else{m.state="hop";m.fast=true;m.hops=RI(8,11);m.ht=0}
+      tg.prey=null;tg.swoop=true}
     const dx=tg.x-o.x,dy=tg.y-o.y,d=Math.hypot(dx,dy);
     o.strike=!!(tg.prey||tg.swoop)&&d<34;                                             // legs swing down, talons open, for the last stretch
     if(d<1.6){
       if(tg.prey){const m=tg.prey;m.marked=false;
-        if(!m.caught&&Math.hypot(m.x+6-o.x,m.y-14-o.y)<6){m.caught=true;m.respawn=RI(500,1100);o.prey=true;
+        if(!m.caught&&(m.kind!=="scorp"||m.alive)&&Math.hypot(m.x+6-o.x,m.y-14-o.y)<6){o.prey=true;o.preyKind=m.kind||"mouse";
+          if(m.kind==="scorp"){m.alive=false;m.timer=RI(500,1100)}else{m.caught=true;m.respawn=RI(500,1100)}
           o.path=[o.path[1],{x:n.x+10,y:n.cy-14},{x:n.x,y:n.top-5,flap:true}];o.path.unshift({x:o.x,y:o.y});}}   // skip the thermal: straight home
       o.path.shift();
       if(!o.path.length){if(o.prey&&shown("owl_chicks")&&owlChickN()>0){o.state="feed";o.feedT=o.timer=RI(16,22);o.x=n.x;o.y=n.top-5}else{o.prey=false;o.state="home";o.timer=RI(40,160)}}
@@ -1384,7 +1405,8 @@ function stepMouse(m,s){
   // desert mouse: bursts of springy hops, pauses to nibble seeds, freezes when the owl is out
   const o=s.owl;
   if(m.marked){m.state="freeze";m.yo=0;m.timer=20;return}
-  if(o&&o.state==="fly"&&Math.hypot(o.x-m.x,o.y-m.y)<70){m.state="freeze";m.timer=RI(10,30);m.yo=0;return}
+  if(m.flee>0){m.flee--;if(m.state!=="hop"){m.state="hop";m.fast=true;m.hops=RI(4,6);m.ht=0}}
+  else if(o&&o.state==="fly"&&Math.hypot(o.x-m.x,o.y-m.y)<70){m.state="freeze";m.timer=RI(10,30);m.yo=0;return}
   m.timer--;
   if(m.state==="hop"){
     m.ht=(m.ht||0)+1;m.x+=m.dir*(m.fast?3:2);m.yo=[-1,-3,-4,-3,-1,0][m.ht%6];
@@ -1807,7 +1829,7 @@ function drawScene(){
       const [dx,dy]=SPOTS[i],hop=feeding&&((s.t>>2)+i*2)%4===0?-1:0;                                       // begging: a gentle, slow hop, taking turns, while the parent feeds them
       sprt(c,begging?CRITTERS.chickBeg:ch.b>0?CRITTERS.chickBlink:CRITTERS.chick,o.nest.x+Math.round(dx*1.2),o.nest.top+Math.round(dy*1.2)+hop,false,CHICKPAL)});
     if(feeding){const f=1-o.timer/o.feedT;                                     // lowered from the talons, then gobbled
-      if(f<.8){const k=Math.min(1,f/.45),py=Math.round(o.nest.top+5+k*7);c.globalAlpha=f<.5?1:1-(f-.5)/.3;sprt(c,PREY,o.nest.x-6,py,false,MOUSE);c.globalAlpha=1}}
+      if(f<.8){const k=Math.min(1,f/.45),py=Math.round(o.nest.top+5+k*7);c.globalAlpha=f<.5?1:1-(f-.5)/.3;if(o.preyKind==="scorp")sprt(c,CRITTERS.scorp[0],o.nest.x-7,py+1,false,N?GLOW:undefined);else sprt(c,PREY,o.nest.x-9,py,false,N?MOUSE_N:MOUSE);c.globalAlpha=1}}
   }
   if(N&&shown("owl")&&s.owl2)drawOwl2(c,s,s.owl2,s.disco);else clearHoo();
   if(fade!==null)c.globalAlpha=Math.max(.15,fade);
@@ -1820,7 +1842,7 @@ function drawScene(){
     [-3,2].forEach(dx=>{c.fillStyle=P.T;c.fillRect(x+dx,y,2,3);c.fillStyle=P.B;c.fillRect(x+dx,y+2,2,1);c.fillStyle=P.k;
       if(carry){c.fillRect(x+dx-1,y+3,1,2);c.fillRect(x+dx+2,y+3,1,2)}                // curled round the mouse
       else{c.fillRect(x+dx-1,y+3,4,1);c.fillStyle=P.k;c.fillRect(x+dx-2,y+4,1,1);c.fillRect(x+dx,y+4,1,1);c.fillRect(x+dx+2,y+4,1,1);c.fillRect(x+dx+3,y+4,1,1)}})}   // toes spread wide, black hooked claws
-  if(carry)sprt(c,PREY,Math.round(o.x)-5,Math.round(o.y)+13,false,MOUSE);
+  if(carry){if(o.preyKind==="scorp")sprt(c,CRITTERS.scorp[0],Math.round(o.x)-7,Math.round(o.y)+14,false,N?GLOW:undefined);else sprt(c,PREY,Math.round(o.x)-9,Math.round(o.y)+13,false,N?MOUSE_N:MOUSE)}
 }
 
 /* ---------- Desert Map: pixel-rendered satellite/terrain with live weather ---------- */
