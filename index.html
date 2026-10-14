@@ -128,7 +128,8 @@ body.still .hero h1 .cursor{animation:none}
 .postcard .cmsg.ok{color:#2f7a3a}.postcard .cmsg.err{color:#a83a2a}
 /* postcard type: the same thin, letter-spaced face as the taskbar's MODE label */
 .postcard .pc-caption,.postcard .pc-line,.postcard .pc-to,.postcard .cmsg,.postcard .pc-line input,.postcard .pc-msg textarea{font-family:var(--font-data);font-weight:300}
-.postcard .pc-caption,.postcard .pc-line>span,.postcard .pc-to{text-transform:uppercase;letter-spacing:.14em;font-size:11px}
+.postcard .pc-caption,.postcard .pc-line>span,.postcard .pc-to,.postcard .pc-req{text-transform:uppercase;letter-spacing:.14em;font-size:11px}
+.postcard .pc-msg{display:flex;flex-direction:column;gap:2px}.postcard .pc-req{font-family:var(--font-data);font-weight:300;color:#6a5a48}.postcard .pc-req b{color:#a83a2a;font-weight:400}
 .postcard .pc-to{font-size:12px;line-height:1.7}.postcard .pc-to b{font-family:var(--font-data);font-weight:400;font-size:11px}
 .postcard .pc-line input{font-size:14px;letter-spacing:.02em}.postcard .pc-msg textarea{font-size:14px;letter-spacing:.02em}
 body.night .cform.postcard input,body.night .cform.postcard textarea{background:transparent}
@@ -2884,7 +2885,7 @@ function contactForm(body,caption){
   f.innerHTML=`<div class="pc-left">
       <div class="pc-art"><canvas width="160" height="100" aria-hidden="true"></canvas><span class="pc-greet"><small>Greetings from</small>${esc(SET.location_short||"Anza-Borrego")}</span></div>
       ${caption?`<p class="pc-caption">${esc(caption)}</p>`:""}
-      <label class="pc-msg"><span class="sr">Message (required)</span><textarea name="message" rows="6" required placeholder="Dear Xerophyte Labs,"></textarea></label>
+      <label class="pc-msg"><span class="pc-req">Message <b>*</b></span><textarea name="message" rows="6" required placeholder="Dear Xerophyte Labs,"></textarea></label>
     </div>
     <div class="pc-right">
       <button type="submit" class="stamp" title="Send" aria-label="Send"><span class="stamp-in"><span class="stamp-air">AIR MAIL</span><canvas width="30" height="22" aria-hidden="true"></canvas><span class="stamp-send">SEND</span></span><span class="postmark" aria-hidden="true">SENT<br><small></small></span></button>
