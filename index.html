@@ -383,7 +383,7 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 /* phones: the icons fill the right, so the turntable parks top-left and glides in from the left edge */
 @media (pointer:coarse),(max-width:500px){.miniamp{display:none!important}}   /* phones: the turntable is the mini player (in disco too); tap it to open the radio */   /* phones: the turntable is the mini player */
 @media (pointer:coarse),(max-width:500px){
-  .turntable{position:fixed;left:12px;top:auto;bottom:calc(54px + env(safe-area-inset-bottom,0px));width:96px;height:84px;margin:0;z-index:3;transform:translateX(-100vw)}
+  .turntable{position:fixed;left:12px;top:auto;bottom:calc(54px + env(safe-area-inset-bottom,0px));width:96px;height:84px;margin:0;z-index:3;transform:translate(-130%,130%)}
   .turntable.on{transform:none}
   body .turntable canvas{width:96px;height:84px}
   body .turntable .deck-art{left:26px;top:26px;width:27px;height:27px}
@@ -1225,7 +1225,7 @@ function paintSky(){
    if(typeof BIO_IMG!=="undefined")Object.keys(P).forEach(k=>delete BIO_IMG[k])}
   clearInterval(SCENE.timer);
   drawScene();
-  if(SCENE.motion)SCENE.timer=setInterval(drawScene,SCENE.disco?90:125);
+  if(SCENE.motion)SCENE.timer=setInterval(drawScene,frameMs());
 }
 /* phone layout: decided mainly by the hardware (a touch screen as the main pointer means phone/tablet; a mouse or
    trackpad means desktop, whatever the window size), with screen size only as a fallback for very narrow screens */
@@ -1636,13 +1636,14 @@ function discoMusic(){
   else if(st.paused||SPOT.stopped||!st.pos)kickPlay(); // already playing? leave the song alone
   clearTimeout(discoMusic.t);discoMusic.t=setTimeout(()=>{if(W.open&&!W.min)shrinkWin("radio")},900);  // …then tuck it away
 }
+const frameMs=()=>SCENE.disco&&!isMob()?90:125;   // phones keep the calmer pace in disco too, leaving the music player room to breathe
 function setDisco(on,user){
   if(on&&user){discoMusic();
     // clear the floor: every window but the radio closes (a half-written postcard keeps its words for later)
     Object.keys(WINS).forEach(id=>{const W=WINS[id];if(id==="radio"||!W.open)return;const f=W.el.querySelector("form.postcard");if(f)f.dataset.hinted="1";closeWin(id)})}
   SCENE.disco=on;document.body.classList.toggle("disco",on);renderTasks();
   const b=document.getElementById("discobtn");if(b){b.setAttribute("aria-pressed",on);b.title=on?"Disable Disco-mode":"Enable Disco-mode";b.setAttribute("aria-label",b.title)}
-  clearInterval(SCENE.timer);if(SCENE.motion&&SCENE.ctx)SCENE.timer=setInterval(drawScene,on?90:125);else drawScene();
+  clearInterval(SCENE.timer);if(SCENE.motion&&SCENE.ctx)SCENE.timer=setInterval(drawScene,frameMs());else drawScene();spinDeck();
 }
 /* sun and moon: on arrival they sit where the real clock puts them (highest at noon / midnight),
    then travel their arc in a few minutes, sink behind the mountains, and rise again from the east */
@@ -2139,7 +2140,7 @@ const MOTION_KEY="xl-motion";
 function motionPref(){return true}
 function setMotion(on,save){
   SCENE.motion=on;
-  document.body.classList.toggle("still",!on);clearInterval(SCENE.timer);if(on&&SCENE.ctx)SCENE.timer=setInterval(drawScene,SCENE.disco?90:125);
+  document.body.classList.toggle("still",!on);clearInterval(SCENE.timer);if(on&&SCENE.ctx)SCENE.timer=setInterval(drawScene,frameMs());
 }
 
 /* ---------- data helpers ---------- */
@@ -2542,7 +2543,7 @@ function loadSpotify(src){
     SPOT.api.createController(host,{uri:src.uri,width:"100%",height:152},ctl=>{
       cropDeck();
       SPOT.ctl=ctl;
-      if(SPOT.autoplay){SPOT.autoplay=false;ctl.addListener("ready",()=>kickPlay());kickPlay()}
+      if(SPOT.autoplay){SPOT.autoplay=false;let once=false;const k=()=>{if(once)return;once=true;kickPlay()};ctl.addListener("ready",k);setTimeout(k,1200)}
       ctl.addListener("playback_update",e=>{const d=e.data||{};
         SPOT.state={paused:!!d.isPaused,pos:d.position||0,dur:d.duration||0,buffering:!!d.isBuffering};SPOT.at=performance.now();
         if(!d.isPaused){SPOT.stopped=false;NOW.started=true}
@@ -2566,12 +2567,16 @@ function preloadSpotify(){
   sc.onerror=()=>{SPOT.loading=false;SPOT.onfail&&SPOT.onfail()};document.head.appendChild(sc);
 }
 // ask Spotify to play, and keep asking for a few seconds: the embed ignores play() until its track has loaded
+// play() restarts the playlist from its first track, so it is sent at most once; after that only resume() is retried,
+// and the retries stop the moment the player reports it is playing or loading (on a slow phone connection a repeated
+// play() made the music stutter and jump back like a scratched CD)
 function kickPlay(){
-  clearInterval(SPOT.kick);let n=0;
+  clearInterval(SPOT.kick);let n=0,played=false;
+  const busy=()=>!SPOT.state.paused||SPOT.state.buffering;
   const go=()=>{const C=SPOT.ctl;if(!C)return;
-    if(n++>12||(!SPOT.state.paused&&!SPOT.stopped&&SPOT.state.pos>0)){clearInterval(SPOT.kick);return}
-    try{SPOT.state.pos>0&&!SPOT.stopped?C.resume():C.play()}catch(e){}};
-  go();SPOT.kick=setInterval(go,700);
+    if(n++>8||(n>1&&busy())){clearInterval(SPOT.kick);return}
+    try{if(!played&&!(SPOT.state.pos>0&&!SPOT.stopped)){played=true;C.play()}else C.resume()}catch(e){}};
+  go();SPOT.kick=setInterval(go,1500);
 }
 /* ---------- the turntable: appears under the radio while music plays; the record spins with the album art on its label ---------- */
 const DECK={art:null,artSrc:"",raf:0,last:0,th:0};
@@ -2585,12 +2590,13 @@ function loadArt(src,keep){
 function deckPlaying(){const st=SPOT.state;return !!SPOT.ctl&&!st.paused&&!SPOT.stopped&&!st.buffering}
 function spinDeck(){
   const el=document.getElementById("turntable");if(!el)return;
-  const on=deckPlaying();el.classList.toggle("on",on);
-  if(document.body.classList.contains("deckOn")!==on){document.body.classList.toggle("deckOn",on);setTimeout(fitIcons,950)}el.classList.toggle("spin",on&&!document.body.classList.contains("still"));
-  if(on&&!DECK.raf){const loop=t=>{DECK.raf=requestAnimationFrame(loop);if(t-DECK.last<70)return;
+  // phones in disco: the deck stays out for the whole party (a moment of buffering shouldn't send it sliding away)
+  const playing=deckPlaying(),on=playing||(SCENE.disco&&isMob()&&!!SPOT.src);el.classList.toggle("on",on);
+  if(document.body.classList.contains("deckOn")!==on){document.body.classList.toggle("deckOn",on);setTimeout(fitIcons,950)}el.classList.toggle("spin",playing&&!document.body.classList.contains("still"));
+  if(playing&&!DECK.raf){const loop=t=>{DECK.raf=requestAnimationFrame(loop);if(t-DECK.last<70)return;
       const dt=DECK.last?Math.min(200,t-DECK.last):0;DECK.last=t;if(!document.body.classList.contains("still"))DECK.th+=dt/1000*Math.PI*2*.555;drawDeck()};
     DECK.raf=requestAnimationFrame(loop)}
-  if(!on&&DECK.raf){cancelAnimationFrame(DECK.raf);DECK.raf=0;DECK.last=0}
+  if(!playing&&DECK.raf){cancelAnimationFrame(DECK.raf);DECK.raf=0;DECK.last=0}
   if(on)drawDeck();
 }
 function drawDeck(){
