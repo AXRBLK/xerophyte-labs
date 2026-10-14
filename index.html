@@ -624,7 +624,7 @@ const OWL_FLY={
   down:["..................kk....kk..................", "..................kDk..kDk..................", ".................kDBBkkBBDk.................", "................kBLrrrrrrLBk................", "................kBrrwrrwrrBk................", "................kBrYYrrYYrBk................", "........kk.k.kkkkBrYprrpYrBkkkk.k.kk........", "......kkTkTkTLBkkBLrrddrrLBkkBLTkTkTkk......", "....kkTwTwTLTLBBBkBLrddrLBkBBBLTLTwTwTkk....", "...kkTwTwTLTLBBDBkBLLwwLLBkBDBBLTLTwTwTkk...", "...kTwTwTLTBBDDkkDBLTLLTLBDkkDDBBTLTwTwTk...", "..kTwTwTLBBDDkk.kDBTLTTLTBDk.kkDDBBLTwTwTk..", "..kTLTLTBBDkk...kDBLTLLTLBDk...kkDBBTLTLTk..", ".kTLTLBBDkk......kDBLTTLBDk......kkDBBLTLTk.", ".kTLBBDkk.........kDBDDBDk.........kkDBBLTk.", "kLBDDkk...........kDkDDkDk...........kkDDBLk", "kBDkk..............kdkkdk..............kkDBk", ".kk......................................kk.", "............................................", "............................................"]
 };
 
-// soaring pose: each wing turned 30° down about its shoulder (nearest-neighbour rotation of the glide sprite)
+// soaring pose: each wing turned 25° down about its shoulder (nearest-neighbour rotation of the glide sprite)
 function droopWings(rows,deg){
   const H=rows.length+4,W=rows[0].length,out=[...Array(H)].map((_,y)=>[...(rows[y]||".".repeat(W))]);
   const BL=16,BR=27,PY=5,a=deg*Math.PI/180,get=(x,y)=>(rows[y]||"")[x]||".";
@@ -654,7 +654,7 @@ const CRITTERS={
   // front view in flight: both eyes stay visible on every wingbeat
   owlUp:OWL_FLY.up,
   owlDown:OWL_FLY.down,
-  owlGlide:droopWings(OWL_FLY.glide,30),
+  owlGlide:droopWings(OWL_FLY.glide,25),
   chick:["..gggg..",".g....g.","gYp..pYg","gYY..YYg",".g.oo.g.","..gggg.."],
   chickBlink:["..gggg..",".g....g.","g......g","gGG..GGg",".g.oo.g.","..gggg.."],
   scorp:[["......sS.",".......S.","SS.SSSS..","s.s.s.s.."],["......sS.",".......S.","SS.SSSS..",".s.s.s.s."]],
@@ -2288,6 +2288,13 @@ const BAT_HANG=[".K.K.",".KKK.","KKvKK","KKKKK",".KKK.","..K.."];
 function bioSprite(key){
   const m={owl:[CRITTERS.owlHome,OWLPAL],owl_chicks:[CRITTERS.chick,CHICKPAL],roadrunner:[CRITTERS.stand],ravens:[CRITTERS.ravenPerch,RAVENPAL],
     horned_lizards:[CRITTERS.toad],scorpions:[CRITTERS.scorp[0]],bats:[BAT_HANG],desert_mice:[CRITTERS.mouseSit,MOUSE]}[key];
+  if(key==="scorpions"){BIO_IMG[key]=BIO_IMG[key]||(()=>{               // two portraits: by day, and glowing under moonlight
+    const rows=CRITTERS.scorp[0],w=Math.max(...rows.map(r=>r.length)),h=rows.length,k=6,pad=3,cw=(w+pad*2)*k,cv=document.createElement("canvas");
+    cv.width=cw*2+k;cv.height=(h+pad*2)*k;const g=cv.getContext("2d");
+    g.fillStyle="#d8c49c";g.fillRect(0,0,cw,cv.height);g.fillStyle="#141a3a";g.fillRect(cw+k,0,cw,cv.height);
+    g.save();g.scale(k,k);sprt(g,rows,pad,pad,false);g.restore();
+    g.save();g.translate(cw+k,0);g.scale(k,k);g.fillStyle="rgba(143,224,204,.16)";g.fillRect(pad-1,pad-1,w+2,h+2);sprt(g,rows,pad,pad,false,GLOW);g.restore();
+    return cv.toDataURL()})();return BIO_IMG[key]}
   const pa=SCENE.plantArt&&SCENE.plantArt[key];
   if(pa){BIO_IMG[key]=BIO_IMG[key]||(()=>{const k=Math.max(2,Math.min(8,Math.floor(96/Math.max(pa.width,pa.height)))),cv=document.createElement("canvas");
     cv.width=pa.width*k;cv.height=pa.height*k;const g=cv.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(pa,0,0,cv.width,cv.height);return cv.toDataURL()})();return BIO_IMG[key]}
@@ -2323,7 +2330,7 @@ function renderBio(body,status){
     <p class="bio-head"><b>Field census</b> · ${esc(SET.location_name||"Anza-Borrego Desert")} · ${today}, ${time} · ${N?"nocturnal":"diurnal"} survey</p>
     <h3>Fauna</h3>
     <div class="tbl"><table class="biot"><thead><tr><th>Species</th><th>Family · class</th><th class="n">Count</th><th>Status</th></tr></thead><tbody>
-    ${fauna.map(a=>`<tr${a.on?"":' class="off"'} title="${esc(a.when)}"><td class="sp" data-sp="${a.key}" data-rest="${esc(a.common)}, at rest">${esc(a.common)}<br><i class="sci">${esc(a.sci)}</i></td><td>${a.fam}<br><span class="muted">${a.cls}</span></td><td class="n big">${a.on?a.n:"—"}</td>
+    ${fauna.map(a=>`<tr${a.on?"":' class="off"'} title="${esc(a.when)}"><td class="sp" data-sp="${a.key}" data-rest="${a.key==="scorpions"?"By day · glowing under moonlight":esc(a.common)+", at rest"}">${esc(a.common)}<br><i class="sci">${esc(a.sci)}</i></td><td>${a.fam}<br><span class="muted">${a.cls}</span></td><td class="n big">${a.on?a.n:"—"}</td>
       <td>${!a.on?"not surveyed":a.n?(a.act?"active":"resting"):"absent"}</td></tr>`).join("")}
     </tbody></table></div>
     <p class="bio-stats">Richness <b>S = ${dF.S}</b> · individuals <b>N = ${dF.N}</b> · Shannon <b>H′ = ${fmt(dF.H)}</b> · evenness <b>J′ = ${fmt(dF.E)}</b> · Simpson <b>1−D = ${fmt(dF.D)}</b></p>
