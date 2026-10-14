@@ -623,7 +623,7 @@ const GLOW={S:"#8fe0cc",s:"#4c9a8c"}; // scorpions fluoresce under moonlight
 const OWLPAL={k:"#241a14",D:"#3e2c20",B:"#5c4230",L:"#8a6a4c",T:"#b08a5a",r:"#b8743e",w:"#d8d0c0",W:"#efe8da",Y:"#e8b828",p:"#0c0806",d:"#2e241c",c:"#d4ccbe"};
 const mixHex=(a,b,t)=>{const A=hex(a),B=hex(b);return "#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join("")};
 const OWLPAL_N=Object.fromEntries(Object.entries(OWLPAL).map(([k,v])=>[k,"WYp".includes(k)?v:mixHex(v,"#1a2250",.3)]));
-const CHICKPAL={g:"#9a98a2",G:"#6a6874",Y:"#f2c230",p:"#140c08",o:"#8a7040",t:"#e8707e",s:"#8a7040"};
+const CHICKPAL={r:"#aa3c46",w:"#d6d2dc",g:"#9a98a2",G:"#6a6874",Y:"#f2c230",p:"#140c08",o:"#8a7040",t:"#e8707e",s:"#8a7040"};
 const OWLPAL_DAY=Object.fromEntries(Object.entries(OWLPAL).map(([k,v])=>[k,mixHex(v,"#1a1418",.4)]));
 const OWLPAL_PEEK={...OWLPAL_DAY,Y:mixHex(OWLPAL.Y,"#1a1418",.12),p:OWLPAL.p};
 const MOUSE={P:"#e0aeb0",p:"#b88494",B:"#8e6c5c",W:"#f6f0ea",k:"#1c1824",n:"#e0aeb0",t:"#d6a2a6"};
@@ -679,9 +679,9 @@ const CRITTERS={
   owlUp:OWL_FLY.up,
   owlDown:OWL_FLY.down,
   owlGlide:droopWings(OWL_FLY.glide,20),
-  chick:["..gggg..",".g....g.","gYp..pYg","gYY..YYg",".g.oo.g.","..gggg.."],
-  chickBlink:["..gggg..",".g....g.","g......g","gGG..GGg",".g.oo.g.","..gggg.."],
-  chickBeg:["..gggg..",".g....g.","gYp..pYg","gYY..YYg",".gopposg","..gttg.."],   // beak wide open, little tongue
+  chick:["..wwww..", ".wYYYYw.", "wYppwppY", "wYppYppY", "wwYooYww", ".wwwwww.", "..wwww.."],
+  chickBlink:["..wwww..", ".wwwwww.", "wwwwwwww", "wGGGwGGG", "wwwoowww", ".wwwwww.", "..wwww.."],
+  chickBeg:["..wwww..", ".wYYYYw.", "wYppwppY", "wYppYppY", "wwYooYww", ".wwppww.", "..wttw..", "...tt..."],   // beak open, tongue out
   scorp:[["......sS.",".......S.","SS.SSSS..","s.s.s.s.."],["......sS.",".......S.","SS.SSSS..",".s.s.s.s."]],
   bat:[["K...K","KK.KK",".KKK."],[".....","KKKKK","K.K.K"]],
   // desert mouse: big round pink ears, brown back, white face and belly, long curling pink tail
@@ -1114,7 +1114,7 @@ function hooBox(){let b=document.getElementById("hoos");if(!b){b=document.create
   const sky=document.getElementById("sky");sky.after(b)}return b}
 function clearHoo(){const b=document.getElementById("hoos");if(b&&b.childElementCount)b.innerHTML=""}
 // a whole, fluffy owlet for the Biodiversity Report hover
-const OWLET_BODY=["...w..w...", "..wwwwww..", ".wwYwwYww.", ".wYpwwpYw.", ".wwwoowww.", "wwwwwwwwww", "wgwgwwgwgw", "wwgwggwgww", "wgwgwwgwgw", "wwwwwwwwww", ".wwgwwgww.", "..wwwwww..", "..oo..oo..", ".o.o..o.o."],OWLETPAL={w:"#d6d2dc",g:"#9a98a2",Y:"#f2c230",p:"#140c08",o:"#8a7040"};
+const OWLET_BODY=["..wwwwww..", ".wwYYYYww.", "wwYppwppYw", "wwYppYppYw", "wwwYooYwww", "wwwwwwwwww", "wgwgwwgwgw", "wwgwggwgww", "wgwgwwgwgw", "wwwwwwwwww", ".wwgwwgww.", "..wwwwww..", "..oo..oo..", ".o.o..o.o."],OWLETPAL={w:"#d6d2dc",g:"#9a98a2",Y:"#f2c230",p:"#140c08",o:"#8a7040"};
 const PREY=["....PPp....","..BBBBBBk..",".BBBBBBBWWk","tBBBBBBWWW.","t..BW..BW..",".t........."];   // a mouse dangling from the owl's talons
 // by day the owl dozes, now and then cracking one eye open; the peeks come oftener as the afternoon wears on toward sunset (7pm)
 function dayPeek(o){
