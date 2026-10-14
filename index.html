@@ -179,6 +179,11 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 .now dl{display:grid;grid-template-columns:auto auto;gap:0 12px;margin:6px 0 0;font-size:12px}
 .now dt{color:var(--mute)}.now dd{margin:0;font-variant-numeric:tabular-nums}
 .days{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:14px}
+.wx-radar{margin:14px 0 0;border:2px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo);background:#b8a684;position:relative}
+.wx-radar canvas{display:block;width:100%;height:auto;image-rendering:auto}
+.wx-radar figcaption{position:absolute;left:0;bottom:0;padding:2px 6px;font:11px var(--font-data);color:#1c1218;background:rgba(244,236,224,.82)}
+.wx-radar figcaption b{font-family:var(--font-display);font-weight:400;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#a03a2a;margin-right:4px}
+body.night .wx-radar canvas{filter:saturate(.7) brightness(.85)}
 .day{border:1px solid var(--line);background:var(--card);padding:6px;text-align:center;font-size:12px;font-variant-numeric:tabular-nums;min-width:0}
 .day b{display:block;font-family:var(--font-ui);font-weight:600;font-size:13px}
 .day small{display:block;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -734,8 +739,8 @@ const CRITTERS={
   scorp:[[".........sSs..", "........T...s.", "............S.", ".ss.s......S..", "S..sSSTSTSS...", "s.sSSSSSSSs...", "....s.s.s.s..."], [".........sSs..", "........T...s.", "............S.", ".ss.s......S..", "S..sSSTSTSS...", "s.sSSSSSSSs...", "...s.s.s.s...."]],   // desert hairy scorpion: tail curled over its back, stinger forward, pincers out
   bat:[["K...K","KK.KK",".KKK."],[".....","KKKKK","K.K.K"]],
   // desert mouse: big round pink ears, brown back, white face and belly, long curling pink tail
-  mouseSit:["...........PP.....", "..........PppP....", "..........PppP....", "........DDBBPBL...", ".......DBBBBLkLw..", ".....DDBBBBLLLLnw.", "....DBBBBBBWWWw...", "...DBBBBBWWWW.....", "..tDBBBPWWPW......", ".t................", "..tttttttt........"],
-  mouseHop:["...........PP.....", "..........PppP....", "..........PppP....", "........DDBBPBL...", ".......DBBBBLkLw..", ".....DDBBBBLLLLnw.", "....DBBBBBBWWWw...", "...DBBBBBWWWW.....", ".tDBBBBWWWW.......", "t...P....P........", "................."],
+  mouseSit:["........PP....", ".......PppP...", "......DBBPBL..", ".....DBBBLkLw.", "...DDBBBBLLLnw", "..DBBBBBWWWw..", ".tDBBBPWWPW...", "t.tttttt......"],   // 25% smaller than before, to sit right beside the owls
+  mouseHop:["........PP....", ".......PppP...", "......DBBPBL..", ".....DBBBLkLw.", "...DDBBBBLLLnw", "..DBBBBBWWWw..", "tDBBBBWWWW....", "...P....P....."],
   bloomBig:[".W.W.","WWYWW",".WWW."],
   bloomSmall:["WYW",".W."]
 };
@@ -1283,7 +1288,7 @@ let OWL2_CACHE=null;const OWL2_BIG=()=>OWL2_CACHE||(OWL2_CACHE={open:OWL2_W(OWL2
 const OWL2_W=k=>k.map(r=>r.slice(0,4)+r[3]+r.slice(4,9)+r[8]+r.slice(9)).flatMap((r,j)=>[11,13,15,17].includes(j)?[r,r]:[r]);
 const OWL2_SHUT=OWL2.map((r,j)=>j===5?"kBDDDwwDDDBk":j===6?"kBrrrddrrrBk":r);
 const OWL2_HOOT=OWL2.map(r=>r==="kBLwLwwLwLBk"?"kBWWWWWWWWBk":r);
-const HOOTS=[0,1,1,1,0,0,0,1,1,0,1,1,0,1,1,1];                    // hoo, h'hoo, hoo, hoo
+const HOOTS=[0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,1];                    // hoo … hoo … hoo, well spaced
 function drawOwl2(c,s,o,hold){
   const p=o.p,BIG=OWL2_BIG(),w=BIG.open[0].length,h=BIG.open.length,x=p.x-(w>>1),y=p.y-h+2;
   if(!hold){if(o.hoot>0)o.hoot--;else if(--o.timer<=0){o.hoot=HOOTS.length;o.timer=RI(40,140)}
@@ -1293,7 +1298,7 @@ function drawOwl2(c,s,o,hold){
   if(hold){const sw=Math.round(Math.sin(performance.now()/1000*Math.PI*1.07)*1.4);   // disco: eyes shut, swaying to the music
     sprt(c,BIG.shut,x+sw,y,false,OWLPAL_N);o.notes=[];clearHoo();return}
   sprt(c,on?BIG.hoot:o.blink?BIG.shut:BIG.open,x,y+(on?1:0),false,OWLPAL_N);
-  o.notes=o.notes.filter(n=>{n.life--;if(!hold){n.x+=.35;n.y-=.4}return n.life>0});
+  o.notes=o.notes.filter(n=>{n.life--;if(!hold){n.x+=.35;n.y-=.7}return n.life>0});
   // the hoots are real text (same face as the taskbar's MODE label), laid over the pixel scene
   const box=hooBox(),k=innerWidth/s.w;
   box.innerHTML=o.notes.map(n=>`<span style="left:${(n.x*k).toFixed(1)}px;top:${(n.y*k).toFixed(1)}px;opacity:${(.55*n.life/16).toFixed(2)}">hoo</span>`).join("");
@@ -1304,17 +1309,7 @@ function clearHoo(){const b=document.getElementById("hoos");if(b&&b.childElement
 // a whole, fluffy owlet for the Biodiversity Report hover
 const OWLET_BODY=["..wwwwww..", ".wwYYYYww.", "wwYppwppYw", "wwYppYppYw", "wwwYooYwww", "wwwwwwwwww", "wgwgwwgwgw", "wwgwggwgww", "wgwgwwgwgw", "wwwwwwwwww", ".wwgwwgww.", "..wwwwww..", "..oo..oo..", ".o.o..o.o."],OWLETPAL={w:"#d6d2dc",g:"#9a98a2",Y:"#f2c230",p:"#140c08",o:"#8a7040"};
 // a mouse gripped across the back: body sagging, head drooping, feet and tail hanging (same coat as the live mice)
-const PREY=["......DDBBBB......",
-            "....DDBBBBBBBB.PP.",
-            "...DBBBBBBBBBBPppP",
-            "..DBBBBBBBBBBLBpP.",
-            ".tDBBBBBBBBBLLkLw.",
-            ".tDBBBWWWWWLLLLLnw",
-            "t..DBWW..WWWLLL.w.",
-            "t...P.P....P.P....",
-            "t....P.......P....",
-            ".t................",
-            "..t..............."];
+const PREY=["....DDBBBB....", "..DDBBBBBB.PP.", ".DBBBBBBBBPppP", ".DBBBBBBBLBpP.", "tDBBBBBBBLkLw.", "tDBWWWWWLLLLnw", "t..BWW.WWLL.w.", "t..P.P..P.P...", ".t............"];
 // out of the ground layer the mouse misses the night wash the ground creatures get, so it carries its own
 const MOUSE_N=Object.fromEntries(Object.entries(MOUSE).map(([k,v])=>{const [r,g,b]=[1,3,5].map(i=>parseInt(v.slice(i,i+2),16)),m=(a,t)=>Math.round(a*.58+t*.42);return [k,`rgb(${m(r,16)},${m(g,22)},${m(b,58)})`]}));
 // by day the owl dozes, now and then cracking one eye open; the peeks come oftener as the afternoon wears on toward sunset (7pm)
@@ -1814,7 +1809,7 @@ function drawScene(){
     if(m.caught){if(!hold&&--m.respawn<=0){m.caught=false;m.dir=R()<.5?1:-1;m.x=m.dir>0?2:s.w-20;m.state="hop";m.hops=RI(4,8);m.ht=0}return}
     if(hold)m.yo=0;else stepMouse(m,s);
     const f=!hold&&m.state==="hop"&&m.yo<0?CRITTERS.mouseHop:CRITTERS.mouseSit;
-    sprtBob(g,f,m.x,m.y-11+m.yo,5,hold?bob:m.state==="nibble"&&s.t%4<2?1:0,m.dir<0,MOUSE)});
+    sprtBob(g,f,m.x,m.y-8+m.yo,4,hold?bob:m.state==="nibble"&&s.t%4<2?1:0,m.dir<0,MOUSE)});
   const tk=N&&shown("baja_truck")?stepTruck(s):null;
   if(tk)sprt(g,TRUCK,tk.x,tk.y,tk.dir<0,TRUCKPAL,"kbgTwR");
   if(N)tint(G,"rgba(16,22,58,.42)");
@@ -1850,7 +1845,7 @@ function drawScene(){
       const [dx,dy]=SPOTS[i],hop=feeding&&((s.t>>2)+i*2)%4===0?-1:0;                                       // begging: a gentle, slow hop, taking turns, while the parent feeds them
       sprt(c,begging?CRITTERS.chickBeg:ch.b>0?CRITTERS.chickBlink:CRITTERS.chick,o.nest.x+Math.round(dx*1.2),o.nest.top+Math.round(dy*1.2)+hop,false,CHICKPAL)});
     if(feeding){const f=1-o.timer/o.feedT;                                     // lowered from the talons, then gobbled
-      if(f<.8){const k=Math.min(1,f/.45),py=Math.round(o.nest.top+5+k*7);c.globalAlpha=f<.5?1:1-(f-.5)/.3;if(o.preyKind==="scorp")sprt(c,CRITTERS.scorp[0],o.nest.x-7,py+1,false,N?GLOW:undefined);else sprt(c,PREY,o.nest.x-9,py,false,N?MOUSE_N:MOUSE);c.globalAlpha=1}}
+      if(f<.8){const k=Math.min(1,f/.45),py=Math.round(o.nest.top+5+k*7);c.globalAlpha=f<.5?1:1-(f-.5)/.3;if(o.preyKind==="scorp")sprt(c,CRITTERS.scorp[0],o.nest.x-7,py+1,false,N?GLOW:undefined);else sprt(c,PREY,o.nest.x-7,py,false,N?MOUSE_N:MOUSE);c.globalAlpha=1}}
   }
   if(N&&shown("owl")&&s.owl2)drawOwl2(c,s,s.owl2,s.disco);else clearHoo();
   if(fade!==null)c.globalAlpha=Math.max(.15,fade);
@@ -1863,7 +1858,7 @@ function drawScene(){
     [-3,2].forEach(dx=>{c.fillStyle=P.T;c.fillRect(x+dx,y,2,3);c.fillStyle=P.B;c.fillRect(x+dx,y+2,2,1);c.fillStyle=P.k;
       if(carry){c.fillRect(x+dx-1,y+3,1,2);c.fillRect(x+dx+2,y+3,1,2)}                // curled round the mouse
       else{c.fillRect(x+dx-1,y+3,4,1);c.fillStyle=P.k;c.fillRect(x+dx-2,y+4,1,1);c.fillRect(x+dx,y+4,1,1);c.fillRect(x+dx+2,y+4,1,1);c.fillRect(x+dx+3,y+4,1,1)}})}   // toes spread wide, black hooked claws
-  if(carry){if(o.preyKind==="scorp")sprt(c,CRITTERS.scorp[0],Math.round(o.x)-7,Math.round(o.y)+14,false,N?GLOW:undefined);else sprt(c,PREY,Math.round(o.x)-9,Math.round(o.y)+13,false,N?MOUSE_N:MOUSE)}
+  if(carry){if(o.preyKind==="scorp")sprt(c,CRITTERS.scorp[0],Math.round(o.x)-7,Math.round(o.y)+14,false,N?GLOW:undefined);else sprt(c,PREY,Math.round(o.x)-7,Math.round(o.y)+13,false,N?MOUSE_N:MOUSE)}
 }
 
 /* ---------- Desert Map: pixel-rendered satellite/terrain with live weather ---------- */
@@ -1888,9 +1883,11 @@ const TILES={
   sat:{url:ESRI+"World_Imagery/MapServer/tile/{z}/{y}/{x}",max:17},
   topo:{url:ESRI+"World_Topo_Map/MapServer/tile/{z}/{y}/{x}",max:17},
   labels:{url:ESRI+"Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",max:17},
+  // vegetation greenness (MODIS NDVI, latest 8-day composite) from NASA GIBS, laid over the terrain
+  veg:{url:"https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDVI_8Day/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png",max:9},
   radar:null
 };
-const MAP={z:9,cx:0,cy:0,base:"sat",pix:2,radar:false,sel:"anza",cache:new Map(),wx:{},wxAt:0,W:0,H:0,raf:0,markers:[]};
+const MAP={z:9,cx:0,cy:0,base:"topo",pix:2,radar:false,sel:"anza",cache:new Map(),wx:{},wxAt:0,W:0,H:0,raf:0,markers:[]};
 const wsz=z=>256*Math.pow(2,z);
 const lon2x=(lon,z)=>(lon+180)/360*wsz(z);
 const lat2y=(lat,z)=>{const s=Math.sin(lat*Math.PI/180);return (.5-Math.log((1+s)/(1-s))/(4*Math.PI))*wsz(z)};
@@ -1927,7 +1924,7 @@ function mapRender(){
   const c=MAP.cv.getContext("2d"),p=MAP.pix;
   c.fillStyle="#b8a684";c.fillRect(0,0,MAP.cv.width,MAP.cv.height);
   c.imageSmoothingEnabled=true;
-  drawLayer(c,TILES[MAP.base],p);
+  if(MAP.base==="veg"){drawLayer(c,TILES.topo,p);drawLayer(c,TILES.veg,p,.78)}else drawLayer(c,TILES[MAP.base],p);
   if(MAP.radar&&TILES.radar)drawLayer(c,TILES.radar,p,.7);
   const lc=MAP.lcv.getContext("2d");lc.clearRect(0,0,MAP.lcv.width,MAP.lcv.height);
   if(MAP.base==="sat")drawLayer(lc,TILES.labels,1);
@@ -1996,6 +1993,33 @@ function selectPlace(id,fly){
   document.querySelectorAll("#placeList [data-id]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.id===id));
   mapPaintWx();if(fly)mapGo(p.lat,p.lon,p.z);else mapDirty();
 }
+// the last couple of hours of radar (RainViewer composites, every 10 minutes) looping over terrain, centred on the station
+let RADAR_FRAMES=null;
+async function radarFrames(){
+  if(RADAR_FRAMES&&Date.now()-RADAR_FRAMES.at<5*60e3)return RADAR_FRAMES;
+  const j=await (await fetch("https://api.rainviewer.com/public/weather-maps.json")).json();
+  return RADAR_FRAMES={at:Date.now(),host:j.host,frames:j.radar.past.slice(-10)};
+}
+async function miniRadar(fig){
+  const cv=fig.querySelector("canvas"),cap=fig.querySelector("figcaption span"),c=cv.getContext("2d");
+  const lat=num(SET.latitude),lon=num(SET.longitude);if(lat==null||lon==null){fig.remove();return}
+  let R;try{R=await radarFrames()}catch(e){cap.textContent="unavailable right now";}
+  const z=7,W=cv.width,H=cv.height,cx=lon2x(lon,z),cy=lat2y(lat,z),left=cx-W/2,top=cy-H/2,n=1<<z;
+  const tiles=(L,alpha)=>{c.globalAlpha=alpha||1;
+    for(let ty=Math.floor(top/256);ty<=Math.floor((top+H)/256);ty++)for(let tx=Math.floor(left/256);tx<=Math.floor((left+W)/256);tx++){
+      const t=tileImg(tileURL(L,z,((tx%n)+n)%n,ty));if(t.ok)c.drawImage(t.img,Math.round(tx*256-left),Math.round(ty*256-top),256,256)}
+    c.globalAlpha=1};
+  let i=0,hold=0;
+  const draw=()=>{
+    if(!cv.isConnected){clearInterval(timer);return}
+    c.fillStyle="#b8a684";c.fillRect(0,0,W,H);tiles(TILES.topo);
+    if(R&&R.frames.length){const f=R.frames[i];tiles({url:`${R.host}${f.path}/256/{z}/{x}/{y}/2/1_1.png`},.75);
+      const last=i===R.frames.length-1;cap.textContent=new Date(f.time*1000).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})+(last?" · latest":"");
+      if(last){if(++hold>=4){hold=0;i=0}}else i++}
+    c.fillStyle="#1c1218";c.fillRect(W/2-3,H/2-1,7,3);c.fillRect(W/2-1,H/2-3,3,7);c.fillStyle="#ffe48a";c.fillRect(W/2-2,H/2,5,1);c.fillRect(W/2,H/2-2,1,5);   // the station
+  };
+  const timer=setInterval(draw,550);draw();
+}
 async function toggleRadar(btn){
   if(!TILES.radar){
     btn.textContent="Radar…";
@@ -2013,7 +2037,7 @@ function renderMap(body,status){
   body.innerHTML=`<div class="maptools" role="toolbar" aria-label="Map controls">
       <button data-a="home">⌂ Anza-Borrego</button><button data-a="all">◎ All deserts</button>
       <span class="sep"></span>
-      <button data-base="sat" aria-pressed="true">Satellite</button><button data-base="topo" aria-pressed="false">Terrain</button>
+      <button data-base="topo" aria-pressed="true">Terrain</button><button data-base="veg" aria-pressed="false">Vegetation</button><button data-base="sat" aria-pressed="false">Satellite</button>
       <button data-a="radar" aria-pressed="false">Radar</button>
       <span class="sep"></span>
       <button data-a="pix" title="Pixel size">Pixels 2×</button><button data-a="in" aria-label="Zoom in">+</button><button data-a="out" aria-label="Zoom out">−</button>
@@ -2021,7 +2045,7 @@ function renderMap(body,status){
     <div class="mapgrid">
       <div class="mapwrap" tabindex="0" aria-label="Map of North American deserts. Drag or use arrow keys to pan, plus and minus to zoom.">
         <canvas class="mapcv"></canvas><canvas class="maplabels"></canvas><div class="mapnight"></div><div class="mapmarks"></div>
-        <div class="mapattr">Imagery © Esri · Radar RainViewer · Weather Open-Meteo</div>
+        <div class="mapattr">Maps © Esri · Vegetation NASA GIBS (MODIS NDVI) · Radar RainViewer · Weather Open-Meteo</div>
       </div>
       <aside class="mapside"><div id="placeInfo" class="pl-info"></div><ol id="placeList" class="places">${PLACES.map(p=>`<li><button data-id="${p.id}" aria-pressed="${p.id===MAP.sel}"><span>${esc(p.name)}<small>${esc(p.region)}</small></span><i>—°</i></button></li>`).join("")}</ol></aside>
     </div>`;
@@ -2674,7 +2698,9 @@ function renderToday(body,status){
         <dt>UV max</dt><dd>${d.uv_index_max?.[0]??"—"}</dd></dl></div></div>
       <div class="days">${d.time.map((t,i)=>{const dt=toDate(t);return `<div class="day"><b>${i?dt.toLocaleDateString(undefined,{weekday:"short"}):"Today"}</b>
         ${Math.round(d.temperature_2m_max[i])}° / ${Math.round(d.temperature_2m_min[i])}°<small>${WMO[d.weather_code[i]]??""}</small><small>${d.precipitation_probability_max?.[i]??0}% rain</small></div>`}).join("")}</div>`;
-    status.innerHTML=`<span>${loc}</span><span>Live · Open-Meteo</span>`;
+    body.insertAdjacentHTML("beforeend",`<figure class="wx-radar"><canvas width="384" height="176" aria-label="Doppler radar loop around ${loc||"the station"}"></canvas><figcaption><b>Radar</b> <span>loading…</span></figcaption></figure>`);
+    miniRadar(body.querySelector(".wx-radar"));
+    status.innerHTML=`<span>${loc}</span><span>Live · Open-Meteo · RainViewer</span>`;
   }else{
     const rows=weatherRows(),last=rows[rows.length-1];
     body.innerHTML=last?`${exampleTag()}<div class="now"><div class="big">${Math.round(last.high)}°</div>
