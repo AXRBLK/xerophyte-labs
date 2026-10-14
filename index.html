@@ -985,19 +985,32 @@ function paintSky(){
     // and one flaring out of the main column into the gap beside the arm
     // close-up blooms, drawn at full pixel detail: eight scalloped petals with faint veins and shade, a ring of yellow
     // stamens round an orange heart, on a green floral tube. "side" blooms face sideways (tube toward the stem); "top" open skyward
-    const bloomPx=(cx,cy,r,kind,dir)=>{const sq=kind==="top"?.55:1,sx=kind==="side"?.72:1,P=(x,y,col)=>{bcx.fillStyle=col;bcx.fillRect(x,y,1,1)};
-      if(kind==="side"){const tl=Math.round(r*.9),th=Math.max(3,Math.round(r*.5));for(let k=0;k<tl;k++)for(let j=-(th>>1);j<=th>>1;j++){const X=Math.round(cx+dir*(r*sx*.6+k)),Y=cy+j+(k>tl*.6?Math.sign(j)*0:0);
-          P(X,Y,j<0?"#9cb882":j>0?"#5e7a4c":"#7e9a6a")}}
-      else{const tl=Math.round(r*.6);for(let k=0;k<tl;k++)for(let j=-1;j<=1;j++)P(cx+j,Math.round(cy+r*sq*.55+k),j<0?"#9cb882":j>0?"#5e7a4c":"#7e9a6a")}
-      const R=Math.ceil(r)+1;
-      for(let y=-R;y<=R;y++)for(let x=-R;x<=R;x++){
-        const ux=x/sx,uy=y/sq,d=Math.hypot(ux,uy),a=Math.atan2(uy,ux),edge=r*(.86+.14*Math.abs(Math.cos(a*4)));
-        if(d>edge)continue;const t=d/r,X=cx+x,Y=cy+y;
-        if(t<.13){P(X,Y,"#e8a830");continue}
-        if(t<.34){P(X,Y,(x+y)&1?"#ffd84a":"#fff0a0");continue}
-        const vein=Math.abs(((a/(Math.PI/4))%1+1)%1-.5)>.44,shade=(ux+uy)>r*.45,rim=d>edge-1;
-        P(X,Y,rim?"#dde4ee":vein?"#e6ecf4":shade?"#eef1f6":"#ffffff")}
-      blooms.push({x:cx,y:cy,big:true,box:[cx-R-(kind==="side"?R+2:2),cy-R-2,R*4+4,R*2+(kind==="top"?R:0)+6]})};
+    // close-up blooms, drawn at full pixel detail like real saguaro blossoms: a green tube flaring into a white, waxy
+    // trumpet that opens in a frilly ring of petals around a dense cushion of yellow stamens.
+    // "side": seen from the side, trumpet pointing away from the stem (dir = which way the tube runs); "top": opening skyward
+    const bloomPx=(cx,cy,r,kind,dir)=>{const P=(x,y,col)=>{bcx.fillStyle=col;bcx.fillRect(Math.round(x),Math.round(y),1,1)},J=()=>rnd()<.5?0:1;
+      const frill=a=>.78+.14*Math.abs(Math.cos(a*7))+.08*Math.abs(Math.sin(a*13+1.3));     // petal tips: lots of small, uneven lobes
+      const face=(fx,fy,rx,ry)=>{const R=Math.ceil(Math.max(rx,ry))+1;
+        for(let y=-R;y<=R;y++)for(let x=-R;x<=R;x++){const ux=x/rx,uy=y/ry,d=Math.hypot(ux,uy),a=Math.atan2(uy,ux);if(d>frill(a))continue;
+          const t=d,X=fx+x,Y=fy+y,seam=Math.abs(((a/(Math.PI/7))%1+1)%1-.5)>.42,seam2=Math.abs((((a+.22)/(Math.PI/6))%1+1)%1-.5)>.43;
+          if(t<.12)P(X,Y,"#d8e8a0");                                        // pale stigma
+          else if(t<.38)P(X,Y,(x*3+y*5)%4===0?"#e8a830":(x+y)&1?"#ffd84a":"#fff0a0");   // stamen cushion
+          else if(t<.6)P(X,Y,seam2?"#d6dce8":(x-y)&1?"#f4f2ea":"#ffffff");        // inner petals, a little creamy
+          else P(X,Y,d>frill(a)-.1?"#dfe5ef":seam?"#e3e9f2":"#ffffff")}};      // outer petals, veined, with a cool rim
+      if(kind==="side"){
+        const L=Math.round(r*1.3),tl=Math.round(r*.7),rimX=cx;
+        for(let k=0;k<tl;k++)for(let j=-1;j<=1;j++)P(rimX+dir*(L+k),cy+j,j<0?"#9cb882":j>0?"#5e7a4c":"#7e9a6a");   // floral tube
+        for(let k=0;k<=L;k++){const f=k/L,h=1.5+(r-1.5)*Math.pow(1-f,1.7),X=rimX+dir*k;                 // the trumpet, flaring toward the rim
+          for(let y=-Math.round(h);y<=Math.round(h);y++)P(X,cy+y,y>h*.45?"#d8dee8":y<-h*.55?"#ffffff":k%3===0&&Math.abs(y)>1?"#e6ecf4":"#f6f7fa")}
+        face(rimX-dir*1,cy,Math.max(2,r*.38),r);                          // the open mouth, seen nearly edge-on, with its frilly lip
+        for(let k=0;k<5;k++)P(rimX-dir*(1+J()),cy-2+k,k%2?"#ffd84a":"#e8a830");  // stamens peeking out of the throat
+      }else{
+        const ry=r*.55;
+        for(let k=0;k<Math.round(r*.9);k++){const w=Math.max(1,Math.round(r*.55*(1-k/(r*.9))));for(let x=-w;x<=w;x++)P(cx+x,cy+ry*.5+k,x<0?"#f6f7fa":"#dde3ec")}   // the trumpet's side, below the face
+        for(let k=0;k<Math.round(r*.5);k++)for(let x=-1;x<=1;x++)P(cx+x,cy+ry*.5+Math.round(r*.9)+k,x<0?"#9cb882":x>0?"#5e7a4c":"#7e9a6a");
+        face(cx,cy,r,ry);
+      }
+      const R=Math.ceil(r)+2;blooms.push({x:cx,y:cy,big:true,box:[cx-R*3,cy-R-2,R*6,R*3+4]})};
     const cx=ax+(AW>>1);
     // arm: six blooms clustered at the tip, back to front so they tuck behind each other; all clear of the owl's hole
     bloomPx(cx+5,armTop-6,9,"top");                                       // a second crown bloom, behind
@@ -1176,7 +1189,14 @@ function stepRaven(r,s){
     if(--r.timer<=0){r.state="soar";r.cy=Math.max(H0*.12,r.y)}
   }
 }
-const OWL_K=1.2,OWL_FW=Math.round(22*1.2),OWL_FH=Math.round(8*1.2),OWL_SETTLE=6,OWL_FADE=3;   // both owls drawn 20% larger
+// the perched owl's faces, built 20% larger at native size: columns 2,5,10,13 (incl. both pupils) and five body rows are
+// doubled, so the eyes stay level, symmetric and 2px-pupilled instead of being unevenly stretched
+const OWL_BIG_CACHE=new Map();
+const owlBig=rows=>{let b=OWL_BIG_CACHE.get(rows);if(!b){b=rows.map(r=>[...r].flatMap((ch,i)=>[2,5,10,13].includes(i)?[ch,ch]:[ch]).join("")).flatMap((r,j)=>[12,14,16,18,20].includes(j)?[r,r]:[r]);OWL_BIG_CACHE.set(rows,b)}return b};
+// in flight: only the wings are widened (paired columns either side) and the body stretched two rows, so the chest's
+// soft lattice and the face stay crisp instead of going round and mushy under scaling
+const owlBigFly=rows=>{let b=OWL_BIG_CACHE.get(rows);if(!b){b=rows.map(r=>[...r].flatMap((ch,i)=>[3,7,11,14,29,32,36,40].includes(i)?[ch,ch]:[ch]).join("")).flatMap((r,j)=>[11,13].includes(j)?[r,r]:[r]);OWL_BIG_CACHE.set(rows,b)}return b};
+const OWL_K=1.2,OWL_FW=26,OWL_FH=Math.round(8*1.2),OWL_SETTLE=6,OWL_FADE=3;   // both owls drawn 20% larger
 // where the owlets sit in the cavity for each brood size (back row first)
 const CHICK_SPOTS=[[],[[-4,15]],[[-9,13],[1,16]],[[-10,12],[2,12],[-4,17]],[[-10,11],[2,11],[-8,17],[0,17]],
   [[-10,10],[2,10],[-4,13],[-10,17],[2,17]],[[-11,10],[-4,10],[3,10],[-11,17],[-4,17],[3,17]]];
@@ -1185,18 +1205,21 @@ const SNAKE_COIL=["..........HHH...t.......",".........HHHeHHt........",".......
 // the hooting neighbour: a smaller, hand-drawn owl (scaling the big one garbled its eyes); a hoot = a little bow,
 // the white throat puffs, and a faint pixel-lettered "HOO" floats up and fades
 const OWL2=[".k........k.",".Dk......kD.","..DBkkkkBD..",".kBLBDDBLBk.",".kDrwDDwrDk.","kBYYYwwYYYBk","kBYpYddYpYBk","kDrrrkkrrrDk",".kDrrkkrrDk.",".kBWWWWWWBk.","kBLwLwwLwLBk","kDBLBLLBLBDk","kBLTLTTLTLBk","kDBBDBBDBBDk","kBLTLTTLTLBk",".kDBLTTLBDk.",".kDBDBBDBDk.","..kDTkkTDk..","..kdk..kdk.."];
+// 20% larger, built at native size: the pupil columns and four body rows are doubled, so both eyes stay identical
+let OWL2_CACHE=null;const OWL2_BIG=()=>OWL2_CACHE||(OWL2_CACHE={open:OWL2_W(OWL2),shut:OWL2_W(OWL2_SHUT),hoot:OWL2_W(OWL2_HOOT)});
+const OWL2_W=k=>k.map(r=>r.slice(0,4)+r[3]+r.slice(4,9)+r[8]+r.slice(9)).flatMap((r,j)=>[11,13,15,17].includes(j)?[r,r]:[r]);
 const OWL2_SHUT=OWL2.map((r,j)=>j===5?"kBDDDwwDDDBk":j===6?"kBrrrddrrrBk":r);
 const OWL2_HOOT=OWL2.map(r=>r==="kBLwLwwLwLBk"?"kBWWWWWWWWBk":r);
 const HOOTS=[0,1,1,1,0,0,0,1,1,0,1,1,0,1,1,1];                    // hoo, h'hoo, hoo, hoo
 function drawOwl2(c,s,o,hold){
-  const p=o.p,w=Math.round(OWL2[0].length*OWL_K),h=Math.round(OWL2.length*OWL_K),x=p.x-(w>>1),y=p.y-h+2;
+  const p=o.p,BIG=OWL2_BIG(),w=BIG.open[0].length,h=BIG.open.length,x=p.x-(w>>1),y=p.y-h+2;
   if(!hold){if(o.hoot>0)o.hoot--;else if(--o.timer<=0){o.hoot=HOOTS.length;o.timer=RI(40,140)}
     if(o.blink>0)o.blink--;else if(R()<.02)o.blink=RI(1,2)}
   const on=o.hoot>0&&HOOTS[HOOTS.length-o.hoot];
   if(on&&(o.hoot===HOOTS.length||!HOOTS[HOOTS.length-o.hoot-1]))o.notes.push({x:x+w+1,y:y+2,life:16});
   if(hold){const sw=Math.round(Math.sin(performance.now()/1000*Math.PI*1.07)*1.4);   // disco: eyes shut, swaying to the music
-    sprtScaled(c,OWL2_SHUT,x+sw,y,false,OWLPAL_N,OWL_K);o.notes=[];clearHoo();return}
-  sprtScaled(c,on?OWL2_HOOT:o.blink?OWL2_SHUT:OWL2,x,y+(on?1:0),false,OWLPAL_N,OWL_K);
+    sprt(c,BIG.shut,x+sw,y,false,OWLPAL_N);o.notes=[];clearHoo();return}
+  sprt(c,on?BIG.hoot:o.blink?BIG.shut:BIG.open,x,y+(on?1:0),false,OWLPAL_N);
   o.notes=o.notes.filter(n=>{n.life--;if(!hold){n.x+=.35;n.y-=.4}return n.life>0});
   // the hoots are real text (same face as the taskbar's MODE label), laid over the pixel scene
   const box=hooBox(),k=innerWidth/s.w;
@@ -1730,8 +1753,9 @@ function drawScene(){
   }
   if(N&&shown("owl")&&s.owl2)drawOwl2(c,s,s.owl2,s.disco);else clearHoo();
   if(fade!==null)c.globalAlpha=Math.max(.15,fade);
-  if(owlOn)sprtScaled(c,owlSprite,ox,oy+(o.state==="home"?bob:0),false,N?OWLPAL_N:o.state==="home"&&o.peek>0?OWLPAL_PEEK:OWLPAL_DAY,OWL_K); // asleep and shadowed by day; awake with bright eyes at night
-  c.globalAlpha=1;if(fade!==null){c.globalAlpha=1-fade;sprtScaled(c,CRITTERS.owlHome,o.nest.x-10,o.nest.top+4,false,OWLPAL_N,OWL_K);c.globalAlpha=1}
+  {const pal=N?OWLPAL_N:o.state==="home"&&o.peek>0?OWLPAL_PEEK:OWLPAL_DAY;
+   if(owlOn)o.state==="home"?sprt(c,owlBig(owlSprite),ox,oy+bob,false,pal):sprt(c,owlBigFly(owlSprite),ox,oy,false,pal)} // asleep and shadowed by day; awake with bright eyes at night
+  c.globalAlpha=1;if(fade!==null){c.globalAlpha=1-fade;sprt(c,owlBig(CRITTERS.owlHome),o.nest.x-10,o.nest.top+4,false,OWLPAL_N);c.globalAlpha=1}
   if(owlOn&&o.state==="fly"&&(o.strike||carry)){                                // feathered legs reaching down, talons spread (or gripping)
     const x=Math.round(o.x),y=Math.round(o.y)+10,P=N?OWLPAL_N:OWLPAL;
     [-3,2].forEach(dx=>{c.fillStyle=P.T;c.fillRect(x+dx,y,2,3);c.fillStyle=P.B;c.fillRect(x+dx,y+2,2,1);c.fillStyle=P.k;
