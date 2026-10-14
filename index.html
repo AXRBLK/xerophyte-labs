@@ -2107,10 +2107,44 @@ addEventListener("message",e=>{
   if(f.title&&!NOW.title){NOW.title=f.title;NOW.via=NOW.via||"message-meta";if(f.artist)NOW.artist=f.artist;ampText()}
   radioDebug();
 });
+/* a playlist embed only ever reports the playlist itself as "playingURI", never the song. So: fetch the playlist's own embed
+   page once (through a public CORS relay, since Spotify doesn't allow cross-site reads), pull its track list, and work out
+   the current song from the playing track's exact length, preferring the track right after the last one we saw */
+const TRACKS={list:null,status:"",src:"",idx:-1};
+async function loadTrackList(src){
+  if(!src||src.type!=="playlist"&&src.type!=="album")return;
+  if(TRACKS.src===src.id&&(TRACKS.list||TRACKS.status==="loading"))return;
+  TRACKS.src=src.id;TRACKS.status="loading";TRACKS.list=null;
+  const key="xl-tracks-"+src.id;
+  try{const c=JSON.parse(localStorage.getItem(key)||"null");if(c&&Date.now()-c.t<6*3600e3&&c.list.length){TRACKS.list=c.list;SPOT.lastDur=0;TRACKS.status="cache "+c.list.length;radioDebug();return}}catch(_){}
+  const page=`https://open.spotify.com/embed/${src.type}/${src.id}`;
+  const relays=[u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`,u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`];
+  for(const r of relays){
+    try{const html=await fetch(r(page)).then(x=>x.ok?x.text():"");
+      const m=html.match(/<script[^>]*id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);if(!m)continue;
+      const list=findTrackList(JSON.parse(m[1]));
+      if(list&&list.length){TRACKS.list=list;TRACKS.status="loaded "+list.length;SPOT.lastDur=0;try{localStorage.setItem(key,JSON.stringify({t:Date.now(),list}))}catch(_){}radioDebug();return}
+    }catch(e){TRACKS.status="relay failed: "+e}}
+  TRACKS.status="no track list";radioDebug();
+}
+function findTrackList(o,depth=0){
+  if(!o||typeof o!=="object"||depth>12)return null;
+  if(Array.isArray(o)&&o.length&&o.every(t=>t&&typeof t==="object"&&t.title&&(t.duration||t.duration_ms)))
+    return o.map(t=>({uri:t.uri||"",title:String(t.title),artist:String(t.subtitle||(t.artists||[]).map(a=>a.name).join(", ")||""),dur:+(t.duration||t.duration_ms)||0}));
+  for(const k in o){const r=findTrackList(o[k],depth+1);if(r)return r}
+  return null;
+}
+function guessTrack(dur){
+  const L=TRACKS.list;if(!L||!dur)return null;
+  const near=L.map((t,i)=>({t,i,d:Math.abs(t.dur-dur)})).filter(x=>x.d<2500).sort((a,b)=>a.d-b.d);
+  if(!near.length)return null;
+  const next=near.find(x=>x.i===TRACKS.idx+1);const pick=next&&next.d<2500?next:near[0];
+  TRACKS.idx=pick.i;return pick.t;
+}
 function radioDebug(){if(!RADIO_DEBUG)return;let b=document.getElementById("radiodbg");
   if(!b){b=document.createElement("pre");b.id="radiodbg";b.style.cssText="position:fixed;left:8px;top:8px;z-index:9999;max-width:46vw;max-height:60vh;overflow:auto;background:#000c;color:#7dff7a;font:11px/1.35 monospace;padding:8px;margin:0;white-space:pre-wrap;pointer-events:auto";document.body.appendChild(b)}
   const keys=o=>{try{return JSON.stringify(o).slice(0,600)}catch(_){return String(o)}};
-  b.textContent=`NOW uri: ${NOW.uri}\ntitle: ${NOW.title}\nartist: ${NOW.artist}\nvia: ${NOW.via}  started: ${NOW.started}\nerr: ${NOW.err}\nstate: ${keys(SPOT.state)}\nlast update: ${keys(SPOT.lastUpdate)}\nlast message: ${keys(SPOT.lastMsg)}`}
+  b.textContent=`tracks: ${TRACKS.status} (idx ${TRACKS.idx})\nNOW uri: ${NOW.uri}\ntitle: ${NOW.title}\nartist: ${NOW.artist}\nvia: ${NOW.via}  started: ${NOW.started}\nerr: ${NOW.err}\nstate: ${keys(SPOT.state)}\nlast update: ${keys(SPOT.lastUpdate)}\nlast message: ${keys(SPOT.lastMsg)}`}
 function lookupTrack(uri,dur){
   const m=String(uri||"").match(/^spotify:(track|episode):([A-Za-z0-9]+)$/);if(!m||uri===NOW.uri)return;
   NOW.uri=uri;NOW.title=NOW.artist="";NOW.err="";ampText();radioDebug();
@@ -2203,6 +2237,7 @@ function cropDeck(){
   fit();if(window.ResizeObserver&&!fr.dataset.watch){fr.dataset.watch=1;new ResizeObserver(fit).observe(fr)}
 }
 function loadSpotify(src){
+  loadTrackList(src);
   const fallback=()=>{
     const host=document.getElementById("spotHost");if(!host||SPOT.ctl)return;
     host.outerHTML=`<iframe title="Spotify player" src="https://open.spotify.com/embed/${src.type}/${src.id}?theme=0" width="100%" height="152" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" style="border:0;display:block"></iframe>`;
@@ -2218,7 +2253,11 @@ function loadSpotify(src){
         SPOT.state={paused:!!d.isPaused,pos:d.position||0,dur:d.duration||0,buffering:!!d.isBuffering};SPOT.at=performance.now();
         if(!d.isPaused){SPOT.stopped=false;NOW.started=true}
         SPOT.lastUpdate=d;const f=d.playingURI?{uri:d.playingURI}:dig(d,0,{});
-        if(f.uri)lookupTrack(f.uri,d.duration||0);ampUpdate();radioDebug()});
+        if(f.uri&&/^spotify:(track|episode):/.test(f.uri))lookupTrack(f.uri,d.duration||0);
+        else if(d.duration&&d.duration!==SPOT.lastDur){SPOT.lastDur=d.duration;const t=guessTrack(d.duration);   // a playlist: identify the song by its length
+          if(t){NOW.uri=t.uri||("guess:"+t.title);NOW.title=t.title;NOW.artist=t.artist;NOW.via="track list";ampText();
+            if(t.uri){const m=t.uri.match(/^spotify:track:(\w+)$/);if(m)fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent("https://open.spotify.com/track/"+m[1])}`).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.thumbnail_url&&NOW.title===t.title){NOW.art=j.thumbnail_url;loadArt(NOW.art)}}).catch(()=>{})}}}
+        ampUpdate();radioDebug()});
     });
   };
   if(SPOT.api){mount();return}
