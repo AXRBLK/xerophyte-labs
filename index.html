@@ -172,7 +172,24 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 .chip.fine{background:#d4dfc8;color:#1c1218}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:10px}
 .cactus{display:grid;grid-template-columns:48px 1fr;gap:4px 10px;padding:10px;background:var(--card);border:1px solid var(--line);min-width:0}
-.cactus img.sp{width:48px;height:48px;image-rendering:pixelated;grid-row:span 3;object-fit:cover}
+.cactus .pic{grid-row:span 3;display:flex;flex-direction:column;align-items:center;gap:6px;width:48px}
+.cactus img.sp{width:48px;height:48px;image-rendering:pixelated;object-fit:cover}
+.cactus img.logo{display:block;max-width:48px;max-height:32px;object-fit:contain}
+.cactus .logo-link{display:block;line-height:0;padding:2px;border:1px solid transparent}.cactus .logo-link:hover{border-color:var(--line)}
+.chip.active{background:#d4dfc8;color:#1c1218}.chip.dormant{background:#d8d2c8;color:#4a4048}
+.meter i.dormant{background:#a8a098}
+.cactus .detail-btn{grid-column:1/-1;justify-self:start;margin-top:6px;height:24px;padding:0 10px;font:13px var(--font-ui);color:var(--ink);background:var(--chrome);border:2px solid;border-color:var(--chrome-hi) var(--chrome-lo) var(--chrome-lo) var(--chrome-hi);cursor:pointer}
+.cactus .detail-btn:active{border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}
+#gallery{position:fixed;inset:0;z-index:9000;background:rgba(10,8,20,.55);display:grid;place-items:center;padding:16px}
+#gallery .gal-win{position:relative;left:auto!important;top:auto!important;width:min(820px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column}
+#gallery .gal-body{padding:10px;display:flex;flex-direction:column;gap:8px;min-height:0;overflow:auto;background:var(--paper)}
+#gallery figure{margin:0;display:flex;flex-direction:column;gap:8px;min-height:0}
+#gallery .gal-img{background:#1c1824;display:grid;place-items:center;min-height:200px}
+#gallery .gal-img img{display:block;max-width:100%;max-height:calc(100vh - 220px);object-fit:contain}
+#gallery .gal-none{color:#a8a0b8;font:13px var(--font-data);padding:40px}
+#gallery figcaption{font:14px/1.5 var(--font-data);color:var(--ink2)}
+#gallery .gal-nav{display:flex;align-items:center;justify-content:center;gap:12px;font:13px var(--font-data)}
+#gallery .gal-nav button,#gallery .bar button{min-width:32px;height:24px;font:13px var(--font-ui);color:var(--ink);background:var(--chrome);border:2px solid;border-color:var(--chrome-hi) var(--chrome-lo) var(--chrome-lo) var(--chrome-hi);cursor:pointer}
 .cactus .nm{font-family:var(--font-ui);font-weight:600;font-size:16px;line-height:1.1;display:flex;justify-content:space-between;gap:6px;align-items:start}
 .cactus .sci{font-style:italic;color:var(--mute);font-size:12px;line-height:1.3}
 .cactus .meta{font-size:12px;color:var(--ink2)}
@@ -568,7 +585,7 @@ const SAMPLE = {
     {name:"Goldie",species:"Opuntia engelmannii",common_name:"Engelmann prickly pear",location:"Back wall",planted:"2022-03-18",last_watered:"2026-10-05",water_every_days:"14",notes:"Yellow blooms every April.",image_url:""},
     {name:"Beaver",species:"Opuntia basilaris",common_name:"Beavertail",location:"Patio pot",planted:"2023-06-02",last_watered:"2026-10-01",water_every_days:"10",notes:"Native to Anza-Borrego. Pads blush purple in heat.",image_url:""},
     {name:"Teddy",species:"Cylindropuntia bigelovii",common_name:"Teddybear cholla",location:"Side yard",planted:"2024-08-30",last_watered:"2026-09-26",water_every_days:"14",notes:"Do not hug.",image_url:""},
-    {name:"Barrel",species:"Ferocactus cylindraceus",common_name:"California barrel",location:"Rock garden",planted:"2022-11-11",last_watered:"2026-09-15",water_every_days:"30",notes:"Leaning south, as they do.",image_url:""},
+    {name:"Barrel",species:"Ferocactus cylindraceus",common_name:"California barrel",location:"Rock garden",planted:"2022-11-11",ended:"2025-06-30",status:"dormant",last_watered:"2026-09-15",water_every_days:"30",notes:"Leaning south, as they do.",image_url:""},
     {name:"Hook",species:"Mammillaria dioica",common_name:"Fishhook cactus",location:"Desk",planted:"2025-09-01",last_watered:"2026-10-08",water_every_days:"12",notes:"",image_url:""}
   ],
   weather: [
@@ -597,7 +614,7 @@ folder:["................","..kkkkk.........",".kyyyyyk........","kyyyyyyykkkkkk
 letter:["................","................","................","kkkkkkkkkkkkkkkk","kwkwwwwwwwwwwkwk","kwwkwwwwwwwwkwwk","kwwwkwwwwwwkwwwk","kwwwwkwwwwkwwwwk","kwwwwwkkkkwwwwwk","kwwwwkwwwwkwwwwk","kwwwkwwwwwwkwwwk","kwwkwwwwwwwwkwwk","kkkkkkkkkkkkkkkk","................","................","................"],
 book:["................",".kkkkkkkkkkkk...",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSSwwwk..",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSwwwwk..",".krrkwwwwwwwwk..",".krrkwwwwwwwwk..",".kkkkkkkkkkkkk..","................","................","................"],
 radio:["..........eeee..........",".......eeeeeeeeee.......",".....eYeeeeeeeeeeeY.....","....eeeYeeeEEEeeeYee....","...eeeYYeeEeeeEeeYYee...","..eeeeeeYEeexeeEYeeeee..","..eeeeeeeYeekeeYeeeeee..",".eeeeeeeeEeekeeEeeeeeee.",".eYYeeeeeeEekeEeeeeeeYY.",".eeeYYYeeeeEkEeeeeYYYee.","eeeeeeeYYeekekeeYYeeeeee","eeeeeeeeeeekkkeeeeeeeeee","eeeeeeeeeekekkkeeeeeeeee","eeeeeeeeeekkkkkeeeeeeeee",".eeeeeeeeekekkkeeeeeeee.",".eeeeeeeekkkeeekeeeeeee.",".eeeeeeeekkkkkkkeeeeeee.","..eeeeeekeekeeeekeeeee..","..eeeeeekeeekkkekeeeee..","...eeeekeeeeeeekekeee...","....eeekkkkkkkkkkkee....",".....kkkkkkkkkkkkkk.....",".......kkkkkkkkkk.......","..........kkkk.........."],   // Xerophyte FM: a 1950s atomic-age broadcast tower, lightning crackling off the top (24×24)
-sunthermo:["................","................","..y.y.y.....kkk.","...kkk......kwk.",".ykYYYky....kwk.","..kYYYk.....krk.",".ykYYYky....krk.","...kkk......krk.","..y.y.y.....krk.","............krk.","...........krrrk","...........krrrk","............kkk.","................","................","................"],
+sunthermo:["................","..y.y.......kkk.","...kkk......kwk.",".ykYYYk.....kwk.","..kYYkkk....krk.","...kkssk....krk.","..kssssssk..krk.",".kssssssssk.krk.",".kSSSSSSSSk.krk.","..kkkYkkkk..krk.","....YY.....krrrk","...YY......krrrk","....Y.......kkk.","...Y............","................","................"],
 campfire:["................","................",".......r........","......rr........","......rOr..r....",".....rOOr.rr....","....rOYOrrOr....","....rOYYOOOr....","....rOYYYYOr....",".....rOYYOr.....","..kn..rrrr..nk..","...knnnnnnnnk...","..knnkkkkkknnk..","...kk......kk...","................","................"],
 hilo:["................","kkkkkkkkkkkkkkkk","kwwwwwwwwwwwwwwk","kwwwwwwwwwrwwwwk","kwwwwrwwwwrwwwwk","kwrwwrwwrwrwwrwk","kwrwwrwwrwrwwrwk","kwrwwrwwrwbwwrwk","kwbwwbwwbwbwwbwk","kwbwwbwwbwbwwbwk","kwbwwbwwbwwwwbwk","kwwwwwwwwwwwwwwk","kkkkkkkkkkkkkkkk","................","................","................"],
 binoculars:["................","................","...kkk....kkk...","..kSSSk..kSSSk..","..kSSSkkkkSSSk..",".kSSSSkSSkSSSSk.",".kSSSSkSSkSSSSk.",".kSSSSkkkkSSSSk.","kSSSSSk..kSSSSSk","kSSSSSk..kSSSSSk","kkkkkkk..kkkkkkk","kBBwBBk..kBBwBBk","kBbbbBk..kBbbbBk","kkkkkkk..kkkkkkk","................","................"],
@@ -2684,23 +2701,64 @@ function cactusKind(c){
 }
 const exampleTag=()=>USING_SAMPLE?`<span class="example">Example data · connect your sheet to replace</span>`:"";
 
+/* My Cacti, as a portfolio: each plant is a client. Cacti tab columns (all optional but name):
+   started (or planted) / ended: dates that give the "age" — how long the work has run
+   status: active or dormant (blank: dormant if there's an end date, otherwise active)
+   logo: an image URL shown under the plant; website (or url): where the logo links
+   detail: a gallery of screenshots, one per line in the cell, as "image URL | caption" (detail_2, detail_3… columns work too) */
+function clientAge(c){
+  const st=toDate(c.started||c.start||c.since||c.planted),en=toDate(c.ended||c.end);if(!st)return null;
+  const days=Math.max(0,daysBetween(st,en||today())),m=Math.floor(days/30.44),y=Math.floor(m/12),mm=m%12;
+  const txt=y?`${y}y${mm?` ${mm}m`:""}`:m?`${m}m`:`${days}d`;
+  return {days,txt,from:st,to:en};
+}
+function clientStatus(c){const v=String(c.status||"").trim().toLowerCase();return /^(dormant|inactive|past|paused|done|ended)$/.test(v)?"dormant":v?"active":(toDate(c.ended||c.end)?"dormant":"active")}
+function clientDetail(c){
+  const cells=[c.detail,...Object.keys(c).filter(k=>/^detail[_\s-]?\d+$/i.test(k)).sort((a,b)=>parseInt(a.replace(/\D/g,""))-parseInt(b.replace(/\D/g,""))).map(k=>c[k])];
+  return cells.filter(Boolean).flatMap(v=>String(v).split(/\r?\n/)).map(l=>l.trim()).filter(Boolean)
+    .map(l=>{const i=l.indexOf("|"),u=(i<0?l:l.slice(0,i)).trim(),t=i<0?"":l.slice(i+1).trim();return /^https?:\/\//i.test(u)?{src:u,text:t}:{src:"",text:l}});
+}
+const safeURL=u=>{u=String(u||"").trim();if(!u)return "";if(!/^https?:\/\//i.test(u))u="https://"+u;return /^https:\/\/|^http:\/\//i.test(u)?u:""};
 function renderCacti(body,status){
-  const list=(DATA.cacti||[]).filter(c=>c.name).map(c=>({...c,st:cactusState(c)}))
-    .sort((a,b)=>(a.st.left??99)-(b.st.left??99));
-  const n=s=>list.filter(c=>c.st.status===s).length;
+  const list=(DATA.cacti||[]).filter(c=>c.name).map(c=>({...c,age:clientAge(c),st:clientStatus(c),gal:clientDetail(c)}))
+    .sort((a,b)=>(a.st==="active"?0:1)-(b.st==="active"?0:1)||(b.age?.days??-1)-(a.age?.days??-1));
+  const maxD=Math.max(1,...list.map(c=>c.age?.days||0)),n=s=>list.filter(c=>c.st===s).length;
+  const mo=d=>d.toLocaleDateString(undefined,{month:"short",year:"numeric"});
   body.innerHTML=`${exampleTag()}
-  <div class="summary"><span class="chip thirsty">${n("thirsty")} thirsty</span><span class="chip soon">${n("soon")} due soon</span><span class="chip fine">${n("fine")} happy</span></div>
-  <div class="grid">${list.map(c=>{const s=c.st;
-    const lbl=s.status==="thirsty"?(s.left===0?"Water today":`${-s.left}d overdue`):s.status==="soon"?`Water in ${s.left}d`:"Happy";
+  <div class="summary"><span class="chip active">${n("active")} active</span><span class="chip dormant">${n("dormant")} dormant</span></div>
+  <div class="grid">${list.map((c,i)=>{const a=c.age,url=safeURL(c.website||c.url||c.link),logo=safeURL(c.logo||c.logo_url);
+    const logoImg=logo?`<img class="logo" alt="${esc(c.name)} logo" src="${esc(logo)}" loading="lazy">`:"";
     return `<article class="cactus">
-      <img class="sp" alt="" src="${c.image_url?esc(c.image_url):sprite(cactusKind(c))}">
-      <div class="nm"><span>${esc(c.name)}</span><span class="chip ${s.status}">${lbl}</span></div>
-      <div class="sci">${esc(c.species)}${c.common_name?` · ${esc(c.common_name)}`:""}</div>
-      <div class="meta">${esc(c.location||"")}${s.since!=null?` · watered ${s.since===0?"today":s.since+"d ago"}`:""} · every ${s.every}d</div>
-      <div class="meter" title="Moisture left until next watering"><i class="${s.status}" style="width:${s.pct}%"></i></div>
+      <div class="pic"><img class="sp" alt="" src="${c.image_url?esc(c.image_url):sprite(cactusKind(c))}">
+        ${logoImg?(url?`<a class="logo-link" href="${esc(url)}" target="_blank" rel="noopener" title="${esc(url.replace(/^https?:\/\//,""))}">${logoImg}</a>`:logoImg):""}</div>
+      <div class="nm"><span>${esc(c.name)}</span><span class="chip ${c.st}">${c.st==="active"?"Active":"Dormant"}</span></div>
+      <div class="sci">${esc(c.species||"")}${c.common_name?` · ${esc(c.common_name)}`:""}</div>
+      <div class="meta">${esc(c.location||"")}${a?`${c.location?" · ":""}age ${a.txt} · ${mo(a.from)}–${a.to?mo(a.to):"now"}`:""}${url&&!logo?` · <a href="${esc(url)}" target="_blank" rel="noopener">website</a>`:""}</div>
+      <div class="meter" title="Age: how long we've worked together"><i class="${c.st}" style="width:${a?Math.max(3,Math.round(100*a.days/maxD)):0}%"></i></div>
       ${c.notes?`<div class="note">${linkify(c.notes)}</div>`:""}
+      ${c.gal.length?`<button class="detail-btn" data-i="${i}">Detail · ${c.gal.length} ${c.gal.length>1?"views":"view"} ▸</button>`:""}
     </article>`}).join("")}</div>`;
-  if(status)status.innerHTML=`<span>${list.length} plants</span><span>Next: ${list[0]?esc(list[0].name):"—"}</span>`;
+  body.querySelectorAll(".detail-btn").forEach(b=>b.onclick=()=>{const c=list[+b.dataset.i];openGallery(c.name,c.gal)});
+  const longest=list.slice().sort((a,b)=>(b.age?.days||0)-(a.age?.days||0))[0];
+  if(status)status.innerHTML=`<span>${list.length} ${list.length===1?"client":"clients"}</span><span>Longest: ${longest?esc(longest.name)+(longest.age?" · "+longest.age.txt:""):"—"}</span>`;
+}
+// detail gallery: screenshots with a caption under each, stepped with the arrows (or swipe / keys)
+function openGallery(title,items){
+  let g=document.getElementById("gallery");if(g)g.remove();
+  g=document.createElement("div");g.id="gallery";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");g.setAttribute("aria-label",title+" detail");
+  g.innerHTML=`<div class="gal-win win active"><div class="bar"><b>${esc(title)} · detail</b><span class="btns"><button data-g="x" aria-label="Close">×</button></span></div>
+    <div class="gal-body"><figure><div class="gal-img"></div><figcaption></figcaption></figure>
+    <div class="gal-nav"><button data-g="p" aria-label="Previous">◀</button><span class="gal-n"></span><button data-g="n" aria-label="Next">▶</button></div></div></div>`;
+  document.body.appendChild(g);
+  let i=0;const show=()=>{const it=items[i];
+    g.querySelector(".gal-img").innerHTML=it.src?`<a href="${esc(it.src)}" target="_blank" rel="noopener"><img alt="${esc(it.text||title)}" src="${esc(it.src)}"></a>`:`<div class="gal-none">No image</div>`;
+    g.querySelector("figcaption").innerHTML=it.text?linkify(it.text):"";g.querySelector(".gal-n").textContent=`${i+1} / ${items.length}`;
+    g.querySelectorAll("[data-g=p],[data-g=n]").forEach(b=>b.hidden=items.length<2)};
+  const go=d=>{i=(i+d+items.length)%items.length;show()},close=()=>{g.remove();removeEventListener("keydown",key)};
+  const key=e=>{if(e.key==="Escape")close();else if(e.key==="ArrowLeft")go(-1);else if(e.key==="ArrowRight")go(1)};addEventListener("keydown",key);
+  g.onclick=e=>{const b=e.target.closest("[data-g]");if(e.target===g||b&&b.dataset.g==="x")close();else if(b)go(b.dataset.g==="n"?1:-1)};
+  let sx=null;g.addEventListener("touchstart",e=>{sx=e.touches[0].clientX},{passive:true});g.addEventListener("touchend",e=>{if(sx==null)return;const dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>40)go(dx<0?1:-1);sx=null});
+  show();g.querySelector("[data-g=x]").focus();
 }
 
 function renderToday(body,status){
@@ -3005,7 +3063,7 @@ function build(){
   document.getElementById("startside").textContent=SET.start_label||"Xerophyte Labs";
 
   const mob=isMob(),cx=w=>Math.max(130,(innerWidth-w)/2);
-  defineWindow("cacti",{title:"My Cacti",icon:"journal",w:640,x:mob?16:120,y:84,render:renderCacti,menu:["File","View","Water"],status:true});
+  defineWindow("cacti",{title:"My Cacti",icon:"journal",w:640,x:mob?16:120,y:84,render:renderCacti,menu:["File","View","Help"],status:true});
   defineWindow("map",{title:"Desert Map",icon:"map",w:Math.min(860,innerWidth-40),x:mob?16:Math.max(110,(innerWidth-860)/2),y:70,render:renderMap,status:true});
   defineWindow("radio",{title:radioName(),icon:"radio",w:380,x:innerWidth-595,y:64,render:renderRadio,status:true});
   defineWindow("today",{title:"Weather Now",icon:"sunthermo",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
@@ -3025,7 +3083,7 @@ function build(){
     const name=lab||label;if(WINS[id]&&lab){WINS[id].title=lab;WINS[id].el.querySelector(".bar b").textContent=lab;WINS[id].el.setAttribute("aria-label",lab)}
     const ord=r?parseFloat(String(r.order??"").trim()):NaN;
     ICONS.push({id,name,el:iconBtn(id,name,icon,badge),ord:Number.isFinite(ord)?ord:Infinity,split:!!(r&&/^(y|yes|true|1|x|split)$/i.test(String(r.split??"").trim()))})};
-  place(L,"cacti","My Cacti","journal",thirsty||"");place(L,"log","Weather Log","hilo");
+  place(L,"cacti","My Cacti","journal");place(L,"log","Weather Log","hilo");
   place(L,"today","Weather Now","sunthermo");place(L,"bio","Biodiversity Report","saguaro");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
     const pic=/^contact/i.test(String(p.title).trim())?"postcard":/^about/i.test(String(p.title).trim())?"campfire":/^field\s*notes/i.test(String(p.title).trim())?"binoculars":(p.icon||"folder").toLowerCase();
