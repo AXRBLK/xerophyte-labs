@@ -381,7 +381,7 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 .turntable.on{transform:none;visibility:visible;transition:transform .9s cubic-bezier(.2,.8,.25,1),visibility 0s}
 .turntable.fromLeft{transform:translateX(-100vw)}.turntable.fromLeft.on{transform:none}
 /* phones: the icons fill the right, so the turntable parks top-left and glides in from the left edge */
-@media (pointer:coarse),(max-width:500px){.miniamp{display:none!important}#discobtn{display:none!important}}   /* phones: no disco mode */   /* phones: the turntable is the mini player */
+@media (pointer:coarse),(max-width:500px){.miniamp{display:none!important}body.disco .turntable{display:none!important}}   /* phones: disco plays the music with no player showing at all */   /* phones: the turntable is the mini player */
 @media (pointer:coarse),(max-width:500px){
   .turntable{position:fixed;left:12px;top:auto;bottom:calc(54px + env(safe-area-inset-bottom,0px));width:96px;height:84px;margin:0;z-index:3;transform:translateX(-100vw)}
   .turntable.on{transform:none}
@@ -1637,11 +1637,10 @@ function discoMusic(){
   clearTimeout(discoMusic.t);discoMusic.t=setTimeout(()=>{if(W.open&&!W.min)shrinkWin("radio")},900);  // …then tuck it away
 }
 function setDisco(on,user){
-  if(on&&isMob())on=false;                    // disco is a desktop-only treat
   if(on&&user){discoMusic();
     // clear the floor: every window but the radio closes (a half-written postcard keeps its words for later)
     Object.keys(WINS).forEach(id=>{const W=WINS[id];if(id==="radio"||!W.open)return;const f=W.el.querySelector("form.postcard");if(f)f.dataset.hinted="1";closeWin(id)})}
-  SCENE.disco=on;document.body.classList.toggle("disco",on);
+  SCENE.disco=on;document.body.classList.toggle("disco",on);renderTasks();
   const b=document.getElementById("discobtn");if(b){b.setAttribute("aria-pressed",on);b.title=on?"Disable Disco-mode":"Enable Disco-mode";b.setAttribute("aria-label",b.title)}
   clearInterval(SCENE.timer);if(SCENE.motion&&SCENE.ctx)SCENE.timer=setInterval(drawScene,on?90:125);else drawScene();
 }
@@ -2366,7 +2365,7 @@ function drag(el,handle){
 function renderTasks(active){
   const t=document.getElementById("tasks");t.innerHTML="";
   const act=active||Object.keys(WINS).find(k=>WINS[k].el.classList.contains("active"));
-  Object.entries(WINS).filter(([,w])=>w.open).forEach(([id,w])=>{
+  Object.entries(WINS).filter(([id,w])=>w.open&&!(id==="radio"&&w.min&&SCENE.disco&&isMob())).forEach(([id,w])=>{   // phones in disco: the music plays with no player in the taskbar
     const b=document.createElement("button");b.className="task"+(id===act&&!w.min?" on":"");b.textContent=w.title;
     b.onclick=()=>{if(w.min||id!==act){w.min=false;w.el.hidden=false;w.el.classList.remove("stowed");focusWin(id)}else minWin(id)};
     t.appendChild(b);
@@ -3225,7 +3224,7 @@ setDisco(false);
 document.getElementById("discobtn").onclick=()=>setDisco(!SCENE.disco,true);
 tick();setInterval(tick,30000);
 document.getElementById("modebtn").onclick=()=>{SCENE.override=!SCENE.night;setNight(SCENE.override)};
-let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{if(SCENE.disco&&isMob())setDisco(false);paintSky()},150)});
+let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{paintSky()},150)});
 document.body.classList.toggle("admin",ADMIN);boot();
 </script>
 </body>
