@@ -897,8 +897,13 @@ function paintSky(){
   const perches=[],blooms=[];
   function saguaro(x,base,hh,pal,depth){
     let crown=null;const tips=[];
-    const tw=Math.max(3,Math.round(hh/8));
-    const column=(x0,y0,ww,len)=>{for(let i=0;i<ww;i++){const col=i===0?pal[0]:i===ww-1?pal[2]:(i%2?pal[1]:pal[0]);rect(x0+i,y0+1,1,len-1,col)}rect(x0+1,y0,ww-2,1,pal[0]);
+    const tw=depth===2?Math.max(6,Math.round(hh/11)):Math.max(3,Math.round(hh/8));
+    // near saguaro: shaded across its width (sunlit left, shadowed right), grooved ribs, spine clusters, a rounded crown
+    const shadeAt=(f)=>f<.15?mixHex(pal[0],"#eef4d8",.3):f<.45?pal[0]:f<.7?pal[1]:f<.9?pal[2]:mixHex(pal[2],"#1e2a1a",.3);
+    const columnHi=(x0,y0,ww,len)=>{for(let i=0;i<ww;i++){const f=i/(ww-1),base=shadeAt(f),groove=i%2===1&&i>0&&i<ww-1;
+        const inset=i===0||i===ww-1?2:(i===1||i===ww-2?1:0);rect(x0+i,y0+inset,1,len-inset,groove?mixHex(base,"#1e2a1a",.18):base);
+        if(!groove&&i>0&&i<ww-1)for(let y=y0+2+((i*3)%4);y<y0+len-1;y+=4){px(x0+i,y,f<.5?"#c8d8b0":"#8a9e78");if(f<.5&&rnd()<.5)px(x0+i,y-1,"#e8f0d8")}}};
+    const column=(x0,y0,ww,len)=>{if(depth===2&&ww>=5)return columnHi(x0,y0,ww,len);for(let i=0;i<ww;i++){const col=i===0?pal[0]:i===ww-1?pal[2]:(i%2?pal[1]:pal[0]);rect(x0+i,y0+1,1,len-1,col)}rect(x0+1,y0,ww-2,1,pal[0]);
       // the near (second-layer) saguaros get just a hint of spines: faint dots down every other rib
       if(depth===2&&ww>=4)for(let i=1;i<ww-1;i+=2)for(let y=y0+3+((i*2)%4);y<y0+len-1;y+=4)px(x0+i,y,i<ww/2?"#93a684":"#6e8262")};
     column(x-(tw>>1),base-hh,tw,hh);
@@ -907,6 +912,15 @@ function paintSky(){
     const arms=hh>40?ri(2,3):hh>18?ri(1,2):hh>10?ri(0,1):0;
     let side=rnd()<.5?-1:1;
     for(let a=0;a<arms;a++,side*=-1){
+      if(depth===2){                                                     // slender arms that leave high and sweep up in a round elbow, hugging the trunk
+        const aw=Math.max(4,tw-2),ay=base-Math.round(hh*(.42+.16*rnd())),gap=Math.round(aw*.7)+1,Rr=gap+aw/2,up=Math.round(hh*(.2+.16*rnd()));
+        const edge=side>0?x+(tw>>1)-1:x-(tw>>1),acx=edge+side*Rr,r=aw/2;
+        for(let th=0;th<=90;th+=4){const t=th*Math.PI/180,cx=edge+side*Rr*Math.sin(t),cy=ay-Rr+Rr*Math.cos(t);
+          for(let yy=-Math.ceil(r);yy<=Math.ceil(r);yy++)for(let xx=-Math.ceil(r);xx<=Math.ceil(r);xx++){if(xx*xx+yy*yy>r*r+.3)continue;px(Math.round(cx+xx),Math.round(cy+yy),shadeAt((xx+r)/(2*r)))}}
+        const ax=Math.round(acx-aw/2),top=Math.round(ay-Rr)-up;
+        column(ax,top,aw,up+1);
+        perches.push({x:ax+(aw>>1),y:top});if(rnd()<.7)tips.push({x:ax+(aw>>1),y:top,big:true,tw:aw});
+        continue}
       const aw=Math.max(2,tw-1),ay=base-Math.round(hh*(.3+.3*rnd())),out=aw+ri(2,Math.max(3,tw>>1)),up=Math.round(hh*(.18+.18*rnd()));
       const hx=side>0?x+(tw>>1):x-(tw>>1)-out;
       rect(hx,ay,out+1,aw,pal[1]);rect(hx,ay,out+1,1,pal[0]);
