@@ -420,16 +420,14 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 #discobtn .ball{font-size:15px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;display:inline-block}
 #discobtn .ballimg{display:block;width:18px;height:18px;image-rendering:pixelated}
 #discobtn[aria-pressed="true"]{background:#4169e1;outline:3px solid #2a4cc0;outline-offset:1px;box-shadow:0 0 10px rgba(65,105,225,.85)}
-/* the ball stays upright and turns on its axis: facet light slides across its face, glints twinkle on top */
+/* while it's on, the ball turns (its mirror tiles step round, frame by frame) and twinkles spring up around it,
+   growing and popping, more and more of them */
 #discobtn .ball{position:relative}
-#discobtn[aria-pressed="true"] .ball::after{content:"";position:absolute;inset:24% 9% 2% 9%;border-radius:50%;pointer-events:none;
-  background:repeating-linear-gradient(90deg,rgba(255,255,255,0) 0 3px,rgba(255,255,255,.8) 3px 3.5px,rgba(160,190,255,0) 3.5px 6px);
-  background-size:6px 100%;mix-blend-mode:screen;animation:orbit 1.1s linear infinite}
-#discobtn[aria-pressed="true"] .ball::before{content:"";position:absolute;width:3px;height:3px;right:0;top:20%;background:#fff;
-  box-shadow:-9px 7px 0 -1px #fff,-4px 11px 0 -1px #cfe0ff;border-radius:50%;animation:glint 1.1s steps(2) infinite}
-@keyframes orbit{from{background-position:0 0}to{background-position:6px 0}}
-@keyframes glint{50%{opacity:.15}}
-body.still #discobtn .ball::after,body.still #discobtn .ball::before{animation:none}
+#discobtn .tw{position:absolute;width:7px;height:7px;margin:-3px 0 0 -3px;pointer-events:none;transform:scale(0);animation:twinkle var(--d,1.4s) var(--dl,0s) ease-in-out infinite}
+#discobtn .tw::before,#discobtn .tw::after{content:"";position:absolute;left:3px;top:0;width:1px;height:7px;background:var(--c,#fff);box-shadow:0 0 2px var(--c,#fff)}
+#discobtn .tw::after{transform:rotate(90deg)}
+@keyframes twinkle{0%,100%{transform:scale(0) rotate(0)}45%{transform:scale(1.15) rotate(45deg)}60%{transform:scale(.9) rotate(60deg)}80%{transform:scale(0) rotate(90deg)}}
+body.still #discobtn .tw{animation:none;transform:scale(.8)}
 body.night{
   --dusk:#0e1124; --sand:#d4d6ec; --bloom:#c0607a; --sage:#7e9a8a;
   --chrome:#383c56; --chrome-hi:#666c94; --chrome-lo:#181a2c; --ink:#e6e6f4; --paper:#1e2138;
@@ -1681,7 +1679,10 @@ function setDisco(on,user){
     Object.keys(WINS).forEach(id=>{const W=WINS[id];if(id==="radio"||!W.open)return;const f=W.el.querySelector("form.postcard");if(f)f.dataset.hinted="1";closeWin(id)})}
   // phones: switching disco off by hand ends the party: the music pauses (and the turntable slides away)
   if(!on&&user&&SCENE.disco&&isMob()){clearInterval(SPOT.kick);try{SPOT.ctl&&SPOT.ctl.pause()}catch(e){}SPOT.state.paused=true}
+  if(on&&!SCENE.disco&&SCENE.night&&SCENE.ctx&&shown("ufo")&&SCENE.saturn&&shown("saturn")&&(!SCENE.ufo||SCENE.ufo.state==="cross")){
+    const sa=SCENE.saturn;SCENE.ufo={x:sa.x+11-UFO_W*.06,y:sa.y+5-UFO_H*.06,vx:0,vy:0,dir:R()<.5?1:-1,t:0,k:.12,state:"emerge"}}
   SCENE.disco=on;document.body.classList.toggle("disco",on);renderTasks();
+  discoButton(on);
   const b=document.getElementById("discobtn");if(b){b.setAttribute("aria-pressed",on);b.title=on?"Disable Disco-mode":"Enable Disco-mode";b.setAttribute("aria-label",b.title)}
   clearInterval(SCENE.timer);if(SCENE.motion&&SCENE.ctx)SCENE.timer=setInterval(drawScene,frameMs());else drawScene();spinDeck();
 }
@@ -1787,7 +1788,24 @@ function drawSaturn(c,s){
 const UFO=["....ksmk....","...ksmddk...","...ksmddk...","..ksmddddk..","..ksmddddk..",".kssmdddddk.",".ksmddddddk.",".ksmddddddk.",".ksmddddddk.",".ksmddddddk.",".ksmddddddk.","kssmdddddddk","kssmdddddddk","kssddddddddk","kssddddddddk","kssddddddddk","kssddddddddk",".ksdddddddk.",".kddddddddk.",".kddddddddk.",".kddddddddk.",".kddddddddk.",".kddddddddk.","..kddddddk..","..kddddddk..","...kddddk...","...kddddk...","....kddk...."],UFOPAL={k:"#2c2e35",d:"#2c2e35",m:"#4a4d57",s:"#7e828e"};
 const UFO_W=UFO[0].length,UFO_H=UFO.length;
 function stepUfo(s,tk){
-  if(s.disco&&s.ufo){s.ufo.spin=(s.ufo.spin||0)+.22;s.ufo.t++;return s.ufo}         // night disco: frozen in the sky, tumbling end over end
+  // night disco: the saucer comes out of Saturn, growing as it nears, and heads for the truck (or, with no truck about,
+  // sets down on the moon and sits there until the party's over)
+  if(s.ufo&&(s.ufo.state==="emerge"||s.ufo.state==="landed")){const u=s.ufo,T=s.truck;u.t++;
+    const truckOn=T&&T.on&&!T.held&&T.x>-10&&T.x<s.w-10;
+    const mr=Math.round(s.sr*(s.moonK||1)),mo=orbPos(s,true,mr);
+    if(u.state==="landed"){
+      if(!s.disco||truckOn&&T.marked!==false){u.state=truckOn?"emerge":"leave";u.hold=0;u.d0=null;u.vx=u.vy=0;u.dir=u.dir||1}
+      else if(mo){const kk=u.k||.5;u.x=mo.x-UFO_W*kk/2;u.y=mo.y-mr-UFO_H*kk+2+Math.sin(u.t*.15)*.3}
+      return u}
+    let tx,ty,kEnd;
+    if(truckOn){tx=T.x+TRUCK[0].length/2-UFO_W/2;ty=Math.max(s.H0*.06,T.y-UFO_H-18);kEnd=1}
+    else if(mo){kEnd=.5;tx=mo.x-UFO_W*kEnd/2;ty=mo.y-mr-UFO_H*kEnd+2}
+    else{tx=s.w/2-UFO_W/2;ty=s.H0*.15;kEnd=1}
+    const dx=tx-u.x,dy=ty-u.y,d=Math.hypot(dx,dy);if(u.d0==null||u.tgt!==(truckOn?"t":"m")){u.d0=Math.max(d,1);u.k0=u.k||.12;u.tgt=truckOn?"t":"m"}
+    const sp=Math.min(d,.7+1.4*Math.min(1,d/40));if(d>0){u.x+=dx/d*sp;u.y+=dy/d*sp}
+    u.k=u.k0+(kEnd-u.k0)*Math.max(0,Math.min(1,1-d/u.d0));
+    if(d<1.2){if(truckOn){u.k=1;u.state="seek";u.vx=T.dir*T.sp;u.vy=0;T.marked=true}else if(mo){u.k=kEnd;u.state="landed"}else{u.k=1;u.state="cross";u.vx=(u.dir||1)*1.1}}
+    return u}
   if(!shown("ufo")){s.ufo=null;return null}
   let u=s.ufo;const T=s.truck;
   if(!u){
@@ -1827,7 +1845,7 @@ function drawUfo(c,u,s){
   if(s.disco){if(!UFO_CV){UFO_CV=layer(UFO_W,UFO_H);sprt(UFO_CV.getContext("2d"),UFO,0,0,false,UFOPAL)}
     const g=UFO_CV.getContext("2d"),lights=["#ff6a5a","#ffe070","#7ad0ff"];let k=0;
     UFO.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==="L"){g.fillStyle=lights[(k+++(u.t>>1))%3];g.fillRect(i,j,1,1)}}));
-    c.save();c.imageSmoothingEnabled=false;c.translate(Math.round(u.x)+UFO_W/2,Math.round(u.y)+UFO_H/2);c.rotate(u.spin||0);c.drawImage(UFO_CV,-UFO_W/2,-UFO_H/2);c.restore();return}
+    c.save();c.imageSmoothingEnabled=false;c.translate(Math.round(u.x)+UFO_W/2,Math.round(u.y)+UFO_H/2);c.drawImage(UFO_CV,-UFO_W/2,-UFO_H/2);c.restore();return}
   const x=Math.round(u.x),y=Math.round(u.y);
   if((u.state==="beam"||u.state==="leave")&&u.beam!=null&&s.truck&&u.beam<90){              // no beam: dark rings ripple out across the sand, then the truck simply rises
     const T=s.truck,gx=Math.round(T.x+TRUCK[0].length/2),gy=Math.round(T.y)+TRUCK.length;
@@ -3288,6 +3306,25 @@ setNight(SCENE.override??isNightNow());
 setDisco(false);
 document.getElementById("discobtn").onclick=()=>setDisco(!SCENE.disco,true);
 {const bi=document.querySelector("#discobtn .ballimg");if(bi)bi.src=sprite("disco")}   // the same silver mirror ball, with its sparkle, as in the Start menu
+// the turning ball: the same ball redrawn with its 2×2 mirror tiles stepped round by a pixel per frame
+const DISCO_FRAMES=[0,1,2,3].map(f=>{const N=16,cx=7.5,cy=8.5,r=6.2,rows=[];
+  for(let y=0;y<N;y++){let row="";for(let x=0;x<N;x++){const dx=x-cx,dy=y-cy,d=Math.hypot(dx,dy);let ch=".";
+    if(d<=r){if(d>r-1)ch="z";else{const light=(-dx*.6-dy*.8)/r,tile=((Math.floor((x+f)/2)+Math.floor(y/2))%2)===0;
+      ch=light>.35?"a":light>-.1?"m":"q";if(tile)ch=light>.35?"m":light>-.1?"q":"v"}}
+    row+=ch}rows.push(row)}
+  const set=(x,y,c)=>{rows[y]=rows[y].slice(0,x)+c+rows[y].slice(x+1)};
+  set(5,5,"h");set(6,4,"h");set(7,0,"z");set(7,1,"z");set(7,2,"z");
+  const name="disco_f"+f;SPRITES[name]=rows;return sprite(name)});
+function discoButton(on){
+  const b=document.getElementById("discobtn"),ball=b&&b.querySelector(".ball"),img=b&&b.querySelector(".ballimg");if(!ball||!img)return;
+  clearInterval(discoButton.spin);clearInterval(discoButton.add);ball.querySelectorAll(".tw").forEach(t=>t.remove());
+  if(!on){img.src=sprite("disco");return}
+  let f=0;discoButton.spin=setInterval(()=>{if(document.body.classList.contains("still"))return;f=(f+1)%4;img.src=DISCO_FRAMES[f]},140);
+  const spots=[[17,4],[2,6],[15,15],[5,16],[19,10],[0,12],[10,-1],[12,19]],cols=["#ffffff","#ffe9a8","#cfe0ff","#ffffff"];
+  let n=0;const add=()=>{if(n>=spots.length){clearInterval(discoButton.add);return}const [x,y]=spots[n],t=document.createElement("i");t.className="tw";
+    t.style.cssText=`left:${x}px;top:${y}px;--d:${(1.1+Math.random()*.9).toFixed(2)}s;--dl:-${(Math.random()).toFixed(2)}s;--c:${cols[n%cols.length]}`;ball.appendChild(t);n++};
+  add();discoButton.add=setInterval(add,700);                       // one twinkle, then more and more
+}
 tick();setInterval(tick,30000);
 document.getElementById("modebtn").onclick=()=>{SCENE.override=!SCENE.night;setNight(SCENE.override)};
 let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{paintSky()},150)});
