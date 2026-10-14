@@ -1242,7 +1242,11 @@ function stepRaven(r,s){
 // the perched owl's faces, built 20% larger at native size: columns 2,5,10,13 (incl. both pupils) and five body rows are
 // doubled, so the eyes stay level, symmetric and 2px-pupilled instead of being unevenly stretched
 const OWL_BIG_CACHE=new Map();
-const owlBig=rows=>{let b=OWL_BIG_CACHE.get(rows);if(!b){b=rows.map(r=>[...r].flatMap((ch,i)=>[2,5,10,13].includes(i)?[ch,ch]:[ch]).join("")).flatMap((r,j)=>[9,10,12,14,16,18,20].includes(j)?[r,r]:[r]);OWL_BIG_CACHE.set(rows,b)}return b};   // rows 9 and 10 (under the eyes, the white bib) doubled: a rounder, taller head with the eyes sitting high
+// the big owl's head is drawn taller and rounder: the eyes sit a row higher while the beak keeps its place,
+// with a row of facial disc slipped in under the eyes and the lower beak doubled
+const owlTallHead=r=>{const sub=(row,i,str)=>row.slice(0,i)+str+row.slice(i+str.length);
+  return [...r.slice(0,6),r[6],sub(r[7],7,r[6].slice(7,9)),sub(sub(r[8],6,"r"),9,"r"),r[8],r[9],r[9],...r.slice(10)]};
+const owlBig=rows=>{let b=OWL_BIG_CACHE.get(rows);if(!b){b=owlTallHead(rows).map(r=>[...r].flatMap((ch,i)=>[2,5,10,13].includes(i)?[ch,ch]:[ch]).join("")).flatMap((r,j)=>[14,16,18,20,22].includes(j)?[r,r]:[r]);OWL_BIG_CACHE.set(rows,b)}return b};
 // in flight: only the wings are widened (paired columns either side) and the body stretched two rows, so the chest's
 // soft lattice and the face stay crisp instead of going round and mushy under scaling
 const owlBigFly=rows=>{let b=OWL_BIG_CACHE.get(rows);if(!b){b=rows.map(r=>[...r].flatMap((ch,i)=>[3,7,11,14,29,32,36,40].includes(i)?[ch,ch]:[ch]).join("")).flatMap((r,j)=>[11,13].includes(j)?[r,r]:[r]);
