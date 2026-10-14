@@ -2111,19 +2111,19 @@ function findArtist(title,dur){
     window[cb]=d=>{const want=norm(title),hits=(d&&d.results||[]).filter(r=>norm(r.trackName)===want);
       // full-length plays must match the track length; 30-second previews fall back to the top match
       const full=dur>35000,pick=full?hits.find(r=>Math.abs((r.trackTimeMillis||0)-dur)<3000):hits[0];
-      const top=pick||hits[0];done({artist:pick?pick.artistName:"",art:top&&top.artworkUrl100?top.artworkUrl100.replace("100x100","300x300"):""})};
+      const top=pick||hits[0];done({artist:top?top.artistName:"",art:top&&top.artworkUrl100?top.artworkUrl100.replace("100x100","300x300"):""})};
     sc.src=`https://itunes.apple.com/search?term=${encodeURIComponent(title)}&entity=song&limit=50&callback=${cb}`;
     sc.onerror=()=>done(null);document.head.appendChild(sc);setTimeout(()=>window[cb]&&done(null),6000);
   });
 }
-function nowLine(){if(!NOW.started||!NOW.title)return "";return (NOW.artist?NOW.artist+" - ":"")+NOW.title}
+function nowLine(){if(!NOW.title||!(NOW.started||SPOT.state.pos>0))return "";return NOW.title+(NOW.artist?" · "+NOW.artist:"")}   // "Are I Here · Helado Negro"
 function setScroll(el,text){if(!el)return;
   if(el.dataset.t!==text){el.dataset.t=text;el.innerHTML=`<span>${esc(text+text)}</span>`}}
 function ampText(){
   const name=radioName(),line=nowLine();
   const big=document.querySelector("#w-radio .lcd-scroll");
   if(big&&SPOT.src){const unit=line?`${line} *** ${name} *** `:`${name} *** ${!SPOT.state.paused?"On air":SPOT.stopped||!SPOT.state.pos?"Press play":"Paused"} *** `;setScroll(big,unit)}
-  const mini=document.getElementById("miniTitle");if(mini)setScroll(mini,(line?`${line} · ${name}`:name)+" · ");
+  const mini=document.getElementById("miniTitle");if(mini)setScroll(mini,(line?`${line}   ***   ${name}`:name)+"   ***   ");
 }
 const SPOT={api:null,ctl:null,loading:false,src:null,viz:null,state:{paused:true,pos:0,dur:0}};
 
