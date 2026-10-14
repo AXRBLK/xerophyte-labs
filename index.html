@@ -1040,12 +1040,12 @@ function paintSky(){
   // each plant claims some elbow room; a spot too close to a neighbour at a similar depth is skipped
   const spot=(y0,y1,gap)=>{for(let k=0;k<12;k++){const x=ri(0,w),y=ri(y0,y1);
     if(taken.every(([px2,py2,g2])=>Math.abs(py2-y)>7||Math.abs(px2-x)>(gap+g2)*.6)){taken.push([x,y,gap]);return [x,y]}}return null};
-  const fixed=[[.3,1,.3],[.8,.99,.4],[.95,1,.28]];
+  // near saguaros: just the big one the neighbour owl sits on; the middle distance is left to the ocotillo
+  const fixed=[[.8,.99,.4]];
   fixed.forEach(([fx,fy])=>taken.push([Math.round(w*fx),Math.round(h*fy),16]));
   const add=(n,kind,y0,y1,gap,extra)=>{for(let i=0;i<n;i++){const p=spot(y0,y1,gap);if(p)items.push([kind,p[0],p[1],...extra()])}};
   for(let i=0;i<6*area;i++)items.push(["cre",ri(0,w),H0+ri(2,span-2)]);
   add(3.5*area,"sag",H0+1,H0+5,6,()=>[ri(7,13),0]);
-  add(2.5*area,"sag",H0+8,H0+Math.round(span*.45),10,()=>[ri(16,28),1]);
   add(2.5*area,"opu",H0+4,H0+Math.round(span*.5),8,()=>[.7+rnd()*.35,true]);
   add(2.5*area,"opu",H0+Math.round(span*.55),H0+span,14,()=>[.95+rnd()*.5,false]);
   add(2.5*area,"cho",H0+3,H0+Math.round(span*.45),7,()=>[.95+rnd()*.3,true]);
