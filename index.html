@@ -860,7 +860,11 @@ function paintSky(){
     const seg=(sx,sy)=>{
       rect(sx,sy+1,sw,shh-1,mid);rect(sx+1,sy,sw-2>0?sw-2:1,1,mid);
       rect(sx,sy+1,1,shh-2,lit);rect(sx+sw-1,sy+1,1,shh-1,sh);
-      for(let i=0;i<sw+1;i++)if(rnd()<.55)px(sx+ri(-1,sw),sy+ri(-1,shh),rnd()<.6?glow:lit);
+      for(let i=0;i<Math.round(sw*shh*.7)+2;i++)if(rnd()<.7)px(sx+ri(0,sw-1),sy+ri(0,shh-1),rnd()<.6?glow:lit);   // dense spine sheen
+      // spines bristling out past the edges in a fuzzy halo, a few longer ones
+      for(let y=sy;y<sy+shh;y++){if(rnd()<.75)px(sx-1,y,rnd()<.6?glow:lit);if(rnd()<.75)px(sx+sw,y,rnd()<.5?glow:lit);
+        if(!far&&rnd()<.22)px(sx-2,y-1,lit);if(!far&&rnd()<.22)px(sx+sw+1,y-1,lit)}
+      for(let x=sx;x<sx+sw;x++)if(rnd()<.6)px(x,sy-1,glow);
     };
     const branch=(bx,by,depth)=>{
       seg(bx,by-shh);
