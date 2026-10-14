@@ -323,6 +323,8 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 .modebtn img{width:16px;height:16px;image-rendering:pixelated;vertical-align:-3px}
 #modebtn{display:inline-flex;align-items:center;gap:5px;padding:0 4px}
 #modebtn .mico{width:16px;height:16px;display:block}
+#hoos{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+#hoos span{position:absolute;font:300 11px/1 var(--font-data);letter-spacing:.14em;text-transform:uppercase;color:#e4e8ff;white-space:nowrap}
 #modebtn .mlab{font:300 11px/1 var(--font-data);letter-spacing:.14em;text-transform:uppercase;opacity:.75}
 #discobtn{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;padding:0}
 #discobtn .ball{font-size:15px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;display:inline-block}
@@ -1046,7 +1048,7 @@ function stepRaven(r,s){
     if(--r.timer<=0){r.state="soar";r.cy=Math.max(H0*.12,r.y)}
   }
 }
-const OWL_FW=22,OWL_FH=8,OWL_SETTLE=14,OWL_FADE=6;
+const OWL_FW=22,OWL_FH=8,OWL_SETTLE=6,OWL_FADE=3;
 // where the owlets sit in the cavity for each brood size (back row first)
 const CHICK_SPOTS=[[],[[-4,15]],[[-9,13],[1,16]],[[-10,12],[2,12],[-4,17]],[[-10,11],[2,11],[-8,17],[0,17]],
   [[-10,10],[2,10],[-4,13],[-10,17],[2,17]],[[-11,10],[-4,10],[3,10],[-11,17],[-4,17],[3,17]]];
@@ -1057,7 +1059,6 @@ const SNAKE_COIL=["......HH....","....HHeHt...","....dHH.....","..crcdrc....",".
 const OWL2=[".k........k.",".Dk......kD.","..DBkkkkBD..",".kBLBDDBLBk.",".kDrwDDwrDk.","kBrYYkkYYrBk","kBrYpkkpYrBk","kDrrrddrrrDk",".kDrrkkrrDk.",".kBWWWWWWBk.","kBLwLwwLwLBk","kDBLBLLBLBDk","kBLTLTTLTLBk","kDBBDBBDBBDk","kBLTLTTLTLBk",".kDBLTTLBDk.",".kDBDBBDBDk.","..kDTkkTDk..","..kdk..kdk.."];
 const OWL2_SHUT=OWL2.map((r,j)=>j===5?"kBrDDkkDDrBk":j===6?"kBrrrkkrrrBk":r);
 const OWL2_HOOT=OWL2.map(r=>r==="kBLwLwwLwLBk"?"kBWWWWWWWWBk":r);
-const HOO_FONT={H:["1.1","111","1.1"],O:["111","1.1","111"]};
 const HOOTS=[0,1,1,1,0,0,0,1,1,0,1,1,0,1,1,1];                    // hoo, h'hoo, hoo, hoo
 function drawOwl2(c,s,o,hold){
   const p=o.p,w=OWL2[0].length,h=OWL2.length,x=p.x-(w>>1),y=p.y-h+2;
@@ -1066,11 +1067,14 @@ function drawOwl2(c,s,o,hold){
   const on=o.hoot>0&&HOOTS[HOOTS.length-o.hoot];
   if(on&&(o.hoot===HOOTS.length||!HOOTS[HOOTS.length-o.hoot-1]))o.notes.push({x:x+w+1,y:y+2,life:16});
   sprt(c,on?OWL2_HOOT:o.blink?OWL2_SHUT:OWL2,x,y+(on?1:0),false,OWLPAL_N);
-  o.notes=o.notes.filter(n=>{n.life--;if(!hold){n.x+=.35;n.y-=.4}const a=n.life/16,X=Math.round(n.x),Y=Math.round(n.y);
-    c.fillStyle=`rgba(220,226,255,${.2*a})`;
-    [..."HOO"].forEach((ch,k)=>HOO_FONT[ch].forEach((r,j)=>[...r].forEach((b,i)=>{if(b==="1")c.fillRect(X+k*4+i,Y+j,1,1)})));
-    return n.life>0});
+  o.notes=o.notes.filter(n=>{n.life--;if(!hold){n.x+=.35;n.y-=.4}return n.life>0});
+  // the hoots are real text (same face as the taskbar's MODE label), laid over the pixel scene
+  const box=hooBox(),k=innerWidth/s.w;
+  box.innerHTML=o.notes.map(n=>`<span style="left:${(n.x*k).toFixed(1)}px;top:${(n.y*k).toFixed(1)}px;opacity:${(.55*n.life/16).toFixed(2)}">hoo</span>`).join("");
 }
+function hooBox(){let b=document.getElementById("hoos");if(!b){b=document.createElement("div");b.id="hoos";b.setAttribute("aria-hidden","true");
+  const sky=document.getElementById("sky");sky.after(b)}return b}
+function clearHoo(){const b=document.getElementById("hoos");if(b&&b.childElementCount)b.innerHTML=""}
 const PREY=["....PPp....","..BBBBBBk..",".BBBBBBBWWk","tBBBBBBWWW.","t..BW..BW..",".t........."];   // a mouse dangling from the owl's talons
 // by day the owl dozes, now and then cracking one eye open; the peeks come oftener as the afternoon wears on toward sunset (7pm)
 function dayPeek(o){
@@ -1100,7 +1104,7 @@ function stepOwl(o,s){
   }else if(o.state==="feed"){                                                 // hovering at the cavity while the owlets take the mouse
     o.flap=1;if(--o.timer<=0){o.prey=false;o.state="settle";o.timer=OWL_SETTLE}
   }else if(o.state==="settle"){                                               // glide down into the hole, wings folding away
-    o.flap=0;const tgtY=n.top+11;o.x+=(n.x-o.x)*.3;o.y+=Math.min(1.6,Math.max(0,tgtY-o.y));
+    o.flap=0;const tgtY=n.top+11;o.x+=(n.x-o.x)*.5;o.y+=Math.min(3.5,Math.max(0,tgtY-o.y));
     if(--o.timer<=0){o.state="home";o.timer=RI(40,160)}
   }else{
     const tg=o.path[0];if(!tg){o.state="home";o.timer=RI(40,160);return}
@@ -1113,7 +1117,7 @@ function stepOwl(o,s){
         if(!m.caught&&Math.hypot(m.x+6-o.x,m.y-14-o.y)<6){m.caught=true;m.respawn=RI(500,1100);o.prey=true;
           o.path=[o.path[1],{x:n.x+10,y:n.cy-14},{x:n.x,y:n.top-4,flap:true}];o.path.unshift({x:o.x,y:o.y});}}   // skip the thermal: straight home
       o.path.shift();
-      if(!o.path.length){if(o.prey&&shown("owl_chicks")&&owlChickN()>0){o.state="feed";o.feedT=o.timer=RI(32,48);o.x=n.x;o.y=n.top-4}else{o.prey=false;o.state="home";o.timer=RI(40,160)}}
+      if(!o.path.length){if(o.prey&&shown("owl_chicks")&&owlChickN()>0){o.state="feed";o.feedT=o.timer=RI(16,22);o.x=n.x;o.y=n.top-4}else{o.prey=false;o.state="home";o.timer=RI(40,160)}}
       return}
     const sp=Math.min(o.path.length<=2?.9:1.5,d);o.x+=dx/d*sp;o.y+=dy/d*sp;
     o.flap=tg.flap||dy/d<-.7?((s.t>>1)%3!==2?1:0):0; // wingbeats only when taking off or climbing hard
@@ -1564,7 +1568,7 @@ function drawScene(){
     if(feeding){const f=1-o.timer/o.feedT;                                     // lowered from the talons, then gobbled
       if(f<.8){const k=Math.min(1,f/.45),py=Math.round(o.nest.top+4+k*6);c.globalAlpha=f<.5?1:1-(f-.5)/.3;sprt(c,PREY,o.nest.x-6,py,false,MOUSE);c.globalAlpha=1}}
   }
-  if(N&&shown("owl")&&s.owl2)drawOwl2(c,s,s.owl2,s.disco);
+  if(N&&shown("owl")&&s.owl2)drawOwl2(c,s,s.owl2,s.disco);else clearHoo();
   if(fade!==null)c.globalAlpha=Math.max(.15,fade);
   if(owlOn)(o.state==="home"?sprtBob:(c,r,x,y,sp,dy,f,p)=>sprt(c,r,x,y,f,p))(c,owlSprite,ox,oy,10,bob,false,N?OWLPAL_N:o.state==="home"&&o.peek>0?OWLPAL_PEEK:OWLPAL_DAY); // asleep and shadowed by day; awake with bright eyes at night
   c.globalAlpha=1;if(fade!==null){c.globalAlpha=1-fade;sprt(c,CRITTERS.owlHome,o.nest.x-8,o.nest.top+3,false,OWLPAL_N);c.globalAlpha=1}
