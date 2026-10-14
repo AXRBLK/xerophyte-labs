@@ -470,7 +470,7 @@ body.night .chip.thirsty{border-color:#e08aa2}
 .icon-gap,.icon-break{display:none}
 body.landicons .icons.left>.icon{order:0}body.landicons .icons.left>.icon-gap{display:none}
 body.landicons .icon-break{display:block;flex-basis:100%;width:0;height:0}
-body.landicons .icons.left{flex-direction:column;flex-wrap:wrap;align-content:flex-start;justify-content:flex-start;right:calc(10px + env(safe-area-inset-right,0px))}
+body.landicons .icons.left{flex-direction:column;flex-wrap:wrap;align-content:flex-end;justify-content:flex-start;right:calc(10px + env(safe-area-inset-right,0px))}
 body.landicons .hero,body.landicons .marquee{right:calc(var(--iconsW,0px) + 22px + env(safe-area-inset-right,0px))}
 /* phones held sideways: windows don't span the whole width (the icons stay visible on the right), they sit higher
    to use the short screen, and the taskbar drops most of the home-indicator padding */
@@ -950,7 +950,7 @@ function paintSky(){
   const perches=[],blooms=[];
   function saguaro(x,base,hh,pal,depth){
     let crown=null;const tips=[];
-    const tw=depth===2?Math.max(6,Math.round(hh/11)):Math.max(3,Math.round(hh/8));
+    const tw=depth===2?Math.max(7,Math.round(hh/9)):Math.max(3,Math.round(hh/8));
     // near saguaro: shaded across its width (sunlit left, shadowed right), grooved ribs, spine clusters, a rounded crown
     const shadeAt=(f)=>f<.15?mixHex(pal[0],"#eef4d8",.3):f<.45?pal[0]:f<.7?pal[1]:f<.9?pal[2]:mixHex(pal[2],"#1e2a1a",.3);
     const columnHi=(x0,y0,ww,len)=>{for(let i=0;i<ww;i++){const f=i/(ww-1),base=shadeAt(f),groove=i%2===1&&i>0&&i<ww-1;
@@ -1137,7 +1137,14 @@ function paintSky(){
   const spot=(y0,y1,gap)=>{for(let k=0;k<12;k++){const x=ri(0,w),y=ri(y0,y1);
     if(taken.every(([px2,py2,g2])=>Math.abs(py2-y)>7||Math.abs(px2-x)>(gap+g2)*.6)){taken.push([x,y,gap]);return [x,y]}}return null};
   // near saguaros: just the big one the neighbour owl sits on; the middle distance is left to the ocotillo
-  const fixed=[[.8,.99,.4]];
+  // it stands a little left of where it used to (under the radio icon on phones), tall and close; but never so tall that
+  // the owl on its crown would be hidden behind the desktop icons
+  let nearH=Math.round(Math.min(h,w*.8)*.5);
+  {const nx=Math.round(w*.72),base=Math.round(h*.99),owlH=(OWL2_BIG().open.length)+3;
+   document.querySelectorAll(".icons").forEach(n=>{const r=n.getBoundingClientRect();if(!r.width||!r.height||!n.querySelector(".icon"))return;
+     const l=r.left/S,rt=r.right/S,bt=r.bottom/S;if(nx+10<l||nx-10>rt)return;
+     nearH=Math.min(nearH,Math.max(Math.round(Math.min(h,w*.8)*.25),base-Math.ceil(bt)-owlH-2))})}
+  const fixed=[[.72,.99,nearH/Math.min(h,w*.8)]];
   fixed.forEach(([fx,fy])=>taken.push([Math.round(w*fx),Math.round(h*fy),16]));
   const add=(n,kind,y0,y1,gap,extra)=>{for(let i=0;i<n;i++){const p=spot(y0,y1,gap);if(p)items.push([kind,p[0],p[1],...extra()])}};
   for(let i=0;i<6*area;i++)items.push(["cre",ri(0,w),H0+ri(2,span-2)]);
@@ -1205,7 +1212,8 @@ function paintSky(){
   SCENE.key=key;
   if(prev){["toads","ravens","scorps","mice","bats"].forEach(k=>{if(prev[k]&&SCENE[k])SCENE[k]=SCENE[k].map((c,i)=>prev[k][i]||c)});
     if(prev.owl)SCENE.owl=Object.assign(prev.owl,{nest:SCENE.owl.nest});
-    if(prev.owl2&&SCENE.owl2)SCENE.owl2=prev.owl2;if(prev.runner)SCENE.runner=prev.runner;SCENE.t=prev.t||0}
+    if(prev.owl2&&SCENE.owl2){const np=SCENE.owl2.p;SCENE.owl2=prev.owl2;SCENE.owl2.p=np}   // same owl, but on the saguaro as it now stands
+    if(prev.runner)SCENE.runner=prev.runner;SCENE.t=prev.t||0}
   // portraits of each plant for the Biodiversity Report, drawn with the same brushes as the scene (side effects undone afterwards)
   {const sv=[c,bcx,fcx],pl=perches.length,bl=blooms.length,fl=flowers.length,P={};
    const mk=(key,W,H,draw)=>{const cv2=layer(W,H),fc=layer(W,H),bc=layer(W,H);c=cv2.getContext("2d");fcx=fc.getContext("2d");bcx=bc.getContext("2d");draw(W,H);c.drawImage(fc,0,0);P[key]=cv2};
@@ -3147,6 +3155,8 @@ function build(){
   const rl=document.createElement("li");rl.className="adm";rl.innerHTML=`<button><img alt="" src="${sprite("globe")}">Refresh from sheet${mark}</button>`;rl.firstChild.onclick=()=>{toggleStart(false);boot(true)};ul.appendChild(rl);
   if(CONFIG.SHEET_ID){const ed=document.createElement("li");ed.className="adm";ed.innerHTML=`<a href="https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/edit" target="_blank" rel="noopener"><img alt="" src="${sprite("book")}">Open the sheet</a>`;ul.appendChild(ed)}
   updateTray();fitIcons();
+  // phones: once the icons have their final places, repaint so the near saguaro keeps its owl clear of them
+  if(isMob()&&SCENE.ctx)setTimeout(paintSky,60);
 }
 // phones: shrink the icon grid just enough that it never runs into the title block at the bottom right
 function fitIcons(){
