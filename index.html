@@ -1559,7 +1559,7 @@ function drawScene(){
     const nc=owlChickN();if(!o.chicks||o.chicks.length!==nc)o.chicks=[...Array(nc)].map(()=>({b:0}));
     const SPOTS=CHICK_SPOTS[nc]||CHICK_SPOTS[6],feeding=o.state==="feed";
     o.chicks.map((ch,i)=>[ch,i]).sort((p,q)=>SPOTS[p[1]][1]-SPOTS[q[1]][1]).forEach(([ch,i])=>{if(ch.b>0)ch.b--;else if(R()<.025)ch.b=RI(1,3);
-      const [dx,dy]=SPOTS[i],hop=feeding&&(s.t+i)%2?-1:0;                                       // begging: they bounce while the parent feeds them
+      const [dx,dy]=SPOTS[i],hop=feeding&&((s.t>>2)+i*2)%4===0?-1:0;                                       // begging: a gentle, slow hop, taking turns, while the parent feeds them
       sprt(c,ch.b>0&&!feeding?CRITTERS.chickBlink:CRITTERS.chick,o.nest.x+dx,o.nest.top+dy+hop,false,CHICKPAL)});
     if(feeding){const f=1-o.timer/o.feedT;                                     // lowered from the talons, then gobbled
       if(f<.8){const k=Math.min(1,f/.45),py=Math.round(o.nest.top+4+k*6);c.globalAlpha=f<.5?1:1-(f-.5)/.3;sprt(c,PREY,o.nest.x-6,py,false,MOUSE);c.globalAlpha=1}}
