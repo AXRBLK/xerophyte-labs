@@ -608,7 +608,7 @@ const GLOW={S:"#8fe0cc",s:"#4c9a8c"}; // scorpions fluoresce under moonlight
 const OWLPAL={k:"#241a14",D:"#3e2c20",B:"#5c4230",L:"#8a6a4c",T:"#b08a5a",r:"#b8743e",w:"#d8d0c0",W:"#efe8da",Y:"#e8b828",p:"#0c0806",d:"#2e241c",c:"#d4ccbe"};
 const mixHex=(a,b,t)=>{const A=hex(a),B=hex(b);return "#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join("")};
 const OWLPAL_N=Object.fromEntries(Object.entries(OWLPAL).map(([k,v])=>[k,"WYp".includes(k)?v:mixHex(v,"#1a2250",.3)]));
-const CHICKPAL={g:"#9a98a2",G:"#6a6874",Y:"#f2c230",p:"#140c08",o:"#8a7040"};
+const CHICKPAL={g:"#9a98a2",G:"#6a6874",Y:"#f2c230",p:"#140c08",o:"#8a7040",t:"#e8707e",s:"#8a7040"};
 const OWLPAL_DAY=Object.fromEntries(Object.entries(OWLPAL).map(([k,v])=>[k,mixHex(v,"#1a1418",.4)]));
 const OWLPAL_PEEK={...OWLPAL_DAY,Y:mixHex(OWLPAL.Y,"#1a1418",.12),p:OWLPAL.p};
 const MOUSE={P:"#e0aeb0",p:"#b88494",B:"#8e6c5c",W:"#f6f0ea",k:"#1c1824",n:"#e0aeb0",t:"#d6a2a6"};
@@ -659,6 +659,7 @@ const CRITTERS={
   owlGlide:droopWings(OWL_FLY.glide,25),
   chick:["..gggg..",".g....g.","gYp..pYg","gYY..YYg",".g.oo.g.","..gggg.."],
   chickBlink:["..gggg..",".g....g.","g......g","gGG..GGg",".g.oo.g.","..gggg.."],
+  chickBeg:["..gggg..",".g....g.","gYp..pYg","gYY..YYg",".gopposg","..gttg.."],   // beak wide open, little tongue
   scorp:[["......sS.",".......S.","SS.SSSS..","s.s.s.s.."],["......sS.",".......S.","SS.SSSS..",".s.s.s.s."]],
   bat:[["K...K","KK.KK",".KKK."],[".....","KKKKK","K.K.K"]],
   // desert mouse: big round pink ears, brown back, white face and belly, long curling pink tail
@@ -1562,9 +1563,10 @@ function drawScene(){
   if((o.state!=="home"||!owlOn)&&shown("owl_chicks")){
     const nc=owlChickN();if(!o.chicks||o.chicks.length!==nc)o.chicks=[...Array(nc)].map(()=>({b:0}));
     const SPOTS=CHICK_SPOTS[nc]||CHICK_SPOTS[6],feeding=o.state==="feed";
+    const begging=feeding||(o.state==="fly"&&o.prey&&Math.hypot(o.x-o.nest.x,o.y-o.nest.cy)<80);   // mouths open as she comes in; shut as she settles
     o.chicks.map((ch,i)=>[ch,i]).sort((p,q)=>SPOTS[p[1]][1]-SPOTS[q[1]][1]).forEach(([ch,i])=>{if(ch.b>0)ch.b--;else if(R()<.025)ch.b=RI(1,3);
       const [dx,dy]=SPOTS[i],hop=feeding&&((s.t>>2)+i*2)%4===0?-1:0;                                       // begging: a gentle, slow hop, taking turns, while the parent feeds them
-      sprt(c,ch.b>0&&!feeding?CRITTERS.chickBlink:CRITTERS.chick,o.nest.x+dx,o.nest.top+dy+hop,false,CHICKPAL)});
+      sprt(c,begging?CRITTERS.chickBeg:ch.b>0?CRITTERS.chickBlink:CRITTERS.chick,o.nest.x+dx,o.nest.top+dy+hop,false,CHICKPAL)});
     if(feeding){const f=1-o.timer/o.feedT;                                     // lowered from the talons, then gobbled
       if(f<.8){const k=Math.min(1,f/.45),py=Math.round(o.nest.top+4+k*6);c.globalAlpha=f<.5?1:1-(f-.5)/.3;sprt(c,PREY,o.nest.x-6,py,false,MOUSE);c.globalAlpha=1}}
   }
