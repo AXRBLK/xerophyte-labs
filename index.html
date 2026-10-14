@@ -659,14 +659,14 @@ const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.sli
 // the eye is a single pixel (the smallest the scene grid allows), so it uses a deep red to read small rather than as a bright dot
 const RAVENPAL={K:"#0e0c14",k:"#1f1a2c",v:"#3d3769",e:"#962632"};
 const CPAL={k:"#29232c",K:"#0b0a12",N:"#5c4838",n:"#8a6e52",c:"#ddcfb8",b:"#7088aa",v:"#463e54",t:"#c4ab8a",T:"#a48d70",d:"#76624c",w:"#ece2d0",S:"#a8824e",s:"#6e5434"};
-const GLOW={S:"#8fe0cc",s:"#4c9a8c"}; // scorpions fluoresce under moonlight
+const GLOW={S:"#8fe0cc",s:"#4c9a8c",T:"#c8fff0"}; // scorpions fluoresce under moonlight
 const OWLPAL={k:"#241a14",D:"#3e2c20",B:"#5c4230",L:"#8a6a4c",T:"#b08a5a",r:"#b8743e",w:"#d8d0c0",W:"#efe8da",Y:"#e8b828",p:"#0c0806",d:"#2e241c",c:"#d4ccbe"};
 const mixHex=(a,b,t)=>{const A=hex(a),B=hex(b);return "#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join("")};
 const OWLPAL_N=Object.fromEntries(Object.entries(OWLPAL).map(([k,v])=>[k,"WYp".includes(k)?v:mixHex(v,"#1a2250",.3)]));
 const CHICKPAL={r:"#aa3c46",w:"#d6d2dc",g:"#9a98a2",G:"#6a6874",Y:"#f2c230",p:"#140c08",o:"#8a7040",t:"#e8707e",s:"#8a7040"};
 const OWLPAL_DAY=Object.fromEntries(Object.entries(OWLPAL).map(([k,v])=>[k,mixHex(v,"#1a1418",.4)]));
 const OWLPAL_PEEK={...OWLPAL_DAY,Y:mixHex(OWLPAL.Y,"#1a1418",.12),p:OWLPAL.p};
-const MOUSE={P:"#e0aeb0",p:"#b88494",B:"#8e6c5c",W:"#f6f0ea",k:"#1c1824",n:"#e0aeb0",t:"#d6a2a6"};
+const MOUSE={P:"#e0aeb0",p:"#c88a98",B:"#8e6c5c",D:"#6a4e42",L:"#b08e7c",W:"#f6f0ea",k:"#1c1824",n:"#e88a9a",t:"#d6a2a6",w:"#e8e0d8"};
 const BLOOM={W:"#ffffff",w:"#e6ecf4",Y:"#ffd84a",O:"#e8a830",g:"#7e9a6a"};
 const BLOOM_TOP=["..W...W..",".WWW.WWW.","WWwWYWwWW",".WWYOYWW.","..WWWWW..","...ggg..."];
 const BLOOM_SIDE=[".WW....","WWWW...","WwYWWgg","WYOWggg","WwYWWgg","WWWW...",".WW...."];
@@ -723,11 +723,11 @@ const CRITTERS={
   chick:["..wwww..", ".wYYYYw.", "wYppwppY", "wYppYppY", "wwYooYww", ".wwwwww.", "..wwww.."],
   chickBlink:["..wwww..", ".wwwwww.", "wwwwwwww", "wGGGwGGG", "wwwoowww", ".wwwwww.", "..wwww.."],
   chickBeg:["..wwww..", ".wYYYYw.", "wYppwppY", "wYppYppY", "wwYooYww", ".wwppww.", "..wttw..", "...tt..."],   // beak open, tongue out
-  scorp:[["......sS.",".......S.","SS.SSSS..","s.s.s.s.."],["......sS.",".......S.","SS.SSSS..",".s.s.s.s."]],
+  scorp:[[".........sSs..", "........T...s.", "............S.", ".ss.s......S..", "S..sSSTSTSS...", "s.sSSSSSSSs...", "....s.s.s.s..."], [".........sSs..", "........T...s.", "............S.", ".ss.s......S..", "S..sSSTSTSS...", "s.sSSSSSSSs...", "...s.s.s.s...."]],   // desert hairy scorpion: tail curled over its back, stinger forward, pincers out
   bat:[["K...K","KK.KK",".KKK."],[".....","KKKKK","K.K.K"]],
   // desert mouse: big round pink ears, brown back, white face and belly, long curling pink tail
-  mouseSit:["..........PPp...",".........PPpPp..",".........PPppP..","........BBBBWWWn",".......BBBBBkWW.","....BBBBBBWWWW..","...BBBBBWWWW....",".tBBBBPWWPW.....","t...............",".tttttttt......."],
-  mouseHop:["..........PPp...",".........PPpPp..",".........PPppP..","........BBBBWWWn",".......BBBBBkWW.","....BBBBBBWWWW..","...BBBBBWWWW....",".tBBBBBWWWW.....","t...P....P......","................"],
+  mouseSit:["...........PP.....", "..........PppP....", "..........PppP....", "........DDBBPBL...", ".......DBBBBLkLw..", ".....DDBBBBLLLLnw.", "....DBBBBBBWWWw...", "...DBBBBBWWWW.....", "..tDBBBPWWPW......", ".t................", "..tttttttt........"],
+  mouseHop:["...........PP.....", "..........PppP....", "..........PppP....", "........DDBBPBL...", ".......DBBBBLkLw..", ".....DDBBBBLLLLnw.", "....DBBBBBBWWWw...", "...DBBBBBWWWW.....", ".tDBBBBWWWW.......", "t...P....P........", "................."],
   bloomBig:[".W.W.","WWYWW",".WWW."],
   bloomSmall:["WYW",".W."]
 };
@@ -1584,9 +1584,9 @@ function drawMoon(c,s){
 // scorpion; with a beat, the head and pincers (front three columns) nod while body and tail stay put
 function drawScorp(ctx,p,frame,bob,pal){
   const f=CRITTERS.scorp[frame];
-  if(!bob){sprt(ctx,f,p.x,p.y-4,p.dir<0,pal);return}
+  if(!bob){sprt(ctx,f,p.x,p.y-7,p.dir<0,pal);return}
   const front=r=>r.slice(0,3),back=r=>r.slice(3);
-  sprt(ctx,f.map(back),p.dir<0?p.x:p.x+3,p.y-4,p.dir<0,pal);sprt(ctx,f.map(front),p.dir<0?p.x+6:p.x,p.y-5,p.dir<0,pal);
+  sprt(ctx,f.map(back),p.dir<0?p.x:p.x+3,p.y-7,p.dir<0,pal);sprt(ctx,f.map(front),p.dir<0?p.x+6:p.x,p.y-8,p.dir<0,pal);
 }
 // flowers and blooms: drawn whole normally; in disco each one is lifted out and rocks a pixel side to side, slowly
 function swayLayer(c,cv,list,s,box){
@@ -1713,7 +1713,7 @@ function drawScene(){
     if(m.caught){if(!hold&&--m.respawn<=0){m.caught=false;m.dir=R()<.5?1:-1;m.x=m.dir>0?2:s.w-20;m.state="hop";m.hops=RI(4,8);m.ht=0}return}
     if(hold)m.yo=0;else stepMouse(m,s);
     const f=!hold&&m.state==="hop"&&m.yo<0?CRITTERS.mouseHop:CRITTERS.mouseSit;
-    sprtBob(g,f,m.x,m.y-10+m.yo,5,hold?bob:m.state==="nibble"&&s.t%4<2?1:0,m.dir<0,MOUSE)});
+    sprtBob(g,f,m.x,m.y-11+m.yo,5,hold?bob:m.state==="nibble"&&s.t%4<2?1:0,m.dir<0,MOUSE)});
   const tk=N&&shown("baja_truck")?stepTruck(s):null;
   if(tk)sprt(g,TRUCK,tk.x,tk.y,tk.dir<0,TRUCKPAL,"kbgTwR");
   if(N)tint(G,"rgba(16,22,58,.42)");
@@ -1754,7 +1754,7 @@ function drawScene(){
   if(N&&shown("owl")&&s.owl2)drawOwl2(c,s,s.owl2,s.disco);else clearHoo();
   if(fade!==null)c.globalAlpha=Math.max(.15,fade);
   {const pal=N?OWLPAL_N:o.state==="home"&&o.peek>0?OWLPAL_PEEK:OWLPAL_DAY;
-   if(owlOn)o.state==="home"?sprt(c,owlBig(owlSprite),ox,oy+bob,false,pal):sprt(c,owlBigFly(owlSprite),ox,oy,false,pal)} // asleep and shadowed by day; awake with bright eyes at night
+   if(owlOn)o.state==="home"?sprtBob(c,owlBig(owlSprite),ox,oy,12,bob,false,pal):sprt(c,owlBigFly(owlSprite),ox,oy,false,pal)} // asleep and shadowed by day; awake with bright eyes at night
   c.globalAlpha=1;if(fade!==null){c.globalAlpha=1-fade;sprt(c,owlBig(CRITTERS.owlHome),o.nest.x-10,o.nest.top+4,false,OWLPAL_N);c.globalAlpha=1}
   if(owlOn&&o.state==="fly"&&(o.strike||carry)){                                // feathered legs reaching down, talons spread (or gripping)
     const x=Math.round(o.x),y=Math.round(o.y)+10,P=N?OWLPAL_N:OWLPAL;
