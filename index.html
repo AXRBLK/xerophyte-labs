@@ -1057,7 +1057,7 @@ const SNAKE_COIL=["......HH....","....HHeHt...","....dHH.....","..crcdrc....",".
 const OWL2=[".k........k.",".Dk......kD.","..DBkkkkBD..",".kBLBDDBLBk.",".kDrwDDwrDk.","kBrYYkkYYrBk","kBrYpkkpYrBk","kDrrrddrrrDk",".kDrrkkrrDk.",".kBWWWWWWBk.","kBLwLwwLwLBk","kDBLBLLBLBDk","kBLTLTTLTLBk","kDBBDBBDBBDk","kBLTLTTLTLBk",".kDBLTTLBDk.",".kDBDBBDBDk.","..kDTkkTDk..","..kdk..kdk.."];
 const OWL2_SHUT=OWL2.map((r,j)=>j===5?"kBrDDkkDDrBk":j===6?"kBrrrkkrrrBk":r);
 const OWL2_HOOT=OWL2.map(r=>r==="kBLwLwwLwLBk"?"kBWWWWWWWWBk":r);
-const HOO_FONT={H:["1.1","1.1","111","1.1","1.1"],O:["111","1.1","1.1","1.1","111"]};
+const HOO_FONT={H:["1.1","111","1.1"],O:["111","1.1","111"]};
 const HOOTS=[0,1,1,1,0,0,0,1,1,0,1,1,0,1,1,1];                    // hoo, h'hoo, hoo, hoo
 function drawOwl2(c,s,o,hold){
   const p=o.p,w=OWL2[0].length,h=OWL2.length,x=p.x-(w>>1),y=p.y-h+2;
