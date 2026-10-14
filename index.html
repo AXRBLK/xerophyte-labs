@@ -155,6 +155,9 @@ td{border-bottom:1px solid var(--line2);padding:4px 6px;white-space:nowrap}
 td.n{text-align:right}
 td.wrap{white-space:normal;min-width:140px}
 .bio h3{margin:14px 0 6px;font:600 13px var(--font-ui);letter-spacing:.04em;text-transform:uppercase}
+#bioTip{position:fixed;z-index:9999;pointer-events:none;background:var(--chrome,#d6cfc0);border:2px solid;border-color:var(--chrome-hi,#fff) var(--chrome-lo,#666) var(--chrome-lo,#666) var(--chrome-hi,#fff);padding:8px 10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:2px 2px 0 rgba(0,0,0,.35)}
+#bioTip img{image-rendering:pixelated;display:block}#bioTip span{font:11px var(--font-ui);color:var(--ink,#222)}
+.bio td.sp{cursor:help}
 .bio .bio-head{margin:0 0 4px}.bio .bio-stats{margin:6px 0 0;font-size:12px}.bio .bio-note{margin-top:14px;font-size:11px}
 .bio tr.off td{opacity:.5}
 .bio .biot td{white-space:normal;vertical-align:top;line-height:1.35}.bio .biot .sci{font-size:11px;opacity:.8}.bio .biot td.big{font-size:15px;font-weight:600}
@@ -403,7 +406,6 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 #w-radio .amp-btns .pico,.miniamp .pico{color:#0c1a0c;filter:none}
 /* bigger player buttons: flat bright neon green with black icons */
 #w-radio .amp-btns button,#w-radio .amp-eject{min-width:42px!important;height:32px!important;background:#2cff3c!important;border-color:#9dffa4 #12a01e #12a01e #9dffa4!important;box-shadow:none}
-#w-radio .amp-btns button.on{background:#12b022!important;border-color:#0a6a14 #7af084 #7af084 #0a6a14!important}
 #w-radio .amp-btns button:active,#w-radio .amp-eject:active{background:#1fd92e!important;border-color:#12a01e #9dffa4 #9dffa4 #12a01e!important}
 #w-radio .amp-btns .pico{width:16px;height:16px}
 .miniamp button:not(.mini-lcd){height:28px!important;min-width:30px!important;background:#2cff3c!important;border-color:#9dffa4 #12a01e #12a01e #9dffa4!important;box-shadow:none}
@@ -441,7 +443,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
   <button class="start" id="startbtn" aria-expanded="false" aria-controls="startmenu">Start</button>
   <div class="tasks" id="tasks"></div>
   <div class="miniamp" id="miniamp" role="group" aria-label="Radio player" hidden>
-    <button type="button" onclick="AMP.prev()" aria-label="Previous / restart" title="Previous (restarts the song)"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="1" y="2" width="2" height="8"/><path d="M11 2v8L4 6z"/></svg></button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><path d="M3 1.5v9L10.5 6z"/></svg></button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="2" width="3" height="8"/><rect x="7" y="2" width="3" height="8"/></svg></button><button type="button" onclick="AMP.stop()" aria-label="Stop" title="Stop"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2.5" y="2.5" width="7" height="7"/></svg></button><button type="button" onclick="AMP.next()" aria-label="Next song" title="Next song"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="9" y="2" width="2" height="8"/><path d="M1 2v8l7-4z"/></svg></button>
+    <button type="button" onclick="AMP.prev()" aria-label="Previous / restart" title="Previous (restarts the song)"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="1" y="2" width="2" height="8"/><path d="M11 2v8L4 6z"/></svg></button><button type="button" onclick="AMP.play()" aria-label="Play" title="Play"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><path d="M3 1.5v9L10.5 6z"/></svg></button><button type="button" onclick="AMP.pause()" aria-label="Pause" title="Pause"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="2" width="3" height="8"/><rect x="7" y="2" width="3" height="8"/></svg></button><button type="button" onclick="AMP.next()" aria-label="Next song" title="Next song"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="9" y="2" width="2" height="8"/><path d="M1 2v8l7-4z"/></svg></button>
     <button type="button" class="mini-lcd" onclick="openWin('radio')" title="Show the player"><span id="miniTime">■ 00:00</span><span class="mini-title" id="miniTitle"></span></button>
   </div>
   <div class="tray"><button class="modebtn" id="modebtn" type="button"></button><button class="modebtn" id="discobtn" type="button" aria-pressed="false" title="Enable Disco-mode" aria-label="Enable Disco-mode"><span class="ball" aria-hidden="true">🪩</span></button><span id="clock"></span></div>
@@ -459,7 +461,7 @@ const CONFIG = {
 };
 
 /* ---------- sample data (shown when no sheet is connected) ---------- */
-const WILDLIFE=["desert_mice","owl","owl_chicks","roadrunner","ravens","horned_lizards","scorpions","bats","night_blooms","shooting_stars","dirt_bikes","baja_truck"];
+const WILDLIFE=["desert_mice","owl","owl_chicks","roadrunner","ravens","horned_lizards","scorpions","bats","night_blooms","shooting_stars","dirt_bikes","baja_truck","ufo","saturn"];
 const SAMPLE = {
   desktop: [],
   wildlife: WILDLIFE.map(a=>({animal:a,show:"yes"})),
@@ -512,6 +514,7 @@ folder:["................","..kkkkk.........",".kyyyyyk........","kyyyyyyykkkkkk
 letter:["................","................","................","kkkkkkkkkkkkkkkk","kwkwwwwwwwwwwkwk","kwwkwwwwwwwwkwwk","kwwwkwwwwwwkwwwk","kwwwwkwwwwkwwwwk","kwwwwwkkkkwwwwwk","kwwwwkwwwwkwwwwk","kwwwkwwwwwwkwwwk","kwwkwwwwwwwwkwwk","kkkkkkkkkkkkkkkk","................","................","................"],
 book:["................",".kkkkkkkkkkkk...",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSSwwwk..",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSwwwwk..",".krrkwwwwwwwwk..",".krrkwwwwwwwwk..",".kkkkkkkkkkkkk..","................","................","................"],
 radio:["................","....kkkkkkkk....","....k......k....","kkkkkkkkkkkkkkkk","kssssssssssssssk","ksSSSssyyssSSSsk","kSkkkSsyysSkkkSk","kSkSkSssssSkSkSk","kSkkkSsrbsSkkkSk","ksSSSssssssSSSsk","kssssssssssssssk","kkkkkkkkkkkkkkkk","................","................","................","................"],
+postcard:["................","................","kkkkkkkkkkkkkkkk","kwwwwwwwkwwwkrrk","kwBBBBBwkwwwkrrk","kwBByBBwkwwwkkkk","kwBBBgBwkwwwwwwk","kwBgBgBwkwkkkkwk","kwttgttwkwwwwwwk","kwwwwwwwkwwwwwwk","kwwkkwwwkwkkkkwk","kwwwwwwwkwwwwwwk","kwwwwwwwkwkkkkwk","kkkkkkkkkkkkkkkk","................","................"],
 infosign:["................","...kkkkkkkkkk...","..knnnnnnnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnnnnnnnnk..","..knnnwwwnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnwwwwnnnk..","...kkkkkkkkkk...","......knnk......","......knnk......","....kkkkkkkk....","................"],
 tower:["..w..w.r.w..w...",".w..w.krk.w..w..",".w..w.kSk.w..w..","..w..w.k.w..w...","......kSk.......","......kSk.......",".....kSkSk......",".....kSkSk......","....kSkkkSk.....","....kSk.kSk.....","...kSkkkkkSk....","...kSk...kSk....","..kSkkkkkkkSk...","..kSk.....kSk...",".kkkkkkkkkkkkk..","................"],
 trailcam:["................","..kkkkkkkkkkkk..",".kGGnGGGGGGgGGk.",".kGgGGkkkkGGnGk.",".kGGGkbbbbkGGGk.",".kGnkbbwbbbkGgk.",".kGGkbbbbbbkGGk.",".kGGkbbbbbbkGGk.",".kgGGkbbbbkGGnk.",".kGGnGkkkkGGrGk.",".kGGGGGgGGGGGGk.",".kGGkkkkkkkkGGk.",".kGGksssssskGgk.",".kGnGGGGgGGGGGk.","..kkkkkkkkkkkk..","................"],
@@ -1275,7 +1278,8 @@ const TRUCK=[
 const TRUCKPAL={k:"#3c3438",b:"#b89a6a",g:"#16141c",T:"#121014"};
 function stepTruck(s){
   const T=s.truck||(s.truck={on:false,wait:RI(30,160)});
-  if(!T.on){if(--T.wait>0)return null;T.on=true;T.dir=R()<.5?1:-1;T.sp=.28+R()*.12;T.x=T.dir>0?-16:s.w+2;T.y=s.H0+RI(1,3)-TRUCK.length+5;T.jig=0}
+  if(!T.on){if(--T.wait>0)return null;T.on=true;T.marked=R()<.4;T.dir=R()<.5?1:-1;T.sp=.28+R()*.12;T.x=T.dir>0?-16:s.w+2;T.y=s.H0+RI(1,3)-TRUCK.length+5;T.jig=0}
+  if(T.held)return {x:T.x,y:T.y-(T.lift||0),dir:T.dir};                        // caught in the beam
   T.x+=T.dir*T.sp;T.jig=(s.t%7===0&&R()<.5)?1:0;                                       // washboard road: an occasional bounce
   if(T.x<-20||T.x>s.w+20){T.on=false;T.wait=RI(260,800);return null}
   return {x:T.x,y:T.y-T.jig,dir:T.dir};
@@ -1315,6 +1319,57 @@ function swayLayer(c,cv,list,s,box){
   const t=performance.now()/1000;
   list.forEach((f,i)=>{const [x,y,w,h]=box(f),dx=Math.round(Math.sin(t*.8+i*1.7+f.x*.13)*1.15);c.drawImage(cv,x,y,w,h,x+dx,y,w,h)});
 }
+// night: Saturn, a tiny ringed dot very far off, steady (planets don't twinkle); it slips behind the clouds and the moon
+const SATURN=[".yyy.","rrrrr",".yYy."],SATPAL={y:"#cdbf94",Y:"#a8996e",r:"#8a8a9c"};
+function drawSaturn(c,s){
+  if(!shown("saturn"))return;
+  if(!s.saturn||s.saturn.w!==s.w)s.saturn={w:s.w,x:Math.round(s.w*(.5+R()*.38)),y:Math.round(s.H0*(.1+R()*.14))};
+  sprt(c,SATURN,s.saturn.x,s.saturn.y,false,SATPAL);
+}
+// night: a flying saucer glides in, parks over the trophy truck, beams it up and leaves; with no truck it just drifts across
+const UFO=["........kggggk........","......kgBBBBBBgk......",".....kgBBwBBBBBgk.....","..kkkkkkkkkkkkkkkkkk..",".kssssssssssssssssssk.","kSsLsSsLsSssSsLsSsLsSk",".kSSSSSSSSSSSSSSSSSSk.","....kkSSSSSSSSSSkk...."],UFOPAL={g:"#9ad8b0",B:"#6aa8a0",w:"#e8fff0",k:"#3a4450",s:"#9aa4b6",S:"#626a80",L:"#626a80"};
+const UFO_W=UFO[0].length,UFO_H=UFO.length;
+function stepUfo(s,tk){
+  if(!shown("ufo")){s.ufo=null;return null}
+  let u=s.ufo;const T=s.truck;
+  if(!u){
+    const truckMid=tk&&T&&T.x>s.w*.2&&T.x<s.w*.7;
+    if(!(truckMid&&T.marked)&&!(R()<1/5000))return null;              // only some trucks are marked for abduction
+    const dir=R()<.5?1:-1;
+    u=s.ufo={x:dir>0?-UFO_W-4:s.w+4,y:Math.round(s.H0*(.08+R()*.1)),vx:0,vy:0,dir,t:0,state:truckMid&&T.marked?"seek":"cross"};if(T)T.marked=false;
+    if(u.state==="cross"){u.vx=dir*.55}
+  }
+  u.t++;
+  if(u.state==="seek"&&T&&T.on){                                     // ease in until parked over the truck, matching its speed
+    const tx=T.x+TRUCK[0].length/2-UFO_W/2,ty=Math.max(s.H0*.18,T.y-30);
+    const cl=(v,m)=>Math.max(-m,Math.min(m,v)),wx=cl((tx-u.x)*.03,1.1)+T.dir*T.sp,wy=cl((ty-u.y)*.03,.6);
+    u.vx+=(wx-u.vx)*.08;u.vy+=(wy-u.vy)*.08;u.x+=u.vx;u.y+=u.vy;
+    if(Math.abs(tx-u.x)<1.5&&Math.abs(ty-u.y)<1.2){u.state="beam";u.beam=0;T.held=true}
+  }else if(u.state==="seek"){u.state="leave"}
+  else if(u.state==="beam"){
+    u.y+=Math.sin(u.t*.2)*.08;u.beam++;
+    if(u.beam>14&&T&&T.on){T.lift=(T.lift||0)*1.02+.35;          // the truck floats up, slowly then faster
+      if(T.y-T.lift<=u.y+UFO_H-3){T.on=false;T.held=false;T.lift=0;T.wait=RI(600,1400);u.state="leave";u.hold=10}}
+    else if(!T||!T.on){u.state="leave";u.hold=10}
+  }else if(u.state==="leave"){
+    if(u.hold>0){u.hold--;u.y+=Math.sin(u.t*.2)*.08}
+    else{u.vy-=.06;u.vx+=u.dir*.05;u.x+=u.vx;u.y+=u.vy}
+  }else{u.x+=u.vx;u.y+=Math.sin(u.t*.06)*.15}
+  if(u.x<-UFO_W-10||u.x>s.w+10||u.y<-UFO_H-4){s.ufo=null;return null}
+  return u;
+}
+function drawUfo(c,u,s){
+  const x=Math.round(u.x),y=Math.round(u.y);
+  if(u.state==="beam"&&u.beam>4&&s.truck&&s.truck.on){                // tractor beam down to the truck
+    const T=s.truck,by=Math.round(T.y-(T.lift||0))+TRUCK.length,top=y+UFO_H-1,cx=x+UFO_W/2,a=.16+.06*Math.sin(u.t*.9);
+    const g=c.createLinearGradient(0,top,0,by);g.addColorStop(0,`rgba(190,255,215,${a+.1})`);g.addColorStop(1,`rgba(190,255,215,${a*.5})`);
+    c.fillStyle=g;c.beginPath();c.moveTo(cx-4,top);c.lineTo(cx+4,top);c.lineTo(cx+12,by);c.lineTo(cx-12,by);c.closePath();c.fill();
+    for(let k=0;k<3;k++){const yy=top+((u.t*2+k*11)%Math.max(1,by-top));c.fillStyle="rgba(230,255,240,.35)";c.fillRect(Math.round(cx-4-(yy-top)/(by-top+1)*8),yy,Math.round(8+(yy-top)/(by-top+1)*16),1)}
+  }
+  sprt(c,UFO,x,y,false,UFOPAL);
+  const lights=["#ff6a5a","#ffe070","#7ad0ff"];let k=0;
+  UFO.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==="L"){c.fillStyle=lights[(k+++(u.t>>1))%3];c.fillRect(x+i,y+j,1,1)}}));
+}
 function drawScene(){
   const s=SCENE,c=s.ctx;if(!c)return;s.t++;const N=s.night;
   if(s.disco&&N){drawDisco(c,s);drawMoon(c,s)}else{
@@ -1333,6 +1388,7 @@ function drawScene(){
     ["#f6f2e4","#c8c6d8","#8e90b0","#5c6088","#3a4068"].forEach((col,k)=>{c.fillStyle=col;c.fillRect(Math.round(m.x-m.vx*k*.6),Math.round(m.y-m.vy*k*.6),1,1)});
     return m.life>0&&m.y<s.H0;
   });
+  if(N)drawSaturn(c,s);
   // sun sinks and rises over ~6 minutes; the moon crosses the sky over ~10
   const now=performance.now()/1000,sr=s.sr;
   if(N)c.drawImage(s.layers.clouds,0,0);                 // night: clouds behind the moon
@@ -1367,7 +1423,8 @@ function drawScene(){
   if(tk)sprt(g,TRUCK,tk.x,tk.y,tk.dir<0,TRUCKPAL,"kbgT");
   if(N)tint(G,"rgba(16,22,58,.42)");
   c.drawImage(G,0,0);
-  if(tk)truckLights(c,tk);
+  if(tk&&!(s.truck&&s.truck.lift))truckLights(c,tk);
+  const ufo=N?stepUfo(s,tk):null;if(ufo)drawUfo(c,ufo,s);
   if(N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)drawScorp(c,p,hold?0:p.state==="walk"?(s.t>>1)%2:0,bob,GLOW)});
   c.drawImage(s.layers.plants,0,0);
   swayLayer(c,s.layers.flowers,s.flowers,s,f=>[f.x-2,f.y-2,6,4]);
@@ -1870,19 +1927,8 @@ function ampText(){
   if(big&&SPOT.src){const unit=line?`${line} *** ${name} *** `:`${name} *** ${!SPOT.state.paused?"On air":SPOT.stopped||!SPOT.state.pos?"Press play":"Paused"} *** `;setScroll(big,unit)}
   const mini=document.getElementById("miniTitle");if(mini)setScroll(mini,(line?`${line} · ${name}`:name)+" · ");
 }
-const SPOT={api:null,ctl:null,loading:false,src:null,viz:null,state:{paused:true,pos:0,dur:0},shuffle:false,chain:null,uri:""};
-try{SPOT.shuffle=localStorage.getItem("xl-shuffle")==="1"}catch(e){}
-/* shuffle: Spotify's embed can't shuffle or pick a track by number, so whenever a new song comes up we hop ahead a random
-   0–4 songs (each hop = jump to the song's last moment, the same trick as Next) before settling */
-function shuffleHop(){
-  if(!SPOT.shuffle||!SPOT.ctl){SPOT.chain=null;return}
-  if(SPOT.chain==null)SPOT.chain=RI(0,4);
-  if(SPOT.chain<=0){SPOT.chain=null;return}
-  SPOT.chain--;let n=0;
-  const t=setInterval(()=>{const st=SPOT.state;
-    if(++n>25){clearInterval(t);SPOT.chain=null;return}                 // gave up waiting for the song to load
-    if(st.dur>0&&st.pos>0&&!st.buffering){clearInterval(t);try{SPOT.ctl.seek(Math.max(0,st.dur/1000-.4))}catch(e){SPOT.chain=null}}},150);
-}
+const SPOT={api:null,ctl:null,loading:false,src:null,viz:null,state:{paused:true,pos:0,dur:0}};
+
 function spotifySrc(v){
   v=String(v||"").trim();
   const m=v.match(/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(?:embed\/)?(playlist|album|track|episode|show|artist)\/([A-Za-z0-9]+)/)||v.match(/^spotify:(playlist|album|track|episode|show|artist):([A-Za-z0-9]+)$/);
@@ -1902,19 +1948,17 @@ function renderRadio(body,status){
     </div>
     <div class="seek" id="ampSeek" role="slider" aria-label="Song position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"><i id="ampBar"></i></div>
     <div class="amp-btns">
-      <button id="ampPrev" aria-label="Back to start" title="Back to start"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="1" y="2" width="2" height="8"/><path d="M11 2v8L4 6z"/></svg></button><button id="ampPlay" aria-label="Play" title="Play"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><path d="M3 1.5v9L10.5 6z"/></svg></button><button id="ampPause" aria-label="Pause" title="Pause"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="2" width="3" height="8"/><rect x="7" y="2" width="3" height="8"/></svg></button><button id="ampStop" aria-label="Stop" title="Stop"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2.5" y="2.5" width="7" height="7"/></svg></button><button id="ampNext" aria-label="Next song" title="Next song"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="9" y="2" width="2" height="8"/><path d="M1 2v8l7-4z"/></svg></button><button id="ampShuffle" aria-label="Shuffle" aria-pressed="false" title="Shuffle"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="0" y="2" width="3" height="2"/><rect x="3" y="3" width="2" height="2"/><rect x="5" y="5" width="2" height="2"/><rect x="7" y="7" width="2" height="2"/><rect x="0" y="8" width="3" height="2"/><rect x="3" y="7" width="2" height="2"/><rect x="7" y="3" width="2" height="2"/><path d="M9 1v5l3-2.5zM9 6v5l3-2.5z"/></svg></button>
+      <button id="ampPrev" aria-label="Back to start" title="Back to start"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="1" y="2" width="2" height="8"/><path d="M11 2v8L4 6z"/></svg></button><button id="ampPlay" aria-label="Play" title="Play"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><path d="M3 1.5v9L10.5 6z"/></svg></button><button id="ampPause" aria-label="Pause" title="Pause"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="2" width="3" height="8"/><rect x="7" y="2" width="3" height="8"/></svg></button><button id="ampNext" aria-label="Next song" title="Next song"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="9" y="2" width="2" height="8"/><path d="M1 2v8l7-4z"/></svg></button>
       ${src?`<a class="amp-eject" href="https://open.spotify.com/${src.type}/${src.id}" target="_blank" rel="noopener" title="Open in Spotify" aria-label="Open in Spotify"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><path d="M6 1.5L11 7H1z"/><rect x="1" y="8.5" width="10" height="2"/></svg></a>`:""}
       <span class="amp-brand">${ampBrand(title)}</span>
     </div>
     <div class="deck">${src?`<div id="spotHost" class="tape-empty">Loading the tape…</div>`:`<div class="tape-empty">Paste a public Spotify playlist link into the <b>spotify_url</b> row of your sheet's Settings tab, then refresh.</div>`}</div>
   </div>`;
   if(status)status.innerHTML=`<span>${src?esc(src.type):"empty"}</span><span>${src?"Spotify":"—"}</span>`;
-  ["ampPrev","ampPlay","ampPause","ampStop","ampNext","ampShuffle"].forEach(id=>document.getElementById(id).disabled=!src);
-  const shb=document.getElementById("ampShuffle"),shSet=()=>{shb.classList.toggle("on",SPOT.shuffle);shb.setAttribute("aria-pressed",SPOT.shuffle)};shSet();
-  shb.onclick=()=>{SPOT.shuffle=!SPOT.shuffle;SPOT.chain=null;try{localStorage.setItem("xl-shuffle",SPOT.shuffle?"1":"0")}catch(e){}shSet();
-    if(SPOT.shuffle&&deckPlaying())AMP.next()};                      // turning it on jumps somewhere random right away
+  ["ampPrev","ampPlay","ampPause","ampNext"].forEach(id=>document.getElementById(id).disabled=!src);
   const C=()=>SPOT.ctl;
-  ["Prev","Play","Pause","Stop","Next"].forEach(k=>document.getElementById("amp"+k).onclick=AMP[k.toLowerCase()]);
+  ["Prev","Play","Pause","Next"].forEach(k=>document.getElementById("amp"+k).onclick=AMP[k.toLowerCase()]);
+  const ej=body.querySelector(".amp-eject");if(ej)ej.addEventListener("click",()=>{try{AMP.pause();SPOT.stopped=true;ampUpdate()}catch(e){}});   // eject: stop the tape, then open the playlist in Spotify
   const seekTo=f=>{if(C()&&SPOT.state.dur)C().seek(Math.floor(f*SPOT.state.dur/1000))};
   const sk=document.getElementById("ampSeek");
   sk.onclick=e=>{const r=sk.getBoundingClientRect();seekTo((e.clientX-r.left)/r.width)};
@@ -1947,7 +1991,6 @@ function loadSpotify(src){
       ctl.addListener("playback_update",e=>{const d=e.data||{};
         SPOT.state={paused:!!d.isPaused,pos:d.position||0,dur:d.duration||0,buffering:!!d.isBuffering};SPOT.at=performance.now();
         if(!d.isPaused){SPOT.stopped=false;NOW.started=true}
-        if(d.playingURI&&d.playingURI!==SPOT.uri){SPOT.uri=d.playingURI;if(!d.isPaused||SPOT.chain!=null)shuffleHop()}
         if(d.playingURI)lookupTrack(d.playingURI,d.duration||0);ampUpdate()});
     });
   };
@@ -2192,6 +2235,27 @@ function diversity(counts){
   const D=N>1?1-n.reduce((a,c)=>a+c*(c-1),0)/(N*(N-1)):0;
   return {S,N,H,E:S>1?H/Math.log(S):0,D};
 }
+// resting portraits for the Biodiversity Report: birds perched, never in flight
+const BAT_HANG=[".K.K.",".KKK.","KKvKK","KKKKK",".KKK.","..K.."];
+function bioSprite(key){
+  const m={owl:[CRITTERS.owlHome,OWLPAL],owl_chicks:[CRITTERS.chick,CHICKPAL],roadrunner:[CRITTERS.stand],ravens:[CRITTERS.ravenPerch,RAVENPAL],
+    horned_lizards:[CRITTERS.toad],scorpions:[CRITTERS.scorp[0]],bats:[BAT_HANG],desert_mice:[CRITTERS.mouseSit,MOUSE]}[key];
+  if(!m)return "";BIO_IMG[key]=BIO_IMG[key]||(()=>{const rows=m[0],w=Math.max(...rows.map(r=>r.length)),h=rows.length,k=Math.max(3,Math.min(6,Math.floor(84/Math.max(w,h))));
+    const cv=document.createElement("canvas");cv.width=w*k;cv.height=h*k;const g=cv.getContext("2d");g.scale(k,k);sprt(g,rows,0,0,false,m[1]);return cv.toDataURL()})();
+  return BIO_IMG[key];
+}
+const BIO_IMG={};
+function bioTips(root){
+  let tip=document.getElementById("bioTip");if(!tip){tip=document.createElement("div");tip.id="bioTip";tip.hidden=true;tip.innerHTML="<img alt=''><span></span>";document.body.appendChild(tip)}
+  const hide=()=>tip.hidden=true;
+  root.querySelectorAll("[data-sp]").forEach(td=>{
+    const show=e=>{const src=bioSprite(td.dataset.sp);if(!src)return;tip.querySelector("img").src=src;tip.querySelector("span").textContent=td.dataset.rest||"";tip.hidden=false;move(e)};
+    const move=e=>{const r=tip.getBoundingClientRect(),x=Math.min(innerWidth-r.width-8,(e.clientX||0)+16),y=Math.max(8,Math.min(innerHeight-r.height-8,(e.clientY||0)-r.height/2));tip.style.left=x+"px";tip.style.top=y+"px"};
+    td.addEventListener("mouseenter",show);td.addEventListener("mousemove",move);td.addEventListener("mouseleave",hide);
+    td.addEventListener("click",e=>{tip.hidden?show(e):hide()});
+  });
+  document.addEventListener("scroll",hide,true);
+}
 function renderBio(body,status){
   const s=SCENE,N=s.night,f=s.flora||{},fmt=(v,d=2)=>Number(v).toFixed(d);
   const active=a=>({owl:N,owl_chicks:N,roadrunner:!N,ravens:!N,horned_lizards:!N,scorpions:true,bats:N,desert_mice:N})[a.key];
@@ -2208,7 +2272,7 @@ function renderBio(body,status){
     <p class="bio-head"><b>Field census</b> · ${esc(SET.location_name||"Anza-Borrego Desert")} · ${today}, ${time} · ${N?"nocturnal":"diurnal"} survey</p>
     <h3>Fauna</h3>
     <div class="tbl"><table class="biot"><thead><tr><th>Species</th><th>Family · class</th><th class="n">Count</th><th>Status</th></tr></thead><tbody>
-    ${fauna.map(a=>`<tr${a.on?"":' class="off"'} title="${esc(a.when)}"><td>${esc(a.common)}<br><i class="sci">${esc(a.sci)}</i></td><td>${a.fam}<br><span class="muted">${a.cls}</span></td><td class="n big">${a.on?a.n:"—"}</td>
+    ${fauna.map(a=>`<tr${a.on?"":' class="off"'} title="${esc(a.when)}"><td class="sp" data-sp="${a.key}" data-rest="${esc(a.common)}, at rest">${esc(a.common)}<br><i class="sci">${esc(a.sci)}</i></td><td>${a.fam}<br><span class="muted">${a.cls}</span></td><td class="n big">${a.on?a.n:"—"}</td>
       <td>${!a.on?"not surveyed":a.n?(a.act?"active":"resting"):"absent"}</td></tr>`).join("")}
     </tbody></table></div>
     <p class="bio-stats">Richness <b>S = ${dF.S}</b> · individuals <b>N = ${dF.N}</b> · Shannon <b>H′ = ${fmt(dF.H)}</b> · evenness <b>J′ = ${fmt(dF.E)}</b> · Simpson <b>1−D = ${fmt(dF.D)}</b></p>
@@ -2225,6 +2289,7 @@ function renderBio(body,status){
     <p class="bio-stats">${cacti.length} specimens · ${Object.keys(bySp).length} species · ${genera.size} genera · ${thirsty} need water, ${soon} due soon</p>`:`<p class="muted">No plants on the Cacti tab yet.</p>`}
   </div>`;
   if(status)status.innerHTML=`<span>${dF.S+dP.S} species observed</span><span>${N?"Night":"Day"} survey</span>`;
+  bioTips(body);
 }
 function renderLog(body,status){
   const all=weatherRows(),rows=all.slice(-30);
@@ -2356,7 +2421,7 @@ function build(){
   place(L,"cacti","My Cacti","saguaro",thirsty||"");place(L,"log","Weather Log","chart");
   place(L,"today","Weather Now","sun");place(L,"bio","Biodiversity Report","trailcam");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
-    const pic=/^contact/i.test(String(p.title).trim())?"tower":/^about/i.test(String(p.title).trim())?"infosign":(p.icon||"folder").toLowerCase();
+    const pic=/^contact/i.test(String(p.title).trim())?"postcard":/^about/i.test(String(p.title).trim())?"infosign":(p.icon||"folder").toLowerCase();
     const id="p"+i;defineWindow(id,{title:p.title,icon:pic,w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
     place(L,id,p.title,pic);
   });
