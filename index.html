@@ -650,7 +650,6 @@ const CRITTERS={
   toad:["......w.w..","..tdtdtTTT.",".tTtTtTTkTt","tdtTtdtTTT.","..t..t..t.."],
   owlHome:owlFace(OWL_EYES),
   owlBlink:owlFace(OWL_SHUT),
-  owlHoot:owlFace(OWL_EYES).map((r,j,a)=>j===a.indexOf("..kBWWWWWWWWBk..")+1?".kBWWWWWWWWWWBk.":r),   // throat puffed out white
   owlPeekL:owlFace(OWL_PEEK_L,OWL_BROW_L),owlPeekR:owlFace(OWL_PEEK_R,OWL_BROW_R),
   // front view in flight: both eyes stay visible on every wingbeat
   owlUp:OWL_FLY.up,
@@ -1049,17 +1048,24 @@ const CHICK_SPOTS=[[],[[-4,15]],[[-9,13],[1,16]],[[-10,12],[2,12],[-4,17]],[[-10
   [[-10,10],[2,10],[-4,13],[-10,17],[2,17]],[[-11,10],[-4,10],[3,10],[-11,17],[-4,17],[3,17]]];
 // resting rattlesnake, coiled with its head up, for the Biodiversity Report
 const SNAKE_COIL=["......HH....","....HHeHt...","....dHH.....","..crcdrc....",".rdcrrdcrc..","crrdcrrdcrrW","rdcrrdcrrdKW",".ccrrdccrcc."],SNAKEPAL={H:"#8a4a36",e:"#1a1210",t:"#d03838",d:"#5c3426",c:"#d8b48e",r:"#a8644a",K:"#2a2018",W:"#e8dcc0"};
-// the hooting neighbour: three-quarter size; a hoot = a little bow, the white throat puffs, and a ring floats off
-const OWL2_K=.75,HOOTS=[0,1,1,1,0,0,0,1,1,0,1,1,0,1,1,1];                    // hoo, h'hoo, hoo, hoo
+// the hooting neighbour: a smaller, hand-drawn owl (scaling the big one garbled its eyes); a hoot = a little bow,
+// the white throat puffs, and a faint pixel-lettered "HOO" floats up and fades
+const OWL2=[".k........k.",".Dk......kD.","..DBkkkkBD..",".kBLBDDBLBk.",".kDrwDDwrDk.","kBrYYkkYYrBk","kBrYpkkpYrBk","kDrrrddrrrDk",".kDrrkkrrDk.",".kBWWWWWWBk.","kBLwLwwLwLBk","kDBLBLLBLBDk","kBLTLTTLTLBk","kDBBDBBDBBDk","kBLTLTTLTLBk",".kDBLTTLBDk.",".kDBDBBDBDk.","..kDTkkTDk..","..kdk..kdk.."];
+const OWL2_SHUT=OWL2.map((r,j)=>j===5?"kBrDDkkDDrBk":j===6?"kBrrrkkrrrBk":r);
+const OWL2_HOOT=OWL2.map(r=>r==="kBLwLwwLwLBk"?"kBWWWWWWWWBk":r);
+const HOO_FONT={H:["1.1","1.1","111","1.1","1.1"],O:["111","1.1","1.1","1.1","111"]};
+const HOOTS=[0,1,1,1,0,0,0,1,1,0,1,1,0,1,1,1];                    // hoo, h'hoo, hoo, hoo
 function drawOwl2(c,s,o,hold){
-  const p=o.p,w=Math.round(16*OWL2_K),h=Math.round(25*OWL2_K),x=p.x-(w>>1),y=p.y-h+2;
+  const p=o.p,w=OWL2[0].length,h=OWL2.length,x=p.x-(w>>1),y=p.y-h+2;
   if(!hold){if(o.hoot>0)o.hoot--;else if(--o.timer<=0){o.hoot=HOOTS.length;o.timer=RI(40,140)}
     if(o.blink>0)o.blink--;else if(R()<.02)o.blink=RI(1,2)}
   const on=o.hoot>0&&HOOTS[HOOTS.length-o.hoot];
-  if(on&&(o.hoot===HOOTS.length||!HOOTS[HOOTS.length-o.hoot-1]))o.notes.push({x:x+w-2,y:y+5,life:12});
-  sprtScaled(c,on?CRITTERS.owlHoot:o.blink?CRITTERS.owlBlink:CRITTERS.owlHome,x,y+(on?1:0),false,OWLPAL_N,OWL2_K);
-  o.notes=o.notes.filter(n=>{n.life--;if(!hold){n.x+=.5;n.y-=.45}const a=n.life/12,X=Math.round(n.x),Y=Math.round(n.y);
-    c.fillStyle=`rgba(230,234,255,${.55*a})`;c.fillRect(X,Y-1,2,1);c.fillRect(X,Y+2,2,1);c.fillRect(X-1,Y,1,2);c.fillRect(X+2,Y,1,2);return n.life>0});
+  if(on&&(o.hoot===HOOTS.length||!HOOTS[HOOTS.length-o.hoot-1]))o.notes.push({x:x+w+1,y:y+2,life:16});
+  sprt(c,on?OWL2_HOOT:o.blink?OWL2_SHUT:OWL2,x,y+(on?1:0),false,OWLPAL_N);
+  o.notes=o.notes.filter(n=>{n.life--;if(!hold){n.x+=.35;n.y-=.4}const a=n.life/16,X=Math.round(n.x),Y=Math.round(n.y);
+    c.fillStyle=`rgba(220,226,255,${.2*a})`;
+    [..."HOO"].forEach((ch,k)=>HOO_FONT[ch].forEach((r,j)=>[...r].forEach((b,i)=>{if(b==="1")c.fillRect(X+k*4+i,Y+j,1,1)})));
+    return n.life>0});
 }
 const PREY=["....PPp....","..BBBBBBk..",".BBBBBBBWWk","tBBBBBBWWW.","t..BW..BW..",".t........."];   // a mouse dangling from the owl's talons
 // by day the owl dozes, now and then cracking one eye open; the peeks come oftener as the afternoon wears on toward sunset (7pm)
@@ -1469,7 +1475,7 @@ function drawUfo(c,u,s){
 }
 function drawScene(){
   const s=SCENE,c=s.ctx;if(!c)return;s.t++;const N=s.night;
-  if(s.disco&&N){drawDisco(c,s);drawMoon(c,s)}else{
+  if(s.disco&&N){drawDisco(c,s);drawSaturn(c,s);drawMoon(c,s)}else{
   c.drawImage(s.layers.sky,0,0);
   // twinkling stars
   const sp=N?["#2a3150","#5c6690","#aeb6d8","#f4f2e8"]:["#4a4458","#7a7088","#bcb2c6","#f2ead8"];
