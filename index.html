@@ -1019,7 +1019,11 @@ function paintSky(){
     for(let y=ecy;y<=ecy+rin+AW;y++)for(let x=ecx;x<=ecx+rin+AW;x++){const r=Math.hypot(x-ecx+.5,y-ecy+.5);if(r<rin||r>=rin+AW)continue;
       const i=Math.floor(r-rin),a=Math.atan2(y-ecy+.5,x-ecx+.5);px(x,y,ribCol(i,AW));
       if(i%4===2&&Math.round(a*r)%5===0)px(x,y,i<AW/2?"#9aa886":"#6e7f60")}       // the bend
-    [[0,0],[1,0],[AW-1,0],[AW-2,0],[0,1],[AW-1,1]].forEach(([dx,dy])=>c.clearRect(ax+dx,armTop+dy,1,1));
+    {const capH=Math.max(3,Math.round(AW*.42)),half=AW/2;                 // a domed crown like the smaller saguaros', not a flat top
+      for(let i=0;i<AW;i++){const u=(i+.5-half)/half,d=Math.round(capH*(1-Math.sqrt(Math.max(0,1-u*u))));
+        if(d>0)c.clearRect(ax+i,armTop,1,d);
+        px(ax+i,armTop+d,i===0||i===AW-1?"#3e4e38":Math.abs(u)<.35?"#a8bc96":u<0?"#94aa82":"#4e6244");   // a lit rim along the curve
+        if(Math.abs(u)<.3&&i%2===0)px(ax+i,armTop+d+1,"#b8bea4")}}            // woolly felt at the crown
     perches.push({x:ax+(AW>>1),y:armTop});
     rib(gx-(GW>>1),-2,GW,h+2);                                        // trunk
     const hcx=gx,rx=11,ry=17,hcy=Math.round(h*.4);
@@ -1108,18 +1112,20 @@ function paintSky(){
   c=plantCtx;
   const GW=Math.max(35,Math.min(43,Math.round(h*.173)));   // the owl's giant saguaro (widened twice by 20%)
   // the giant is also lifted onto its own layer (pixels it changed), so ravens and bats can fly behind it
-  const preG=layer(w,h);preG.getContext("2d").drawImage(plants,0,0);
+  // painted on its own transparent layer (so no pixel of it can vanish by matching what was behind), then laid onto the plants
+  const giantCv=layer(w,h);c=giantCv.getContext("2d");
   const nest=giantSaguaro(Math.max(Math.round(w*.14),(GW>>1)+4),GW);
-  const giantCv=layer(w,h);{const A0=preG.getContext("2d").getImageData(0,0,w,h).data,pc=plants.getContext("2d").getImageData(0,0,w,h),B=pc.data,gx=giantCv.getContext("2d"),out=gx.createImageData(w,h),O=out.data;
-    for(let i=0;i<B.length;i+=4)if(B[i]!==A0[i]||B[i+1]!==A0[i+1]||B[i+2]!==A0[i+2]||B[i+3]!==A0[i+3]){O[i]=B[i];O[i+1]=B[i+1];O[i+2]=B[i+2];O[i+3]=B[i+3]}
-    gx.putImageData(out,0,0)}
+  c=plantCtx;c.drawImage(giantCv,0,0);
   // the far skyline (top of the mountain ranges in each column), smoothed: the day-disco ripples echo it
   {const gd=gc.getImageData(0,0,w,H0).data,top=new Array(w).fill(H0);
    for(let x=0;x<w;x++)for(let y=0;y<H0;y++)if(gd[(y*w+x)*4+3]>0){top[x]=y;break}
    const sm=top.map((_,x)=>{let t=0,n=0;for(let j=-6;j<=6;j++){const v=top[Math.max(0,Math.min(w-1,x+j))];t+=v;n++}return t/n});
    SCENE.ridge=sm;SCENE.ridgeMean=sm.reduce((a,b)=>a+b,0)/w}
-  {const gx=giantCv.getContext("2d");gx.globalCompositeOperation="destination-out";gx.drawImage(bloomCv,0,0);gx.drawImage(flowerCv,0,0);gx.globalCompositeOperation="source-over"}   // blooms on the giant stay in front of it
-  if(N){tint(ground,NIGHT_TINT);tint(plants,NIGHT_TINT);tint(giantCv,NIGHT_TINT);tint(clouds,NIGHT_TINT);tint(flowerCv,NIGHT_TINT)}
+  const giantNoBloom=layer(w,h);   // by day (or with the night blooms switched off) the arm stays whole, with no bloom-shaped gaps for ravens to show through
+  {const gx=giantCv.getContext("2d");gx.globalCompositeOperation="destination-out";gx.drawImage(flowerCv,0,0);gx.globalCompositeOperation="source-over";
+   giantNoBloom.getContext("2d").drawImage(giantCv,0,0);
+   gx.globalCompositeOperation="destination-out";gx.drawImage(bloomCv,0,0);gx.globalCompositeOperation="source-over"}   // blooms on the giant stay in front of it
+  if(N){tint(ground,NIGHT_TINT);tint(plants,NIGHT_TINT);tint(giantCv,NIGHT_TINT);tint(giantNoBloom,NIGHT_TINT);tint(clouds,NIGHT_TINT);tint(flowerCv,NIGHT_TINT)}
   // the lip of the cavity, copied so it can be drawn over the owl's lower body
 
 
@@ -1139,7 +1145,7 @@ function paintSky(){
   const mice=N?[...Array(wildCount("desert_mice",3)).keys()].map(i=>({x:ri(20,w-30),y:H0+ri(Math.round(span*.45),span-6),dir:rnd()<.5?1:-1,state:"pause",timer:ri(10,60),yo:0})):[];
   const bats=N?[...Array(wildCount("bats",4)).keys()].map(i=>({x:ri(0,w),y:ri(Math.round(H0*.2),Math.round(H0*.7)),vx:(i%2?-1:1)*1.2,vy:0,state:"roam",timer:ri(10,80)})):[];
   SCENE.ridge=ridge;SCENE.bikes=null;SCENE.dust=[];
-  Object.assign(SCENE,{layers:{sky,orb,clouds,ground,plants,giant:giantCv,bloom:bloomCv,flowers:flowerCv},flowers,sr,H0,span,ctx:cv.getContext("2d"),groundA:layer(w,h),airA:layer(w,h),w,h,t:0,stars,toads,ravens,perches:usable,scorps,bats,mice,shoot:[],groundY,blooms:N?blooms:[]});
+  Object.assign(SCENE,{layers:{sky,orb,clouds,ground,plants,giant:giantCv,giantNoBloom,bloom:bloomCv,flowers:flowerCv},flowers,sr,H0,span,ctx:cv.getContext("2d"),groundA:layer(w,h),airA:layer(w,h),w,h,t:0,stars,toads,ravens,perches:usable,scorps,bats,mice,shoot:[],groundY,blooms:N?blooms:[]});
   SCENE.owl={nest,state:"home",blink:0,timer:RI(40,120),path:[],x:0,y:0,face:1};
   // night: a second owl just sits on top of a neighbouring saguaro, watching and hooting now and then
   SCENE.owl2=owlPerch?{p:owlPerch,timer:ri(20,90),hoot:0,blink:0,notes:[]}:null;
@@ -1835,7 +1841,7 @@ function drawScene(){
   if(shown("bats"))s.bats.forEach(b=>{stepBat(b,s);sprt(a,CRITTERS.bat[b.state==="feed"?s.t%2:(s.t>>1)%2],b.x,b.y)});
   if(N)tint(A,"rgba(16,22,58,.5)");
   c.drawImage(A,0,0);
-  if(s.layers.giant)c.drawImage(s.layers.giant,0,0);                     // ravens and bats pass behind the big saguaro; the owl stays in front
+  if(s.layers.giant)c.drawImage(N&&shown("night_blooms")?s.layers.giant:s.layers.giantNoBloom,0,0);                     // ravens and bats pass behind the big saguaro; the owl stays in front
   if((o.state!=="home"||!owlOn)&&shown("owl_chicks")){
     const nc=owlChickN();if(!o.chicks||o.chicks.length!==nc)o.chicks=[...Array(nc)].map(()=>({b:0}));
     const SPOTS=CHICK_SPOTS[nc]||CHICK_SPOTS[6],feeding=o.state==="feed";
