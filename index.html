@@ -1039,13 +1039,13 @@ function stepRaven(r,s){
     if(--r.timer<=0){r.state="soar";r.cy=Math.max(H0*.12,r.y)}
   }
 }
-const OWL_FW=22,OWL_FH=8;
+const OWL_FW=22,OWL_FH=8,OWL_SETTLE=14,OWL_FADE=6;
 // where the owlets sit in the cavity for each brood size (back row first)
 const CHICK_SPOTS=[[],[[-4,15]],[[-9,13],[1,16]],[[-10,12],[2,12],[-4,17]],[[-10,11],[2,11],[-8,17],[0,17]],
   [[-10,10],[2,10],[-4,13],[-10,17],[2,17]],[[-11,10],[-4,10],[3,10],[-11,17],[-4,17],[3,17]]];
 // resting rattlesnake, coiled with its head up, for the Biodiversity Report
 const SNAKE_COIL=["......HH....","....HHeHt...","....dHH.....","..crcdrc....",".rdcrrdcrc..","crrdcrrdcrrW","rdcrrdcrrdKW",".ccrrdccrcc."],SNAKEPAL={H:"#8a4a36",e:"#1a1210",t:"#d03838",d:"#5c3426",c:"#d8b48e",r:"#a8644a",K:"#2a2018",W:"#e8dcc0"};
-const PREY=["..PBBB..",".BBBBBk.","tBBBBWW.","t..BWW..",".t......"];   // a mouse dangling from the owl's talons
+const PREY=["....PPp....","..BBBBBBk..",".BBBBBBBWWk","tBBBBBBWWW.","t..BW..BW..",".t........."];   // a mouse dangling from the owl's talons
 // by day the owl dozes, now and then cracking one eye open; the peeks come oftener as the afternoon wears on toward sunset (7pm)
 function dayPeek(o){
   const d=new Date(),h=d.getHours()+d.getMinutes()/60,pd=Math.min(1,Math.max(0,(h-6)/13));
@@ -1064,7 +1064,7 @@ function stepOwl(o,s){
     if(--o.timer<=0&&R()<(s.night?1/90:1/600)){
       // a sortie: flap out of the cavity, glide down to swoop at the ground, ride a thermal, then glide home
       const prey=shown("desert_mice")&&R()<.7?(s.mice||[]).filter(m=>!m.caught&&m.x>20&&m.x<s.w-30).sort(()=>R()-.5)[0]:null;
-      if(prey)prey.marked=true;
+      if(prey){prey.marked=true;prey.escape=R()<.4}                       // about 2 in 5 mice bolt at the last moment
       const gx=prey?prey.x+6:Math.max(20,Math.min(s.w-20,n.x+RI(30,Math.round(s.w*.6)))),gy=prey?prey.y-14:s.groundY()-8;
       const cx=Math.max(30,Math.min(s.w-30,gx+RI(-30,30))),cy=s.H0*.3+RI(-8,8),r=RI(16,28),dir=R()<.5?1:-1,a0=R()*6.28,steps=Math.round(14*(1+R()*.6));
       const loop=[];for(let k=0;k<=steps;k++){const a=a0+dir*k*Math.PI*2/14;loop.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r*.5})}
@@ -1072,10 +1072,15 @@ function stepOwl(o,s){
       o.state="fly";o.x=n.x;o.y=n.cy;o.flap=0;
     }
   }else if(o.state==="feed"){                                                 // hovering at the cavity while the owlets take the mouse
-    o.flap=1;if(--o.timer<=0){o.prey=false;o.state="home";o.x=n.x;o.y=n.cy;o.timer=RI(40,160)}
+    o.flap=1;if(--o.timer<=0){o.prey=false;o.state="settle";o.timer=OWL_SETTLE}
+  }else if(o.state==="settle"){                                               // glide down into the hole, wings folding away
+    o.flap=0;const tgtY=n.top+11;o.x+=(n.x-o.x)*.3;o.y+=Math.min(1.6,Math.max(0,tgtY-o.y));
+    if(--o.timer<=0){o.state="home";o.timer=RI(40,160)}
   }else{
     const tg=o.path[0];if(!tg){o.state="home";o.timer=RI(40,160);return}
     if(tg.prey&&!tg.prey.caught){tg.x=tg.prey.x+6;tg.y=tg.prey.y-14}                 // track the frozen mouse
+    if(tg.prey&&tg.prey.escape&&Math.hypot(tg.x-o.x,tg.y-o.y)<22){const m=tg.prey;    // ...which bolts: the owl swoops on empty sand
+      m.marked=false;m.escape=false;m.state="hop";m.fast=true;m.hops=RI(6,9);m.ht=0;m.dir=m.x<o.x?-1:1;tg.prey=null}
     const dx=tg.x-o.x,dy=tg.y-o.y,d=Math.hypot(dx,dy);
     if(d<1.6){
       if(tg.prey){const m=tg.prey;m.marked=false;
@@ -1403,7 +1408,14 @@ const SATURN=["......................",".........YYyy.........","........YYyyyy.
 function drawSaturn(c,s){
   if(!shown("saturn"))return;
   if(!s.saturn||s.saturn.w!==s.w)s.saturn={w:s.w,x:Math.round(s.w*(.5+R()*.36)),y:Math.round(s.H0*(.18+R()*.14))};
-  sprt(c,SATURN,s.saturn.x,s.saturn.y,false,SATPAL);
+  const {x,y}=s.saturn;c.globalAlpha=.72;
+  if(!s.disco){sprt(c,SATURN,x,y,false,SATPAL);c.globalAlpha=1;return}
+  // disco: the ring pixels pick their shade by angle, and the shades march around the ring so it looks like it's spinning
+  const RING=["#dcd8ec","#b4b0c8","#8e8aa8"],t=performance.now()/1000;
+  SATURN.forEach((row,j)=>[...row].forEach((ch,i)=>{if(ch===".")return;
+    if(ch==="r"||ch==="R"){const a=Math.atan2((j-5)/2.3,i-10.5),k=((Math.floor((a/(Math.PI*2)+1)*14-t*6)%3)+3)%3;c.fillStyle=RING[k]}else c.fillStyle=SATPAL[ch];
+    c.fillRect(x+i,y+j,1,1)}));
+  c.globalAlpha=1;
 }
 // night: a flying saucer glides in, parks over the trophy truck, beams it up and leaves; with no truck it just drifts across
 const UFO=["........kggggk........","......kgBBBBBBgk......",".....kgBBwBBBBBgk.....","..kkkkkkkkkkkkkkkkkk..",".kssssssssssssssssssk.","kSsLsSsLsSssSsLsSsLsSk",".kSSSSSSSSSSSSSSSSSSk.","....kkSSSSSSSSSSkk...."],UFOPAL={g:"#9ad8b0",B:"#6aa8a0",w:"#e8fff0",k:"#3a4450",s:"#9aa4b6",S:"#626a80",L:"#626a80"};
@@ -1518,6 +1530,7 @@ function drawScene(){
   if(o.state==="home"){owlSprite=!N?(o.peek>0?CRITTERS["owlPeek"+o.peekEye]:CRITTERS.owlBlink):o.blink>0?CRITTERS.owlBlink:CRITTERS.owlHome;ox=o.nest.x-8;oy=o.nest.top+(N?3:4)}
   else{owlSprite=o.flap?((s.t>>1)%2?CRITTERS.owlUp:CRITTERS.owlDown):CRITTERS.owlGlide;ox=o.x-OWL_FW;oy=o.y-OWL_FH}
   const carry=owlOn&&o.prey&&o.state==="fly";
+  const fade=owlOn&&o.state==="settle"&&o.timer<OWL_FADE?o.timer/OWL_FADE:null;   // last few frames: cross-fade the folded, sitting owl in
   if(shown("ravens"))s.ravens.forEach(r=>{
     stepRaven(r,s);if(r.state==="gone")return;
     const f=r.state==="roost"?CRITTERS.ravenSleep:r.state==="perch"?CRITTERS.ravenPerch:r.flap>0?(Math.floor(s.t/3)%2?CRITTERS.ravenUp:CRITTERS.ravenDown):CRITTERS.ravenGlide;
@@ -1532,10 +1545,13 @@ function drawScene(){
     o.chicks.map((ch,i)=>[ch,i]).sort((p,q)=>SPOTS[p[1]][1]-SPOTS[q[1]][1]).forEach(([ch,i])=>{if(ch.b>0)ch.b--;else if(R()<.025)ch.b=RI(1,3);
       const [dx,dy]=SPOTS[i],hop=feeding&&(s.t+i)%2?-1:0;                                       // begging: they bounce while the parent feeds them
       sprt(c,ch.b>0&&!feeding?CRITTERS.chickBlink:CRITTERS.chick,o.nest.x+dx,o.nest.top+dy+hop,false,CHICKPAL)});
-    if(feeding&&o.timer>o.feedT*.4)sprt(c,PREY,o.nest.x-5,o.nest.top+9,false,MOUSE);              // the mouse, until it's gone
+    if(feeding){const f=1-o.timer/o.feedT;                                     // lowered from the talons, then gobbled
+      if(f<.8){const k=Math.min(1,f/.45),py=Math.round(o.nest.top+4+k*6);c.globalAlpha=f<.5?1:1-(f-.5)/.3;sprt(c,PREY,o.nest.x-6,py,false,MOUSE);c.globalAlpha=1}}
   }
+  if(fade!==null)c.globalAlpha=Math.max(.15,fade);
   if(owlOn)(o.state==="home"?sprtBob:(c,r,x,y,sp,dy,f,p)=>sprt(c,r,x,y,f,p))(c,owlSprite,ox,oy,10,bob,false,N?OWLPAL_N:o.state==="home"&&o.peek>0?OWLPAL_PEEK:OWLPAL_DAY); // asleep and shadowed by day; awake with bright eyes at night
-  if(carry)sprt(c,PREY,Math.round(o.x)-4,Math.round(o.y)+8,false,MOUSE);
+  c.globalAlpha=1;if(fade!==null){c.globalAlpha=1-fade;sprt(c,CRITTERS.owlHome,o.nest.x-8,o.nest.top+3,false,OWLPAL_N);c.globalAlpha=1}
+  if(carry)sprt(c,PREY,Math.round(o.x)-5,Math.round(o.y)+8,false,MOUSE);
 }
 
 /* ---------- Desert Map: pixel-rendered satellite/terrain with live weather ---------- */
