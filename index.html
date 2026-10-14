@@ -200,7 +200,8 @@ td.wrap{white-space:normal;min-width:140px}
 .bio h3{margin:14px 0 6px;font:600 13px var(--font-ui);letter-spacing:.04em;text-transform:uppercase}
 #bioTip{position:fixed;z-index:9999;pointer-events:none;background:var(--chrome,#d6cfc0);border:2px solid;border-color:var(--chrome-hi,#fff) var(--chrome-lo,#666) var(--chrome-lo,#666) var(--chrome-hi,#fff);padding:8px 10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:2px 2px 0 rgba(0,0,0,.35)}
 #bioTip img{image-rendering:pixelated;display:block}#bioTip span{font:11px var(--font-ui);color:var(--ink,#222)}
-.bio td.sp{cursor:help}
+.bio .sp-row{display:flex;align-items:center;gap:10px}.bio .sp-pic{flex:none;width:44px;height:44px;display:grid;place-items:center}
+.bio .sp-pic img{max-width:44px;max-height:44px;image-rendering:pixelated;object-fit:contain}
 .bio td.habits{font-size:11px;line-height:1.35;min-width:150px;white-space:normal}.bio .bio-head{margin:0 0 4px}.bio .bio-stats{margin:6px 0 0;font-size:12px}.bio .bio-note{margin-top:14px;font-size:11px}
 .bio tr.off td{opacity:.5}
 .bio .biot td{white-space:normal;vertical-align:top;line-height:1.35}.bio .biot .sci{font-size:11px;opacity:.8}.bio .biot td.big{font-size:15px;font-weight:600}
@@ -2740,6 +2741,13 @@ function bioSprite(key){
   return BIO_IMG[key];
 }
 const BIO_IMG={};
+// row thumbnails: the resting portrait beside each species name (the scorpion shows its moonlit glow at night)
+function bioThumb(key){
+  if(key==="scorpions"){const N=SCENE.night,id="scorp_"+(N?"n":"d");if(BIO_IMG[id])return BIO_IMG[id];
+    const rows=CRITTERS.scorp[0],w=Math.max(...rows.map(r=>r.length)),h=rows.length,k=4,cv=document.createElement("canvas");cv.width=w*k;cv.height=h*k;
+    const g=cv.getContext("2d");g.scale(k,k);sprt(g,rows,0,0,false,N?GLOW:undefined);return BIO_IMG[id]=cv.toDataURL()}
+  return bioSprite(key)}
+const spCell=(key,common,sci)=>{const src=bioThumb(key);return `<td class="sp"><div class="sp-row"><span class="sp-pic">${src?`<img alt="" src="${src}">`:""}</span><span>${common}<br><i class="sci">${sci}</i></span></div></td>`};
 function bioTips(root){
   let tip=document.getElementById("bioTip");if(!tip){tip=document.createElement("div");tip.id="bioTip";tip.hidden=true;tip.innerHTML="<img alt=''><span></span>";document.body.appendChild(tip)}
   const hide=()=>tip.hidden=true;
@@ -2767,19 +2775,18 @@ function renderBio(body,status){
     <p class="bio-head"><b>Field census</b> · ${esc(SET.location_name||"Anza-Borrego Desert")} · ${today}, ${time} · ${N?"nocturnal":"diurnal"} survey</p>
     <h3>Fauna</h3>
     <div class="tbl"><table class="biot"><thead><tr><th>Species</th><th>Family · class</th><th class="n">Count</th><th>Status</th><th>Habits</th></tr></thead><tbody>
-    ${fauna.map(a=>`<tr${a.on?"":' class="off"'}><td class="sp" data-sp="${a.key}" data-rest="${a.key==="scorpions"?"By day · glowing under moonlight":esc(a.common)+", at rest"}">${esc(a.common)}<br><i class="sci">${esc(a.sci)}</i></td><td>${a.fam}<br><span class="muted">${a.cls}</span></td><td class="n big">${a.on?a.n:"—"}</td>
+    ${fauna.map(a=>`<tr${a.on?"":' class="off"'}>${spCell(a.key,esc(a.common),esc(a.sci))}<td>${a.fam}<br><span class="muted">${a.cls}</span></td><td class="n big">${a.on?a.n:"—"}</td>
       <td>${!a.on?"not surveyed":a.n?(a.act?"active":"resting"):"absent"}</td><td class="habits">${esc(a.when)}</td></tr>`).join("")}
     </tbody></table></div>
     <p class="bio-stats">Richness <b>S = ${dF.S}</b> · individuals <b>N = ${dF.N}</b> · Shannon <b>H′ = ${fmt(dF.H)}</b> · evenness <b>J′ = ${fmt(dF.E)}</b> · Simpson <b>1−D = ${fmt(dF.D)}</b></p>
     <h3>Flora (scene transect)</h3>
     <div class="tbl"><table class="biot"><thead><tr><th>Species</th><th>Family</th><th class="n">Count</th></tr></thead><tbody>
-    ${floraRows.map(p=>`<tr><td class="sp" data-sp="${p.key}" data-rest="${esc(p.common)}">${p.common}<br><i class="sci">${p.sci}</i></td><td>${p.fam}</td><td class="n big">${p.n}</td></tr>`).join("")}
+    ${floraRows.map(p=>`<tr>${spCell(p.key,p.common,p.sci)}<td>${p.fam}</td><td class="n big">${p.n}</td></tr>`).join("")}
     <tr><td colspan="2" class="muted">Flowering: prickly-pear blooms${N?" · open saguaro night blooms":""}</td><td class="n">${(s.flowers||[]).length}${N?" · "+(s.blooms||[]).length:""}</td></tr>
     </tbody></table></div>
     <p class="bio-stats">Richness <b>S = ${dP.S}</b> · individuals <b>N = ${dP.N}</b> · Shannon <b>H′ = ${fmt(dP.H)}</b> · evenness <b>J′ = ${fmt(dP.E)}</b> · Simpson <b>1−D = ${fmt(dP.D)}</b></p>
   </div>`;
   if(status)status.innerHTML=`<span>${dF.S+dP.S} species observed</span><span>${N?"Night":"Day"} survey</span>`;
-  bioTips(body);
 }
 function renderLog(body,status){
   const all=weatherRows(),rows=all.slice(-30);
