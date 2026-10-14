@@ -935,12 +935,21 @@ function paintSky(){
     const armTop=Math.round(h*.25);
     rib(ax,armTop,AW,ay+AW-2);                                        // arm turning up, ending in frame
     [[0,0],[1,0],[AW-1,0],[AW-2,0],[0,1],[AW-1,1]].forEach(([dx,dy])=>c.clearRect(ax+dx,armTop+dy,1,1));
-    addBloom({x:ax+(AW>>1),y:armTop+1,big:true,tw:AW});perches.push({x:ax+(AW>>1),y:armTop});
+    perches.push({x:ax+(AW>>1),y:armTop});
     rib(gx-(GW>>1),-2,GW,h+2);                                        // trunk
     const hcx=gx,rx=11,ry=17,hcy=Math.round(h*.4);
     for(let y=-ry-2;y<=ry+2;y++)for(let x=-rx-2;x<=rx+2;x++){const o=(x*x)/((rx+2)*(rx+2))+(y*y)/((ry+2)*(ry+2)),n=(x*x)/(rx*rx)+(y*y)/(ry*ry);
       if(n<=1)px(hcx+x,hcy+y,y<-ry+3?"#120e12":"#1c161c");else if(o<=1)px(hcx+x,hcy+y,x<0?"#b8b898":"#98987e")}
     SCENE.giant={tx0:gx-(GW>>1),tx1:gx+(GW>>1),ax,AW,armTop,ay};
+    // the front saguaro's night blooms, three times life size: a full crown on the right arm plus three more down its sides,
+    // and one flaring out of the main column into the gap beside the arm
+    const BK=3,big=(rows,x0,y0,flip)=>{const w=rows[0].length,hh=rows.length,t=layer(w,hh);sprt(t.getContext("2d"),rows,0,0,flip,BLOOM);
+        bcx.imageSmoothingEnabled=false;bcx.drawImage(t,x0,y0,w*BK,hh*BK);blooms.push({x:x0+w*BK/2,y:y0+hh*BK/2,big:true,box:[x0-2,y0-2,w*BK+4,hh*BK+4]})};
+    const cx=ax+(AW>>1),T=BLOOM_TOP,SD=BLOOM_SIDE;
+    big(T,cx-Math.round(T[0].length*BK/2),armTop-T.length*BK+3,false);                 // crown, opening skyward
+    big(SD,ax-SD[0].length*BK+4,armTop-2,false);big(SD,ax+AW-4,armTop-2,true);          // flaring out each side of the tip
+    big(SD,ax-SD[0].length*BK+4,armTop+24,false);big(SD,ax+AW-4,armTop+16,true);big(SD,ax+AW-4,armTop+38,true);   // three more down the arm
+    big(SD,gx+(GW>>1)-4,Math.max(4,armTop-34),true);                                      // one off the main column, in the gap
     return {x:hcx,top:hcy-ry,cy:hcy};
   }
 
@@ -1626,7 +1635,7 @@ function drawScene(){
   if(N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)drawScorp(c,p,hold?0:p.state==="walk"?(s.t>>1)%2:0,bob,GLOW)});
   c.drawImage(s.layers.plants,0,0);
   swayLayer(c,s.layers.flowers,s.flowers,s,f=>[f.x-2,f.y-2,6,4]);
-  if(N&&shown("night_blooms"))swayLayer(c,s.layers.bloom,s.blooms,s,b=>{if(!b.big)return [b.x-2,b.y-3,5,5];const hf=Math.max(2,(b.tw||6)>>1);return [b.x-hf-7,b.y-6,hf*2+15,12]});
+  if(N&&shown("night_blooms"))swayLayer(c,s.layers.bloom,s.blooms,s,b=>{if(b.box)return b.box;if(!b.big)return [b.x-2,b.y-3,5,5];const hf=Math.max(2,(b.tw||6)>>1);return [b.x-hf-7,b.y-6,hf*2+15,12]});
 
   // things in the air (and the owl at its door) go in front of the plants
   const A=s.airA,a=A.getContext("2d");a.clearRect(0,0,s.w,s.h);
