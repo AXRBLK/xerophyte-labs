@@ -1111,6 +1111,8 @@ function drawOwl2(c,s,o,hold){
 function hooBox(){let b=document.getElementById("hoos");if(!b){b=document.createElement("div");b.id="hoos";b.setAttribute("aria-hidden","true");
   const sky=document.getElementById("sky");sky.after(b)}return b}
 function clearHoo(){const b=document.getElementById("hoos");if(b&&b.childElementCount)b.innerHTML=""}
+// a whole, fluffy owlet for the Biodiversity Report hover
+const OWLET_BODY=["...w..w...", "..wwwwww..", ".wwYwwYww.", ".wYpwwpYw.", ".wwwoowww.", "wwwwwwwwww", "wgwgwwgwgw", "wwgwggwgww", "wgwgwwgwgw", "wwwwwwwwww", ".wwgwwgww.", "..wwwwww..", "..oo..oo..", ".o.o..o.o."],OWLETPAL={w:"#d6d2dc",g:"#9a98a2",Y:"#f2c230",p:"#140c08",o:"#8a7040"};
 const PREY=["....PPp....","..BBBBBBk..",".BBBBBBBWWk","tBBBBBBWWW.","t..BW..BW..",".t........."];   // a mouse dangling from the owl's talons
 // by day the owl dozes, now and then cracking one eye open; the peeks come oftener as the afternoon wears on toward sunset (7pm)
 function dayPeek(o){
@@ -2422,7 +2424,7 @@ function diversity(counts){
 // resting portraits for the Biodiversity Report: birds perched, never in flight
 const BAT_HANG=[".K.K.",".KKK.","KKvKK","KKKKK",".KKK.","..K.."];
 function bioSprite(key){
-  const m={owl:[CRITTERS.owlHome,OWLPAL],owl_chicks:[CRITTERS.chick,CHICKPAL],roadrunner:[CRITTERS.stand],ravens:[CRITTERS.ravenPerch,RAVENPAL],
+  const m={owl:[CRITTERS.owlHome,OWLPAL],owl_chicks:[OWLET_BODY,OWLETPAL],roadrunner:[CRITTERS.stand],ravens:[CRITTERS.ravenPerch,RAVENPAL],
     horned_lizards:[CRITTERS.toad],scorpions:[CRITTERS.scorp[0]],bats:[BAT_HANG],desert_mice:[CRITTERS.mouseSit,MOUSE],rattlesnake:[SNAKE_COIL,SNAKEPAL]}[key];
   if(key==="scorpions"){BIO_IMG[key]=BIO_IMG[key]||(()=>{               // two portraits: by day, and glowing under moonlight
     const rows=CRITTERS.scorp[0],w=Math.max(...rows.map(r=>r.length)),h=rows.length,k=6,pad=3,cw=(w+pad*2)*k,cv=document.createElement("canvas");
