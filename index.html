@@ -154,6 +154,10 @@ th{font-family:var(--font-ui);font-weight:600;text-align:left;background:var(--c
 td{border-bottom:1px solid var(--line2);padding:4px 6px;white-space:nowrap}
 td.n{text-align:right}
 td.wrap{white-space:normal;min-width:140px}
+.bio h3{margin:14px 0 6px;font:600 13px var(--font-ui);letter-spacing:.04em;text-transform:uppercase}
+.bio .bio-head{margin:0 0 4px}.bio .bio-stats{margin:6px 0 0;font-size:12px}.bio .bio-note{margin-top:14px;font-size:11px}
+.bio tr.off td{opacity:.5}
+.bio .biot td{white-space:normal;vertical-align:top;line-height:1.35}.bio .biot .sci{font-size:11px;opacity:.8}.bio .biot td.big{font-size:15px;font-weight:600}
 
 /* taskbar */
 .taskbar{position:fixed;left:0;right:0;bottom:0;display:flex;align-items:center;gap:6px;padding:4px 4px calc(4px + env(safe-area-inset-bottom,0px));background:rgba(28,18,24,.62);border-top:1px solid rgba(243,201,160,.6);z-index:50;font-family:var(--font-ui)}
@@ -885,6 +889,7 @@ function paintSky(){
   // the farthest row (right at the horizon) is painted onto the ground layer, so the night truck on the far road
   // drives in front of it while every nearer plant still passes in front of the truck
   const plantCtx=c,FAR=H0+5;
+  SCENE.flora={sag:1,cho:0,opu:0,cre:0};items.forEach(it=>{SCENE.flora[it[0]]=(SCENE.flora[it[0]]||0)+1});   // census for the Biodiversity Report (+1: the owl's giant saguaro)
   items.sort((a,b)=>a[2]-b[2]).forEach(it=>{
     c=it[2]<=FAR?gc:plantCtx;
     if(it[0]==="cre")creosote(it[1],it[2]);
@@ -2076,6 +2081,64 @@ async function loadHistory(){
     return d.time.map((t,i)=>({date:t,d:toDate(t),high:d.temperature_2m_max[i]==null?null:Math.round(d.temperature_2m_max[i]),low:d.temperature_2m_min[i]==null?null:Math.round(d.temperature_2m_min[i]),rain:+(d.precipitation_sum[i]||0).toFixed(2),conditions:WMO[d.weather_code[i]]??"",notes:""})).filter(r=>r.high!=null);
   }catch(e){return null}
 }
+/* ---------- Biodiversity Report: a field census of the scene's wildlife and flora, plus the Cacti tab collection ---------- */
+const FAUNA=[
+  {key:"owl",common:"Great horned owl",sci:"Bubo virginianus",fam:"Strigidae",cls:"Aves",n:s=>1,when:"nocturnal; roosts in the saguaro cavity by day"},
+  {key:"owl_chicks",common:"Great horned owl (owlets)",sci:"Bubo virginianus",fam:"Strigidae",cls:"Aves",n:s=>2,when:"nestlings; visible while the parent hunts"},
+  {key:"roadrunner",common:"Greater roadrunner",sci:"Geococcyx californianus",fam:"Cuculidae",cls:"Aves",n:s=>1,when:"diurnal; hunts scorpions and lizards"},
+  {key:"ravens",common:"Common raven",sci:"Corvus corax",fam:"Corvidae",cls:"Aves",n:s=>(s.ravens||[]).length,when:"diurnal; soars, perches and roosts on saguaros"},
+  {key:"horned_lizards",common:"Flat-tailed horned lizard",sci:"Phrynosoma mcallii",fam:"Phrynosomatidae",cls:"Reptilia",n:s=>(s.toads||[]).length,when:"diurnal; buries in sand after dark"},
+  {key:"scorpions",common:"Desert hairy scorpion",sci:"Hadrurus arizonensis",fam:"Caraboctonidae",cls:"Arachnida",n:s=>(s.scorps||[]).filter(p=>p.alive).length,when:"mostly nocturnal; fluoresces under moonlight"},
+  {key:"bats",common:"Lesser long-nosed bat",sci:"Leptonycteris yerbabuenae",fam:"Phyllostomidae",cls:"Mammalia",n:s=>(s.bats||[]).length,when:"nocturnal; pollinates saguaro blooms"},
+  {key:"desert_mice",common:"Cactus mouse",sci:"Peromyscus eremicus",fam:"Cricetidae",cls:"Mammalia",n:s=>(s.mice||[]).length,when:"nocturnal; forages for seeds"}
+];
+const FLORA=[
+  {key:"sag",common:"Saguaro",sci:"Carnegiea gigantea",fam:"Cactaceae"},
+  {key:"cho",common:"Teddybear cholla",sci:"Cylindropuntia bigelovii",fam:"Cactaceae"},
+  {key:"opu",common:"Engelmann prickly pear",sci:"Opuntia engelmannii",fam:"Cactaceae"},
+  {key:"cre",common:"Creosote bush",sci:"Larrea tridentata",fam:"Zygophyllaceae"}
+];
+function diversity(counts){
+  const n=counts.filter(c=>c>0),N=n.reduce((a,b)=>a+b,0);if(!N)return {S:0,N:0,H:0,E:0,D:0};
+  const H=-n.reduce((a,c)=>a+(c/N)*Math.log(c/N),0),S=n.length;
+  const D=N>1?1-n.reduce((a,c)=>a+c*(c-1),0)/(N*(N-1)):0;
+  return {S,N,H,E:S>1?H/Math.log(S):0,D};
+}
+function renderBio(body,status){
+  const s=SCENE,N=s.night,f=s.flora||{},fmt=(v,d=2)=>Number(v).toFixed(d);
+  const active=a=>({owl:N,owl_chicks:N,roadrunner:!N,ravens:!N,horned_lizards:!N,scorpions:true,bats:N,desert_mice:N})[a.key];
+  const fauna=FAUNA.map(a=>{const on=shown(a.key),present=on&&(a.key==="bats"||a.key==="desert_mice"?N:true);
+    const n=present?a.n(s):0;return {...a,on,n,act:on&&active(a)}});
+  const floraRows=FLORA.map(p=>({...p,n:f[p.key]||0}));
+  const dF=diversity(fauna.filter(a=>a.key!=="owl_chicks").map(a=>a.n+(a.key==="owl"?2*(shown("owl_chicks")?1:0):0)));
+  const dP=diversity(floraRows.map(p=>p.n));
+  const cacti=(DATA.cacti||[]).filter(c=>c.name),bySp={};cacti.forEach(c=>{const k=(c.species||"Unidentified").trim();(bySp[k]=bySp[k]||[]).push(c)});
+  const genera=new Set(Object.keys(bySp).map(k=>k.split(/\s+/)[0]));
+  const st=c=>cactusState(c).status,thirsty=cacti.filter(c=>st(c)==="thirsty").length,soon=cacti.filter(c=>st(c)==="soon").length;
+  const today=new Date().toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"}),time=new Date().toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+  body.innerHTML=`<div class="bio">
+    <p class="bio-head"><b>Field census</b> · ${esc(SET.location_name||"Anza-Borrego Desert")} · ${today}, ${time} · ${N?"nocturnal":"diurnal"} survey</p>
+    <h3>Fauna</h3>
+    <div class="tbl"><table class="biot"><thead><tr><th>Species</th><th>Family · class</th><th class="n">Count</th><th>Status</th></tr></thead><tbody>
+    ${fauna.map(a=>`<tr${a.on?"":' class="off"'} title="${esc(a.when)}"><td>${esc(a.common)}<br><i class="sci">${esc(a.sci)}</i></td><td>${a.fam}<br><span class="muted">${a.cls}</span></td><td class="n big">${a.on?a.n:"—"}</td>
+      <td>${!a.on?"not surveyed":a.n?(a.act?"active":"resting"):"absent"}</td></tr>`).join("")}
+    </tbody></table></div>
+    <p class="bio-stats">Richness <b>S = ${dF.S}</b> · individuals <b>N = ${dF.N}</b> · Shannon <b>H′ = ${fmt(dF.H)}</b> · evenness <b>J′ = ${fmt(dF.E)}</b> · Simpson <b>1−D = ${fmt(dF.D)}</b></p>
+    <h3>Flora (scene transect)</h3>
+    <div class="tbl"><table class="biot"><thead><tr><th>Species</th><th>Family</th><th class="n">Count</th></tr></thead><tbody>
+    ${floraRows.map(p=>`<tr><td>${p.common}<br><i class="sci">${p.sci}</i></td><td>${p.fam}</td><td class="n big">${p.n}</td></tr>`).join("")}
+    <tr><td colspan="2" class="muted">Flowering: prickly-pear blooms${N?" · open saguaro night blooms":""}</td><td class="n">${(s.flowers||[]).length}${N?" · "+(s.blooms||[]).length:""}</td></tr>
+    </tbody></table></div>
+    <p class="bio-stats">Richness <b>S = ${dP.S}</b> · individuals <b>N = ${dP.N}</b> · Shannon <b>H′ = ${fmt(dP.H)}</b> · evenness <b>J′ = ${fmt(dP.E)}</b> · Simpson <b>1−D = ${fmt(dP.D)}</b></p>
+    <h3>Collection (Cacti tab)</h3>
+    ${cacti.length?`<div class="tbl"><table class="biot"><thead><tr><th>Species</th><th class="n">Specimens</th><th>Names</th></tr></thead><tbody>
+    ${Object.entries(bySp).sort((a,b)=>a[0].localeCompare(b[0])).map(([sp,cs])=>`<tr><td>${esc(cs[0].common_name||"")}<br><i class="sci">${esc(sp)}</i></td><td class="n big">${cs.length}</td><td class="wrap">${cs.map(c=>esc(c.name)).join(", ")}</td></tr>`).join("")}
+    </tbody></table></div>
+    <p class="bio-stats">${cacti.length} specimens · ${Object.keys(bySp).length} species · ${genera.size} genera · ${thirsty} need water, ${soon} due soon</p>`:`<p class="muted">No plants on the Cacti tab yet.</p>`}
+    <p class="muted bio-note">Scene counts are a live census of the animated desert; set them with the Wildlife tab's count column. H′ uses natural logs; Simpson's index is the probability that two individuals drawn at random belong to different species.</p>
+  </div>`;
+  if(status)status.innerHTML=`<span>${dF.S+dP.S} species observed</span><span>${N?"Night":"Day"} survey</span>`;
+}
 function renderLog(body,status){
   const all=weatherRows(),rows=all.slice(-30);
   if(!rows.length){body.innerHTML="<p>No weather logged yet.</p>";return}
@@ -2189,6 +2252,7 @@ function build(){
   defineWindow("map",{title:"Desert Map",icon:"map",w:Math.min(860,innerWidth-40),x:mob?16:Math.max(110,(innerWidth-860)/2),y:70,render:renderMap,status:true});
   defineWindow("radio",{title:radioName(),icon:"radio",w:380,x:innerWidth-595,y:64,render:renderRadio,status:true});
   defineWindow("today",{title:"Weather Now",icon:"sun",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
+  defineWindow("bio",{title:"Biodiversity Report",icon:"flower",w:660,x:cx(660),y:100,render:renderBio,menu:["File","Survey","Help"],status:true});
   defineWindow("log",{title:"Weather Log",icon:"chart",w:640,x:cx(640),y:110,render:renderLog,menu:["File","Edit","Chart"],status:true});
   const thirsty=(DATA.cacti||[]).filter(c=>c.name&&cactusState(c).status==="thirsty").length;
   HIDE_WILD=new Set((DATA.wildlife||[]).filter(r=>isNo(r.show)).map(r=>String(r.animal||"").trim().toLowerCase()));
@@ -2203,7 +2267,7 @@ function build(){
     const name=lab||label;if(WINS[id]&&lab){WINS[id].title=lab;WINS[id].el.querySelector(".bar b").textContent=lab;WINS[id].el.setAttribute("aria-label",lab)}
     ICONS.push({id,name,el:iconBtn(id,name,icon,badge)})};
   place(L,"cacti","My Cacti","saguaro",thirsty||"");place(L,"log","Weather Log","chart");
-  place(L,"today","Weather Now","sun");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
+  place(L,"today","Weather Now","sun");place(L,"bio","Biodiversity Report","flower");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
     const id="p"+i;defineWindow(id,{title:p.title,icon:(p.icon||"folder").toLowerCase(),w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
     place(L,id,p.title,(p.icon||"folder").toLowerCase());
