@@ -418,6 +418,7 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 #modebtn .mlab{font:300 11px/1 var(--font-data);letter-spacing:.14em;text-transform:uppercase;opacity:.75}
 #discobtn{width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;padding:0}
 #discobtn .ball{font-size:15px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;display:inline-block}
+#discobtn .ballimg{display:block;width:18px;height:18px;image-rendering:pixelated}
 #discobtn[aria-pressed="true"]{background:#4169e1;outline:3px solid #2a4cc0;outline-offset:1px;box-shadow:0 0 10px rgba(65,105,225,.85)}
 /* the ball stays upright and turns on its axis: facet light slides across its face, glints twinkle on top */
 #discobtn .ball{position:relative}
@@ -561,7 +562,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
     <button type="button" onclick="AMP.prev()" aria-label="Previous / restart" title="Previous (restarts the song)"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="1" y="2" width="2" height="8"/><path d="M11 2v8L4 6z"/></svg></button><button type="button" id="miniPlay" onclick="AMP.play()" aria-label="Play" title="Play"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><path d="M3 1.5v9L10.5 6z"/></svg></button><button type="button" id="miniPause" onclick="AMP.pause()" aria-label="Pause" title="Pause"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="2" width="3" height="8"/><rect x="7" y="2" width="3" height="8"/></svg></button><button type="button" onclick="AMP.next()" aria-label="Next song" title="Next song"><svg class="pico" viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="9" y="2" width="2" height="8"/><path d="M1 2v8l7-4z"/></svg></button>
     <button type="button" class="mini-lcd" onclick="openWin('radio')" title="Show the player"><span id="miniTime">■ 00:00</span><span class="mini-title" id="miniTitle"></span></button>
   </div>
-  <div class="tray"><button class="modebtn" id="modebtn" type="button"></button><button class="modebtn" id="discobtn" type="button" aria-pressed="false" title="Enable Disco-mode" aria-label="Enable Disco-mode"><span class="ball" aria-hidden="true">🪩</span></button><span id="clock"></span></div>
+  <div class="tray"><button class="modebtn" id="modebtn" type="button"></button><button class="modebtn" id="discobtn" type="button" aria-pressed="false" title="Enable Disco-mode" aria-label="Enable Disco-mode"><span class="ball" aria-hidden="true"><img alt="" class="ballimg"></span></button><span id="clock"></span></div>
 </footer>
 
 <script>
@@ -618,7 +619,7 @@ const SAMPLE = {
 };
 
 /* ---------- pixel sprites ---------- */
-const PAL={k:"#2a2420",g:"#6f8c5c",G:"#3f5a3c",y:"#d4b45e",o:"#b87c48",w:"#ece6da",s:"#bdb6aa",S:"#6a6258",r:"#a24a3a",b:"#5a7896",n:"#8a5a3c",p:"#b8708a",l:"#a4b88e",R:"#b09068",D:"#5a3f28",t:"#d6be96",B:"#a0bed6",O:"#d6955f",Y:"#f0d682",e:"#3f8a86",E:"#7cc0b4",x:"#e85a3a"};
+const PAL={k:"#2a2420",g:"#6f8c5c",G:"#3f5a3c",y:"#d4b45e",o:"#b87c48",w:"#ece6da",s:"#bdb6aa",S:"#6a6258",r:"#a24a3a",b:"#5a7896",n:"#8a5a3c",p:"#b8708a",l:"#a4b88e",R:"#b09068",D:"#5a3f28",t:"#d6be96",B:"#a0bed6",O:"#d6955f",Y:"#f0d682",e:"#3f8a86",E:"#7cc0b4",x:"#e85a3a",a:"#f4f4fa",m:"#c4c4d4",q:"#8a8aa0",v:"#5e5e74",z:"#2a2430",j:"#ffe9a8",h:"#ffffff"};
 const SPRITES={
 cactus:["......kk........",".....kgGk.......",".....kgGk.......","..kk.kgGk.......",".kgGkkgGk..kk...",".kgGkkgGk.kgGk..",".kgGkkgGk.kgGk..",".kgggggGkkkgGk..","..kkGgggggggGk..","....kkkgGkkkk...","......kgGk......","......DgGD......",".....RDRRDR.....","....R.R..R.R....","...R..R...R.R...","..R..R.....R..R."],
 flower:["......kpk.......",".....kpppk......","......kkk.......",".....kgGk.......","....kgggGk......","...kggggGGk.....","...kgkggGkGk....","...kggggGGGk....","...kgkgggkGk....","...kggggGGGk....","....kgggGGk.....","....kDDDDDDk....","....R.RDDR.R....","...R..R..R..R...","..R...R...R..R..",".R...R.....R...R"],
@@ -639,7 +640,7 @@ infosign:["................","...kkkkkkkkkk...","..knnnnnnnnnnk..","..knnnnwwnnn
 tower:["..w..w.r.w..w...",".w..w.krk.w..w..",".w..w.kSk.w..w..","..w..w.k.w..w...","......kSk.......","......kSk.......",".....kSkSk......",".....kSkSk......","....kSkkkSk.....","....kSk.kSk.....","...kSkkkkkSk....","...kSk...kSk....","..kSkkkkkkkSk...","..kSk.....kSk...",".kkkkkkkkkkkkk..","................"],
 trailcam:["................","..kkkkkkkkkkkk..",".kGGnGGGGGGgGGk.",".kGgGGkkkkGGnGk.",".kGGGkbbbbkGGGk.",".kGnkbbwbbbkGgk.",".kGGkbbbbbbkGGk.",".kGGkbbbbbbkGGk.",".kgGGkbbbbkGGnk.",".kGGnGkkkkGGrGk.",".kGGGGGgGGGGGGk.",".kGGkkkkkkkkGGk.",".kGGksssssskGgk.",".kGnGGGGgGGGGGk.","..kkkkkkkkkkkk..","................"],
 map:["kkkkkkkkkkkk....","kttltttblttk....","ktlllttbtttk....","kttlltkkkkk.....","kttttkBBBBBk....","ktttkBBwBBBBk...","kbbbkBwrBBBBk...","ktttkBBBBBBBk...","ktttkBBBBBBBk...","kttttkBBBBBk....","kttltkkkkkknk...","kkkkkkkkkk.knk..","............knk.",".............knk","..............kk","................"],
-disco:[".......k........",".......k........","......kkk.......",".....kwswk......","....kswswsk.....","...kswbwswsk....","...kwswswpwk....","..kswswbwswsk...","..kwswswswswk...","..kswpwswbwsk...","...kwswswswk....","...kswswswsk....","....kswswsk.....",".....kkkkk......","................","................"],
+disco:[".......z........",".......z........",".......z....j...",".....zzzzzzjhj..","....zmhmammzj...","...zmhmammqmz...","..zamamaqmqmvz..","..zmammqmqmvqz..","..zmaqmqmqqvqz..","..zaqmqmvqvqvz..","..zmqmqqvqvqvz..","..zqmqqvqvqvqz..","...zqvqvqvqvz...","....zqvqvqvz....",".....zzzzzz.....","................"],
 computer:["................","..kkkkkkkkkkkk..","..ksssssssssSk..","..kskkkkkkkksSk.","..kskbbbbbbksSk.","..kskblbbbbksSk.","..kskbbbbbbksSk.","..kskkkkkkkksSk.","..ksssssssssSk..","..kkkkkkkkkkkk..",".....kSSSSk.....","..kkkkkkkkkkkk..",".kssssssssssssk.",".kSsSsSsSsSsSsk.",".kkkkkkkkkkkkkk.","................"],
 globe:["................",".....kkkkkk.....","...kkbbggbbkk...","..kbbggggbbbbk..","..kbgggggbbggk..",".kbbbggbbbgggbk.",".kbbbbgbbbbggbk.",".kbbbbbbbbbbbbk.",".kbbggbbbbbbbbk.",".kbgggggbbbgbbk.","..kbgggbbbgggk..","..kbbggbbbbbbk..","...kkbbbbbbkk...",".....kkkkkk.....","......kSSk......","....kkkkkkkk...."]
 };
@@ -3246,6 +3247,7 @@ setNight(SCENE.override??isNightNow());
   document.getElementById("favicon").href=cv.toDataURL("image/png")})();
 setDisco(false);
 document.getElementById("discobtn").onclick=()=>setDisco(!SCENE.disco,true);
+{const bi=document.querySelector("#discobtn .ballimg");if(bi)bi.src=sprite("disco")}   // the same silver mirror ball, with its sparkle, as in the Start menu
 tick();setInterval(tick,30000);
 document.getElementById("modebtn").onclick=()=>{SCENE.override=!SCENE.night;setNight(SCENE.override)};
 let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{paintSky()},150)});
