@@ -880,27 +880,41 @@ function paintSky(){
     pads.slice(1).forEach(([dx,dy])=>{const n=ri(1,far?1:3);for(let i=0;i<n;i++){const fx=x+dx+ri(-rx+1,rx-1),fy=base+dy-ry+(Math.abs(fx-x-dx)>rx/2?1:0);
       flower(fx,fy,s>1)}});
   }
+  // cholla, two looks: a young "jumping" cholla (a few long green arms in a V under a bright halo of spines) and a
+  // teddybear cholla (a dark, shaggy trunk with dead brown arms below and a crowded crown of pale golden joints)
   function cholla(x,base,s,far){
-    const lit=far?"#b8ab8c":"#ddd0a6",mid=far?"#9c9076":"#bfb088",sh=far?"#80765f":"#978a6a",glow=far?"#cfc3a4":"#f0e6c6";
-    const sw=Math.max(2,Math.round(2.2*s)),shh=Math.max(3,Math.round(3*s)),th=far?2:Math.max(2,Math.round(4*s));
-    rect(x,base-th,2,th,"#5a4a3c");rect(x+1,base-th,1,th,"#46392e");
-    if(!far)for(let i=0;i<ri(1,3);i++)rect(x+ri(-4,4),base-ri(1,2),2,1,"#6e5a44");
-    const seg=(sx,sy)=>{
-      rect(sx,sy+1,sw,shh-1,mid);rect(sx+1,sy,sw-2>0?sw-2:1,1,mid);
-      rect(sx,sy+1,1,shh-2,lit);rect(sx+sw-1,sy+1,1,shh-1,sh);
-      for(let i=0;i<Math.round(sw*shh*.7)+2;i++)if(rnd()<.7)px(sx+ri(0,sw-1),sy+ri(0,shh-1),rnd()<.6?glow:lit);   // dense spine sheen
-      // spines bristling out past the edges in a fuzzy halo, a few longer ones
-      for(let y=sy;y<sy+shh;y++){if(rnd()<.75)px(sx-1,y,rnd()<.6?glow:lit);if(rnd()<.75)px(sx+sw,y,rnd()<.5?glow:lit);
-        if(!far&&rnd()<.22)px(sx-2,y-1,lit);if(!far&&rnd()<.22)px(sx+sw+1,y-1,lit)}
-      for(let x=sx;x<sx+sw;x++)if(rnd()<.6)px(x,sy-1,glow);
-    };
-    const branch=(bx,by,depth)=>{
-      seg(bx,by-shh);
-      if(depth<=0)return;
-      const n=depth>1?ri(2,3):ri(1,2);
-      for(let i=0;i<n;i++){const dx=n===1?ri(-1,1):(i-(n-1)/2)*(sw+ri(0,1));branch(Math.round(bx+dx),by-shh+1,depth-1)}
-    };
-    branch(x-(sw>>1)+1,base-th+1,far?2:ri(2,3));
+    const mute=c=>far?mixHex(c,"#9a8e7a",.35):c,halo=[mute("#f4f0d8"),mute("#e2dcb8"),mute("#cfc69c")];
+    const fuzz=(cx,cy,r,dens)=>{for(let k=0;k<dens;k++){const a=rnd()*Math.PI*2,d=r*(.6+rnd()*.7);px(Math.round(cx+Math.cos(a)*d),Math.round(cy+Math.sin(a)*d),halo[(rnd()*3)|0])}};
+    if(rnd()<.5){                                                         // young cholla
+      const trunk=mute("#5a4434"),core=mute("#7e9258"),coreD=mute("#5e7044"),th=Math.max(2,Math.round(3*s));
+      rect(x,base-th,2,th,trunk);rect(x+1,base-th,1,th,mute("#46362a"));
+      // an arm: a 2px green core climbing (and leaning), edged with a tight fringe of pale spines and a bright tuft at the tip
+      const arm=(x0,y0,len,lean)=>{let ax=x0;
+        for(let k=0;k<len;k++){if(k&&k%Math.max(2,Math.round(3/Math.max(.3,Math.abs(lean))))===0)ax+=Math.sign(lean);const X=ax,Y=y0-k;
+          px(X,Y,k%2?core:coreD);px(X+1,Y,coreD);
+          if(rnd()<.8)px(X-1,Y,halo[k%2]);if(rnd()<.8)px(X+2,Y,halo[(k+1)%2]);
+          if(!far&&rnd()<.25)px(X-2,Y-1,halo[2]);if(!far&&rnd()<.25)px(X+3,Y-1,halo[2])}
+        const tx=ax,ty=y0-len;px(tx,ty,halo[0]);px(tx+1,ty,halo[0]);px(tx-1,ty+1,halo[1]);px(tx+2,ty+1,halo[1]);if(!far){px(tx,ty-1,halo[1]);px(tx+1,ty-1,halo[2]);px(tx-1,ty-1,halo[2]);px(tx+2,ty-1,halo[2])}
+        return [ax,y0-len]};
+      const L=Math.max(5,Math.round((8+rnd()*5)*s)),top=base-th;
+      const [mx,my]=arm(x,top,Math.round(L*.4),0);
+      const n=rnd()<.55?2:3;
+      for(let i=0;i<n;i++){const lean=n===2?(i?1:-1)*(.6+rnd()*.5):(i-1)*(.7+rnd()*.4);arm(mx+Math.round((i-(n-1)/2)*1.5),my,Math.round(L*(.55+rnd()*.4)),lean||.0001)}
+      if(!far&&rnd()<.6)arm(x+2,top-Math.round(L*.15),Math.round(L*.35),.8);   // a short side arm low down
+    }else{                                                                 // teddybear cholla
+      const dark=mute("#33251c"),dark2=mute("#4e3a2a"),dead=mute("#6a4c34"),g1=mute("#efe3b4"),g2=mute("#d4c48e"),g3=mute("#a8975f");
+      const H=Math.max(6,Math.round((8+rnd()*4)*s)),tw=far?2:3;
+      for(let y=0;y<H;y++)for(let i=0;i<tw;i++)px(x+i,base-1-y,rnd()<.25?dark2:dark);                 // shaggy dark trunk
+      for(let y=0;y<H;y+=2){if(rnd()<.6)px(x-1,base-1-y,dark2);if(rnd()<.6)px(x+tw,base-1-y,dark2)}
+      if(!far)for(let i=0;i<2;i++){const yy=base-2-Math.round(H*(.25+i*.22)),dir=i%2?1:-1;for(let k=1;k<=3;k++)px(x+(dir>0?tw-1+k:-k),yy+(k>2?1:0),k===3?dead:dark2);px(x+(dir>0?tw+3:-4),yy+2,dead)}   // dead, drooping arms
+      // crown: tiers of short, stubby, pale-gold joints, each 2px wide with a lit side and a shaded side, pointing up and out
+      const cx=x+Math.floor(tw/2),joints=far?7:Math.round(12+rnd()*5);
+      for(let j=0;j<joints;j++){const tier=j%3,a=-Math.PI/2+(rnd()-.5)*(1.2+tier*.5),len=(far?2:3)+Math.round(rnd()*2*s),
+          sx=cx+Math.round(Math.cos(a)*(1+tier*1.6)),sy=base-H-1+tier*2;
+        for(let k=0;k<len;k++){const X=Math.round(sx+Math.cos(a)*k),Y=Math.round(sy+Math.sin(a)*k);px(X,Y,g2);px(X+1,Y,g3);px(X,Y-1,g1)}
+        const ex=Math.round(sx+Math.cos(a)*len),ey=Math.round(sy+Math.sin(a)*len);px(ex,ey-1,halo[0]);if(!far){px(ex-1,ey-1,halo[1]);px(ex+1,ey-2,halo[1])}}
+      fuzz(cx,base-H-3,far?3:5,far?4:10);
+    }
   }
   function creosote(x,base){for(let i=0;i<6;i++)px(x+ri(-3,3),base-ri(0,3),rnd()<.6?"#6e7452":"#545a40")}
   // the owl's home: a giant saguaro right up close, cropped by the top and bottom of the screen
