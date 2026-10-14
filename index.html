@@ -629,14 +629,21 @@ const OWL_FLY={
   down:["..................kk....kk..................", "..................kDk..kDk..................", ".................kDBBkkBBDk.................", "................kBLrrrrrrLBk................", "................kBrrwrrwrrBk................", "................kBrYYrrYYrBk................", "........kk.k.kkkkBrYprrpYrBkkkk.k.kk........", "......kkTkTkTLBkkBLrrddrrLBkkBLTkTkTkk......", "....kkTwTwTLTLBBBkBLrddrLBkBBBLTLTwTwTkk....", "...kkTwTwTLTLBBDBkBLLwwLLBkBDBBLTLTwTwTkk...", "...kTwTwTLTBBDDkkDBLTLLTLBDkkDDBBTLTwTwTk...", "..kTwTwTLBBDDkk.kDBTLTTLTBDk.kkDDBBLTwTwTk..", "..kTLTLTBBDkk...kDBLTLLTLBDk...kkDBBTLTLTk..", ".kTLTLBBDkk......kDBLTTLBDk......kkDBBLTLTk.", ".kTLBBDkk.........kDBDDBDk.........kkDBBLTk.", "kLBDDkk...........kDkDDkDk...........kkDDBLk", "kBDkk..............kdkkdk..............kkDBk", ".kk......................................kk.", "............................................", "............................................"]
 };
 
-// soaring pose: each wing turned 25° down about its shoulder (nearest-neighbour rotation of the glide sprite)
+// soaring pose: each wing turned 20° down about its shoulder (nearest-neighbour rotation of the glide sprite)
 function droopWings(rows,deg){
-  const H=rows.length+4,W=rows[0].length,out=[...Array(H)].map((_,y)=>[...(rows[y]||".".repeat(W))]);
-  const BL=16,BR=27,PY=5,a=deg*Math.PI/180,get=(x,y)=>(rows[y]||"")[x]||".";
+  // supersampled: each pixel is split 4x4, rotated, then each output pixel takes the majority colour, so the wing
+  // edges come out as clean straight runs; the silhouette's top edge is then re-inked so the outline is unbroken
+  const H=rows.length+4,W=rows[0].length,Q=4,BL=16,BR=27,PY=5,a=deg*Math.PI/180,get=(x,y)=>(rows[y]||"")[x]||".";
+  const out=[...Array(H)].map((_,y)=>[...(rows[y]||".".repeat(W))]);
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){
-    if(x>=BL&&x<=BR)continue;const left=x<BL,px=left?BL:BR,t=left?-a:a,dx=x-px,dy=y-PY;
-    const sx=Math.round(px+dx*Math.cos(t)+dy*Math.sin(t)),sy=Math.round(PY-dx*Math.sin(t)+dy*Math.cos(t));
-    out[y][x]=(left?sx<BL:sx>BR)?get(sx,sy):"."}
+    if(x>=BL&&x<=BR)continue;const left=x<BL,px=left?BL:BR,t=left?-a:a,cnt={};let n=0;
+    for(let sy=0;sy<Q;sy++)for(let sx=0;sx<Q;sx++){const dx=x+(sx+.5)/Q-.5-px,dy=y+(sy+.5)/Q-.5-PY;
+      const fx=px+dx*Math.cos(t)+dy*Math.sin(t),fy=PY-dx*Math.sin(t)+dy*Math.cos(t),ix=Math.round(fx),iy=Math.round(fy);
+      if(left?ix>=BL:ix<=BR)continue;const ch=get(ix,iy);if(ch!=="."){cnt[ch]=(cnt[ch]||0)+1;n++}}
+    if(n<Q*Q*.45){out[y][x]=".";continue}
+    let best=".",bn=0;for(const k in cnt)if(cnt[k]>bn){bn=cnt[k];best=k}
+    out[y][x]=best}
+  for(let x=0;x<W;x++){if(x>=BL&&x<=BR)continue;for(let y=0;y<H;y++)if(out[y][x]!=="."){out[y][x]="k";break}}   // crisp top outline
   return out.map(r=>r.join(""));
 }
 const CRITTERS={
@@ -659,7 +666,7 @@ const CRITTERS={
   // front view in flight: both eyes stay visible on every wingbeat
   owlUp:OWL_FLY.up,
   owlDown:OWL_FLY.down,
-  owlGlide:droopWings(OWL_FLY.glide,25),
+  owlGlide:droopWings(OWL_FLY.glide,20),
   chick:["..gggg..",".g....g.","gYp..pYg","gYY..YYg",".g.oo.g.","..gggg.."],
   chickBlink:["..gggg..",".g....g.","g......g","gGG..GGg",".g.oo.g.","..gggg.."],
   chickBeg:["..gggg..",".g....g.","gYp..pYg","gYY..YYg",".gopposg","..gttg.."],   // beak wide open, little tongue
