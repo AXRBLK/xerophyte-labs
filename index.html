@@ -518,6 +518,7 @@ folder:["................","..kkkkk.........",".kyyyyyk........","kyyyyyyykkkkkk
 letter:["................","................","................","kkkkkkkkkkkkkkkk","kwkwwwwwwwwwwkwk","kwwkwwwwwwwwkwwk","kwwwkwwwwwwkwwwk","kwwwwkwwwwkwwwwk","kwwwwwkkkkwwwwwk","kwwwwkwwwwkwwwwk","kwwwkwwwwwwkwwwk","kwwkwwwwwwwwkwwk","kkkkkkkkkkkkkkkk","................","................","................"],
 book:["................",".kkkkkkkkkkkk...",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSSwwwk..",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSwwwwk..",".krrkwwwwwwwwk..",".krrkwwwwwwwwk..",".kkkkkkkkkkkkk..","................","................","................"],
 radio:["................","....kkkkkkkk....","....k......k....","kkkkkkkkkkkkkkkk","kssssssssssssssk","ksSSSssyyssSSSsk","kSkkkSsyysSkkkSk","kSkSkSssssSkSkSk","kSkkkSsrbsSkkkSk","ksSSSssssssSSSsk","kssssssssssssssk","kkkkkkkkkkkkkkkk","................","................","................","................"],
+sunthermo:["................","................","..y.y.y.....kkk.","...kkk......kwk.",".ykYYYky....kwk.","..kYYYk.....krk.",".ykYYYky....krk.","...kkk......krk.","..y.y.y.....krk.","............krk.","...........krrrk","...........krrrk","............kkk.","................","................","................"],
 campfire:["................","................",".......r........","......rr........","......rOr..r....",".....rOOr.rr....","....rOYOrrOr....","....rOYYOOOr....","....rOYYYYOr....",".....rOYYOr.....","..kn..rrrr..nk..","...knnnnnnnnk...","..knnkkkkkknnk..","...kk......kk...","................","................"],
 hilo:["................","kkkkkkkkkkkkkkkk","kwwwwwwwwwwwwwwk","kwwwwwwwwwrwwwwk","kwwwwrwwwwrwwwwk","kwrwwrwwrwrwwrwk","kwrwwrwwrwrwwrwk","kwrwwrwwrwbwwrwk","kwbwwbwwbwbwwbwk","kwbwwbwwbwbwwbwk","kwbwwbwwbwwwwbwk","kwwwwwwwwwwwwwwk","kkkkkkkkkkkkkkkk","................","................","................"],
 binoculars:["................","................","...kkk....kkk...","..kSSSk..kSSSk..","..kSSSkkkkSSSk..",".kSSSSkSSkSSSSk.",".kSSSSkSSkSSSSk.",".kSSSSkkkkSSSSk.","kSSSSSk..kSSSSSk","kSSSSSk..kSSSSSk","kkkkkkk..kkkkkkk","kBBwBBk..kBBwBBk","kBbbbBk..kBbbbBk","kkkkkkk..kkkkkkk","................","................"],
@@ -1130,25 +1131,28 @@ function stepOwl(o,s){
    shake its rattle, then pours itself down a freshly made burrow somewhere out on the flats */
 const SNAKE_L=26;
 function stepSnake(s,hold){
+  // the snake's next burrow is already dug out on the flats from the moment the scene appears
+  const newHole=()=>({x:RI(Math.round(s.w*.25),Math.round(s.w*.75)),y:s.H0+RI(Math.round(s.span*.48),s.span-8),life:1e9});
   const sk=s.snake||(s.snake={state:"wait",timer:RI(40,240)});
+  if(!sk.holes){sk.target=newHole();sk.holes=[sk.target]}
   if(hold)return sk;
-  if(sk.hole&&sk.state!=="enter"&&--sk.hole.life<=0)sk.hole=null;           // an empty burrow drifts shut after a while
+  sk.holes=sk.holes.filter(h=>h===sk.target||--h.life>0);                    // an old, empty burrow drifts shut after a while
   if(sk.state==="wait"){
     if(--sk.timer>0)return sk;
-    const y=s.H0+RI(Math.round(s.span*.5),s.span-8),hx=RI(Math.round(s.w*.25),Math.round(s.w*.75)),hy=s.H0+RI(Math.round(s.span*.48),s.span-8);
+    const {x:hx,y:hy}=sk.target,y=s.H0+RI(Math.round(s.span*.5),s.span-8);
     const dir=R()<.5?1:-1,x0=dir>0?-SNAKE_L-4:s.w+SNAKE_L+4,dx=hx-x0,dy=hy-y,d=Math.hypot(dx,dy);
-    Object.assign(sk,{state:"go",x0,y0:y,ux:dx/d,uy:dy/d,dist:d,h:0,amp:2.2,pause:0,ph:R()*6,hole:{x:hx,y:hy,life:1e9},dir});
+    Object.assign(sk,{state:"go",x0,y0:y,ux:dx/d,uy:dy/d,dist:d,h:0,amp:2.2,pause:0,ph:R()*6,dir});
     return sk;
   }
   if(sk.pause>0){sk.pause--;return sk}
   if(sk.state==="go"&&R()<1/90){sk.pause=RI(10,26);sk.act=R()<.5?"rattle":"tongue";return sk}
   sk.act=null;sk.h+=sk.state==="enter"?.9:.75;
   if(sk.state==="go"&&sk.h>=sk.dist)sk.state="enter";
-  if(sk.state==="enter"&&sk.h-SNAKE_L>sk.dist){sk.state="wait";sk.timer=RI(400,1100);sk.hole.life=RI(160,400)}
+  if(sk.state==="enter"&&sk.h-SNAKE_L>sk.dist){sk.state="wait";sk.timer=RI(400,1100);sk.target.life=RI(160,400);sk.target=newHole();sk.holes.push(sk.target)}
   return sk;
 }
 function drawSnake(g,s,sk){
-  if(sk.hole){const {x,y}=sk.hole;g.fillStyle="#b89c78";g.fillRect(x-4,y-1,9,1);g.fillRect(x-3,y-2,7,1);g.fillStyle="#3a2a1e";g.fillRect(x-3,y,7,2);g.fillRect(x-2,y+2,5,1);g.fillStyle="#1e140e";g.fillRect(x-2,y,5,1)}
+  (sk.holes||[]).forEach(({x,y})=>{g.fillStyle="#b89c78";g.fillRect(x-4,y-1,9,1);g.fillRect(x-3,y-2,7,1);g.fillStyle="#3a2a1e";g.fillRect(x-3,y,7,2);g.fillRect(x-2,y+2,5,1);g.fillStyle="#1e140e";g.fillRect(x-2,y,5,1)});
   if(sk.state!=="go"&&sk.state!=="enter")return;
   const at=d=>{const w=sk.amp*Math.sin(d*.42+sk.ph)*Math.min(1,(sk.dist-d)/6+.15);          // the wave fades as it reaches the hole
     return [sk.x0+sk.ux*d-sk.uy*w,sk.y0+sk.uy*d+sk.ux*w]};
@@ -2541,7 +2545,7 @@ function build(){
   defineWindow("cacti",{title:"My Cacti",icon:"saguaro",w:640,x:mob?16:120,y:84,render:renderCacti,menu:["File","View","Water"],status:true});
   defineWindow("map",{title:"Desert Map",icon:"map",w:Math.min(860,innerWidth-40),x:mob?16:Math.max(110,(innerWidth-860)/2),y:70,render:renderMap,status:true});
   defineWindow("radio",{title:radioName(),icon:"radio",w:380,x:innerWidth-595,y:64,render:renderRadio,status:true});
-  defineWindow("today",{title:"Weather Now",icon:"sun",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
+  defineWindow("today",{title:"Weather Now",icon:"sunthermo",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
   defineWindow("bio",{title:"Biodiversity Report",icon:"journal",w:660,x:cx(660),y:100,render:renderBio,menu:["File","Survey","Help"],status:true});
   defineWindow("log",{title:"Weather Log",icon:"hilo",w:640,x:cx(640),y:110,render:renderLog,menu:["File","Edit","Chart"],status:true});
   const thirsty=(DATA.cacti||[]).filter(c=>c.name&&cactusState(c).status==="thirsty").length;
@@ -2557,7 +2561,7 @@ function build(){
     const name=lab||label;if(WINS[id]&&lab){WINS[id].title=lab;WINS[id].el.querySelector(".bar b").textContent=lab;WINS[id].el.setAttribute("aria-label",lab)}
     ICONS.push({id,name,el:iconBtn(id,name,icon,badge)})};
   place(L,"cacti","My Cacti","saguaro",thirsty||"");place(L,"log","Weather Log","hilo");
-  place(L,"today","Weather Now","sun");place(L,"bio","Biodiversity Report","journal");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
+  place(L,"today","Weather Now","sunthermo");place(L,"bio","Biodiversity Report","journal");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
     const pic=/^contact/i.test(String(p.title).trim())?"postcard":/^about/i.test(String(p.title).trim())?"campfire":/^field\s*notes/i.test(String(p.title).trim())?"binoculars":(p.icon||"folder").toLowerCase();
     const id="p"+i;defineWindow(id,{title:p.title,icon:pic,w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
