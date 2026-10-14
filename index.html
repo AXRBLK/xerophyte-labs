@@ -1679,8 +1679,8 @@ function setDisco(on,user){
     Object.keys(WINS).forEach(id=>{const W=WINS[id];if(id==="radio"||!W.open)return;const f=W.el.querySelector("form.postcard");if(f)f.dataset.hinted="1";closeWin(id)})}
   // phones: switching disco off by hand ends the party: the music pauses (and the turntable slides away)
   if(!on&&user&&SCENE.disco&&isMob()){clearInterval(SPOT.kick);try{SPOT.ctl&&SPOT.ctl.pause()}catch(e){}SPOT.state.paused=true}
-  if(on&&!SCENE.disco&&SCENE.night&&SCENE.ctx&&shown("ufo")&&SCENE.saturn&&shown("saturn")&&(!SCENE.ufo||SCENE.ufo.state==="cross")){
-    const sa=SCENE.saturn;SCENE.ufo={x:sa.x+11-UFO_W*.06,y:sa.y+5-UFO_H*.06,vx:0,vy:0,dir:R()<.5?1:-1,t:0,k:.12,state:"emerge"}}
+  if(on&&!SCENE.disco&&SCENE.night&&shown("ufo")&&!SCENE.ufo)SCENE.ufoLaunchAt=performance.now()+5000;   // the saucer leaves Saturn 5s in
+  if(!on)SCENE.ufoLaunchAt=0;
   SCENE.disco=on;document.body.classList.toggle("disco",on);renderTasks();
   discoButton(on);
   const b=document.getElementById("discobtn");if(b){b.setAttribute("aria-pressed",on);b.title=on?"Disable Disco-mode":"Enable Disco-mode";b.setAttribute("aria-label",b.title)}
@@ -1790,27 +1790,32 @@ const UFO_W=UFO[0].length,UFO_H=UFO.length;
 function stepUfo(s,tk){
   // night disco: the saucer comes out of Saturn, growing as it nears, and heads for the truck (or, with no truck about,
   // sets down on the moon and sits there until the party's over)
+  // the only saucer is the disco one: it leaves Saturn five seconds after disco starts, giving the truck time to show up
+  if(!s.ufo&&s.disco&&s.ufoLaunchAt&&performance.now()>=s.ufoLaunchAt&&s.saturn&&shown("saturn")){s.ufoLaunchAt=0;
+    const sa=s.saturn;s.ufo={x:sa.x+11-UFO_W*.06,y:sa.y+5-UFO_H*.06,vx:0,vy:0,dir:R()<.5?1:-1,t:0,k:.12,state:"emerge"}}
   if(s.ufo&&(s.ufo.state==="emerge"||s.ufo.state==="landed")){const u=s.ufo,T=s.truck;u.t++;
-    const truckOn=T&&T.on&&!T.held&&T.x>-10&&T.x<s.w-10;
+    const G=s.giant,TW=TRUCK[0].length,clear=T&&(!G||T.x>G.tx1+2||T.x+TW<G.tx0-2);   // not hidden behind the big saguaro
+    const truckOn=T&&T.on&&!T.held&&T.x>-10&&T.x<s.w-10,waiting=truckOn&&!clear;
     const mr=Math.round(s.sr*(s.moonK||1)),mo=orbPos(s,true,mr);
     if(u.state==="landed"){
-      if(!s.disco||truckOn&&T.marked!==false){u.state=truckOn?"emerge":"leave";u.hold=0;u.d0=null;u.vx=u.vy=0;u.dir=u.dir||1}
+      if(!s.disco||truckOn&&clear){u.state=truckOn?"emerge":"leave";u.hold=0;u.d0=null;u.vx=u.vy=0;u.dir=u.dir||1}
       else if(mo){const kk=u.k||.5;u.x=mo.x-UFO_W*kk/2;u.y=mo.y-mr-UFO_H*kk+2+Math.sin(u.t*.15)*.3}
       return u}
     let tx,ty,kEnd;
-    if(truckOn){tx=T.x+TRUCK[0].length/2-UFO_W/2;ty=Math.max(s.H0*.06,T.y-UFO_H-18);kEnd=1}
+    if(waiting){tx=(G?G.tx1:0)+18;ty=s.H0*.12;kEnd=1}                                // hold off until the truck is out from behind the cactus
+    else if(truckOn){tx=T.x+TRUCK[0].length/2-UFO_W/2;ty=Math.max(s.H0*.06,T.y-UFO_H-18);kEnd=1}
     else if(mo){kEnd=.5;tx=mo.x-UFO_W*kEnd/2;ty=mo.y-mr-UFO_H*kEnd+2}
     else{tx=s.w/2-UFO_W/2;ty=s.H0*.15;kEnd=1}
-    const dx=tx-u.x,dy=ty-u.y,d=Math.hypot(dx,dy);if(u.d0==null||u.tgt!==(truckOn?"t":"m")){u.d0=Math.max(d,1);u.k0=u.k||.12;u.tgt=truckOn?"t":"m"}
+    const tg=waiting?"w":truckOn?"t":"m",dx=tx-u.x,dy=ty-u.y,d=Math.hypot(dx,dy);if(u.d0==null||u.tgt!==tg){u.d0=Math.max(d,1);u.k0=u.k||.12;u.tgt=tg}
     const sp=Math.min(d,.7+1.4*Math.min(1,d/40));if(d>0){u.x+=dx/d*sp;u.y+=dy/d*sp}
     u.k=u.k0+(kEnd-u.k0)*Math.max(0,Math.min(1,1-d/u.d0));
+    if(waiting){if(d<1.2)u.y+=Math.sin(u.t*.15)*.2;return u}
     if(d<1.2){if(truckOn){u.k=1;u.state="seek";u.vx=T.dir*T.sp;u.vy=0;T.marked=true}else if(mo){u.k=kEnd;u.state="landed"}else{u.k=1;u.state="cross";u.vx=(u.dir||1)*1.1}}
     return u}
   if(!shown("ufo")){s.ufo=null;return null}
   let u=s.ufo;const T=s.truck;
-  if(!u){
+  if(!u){return null;                                                 // no random saucers any more: only the disco one (above)
     const truckMid=tk&&T&&T.x>s.w*.2&&T.x<s.w*.7;
-    if(!(truckMid&&T.marked)&&!(R()<1/2000))return null;              // only some trucks are marked for abduction
     const dir=R()<.5?1:-1;
     u=s.ufo={x:dir>0?-UFO_W-4:s.w+4,y:Math.round(s.H0*(.08+R()*.1)),vx:0,vy:0,dir,t:0,state:truckMid&&T.marked?"seek":"cross"};if(T)T.marked=false;
     if(u.state==="cross"){u.vx=dir*1.1}
@@ -3325,7 +3330,7 @@ function discoButton(on){
   clearInterval(discoButton.spin);clearInterval(discoButton.add);ball.querySelectorAll(".tw").forEach(t=>t.remove());
   if(!on){img.src=sprite("disco");return}
   let f=0;discoButton.spin=setInterval(()=>{if(document.body.classList.contains("still"))return;f=(f+1)%4;img.src=DISCO_FRAMES[f]},140);
-  const spots=[[17,4],[2,6],[15,15],[5,16],[19,10],[0,12],[10,-1],[12,19]],cols=["#ffffff","#ffe9a8","#cfe0ff","#ffffff"];
+  const spots=[[17,4],[2,6],[15,15],[5,16]],cols=["#ffffff","#ffe9a8","#cfe0ff","#ffffff"];
   let n=0;const add=()=>{if(n>=spots.length){clearInterval(discoButton.add);return}const [x,y]=spots[n],t=document.createElement("i");t.className="tw";
     t.style.cssText=`left:${x}px;top:${y}px;--d:${(1.1+Math.random()*.9).toFixed(2)}s;--dl:-${(Math.random()).toFixed(2)}s;--c:${cols[n%cols.length]}`;ball.appendChild(t);n++};
   add();discoButton.add=setInterval(add,700);                       // one twinkle, then more and more
