@@ -463,7 +463,7 @@ const CONFIG = {
 };
 
 /* ---------- sample data (shown when no sheet is connected) ---------- */
-const WILDLIFE=["desert_mice","owl","owl_chicks","roadrunner","ravens","horned_lizards","scorpions","bats","night_blooms","shooting_stars","dirt_bikes","baja_truck","ufo","saturn"];
+const WILDLIFE=["desert_mice","owl","owl_chicks","roadrunner","ravens","horned_lizards","scorpions","bats","night_blooms","shooting_stars","dirt_bikes","baja_truck","ufo","saturn","rattlesnake"];
 const SAMPLE = {
   desktop: [],
   wildlife: WILDLIFE.map(a=>({animal:a,show:"yes"})),
@@ -1043,6 +1043,8 @@ const OWL_FW=22,OWL_FH=8;
 // where the owlets sit in the cavity for each brood size (back row first)
 const CHICK_SPOTS=[[],[[-4,15]],[[-9,13],[1,16]],[[-10,12],[2,12],[-4,17]],[[-10,11],[2,11],[-8,17],[0,17]],
   [[-10,10],[2,10],[-4,13],[-10,17],[2,17]],[[-11,10],[-4,10],[3,10],[-11,17],[-4,17],[3,17]]];
+// resting rattlesnake, coiled with its head up, for the Biodiversity Report
+const SNAKE_COIL=["......HH....","....HHeHt...","....dHH.....","..crcdrc....",".rdcrrdcrc..","crrdcrrdcrrW","rdcrrdcrrdKW",".ccrrdccrcc."],SNAKEPAL={H:"#8a4a36",e:"#1a1210",t:"#d03838",d:"#5c3426",c:"#d8b48e",r:"#a8644a",K:"#2a2018",W:"#e8dcc0"};
 const PREY=["..PBBB..",".BBBBBk.","tBBBBWW.","t..BWW..",".t......"];   // a mouse dangling from the owl's talons
 // by day the owl dozes, now and then cracking one eye open; the peeks come oftener as the afternoon wears on toward sunset (7pm)
 function dayPeek(o){
@@ -1085,6 +1087,44 @@ function stepOwl(o,s){
     const sp=Math.min(o.path.length<=2?.9:1.5,d);o.x+=dx/d*sp;o.y+=dy/d*sp;
     o.flap=tg.flap||dy/d<-.7?((s.t>>1)%3!==2?1:0):0; // wingbeats only when taking off or climbing hard
   }
+}
+/* day: a red diamond rattlesnake slithers in from the edge in a lazy S-curve, now and then stops to flick its tongue or
+   shake its rattle, then pours itself down a freshly made burrow somewhere out on the flats */
+const SNAKE_L=26;
+function stepSnake(s,hold){
+  const sk=s.snake||(s.snake={state:"wait",timer:RI(40,240)});
+  if(hold)return sk;
+  if(sk.hole&&sk.state!=="enter"&&--sk.hole.life<=0)sk.hole=null;           // an empty burrow drifts shut after a while
+  if(sk.state==="wait"){
+    if(--sk.timer>0)return sk;
+    const y=s.H0+RI(Math.round(s.span*.5),s.span-8),hx=RI(Math.round(s.w*.25),Math.round(s.w*.75)),hy=s.H0+RI(Math.round(s.span*.48),s.span-8);
+    const dir=R()<.5?1:-1,x0=dir>0?-SNAKE_L-4:s.w+SNAKE_L+4,dx=hx-x0,dy=hy-y,d=Math.hypot(dx,dy);
+    Object.assign(sk,{state:"go",x0,y0:y,ux:dx/d,uy:dy/d,dist:d,h:0,amp:2.2,pause:0,ph:R()*6,hole:{x:hx,y:hy,life:1e9},dir});
+    return sk;
+  }
+  if(sk.pause>0){sk.pause--;return sk}
+  if(sk.state==="go"&&R()<1/90){sk.pause=RI(10,26);sk.act=R()<.5?"rattle":"tongue";return sk}
+  sk.act=null;sk.h+=sk.state==="enter"?.9:.75;
+  if(sk.state==="go"&&sk.h>=sk.dist)sk.state="enter";
+  if(sk.state==="enter"&&sk.h-SNAKE_L>sk.dist){sk.state="wait";sk.timer=RI(400,1100);sk.hole.life=RI(160,400)}
+  return sk;
+}
+function drawSnake(g,s,sk){
+  if(sk.hole){const {x,y}=sk.hole;g.fillStyle="#b89c78";g.fillRect(x-4,y-1,9,1);g.fillRect(x-3,y-2,7,1);g.fillStyle="#3a2a1e";g.fillRect(x-3,y,7,2);g.fillRect(x-2,y+2,5,1);g.fillStyle="#1e140e";g.fillRect(x-2,y,5,1)}
+  if(sk.state!=="go"&&sk.state!=="enter")return;
+  const at=d=>{const w=sk.amp*Math.sin(d*.42+sk.ph)*Math.min(1,(sk.dist-d)/6+.15);          // the wave fades as it reaches the hole
+    return [sk.x0+sk.ux*d-sk.uy*w,sk.y0+sk.uy*d+sk.ux*w]};
+  const pts=[];for(let i=SNAKE_L;i>=0;i--){const d=sk.h-i;if(d>sk.dist+.5||d<-40)continue;pts.push([at(d),i])}
+  const shake=sk.act==="rattle"&&s.t%2;
+  pts.forEach(([[x,y],i])=>{x=Math.round(x);y=Math.round(y);
+    if(i>=SNAKE_L-2){g.fillStyle=i===SNAKE_L?"#efe2c4":"#cbb994";g.fillRect(x+(shake&&i===SNAKE_L?1:0),y-(sk.act==="rattle"?1:0),1,2);return}   // rattle
+    if(i>=SNAKE_L-5){g.fillStyle=(i%2)?"#2a2018":"#e8dcc0";g.fillRect(x,y,2,2);return}     // black-and-white banded tail
+    const band=(i+1)%5;g.fillStyle=band===0?"#5c3426":band===1||band===4?"#d8b48e":"#a8644a";g.fillRect(x,y,2,2);   // red-brown diamonds edged in cream
+    g.fillStyle="#e8d2ac";g.fillRect(x,y+1,1,1)});                                   // pale belly
+  const hd=pts.find(p=>p[1]===0);
+  if(hd&&sk.h<=sk.dist+.5){const [[x,y]]=hd,hx=Math.round(x),hy=Math.round(y),f=sk.ux>=0?1:-1;
+    g.fillStyle="#8a4a36";g.fillRect(hx-(f<0?1:0),hy-1,3,3);g.fillStyle="#1a1210";g.fillRect(hx+(f>0?1:0),hy-1,1,1);
+    if(sk.act==="tongue"&&s.t%3)g.fillStyle="#d03838",g.fillRect(hx+(f>0?3:-2),hy,1,1),g.fillRect(hx+(f>0?4:-3),hy+(s.t%2),1,1)}
 }
 function stepMouse(m,s){
   // desert mouse: bursts of springy hops, pauses to nibble seeds, freezes when the owl is out
@@ -1447,6 +1487,7 @@ function drawScene(){
   if(!N&&shown("horned_lizards"))s.toads.forEach(t=>{if(hold)t.bob=0;else stepToad(t,s.w);g.fillStyle="#6e5e4c";g.fillRect(Math.round(t.x)+1,t.y+5,10,1);
     // disco: the head (front columns) nods on the beat while the body stays put
     if(bob)sprt(g,TOAD_BODY,t.x,t.y+t.bob,t.dir<0),sprt(g,TOAD_HEAD,t.x,t.y+t.bob+1,t.dir<0);else sprt(g,CRITTERS.toad,t.x,t.y+t.bob,t.dir<0)});
+  if(!N&&shown("rattlesnake"))drawSnake(g,s,stepSnake(s,hold));else if(s.snake)s.snake={state:"wait",timer:RI(60,300)};
   const scorpOn=shown("scorpions");if(!scorpOn)s.scorps.forEach(p=>p.alive=false);
   if(scorpOn&&!hold)s.scorps.forEach(p=>stepScorp(p,s));
   if(!N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)drawScorp(g,p,hold?0:p.state==="walk"?(s.t>>1)%2:0,bob)});
@@ -2269,6 +2310,7 @@ const FAUNA=[
   {key:"horned_lizards",common:"Flat-tailed horned lizard",sci:"Phrynosoma mcallii",fam:"Phrynosomatidae",cls:"Reptilia",n:s=>(s.toads||[]).length,when:"diurnal; buries in sand after dark"},
   {key:"scorpions",common:"Desert hairy scorpion",sci:"Hadrurus arizonensis",fam:"Caraboctonidae",cls:"Arachnida",n:s=>(s.scorps||[]).filter(p=>p.alive).length,when:"mostly nocturnal; fluoresces under moonlight"},
   {key:"bats",common:"Lesser long-nosed bat",sci:"Leptonycteris yerbabuenae",fam:"Phyllostomidae",cls:"Mammalia",n:s=>(s.bats||[]).length,when:"nocturnal; pollinates saguaro blooms"},
+  {key:"rattlesnake",common:"Red diamond rattlesnake",sci:"Crotalus ruber",fam:"Viperidae",cls:"Reptilia",n:s=>s.snake&&(s.snake.state==="go"||s.snake.state==="enter")?1:0,when:"diurnal in cool months; shelters in burrows"},
   {key:"desert_mice",common:"Cactus mouse",sci:"Peromyscus eremicus",fam:"Cricetidae",cls:"Mammalia",n:s=>(s.mice||[]).filter(m=>!m.caught).length,when:"nocturnal; forages for seeds"}
 ];
 const FLORA=[
@@ -2287,7 +2329,7 @@ function diversity(counts){
 const BAT_HANG=[".K.K.",".KKK.","KKvKK","KKKKK",".KKK.","..K.."];
 function bioSprite(key){
   const m={owl:[CRITTERS.owlHome,OWLPAL],owl_chicks:[CRITTERS.chick,CHICKPAL],roadrunner:[CRITTERS.stand],ravens:[CRITTERS.ravenPerch,RAVENPAL],
-    horned_lizards:[CRITTERS.toad],scorpions:[CRITTERS.scorp[0]],bats:[BAT_HANG],desert_mice:[CRITTERS.mouseSit,MOUSE]}[key];
+    horned_lizards:[CRITTERS.toad],scorpions:[CRITTERS.scorp[0]],bats:[BAT_HANG],desert_mice:[CRITTERS.mouseSit,MOUSE],rattlesnake:[SNAKE_COIL,SNAKEPAL]}[key];
   if(key==="scorpions"){BIO_IMG[key]=BIO_IMG[key]||(()=>{               // two portraits: by day, and glowing under moonlight
     const rows=CRITTERS.scorp[0],w=Math.max(...rows.map(r=>r.length)),h=rows.length,k=6,pad=3,cw=(w+pad*2)*k,cv=document.createElement("canvas");
     cv.width=cw*2+k;cv.height=(h+pad*2)*k;const g=cv.getContext("2d");
@@ -2316,7 +2358,7 @@ function bioTips(root){
 }
 function renderBio(body,status){
   const s=SCENE,N=s.night,f=s.flora||{},fmt=(v,d=2)=>Number(v).toFixed(d);
-  const active=a=>({owl:N,owl_chicks:N,roadrunner:!N,ravens:!N,horned_lizards:!N,scorpions:true,bats:N,desert_mice:N})[a.key];
+  const active=a=>({rattlesnake:!N,owl:N,owl_chicks:N,roadrunner:!N,ravens:!N,horned_lizards:!N,scorpions:true,bats:N,desert_mice:N})[a.key];
   const fauna=FAUNA.map(a=>{const on=shown(a.key),present=on&&(a.key==="bats"||a.key==="desert_mice"?N:true);
     const n=present?a.n(s):0;return {...a,on,n,act:on&&active(a)}});
   const floraRows=FLORA.map(p=>({...p,n:f[p.key]||0}));
