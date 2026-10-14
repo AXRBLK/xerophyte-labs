@@ -335,7 +335,7 @@ body.night .mapcv{filter:saturate(.5) brightness(.8)}
 .pl-region{color:var(--mute);font-size:11px;margin-top:2px}
 .pl-now{display:flex;gap:10px;align-items:center;margin:8px 0 6px}
 .pl-now b{font-family:var(--font-display);font-size:28px;font-weight:400;color:var(--link);line-height:1;-webkit-font-smoothing:none}
-.pl-now span{font-size:11px;line-height:1.45}
+.pl-now span{font-size:11px;line-height:1.45}.pl-now .pl-rain{font-size:11px;font-family:inherit;color:#3a6a9a}
 .pl-info p{margin:0;font-size:12px;line-height:1.45}
 .places{list-style:none;margin:0;padding:4px;overflow:auto;flex:1}
 .places button{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;padding:4px 6px;background:none;border:1px solid transparent;color:var(--ink);font:13px var(--font-ui);text-align:left;cursor:pointer}
@@ -1933,7 +1933,7 @@ const TILES={
   veg:{url:"https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDVI_8Day/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png",max:9},
   radar:null
 };
-const MAP={z:9,cx:0,cy:0,base:"veg",pix:2,radar:false,sel:"anza",cache:new Map(),wx:{},wxAt:0,W:0,H:0,raf:0,markers:[]};
+const MAP={z:9,cx:0,cy:0,base:"topo",pix:2,radar:false,sel:"anza",cache:new Map(),wx:{},wxAt:0,W:0,H:0,raf:0,markers:[]};
 const wsz=z=>256*Math.pow(2,z);
 const lon2x=(lon,z)=>(lon+180)/360*wsz(z);
 const lat2y=(lat,z)=>{const s=Math.sin(lat*Math.PI/180);return (.5-Math.log((1+s)/(1-s))/(4*Math.PI))*wsz(z)};
@@ -2012,7 +2012,7 @@ function fitAll(){
 }
 async function loadPlacesWx(force){
   if(!force&&Date.now()-MAP.wxAt<10*60e3)return;MAP.wxAt=Date.now();
-  const q=`current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=1${isF()?"&temperature_unit=fahrenheit&wind_speed_unit=mph":""}`;
+  const q=`current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum&past_days=14&timezone=auto&forecast_days=1${isF()?"&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch":""}`;
   const base="https://api.open-meteo.com/v1/forecast?";
   try{
     const r=await fetch(`${base}latitude=${PLACES.map(p=>p.lat).join(",")}&longitude=${PLACES.map(p=>p.lon).join(",")}&${q}`);
@@ -2027,10 +2027,14 @@ async function loadPlacesWx(force){
 }
 function mapPaintWx(){
   const U=isF()?"mph":"km/h";
+  // rain over the last two weeks (the 14 days before today), from the same Open-Meteo call
+  const rain=w=>{const d=w&&w.daily,ps=d&&d.precipitation_sum;if(!ps)return null;const v=ps.slice(0,Math.max(0,ps.length-1)).reduce((a,b)=>a+(b||0),0);
+    return isF()?(v<.005?"0″":v.toFixed(2)+"″"):(v<.05?"0 mm":v.toFixed(1)+" mm")};
   MAP.markers.forEach(m=>{const w=MAP.wx[m.p.id];m.t.textContent=w?Math.round(w.current.temperature_2m)+"°":"—"});
-  document.querySelectorAll("#placeList [data-id]").forEach(b=>{const w=MAP.wx[b.dataset.id];b.querySelector("i").textContent=w?Math.round(w.current.temperature_2m)+"°":"—°"});
+  document.querySelectorAll("#placeList [data-id]").forEach(b=>{const w=MAP.wx[b.dataset.id];b.querySelector("i").textContent=w?Math.round(w.current.temperature_2m)+"°":"—°";
+    const r=rain(w),sm=b.querySelector("small");if(sm){sm.dataset.region=sm.dataset.region||sm.textContent;sm.textContent=sm.dataset.region+(r!=null?` · ${r} rain, 2 wks`:"")}});
   const p=PLACES.find(x=>x.id===MAP.sel),w=MAP.wx[p.id],box=document.getElementById("placeInfo");if(!box)return;
-  const now=w?`<div class="pl-now"><b>${Math.round(w.current.temperature_2m)}°</b><span>${WMO[w.current.weather_code]??""}<br>feels ${Math.round(w.current.apparent_temperature)}° · ${w.current.relative_humidity_2m}% humidity<br>wind ${Math.round(w.current.wind_speed_10m)} ${U} · today ${Math.round(w.daily.temperature_2m_max[0])}°/${Math.round(w.daily.temperature_2m_min[0])}°</span></div>`
+  const now=w?`<div class="pl-now"><b>${Math.round(w.current.temperature_2m)}°</b><span>${WMO[w.current.weather_code]??""}<br>feels ${Math.round(w.current.apparent_temperature)}° · ${w.current.relative_humidity_2m}% humidity<br>wind ${Math.round(w.current.wind_speed_10m)} ${U} · today ${Math.round(w.daily.temperature_2m_max.at(-1))}°/${Math.round(w.daily.temperature_2m_min.at(-1))}°${rain(w)!=null?`<br>rain, last 2 weeks: <b class="pl-rain">${rain(w)}</b>`:""}</span></div>`
     :`<div class="pl-now muted">Live weather is loading, or unavailable right now.</div>`;
   box.innerHTML=`<h3>${esc(p.name)}</h3><div class="pl-region">${esc(p.region)} · ${esc(p.where)}</div>${now}<p>${esc(p.blurb)}</p>`;
 }
@@ -2083,7 +2087,7 @@ function renderMap(body,status){
   body.innerHTML=`<div class="maptools" role="toolbar" aria-label="Map controls">
       <button data-a="home">⌂ Anza-Borrego</button><button data-a="all">◎ All deserts</button>
       <span class="sep"></span>
-      <button data-base="veg" aria-pressed="true">Vegetation</button><button data-base="topo" aria-pressed="false">Terrain</button><button data-base="sat" aria-pressed="false">Satellite</button>
+      <button data-base="topo" aria-pressed="true">Terrain</button><button data-base="veg" aria-pressed="false">Vegetation</button><button data-base="sat" aria-pressed="false">Satellite</button>
       <button data-a="radar" aria-pressed="false">Radar</button>
       <span class="sep"></span>
       <button data-a="in" aria-label="Zoom in">+</button><button data-a="out" aria-label="Zoom out">−</button>
@@ -2123,10 +2127,7 @@ function renderMap(body,status){
   function sizeMap(){
     const r=wrap.getBoundingClientRect();MAP.W=Math.round(r.width);MAP.H=Math.round(r.height);if(!MAP.W)return;
     MAP.cv.width=Math.ceil(MAP.W/MAP.pix);MAP.cv.height=Math.ceil(MAP.H/MAP.pix);MAP.lcv.width=MAP.W;MAP.lcv.height=MAP.H;
-    if(!MAP.placed){MAP.placed=true;                                       // open on all the deserts at once
-      const lats=PLACES.map(p=>p.lat),lons=PLACES.map(p=>p.lon);let z=8;
-      while(z>3&&(lon2x(Math.max(...lons),z)-lon2x(Math.min(...lons),z)>MAP.W-80||lat2y(Math.min(...lats),z)-lat2y(Math.max(...lats),z)>MAP.H-80))z--;
-      MAP.z=z;MAP.cx=lon2x((Math.min(...lons)+Math.max(...lons))/2,z);MAP.cy=lat2y((Math.min(...lats)+Math.max(...lats))/2,z)}
+    if(!MAP.placed){MAP.placed=true;const p=PLACES[0];MAP.z=p.z;MAP.cx=lon2x(p.lon,p.z);MAP.cy=lat2y(p.lat,p.z)}   // open zoomed in on home
     mapRender();
   }
   new ResizeObserver(sizeMap).observe(wrap);
