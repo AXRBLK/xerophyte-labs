@@ -1041,9 +1041,19 @@ function paintSky(){
           else if(t<.38)P(X,Y,(x*3+y*5)%4===0?"#e8a830":(x+y)&1?"#ffd84a":"#fff0a0");   // stamen cushion
           else if(t<.6)P(X,Y,seam2?"#d6dce8":(x-y)&1?"#f4f2ea":"#ffffff");        // inner petals, a little creamy
           else P(X,Y,d>frill(a)-.1?"#dfe5ef":seam?"#e3e9f2":"#ffffff")}};      // outer petals, veined, with a cool rim
+      // the floral tube grows out of the skin gradually: pale green by the petals, deepening to the saguaro's own
+      // greens where it meets the stem, swelling a little at its base, with a few scales, and dithered into the skin
+      const mixC=(a,b,t)=>{const A=[1,3,5].map(i=>parseInt(a.slice(i,i+2),16)),B=[1,3,5].map(i=>parseInt(b.slice(i,i+2),16));return "#"+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,"0")).join("")};
+      const TUBE=["#9cb882","#7e9a6a","#5e7a4c"],SKIN=["#7e9470","#62785a","#4e6244"];
+      const tube=(n,at)=>{for(let k=0;k<n+2;k++){const f=Math.min(1,k/(n-1)),half=k>=n-2?2:1;   // k counts from the petals toward the stem
+          for(let j=-half;j<=half;j++){if(k>=n&&((k+j)&1))continue;                                   // last two steps: dithered into the skin
+            const band=j<0?0:j>0?2:1,edge=Math.abs(j)===2;let col=mixC(TUBE[band],SKIN[band],Math.min(1,f*1.1));
+            if(edge)col=mixC(col,SKIN[2],.5);
+            if(k%2===1&&k<n&&j===-half&&k>0)col=mixC(col,"#3e4e38",.45);                       // little bract scales along the top
+            at(k,j,col)}}};
       if(kind==="side"){
-        const L=Math.round(r*1.3),tl=Math.round(r*.7),rimX=cx;
-        for(let k=0;k<tl;k++)for(let j=-1;j<=1;j++)P(rimX+dir*(L+k),cy+j,j<0?"#9cb882":j>0?"#5e7a4c":"#7e9a6a");   // floral tube
+        const L=Math.round(r*1.3),tl=Math.round(r*.9),rimX=cx;
+        tube(tl,(k,j,col)=>P(rimX+dir*(L+k),cy+j,col));                    // floral tube
         for(let k=0;k<=L;k++){const f=k/L,h=1.5+(r-1.5)*Math.pow(1-f,1.7),X=rimX+dir*k;                 // the trumpet, flaring toward the rim
           for(let y=-Math.round(h);y<=Math.round(h);y++)P(X,cy+y,y>h*.45?"#d8dee8":y<-h*.55?"#ffffff":k%3===0&&Math.abs(y)>1?"#e6ecf4":"#f6f7fa")}
         face(rimX-dir*1,cy,Math.max(2,r*.38),r);                          // the open mouth, seen nearly edge-on, with its frilly lip
@@ -1051,7 +1061,7 @@ function paintSky(){
       }else{
         const ry=r*.55;
         for(let k=0;k<Math.round(r*.9);k++){const w=Math.max(1,Math.round(r*.55*(1-k/(r*.9))));for(let x=-w;x<=w;x++)P(cx+x,cy+ry*.5+k,x<0?"#f6f7fa":"#dde3ec")}   // the trumpet's side, below the face
-        for(let k=0;k<Math.round(r*.5);k++)for(let x=-1;x<=1;x++)P(cx+x,cy+ry*.5+Math.round(r*.9)+k,x<0?"#9cb882":x>0?"#5e7a4c":"#7e9a6a");
+        tube(Math.round(r*.7),(k,j,col)=>P(cx+j,cy+ry*.5+Math.round(r*.9)+k,col));
         face(cx,cy,r,ry);
       }
       const R=Math.ceil(r)+2;blooms.push({x:cx,y:cy,big:true,box:[cx-R*3,cy-R-2,R*6,R*3+4]})};
