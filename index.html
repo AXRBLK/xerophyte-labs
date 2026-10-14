@@ -852,8 +852,10 @@ function paintSky(){
   const flowerCv=layer(w,h);let fcx=null;const flowers=[]; // prickly-pear flowers on their own layer so they can sway in disco
   const px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1);if(bcx)bcx.clearRect(x,y,1,1);if(fcx)fcx.clearRect(x,y,1,1)};
   const rect=(x,y,ww,hh,col)=>{c.fillStyle=col;c.fillRect(x,y,ww,hh);if(bcx)bcx.clearRect(x,y,ww,hh);if(fcx)fcx.clearRect(x,y,ww,hh)};
+  // prickly-pear flowers come in two colours, picked per plant: butter yellow or a deep rosy red
+  const FLOWER_YEL=["#e6c868","#ecd58a","#c89a52"],FLOWER_RED=["#d8443a","#ee6a5a","#a82a2a"];let flowerPal=FLOWER_YEL;
   const flower=(fx,fy,big)=>{flowers.push({x:fx,y:fy});const f=(x,y,ww,hh,col)=>{fcx.fillStyle=col;fcx.fillRect(x,y,ww,hh)};
-    f(fx,fy-1,2,2,"#e6c868");if(big)f(fx-1,fy,4,1,"#ecd58a");f(fx,fy-1,1,1,"#c89a52")};
+    f(fx,fy-1,2,2,flowerPal[0]);if(big)f(fx-1,fy,4,1,flowerPal[1]);f(fx,fy-1,1,1,flowerPal[2])};
   // cloud streaks get their own layer: at night they sit behind the moon instead of striping across it
   const clouds=layer(w,h);c=clouds.getContext("2d");
   for(let i=0;i<Math.max(4,w/45);i++){
@@ -916,15 +918,21 @@ function paintSky(){
     if(depth>0&&hh>14)for(let i=0;i<3;i++)px(x-(tw>>1)+ri(0,tw-1),base-hh+ri(0,1),"#e8e0cc");
     if(crown)addBloom(crown);tips.forEach(addBloom);
   }
-  function pad(cx,cy,rx,ry,fill,edge){
-    for(let y=-ry;y<=ry;y++)for(let x=-rx;x<=rx;x++){const v=(x*x)/(rx*rx)+(y*y)/(ry*ry);if(v<=1)px(cx+x,cy+y,v>.62||x>rx*.5?edge:fill)}
-    for(let i=0;i<rx*ry/4;i++)px(cx+ri(-rx+1,rx-1),cy+ri(-ry+1,ry-1),"#b8c498");
+  function pad(cx,cy,rx,ry,fill,edge,far){
+    const lit=mixHex(fill,"#e8f0c8",.28),rim=mixHex(edge,"#2a3a20",.25);
+    for(let y=-ry;y<=ry;y++)for(let x=-rx;x<=rx;x++){const v=(x*x)/(rx*rx)+(y*y)/(ry*ry);if(v>1)continue;
+      px(cx+x,cy+y,v>.8?rim:x<-rx*.3?lit:x>rx*.35?edge:fill)}
+    if(rx<3||far){for(let i=0;i<rx*ry/4;i++)px(cx+ri(-rx+1,rx-1),cy+ri(-ry+1,ry-1),"#b8c498");return}
+    for(let gy=-ry+2;gy<=ry-2;gy+=3)for(let gx=-rx+2+((gy+ry)%2);gx<=rx-2;gx+=3){if((gx*gx)/(rx*rx)+(gy*gy)/(ry*ry)>.7)continue;
+      px(cx+gx,cy+gy,"#c8b070");px(cx+gx-1,cy+gy-1,"#f0ecd8");if(rnd()<.6)px(cx+gx+1,cy+gy-1,"#e4e0c8")}   // areole + spines
   }
   function opuntia(x,base,s,far){
     const rx=Math.max(2,Math.round(3*s)),ry=Math.max(3,Math.round(4*s));
     const fill=far?"#8a9270":"#8aa06c",edge=far?"#687058":"#62784e";
     const pads=[[0,-ry],[-rx-1,-ry*2],[rx,-ry*2-1]];if(rnd()<.7)pads.push([ri(-1,1),-ry*3-1]);if(rnd()<.5)pads.push([rx*2,-ry]);
-    pads.forEach(([dx,dy])=>pad(x+dx,base+dy,rx,ry,fill,edge));
+    flowerPal=rnd()<.5?FLOWER_RED:FLOWER_YEL;
+    pads.forEach(([dx,dy])=>pad(x+dx,base+dy,rx,ry,fill,edge,far));
+    if(!far&&rnd()<.6)pads.slice(1).forEach(([dx,dy])=>{if(rnd()<.5){const tx=x+dx+ri(-1,1),ty=base+dy-ry-1;px(tx,ty,"#a82a4a");px(tx+1,ty,"#c83a5a");px(tx,ty-1,"#c83a5a");px(tx+1,ty-1,"#e86a8a")}});   // a few ripe tunas
     pads.slice(1).forEach(([dx,dy])=>{const n=ri(1,far?1:3);for(let i=0;i<n;i++){const fx=x+dx+ri(-rx+1,rx-1),fy=base+dy-ry+(Math.abs(fx-x-dx)>rx/2?1:0);
       flower(fx,fy,s>1)}});
   }
