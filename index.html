@@ -158,7 +158,7 @@ td.wrap{white-space:normal;min-width:140px}
 #bioTip{position:fixed;z-index:9999;pointer-events:none;background:var(--chrome,#d6cfc0);border:2px solid;border-color:var(--chrome-hi,#fff) var(--chrome-lo,#666) var(--chrome-lo,#666) var(--chrome-hi,#fff);padding:8px 10px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:2px 2px 0 rgba(0,0,0,.35)}
 #bioTip img{image-rendering:pixelated;display:block}#bioTip span{font:11px var(--font-ui);color:var(--ink,#222)}
 .bio td.sp{cursor:help}
-.bio .bio-head{margin:0 0 4px}.bio .bio-stats{margin:6px 0 0;font-size:12px}.bio .bio-note{margin-top:14px;font-size:11px}
+.bio td.habits{font-size:11px;line-height:1.35;min-width:150px;white-space:normal}.bio .bio-head{margin:0 0 4px}.bio .bio-stats{margin:6px 0 0;font-size:12px}.bio .bio-note{margin-top:14px;font-size:11px}
 .bio tr.off td{opacity:.5}
 .bio .biot td{white-space:normal;vertical-align:top;line-height:1.35}.bio .biot .sci{font-size:11px;opacity:.8}.bio .biot td.big{font-size:15px;font-weight:600}
 
@@ -2425,9 +2425,9 @@ function renderBio(body,status){
   body.innerHTML=`<div class="bio">
     <p class="bio-head"><b>Field census</b> · ${esc(SET.location_name||"Anza-Borrego Desert")} · ${today}, ${time} · ${N?"nocturnal":"diurnal"} survey</p>
     <h3>Fauna</h3>
-    <div class="tbl"><table class="biot"><thead><tr><th>Species</th><th>Family · class</th><th class="n">Count</th><th>Status</th></tr></thead><tbody>
-    ${fauna.map(a=>`<tr${a.on?"":' class="off"'} title="${esc(a.when)}"><td class="sp" data-sp="${a.key}" data-rest="${a.key==="scorpions"?"By day · glowing under moonlight":esc(a.common)+", at rest"}">${esc(a.common)}<br><i class="sci">${esc(a.sci)}</i></td><td>${a.fam}<br><span class="muted">${a.cls}</span></td><td class="n big">${a.on?a.n:"—"}</td>
-      <td>${!a.on?"not surveyed":a.n?(a.act?"active":"resting"):"absent"}</td></tr>`).join("")}
+    <div class="tbl"><table class="biot"><thead><tr><th>Species</th><th>Family · class</th><th class="n">Count</th><th>Status</th><th>Habits</th></tr></thead><tbody>
+    ${fauna.map(a=>`<tr${a.on?"":' class="off"'}><td class="sp" data-sp="${a.key}" data-rest="${a.key==="scorpions"?"By day · glowing under moonlight":esc(a.common)+", at rest"}">${esc(a.common)}<br><i class="sci">${esc(a.sci)}</i></td><td>${a.fam}<br><span class="muted">${a.cls}</span></td><td class="n big">${a.on?a.n:"—"}</td>
+      <td>${!a.on?"not surveyed":a.n?(a.act?"active":"resting"):"absent"}</td><td class="habits">${esc(a.when)}</td></tr>`).join("")}
     </tbody></table></div>
     <p class="bio-stats">Richness <b>S = ${dF.S}</b> · individuals <b>N = ${dF.N}</b> · Shannon <b>H′ = ${fmt(dF.H)}</b> · evenness <b>J′ = ${fmt(dF.E)}</b> · Simpson <b>1−D = ${fmt(dF.D)}</b></p>
     <h3>Flora (scene transect)</h3>
