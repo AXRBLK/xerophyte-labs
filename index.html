@@ -1484,8 +1484,9 @@ function drawSaturn(c,s){
     c.fillRect(x+i,y+j,1,1)}));
   c.globalAlpha=1;
 }
-// night: a flying saucer glides in, parks over the trophy truck, beams it up and leaves; with no truck it just drifts across
-const UFO=["........kggggk........","......kgBBBBBBgk......",".....kgBBwBBBBBgk.....","..kkkkkkkkkkkkkkkkkk..",".kssssssssssssssssssk.","kSsLsSsLsSssSsLsSsLsSk",".kSSSSSSSSSSSSSSSSSSk.","....kkSSSSSSSSSSkk...."],UFOPAL={g:"#9ad8b0",B:"#6aa8a0",w:"#e8fff0",k:"#3a4450",s:"#9aa4b6",S:"#626a80",L:"#626a80"};
+// night: a tall alien shell glides in, hangs over the truck, draws it up in a pale haze and leaves; with no truck it just drifts across
+// a tall, dark, silent lens of a ship standing on its edge in the sky, lit only along one flank
+const UFO=["....ksmk....","...ksmddk...","...ksmddk...","..ksmddddk..","..ksmddddk..",".kssmdddddk.",".ksmddddddk.",".ksmddddddk.",".ksmddddddk.",".ksmddddddk.",".ksmddddddk.","kssmdddddddk","kssmdddddddk","kssddddddddk","kssddddddddk","kssddddddddk","kssddddddddk",".ksdddddddk.",".kddddddddk.",".kddddddddk.",".kddddddddk.",".kddddddddk.",".kddddddddk.","..kddddddk..","..kddddddk..","...kddddk...","...kddddk...","....kddk...."],UFOPAL={k:"#121318",d:"#2c2e35",m:"#4a4d57",s:"#7e828e"};
 const UFO_W=UFO[0].length,UFO_H=UFO.length;
 function stepUfo(s,tk){
   if(s.disco&&s.ufo){s.ufo.spin=(s.ufo.spin||0)+.22;s.ufo.t++;return s.ufo}         // night disco: frozen in the sky, tumbling end over end
@@ -1500,7 +1501,7 @@ function stepUfo(s,tk){
   }
   u.t++;
   if(u.state==="seek"&&T&&T.on){                                     // ease in until parked over the truck, matching its speed
-    const tx=T.x+TRUCK[0].length/2-UFO_W/2,ty=Math.max(s.H0*.18,T.y-30);
+    const tx=T.x+TRUCK[0].length/2-UFO_W/2,ty=Math.max(s.H0*.06,T.y-UFO_H-18);
     const cl=(v,m)=>Math.max(-m,Math.min(m,v)),wx=cl((tx-u.x)*.05,2.2)+T.dir*T.sp,wy=cl((ty-u.y)*.05,1.2);
     u.vx+=(wx-u.vx)*.14;u.vy+=(wy-u.vy)*.14;u.x+=u.vx;u.y+=u.vy;
     if(Math.abs(tx-u.x)<1.5&&Math.abs(ty-u.y)<1.2){u.state="beam";u.beam=0;T.held=true}
@@ -1526,9 +1527,9 @@ function drawUfo(c,u,s){
   const x=Math.round(u.x),y=Math.round(u.y);
   if(u.state==="beam"&&u.beam>4&&s.truck&&s.truck.on){                // tractor beam down to the truck
     const T=s.truck,by=Math.round(T.y-(T.lift||0))+TRUCK.length,top=y+UFO_H-1,cx=x+UFO_W/2,a=.16+.06*Math.sin(u.t*.9);
-    const g=c.createLinearGradient(0,top,0,by);g.addColorStop(0,`rgba(190,255,215,${a+.1})`);g.addColorStop(1,`rgba(190,255,215,${a*.5})`);
-    c.fillStyle=g;c.beginPath();c.moveTo(cx-4,top);c.lineTo(cx+4,top);c.lineTo(cx+12,by);c.lineTo(cx-12,by);c.closePath();c.fill();
-    for(let k=0;k<3;k++){const yy=top+((u.t*2+k*11)%Math.max(1,by-top));c.fillStyle="rgba(230,255,240,.35)";c.fillRect(Math.round(cx-4-(yy-top)/(by-top+1)*8),yy,Math.round(8+(yy-top)/(by-top+1)*16),1)}
+    const g=c.createLinearGradient(0,top,0,by);g.addColorStop(0,`rgba(225,228,236,${a+.08})`);g.addColorStop(1,`rgba(225,228,236,${a*.45})`);
+    c.fillStyle=g;c.beginPath();c.moveTo(cx-2,top);c.lineTo(cx+2,top);c.lineTo(cx+12,by);c.lineTo(cx-12,by);c.closePath();c.fill();
+    for(let k=0;k<3;k++){const yy=top+((u.t*2+k*11)%Math.max(1,by-top));c.fillStyle="rgba(240,242,250,.28)";c.fillRect(Math.round(cx-2-(yy-top)/(by-top+1)*10),yy,Math.round(4+(yy-top)/(by-top+1)*20),1)}
   }
   sprt(c,UFO,x,y,false,UFOPAL);
   const lights=["#ff6a5a","#ffe070","#7ad0ff"];let k=0;
