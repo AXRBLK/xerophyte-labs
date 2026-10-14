@@ -514,6 +514,7 @@ folder:["................","..kkkkk.........",".kyyyyyk........","kyyyyyyykkkkkk
 letter:["................","................","................","kkkkkkkkkkkkkkkk","kwkwwwwwwwwwwkwk","kwwkwwwwwwwwkwwk","kwwwkwwwwwwkwwwk","kwwwwkwwwwkwwwwk","kwwwwwkkkkwwwwwk","kwwwwkwwwwkwwwwk","kwwwkwwwwwwkwwwk","kwwkwwwwwwwwkwwk","kkkkkkkkkkkkkkkk","................","................","................"],
 book:["................",".kkkkkkkkkkkk...",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSSwwwk..",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSwwwwk..",".krrkwwwwwwwwk..",".krrkwwwwwwwwk..",".kkkkkkkkkkkkk..","................","................","................"],
 radio:["................","....kkkkkkkk....","....k......k....","kkkkkkkkkkkkkkkk","kssssssssssssssk","ksSSSssyyssSSSsk","kSkkkSsyysSkkkSk","kSkSkSssssSkSkSk","kSkkkSsrbsSkkkSk","ksSSSssssssSSSsk","kssssssssssssssk","kkkkkkkkkkkkkkkk","................","................","................","................"],
+journal:["................","................",".kkkkkk..kkkkkk.","kwwwwwwkkwwwwwwk","kwkkkkwkkwwgwwwk","kwwwwwwkkwgggwgk","kwkkkkwkkwwgwggk","kwwwwwwkkwwgggwk","kwkkkwwkkwwgwwwk","kwwwwwwkkwwgwwwk","kwkkkkwkkwtttttk","kwwwwwwkkwwwwwwk","knnnnnnkknnnnnnk",".kkkkkkkkkkkkkk.","................","................"],
 postcard:["................","................","kkkkkkkkkkkkkkkk","kwwwwwwwkwwwkrrk","kwBBBBBwkwwwkrrk","kwBByBBwkwwwkkkk","kwBBBgBwkwwwwwwk","kwBgBgBwkwkkkkwk","kwttgttwkwwwwwwk","kwwwwwwwkwwwwwwk","kwwkkwwwkwkkkkwk","kwwwwwwwkwwwwwwk","kwwwwwwwkwkkkkwk","kkkkkkkkkkkkkkkk","................","................"],
 infosign:["................","...kkkkkkkkkk...","..knnnnnnnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnnnnnnnnk..","..knnnwwwnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnwwwwnnnk..","...kkkkkkkkkk...","......knnk......","......knnk......","....kkkkkkkk....","................"],
 tower:["..w..w.r.w..w...",".w..w.krk.w..w..",".w..w.kSk.w..w..","..w..w.k.w..w...","......kSk.......","......kSk.......",".....kSkSk......",".....kSkSk......","....kSkkkSk.....","....kSk.kSk.....","...kSkkkkkSk....","...kSk...kSk....","..kSkkkkkkkSk...","..kSk.....kSk...",".kkkkkkkkkkkkk..","................"],
@@ -2421,7 +2422,7 @@ function build(){
   place(L,"cacti","My Cacti","saguaro",thirsty||"");place(L,"log","Weather Log","chart");
   place(L,"today","Weather Now","sun");place(L,"bio","Biodiversity Report","trailcam");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
-    const pic=/^contact/i.test(String(p.title).trim())?"postcard":/^about/i.test(String(p.title).trim())?"infosign":(p.icon||"folder").toLowerCase();
+    const pic=/^contact/i.test(String(p.title).trim())?"postcard":/^about/i.test(String(p.title).trim())?"infosign":/^field\s*notes/i.test(String(p.title).trim())?"journal":(p.icon||"folder").toLowerCase();
     const id="p"+i;defineWindow(id,{title:p.title,icon:pic,w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
     place(L,id,p.title,pic);
   });
