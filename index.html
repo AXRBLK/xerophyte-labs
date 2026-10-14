@@ -1792,9 +1792,9 @@ function moonFace(c,ox,oy,r,wink,a){
      for(let i=-px;i<=px;i++)P(ex+i/r,ey-1/r-(Math.abs(i)>=px-1?-1/r:0),ink);   // upper lid
      P(ex+(px-2)/r,ey,ink);P(ex+(px-3)/r,ey,ink)});                             // irises, looking right
    // the smile: closed, sly, lifting more on the right
-   const m=Math.round(r*.36),Y0=.43;for(let i=-m;i<=m;i++){const t=i/m,yy=Y0-(t<0?.05*t*t:.15*t*t+.04*t*t*t);   // a smirk: flat on the left, hitched up on the right
-     P(i/r,yy,ink);if(t>-.4&&t<.5)P(i/r,yy+1/r,`rgba(110,94,70,${(.5*a).toFixed(2)})`)}
-   P(-(m+1)/r,Y0-.04,ink);P((m+1)/r,Y0-.23,ink);P((m+1)/r,Y0-.23+1/r,`rgba(96,80,60,${(.6*a).toFixed(2)})`);   // the hitched corner digs into the cheek
+   const m=Math.round(r*.27),Y0=.45;for(let i=-m;i<=m;i++){const t=i/m,yy=Y0-.2*t*t-(t>0?.03*t*t:0);   // a rounder, tighter smile, only a hint lopsided
+     P(i/r,yy,ink);if(Math.abs(t)<.55)P(i/r,yy+1/r,`rgba(110,94,70,${(.5*a).toFixed(2)})`)}
+   P(-(m+1)/r,Y0-.24,ink);P((m+1)/r,Y0-.27,ink);   // corners tucked into the cheeks
  }
 // scorpion; with a beat, the head and pincers (front three columns) nod while body and tail stay put
 function drawScorp(ctx,p,frame,bob,pal){
