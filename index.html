@@ -1104,6 +1104,8 @@ function drawOwl2(c,s,o,hold){
     if(o.blink>0)o.blink--;else if(R()<.02)o.blink=RI(1,2)}
   const on=o.hoot>0&&HOOTS[HOOTS.length-o.hoot];
   if(on&&(o.hoot===HOOTS.length||!HOOTS[HOOTS.length-o.hoot-1]))o.notes.push({x:x+w+1,y:y+2,life:16});
+  if(hold){const sw=Math.round(Math.sin(performance.now()/1000*Math.PI*1.07)*1.4);   // disco: eyes shut, swaying to the music
+    sprt(c,OWL2_SHUT.slice(0,10),x+sw,y,false,OWLPAL_N);sprt(c,OWL2_SHUT.slice(10),x+Math.round(sw/2),y+10,false,OWLPAL_N);o.notes=[];clearHoo();return}
   sprt(c,on?OWL2_HOOT:o.blink?OWL2_SHUT:OWL2,x,y+(on?1:0),false,OWLPAL_N);
   o.notes=o.notes.filter(n=>{n.life--;if(!hold){n.x+=.35;n.y-=.4}return n.life>0});
   // the hoots are real text (same face as the taskbar's MODE label), laid over the pixel scene
@@ -1133,7 +1135,7 @@ function stepOwl(o,s){
     if(o.blink>0)o.blink--;else if(R()<(s.night?.03:.02))o.blink=RI(1,2);
     if(--o.timer<=0&&R()<(s.night?1/90:1/600)){
       // a sortie: flap out of the cavity, glide down to swoop at the ground, ride a thermal, then glide home
-      const prey=shown("desert_mice")&&R()<.7?(s.mice||[]).filter(m=>!m.caught&&m.x>20&&m.x<s.w-30).sort(()=>R()-.5)[0]:null;
+      const prey=shown("desert_mice")&&R()<.7?(s.mice||[]).filter(m=>!m.caught&&m.x>(s.giant?s.giant.tx1+8:20)&&m.x<s.w-30).sort(()=>R()-.5)[0]:null;
       if(prey){prey.marked=true;prey.escape=R()<.4}                       // about 2 in 5 mice bolt at the last moment
       const gx=prey?prey.x+6:Math.max(20,Math.min(s.w-20,n.x+RI(30,Math.round(s.w*.6)))),gy=prey?prey.y-14:s.groundY()-8;
       const cx=Math.max(30,Math.min(s.w-30,gx+RI(-30,30))),cy=s.H0*.3+RI(-8,8),r=RI(16,28),dir=R()<.5?1:-1,a0=R()*6.28,steps=Math.round(14*(1+R()*.6));
