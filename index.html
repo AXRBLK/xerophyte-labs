@@ -974,13 +974,15 @@ function paintSky(){
     SCENE.giant={tx0:gx-(GW>>1),tx1:gx+(GW>>1),ax,AW,armTop,ay};
     // the front saguaro's night blooms, three times life size: a full crown on the right arm plus three more down its sides,
     // and one flaring out of the main column into the gap beside the arm
-    const BK=3,big=(rows,x0,y0,flip)=>{const w=rows[0].length,hh=rows.length,t=layer(w,hh);sprt(t.getContext("2d"),rows,0,0,flip,BLOOM);
-        bcx.imageSmoothingEnabled=false;bcx.drawImage(t,x0,y0,w*BK,hh*BK);blooms.push({x:x0+w*BK/2,y:y0+hh*BK/2,big:true,box:[x0-2,y0-2,w*BK+4,hh*BK+4]})};
-    const cx=ax+(AW>>1),T=BLOOM_TOP,SD=BLOOM_SIDE;
-    big(T,cx-Math.round(T[0].length*BK/2),armTop-T.length*BK+3,false);                 // crown, opening skyward
-    big(SD,ax-SD[0].length*BK+4,armTop-2,false);big(SD,ax+AW-4,armTop-2,true);          // flaring out each side of the tip
-    big(SD,ax-SD[0].length*BK+4,armTop+24,false);big(SD,ax+AW-4,armTop+16,true);big(SD,ax+AW-4,armTop+38,true);   // three more down the arm
-    big(SD,gx+(GW>>1)-4,Math.max(4,armTop-34),true);                                      // one off the main column, in the gap
+    const big=(rows,x0,y0,flip,BK)=>{const w=rows[0].length,hh=rows.length,t=layer(w,hh);sprt(t.getContext("2d"),rows,0,0,flip,BLOOM);
+        bcx.imageSmoothingEnabled=false;const W2=Math.round(w*BK),H2=Math.round(hh*BK);bcx.drawImage(t,Math.round(x0),Math.round(y0),W2,H2);blooms.push({x:x0+W2/2,y:y0+H2/2,big:true,box:[Math.round(x0)-2,Math.round(y0)-2,W2+4,H2+4]})};
+    const cx=ax+(AW>>1),T=BLOOM_TOP,SD=BLOOM_SIDE,AK=2.4,TK=3.6,sw=SD[0].length*AK,tw2=T[0].length*AK,th2=T.length*AK;
+    // arm: six blooms clustered at the tip, drawn back to front so they tuck behind each other; all clear of the owl's hole
+    big(T,cx-tw2/2+5,armTop-th2-1,false,AK);                                           // a second crown bloom, behind
+    big(SD,ax+AW-4,armTop+22,true,AK);big(SD,ax+AW-4,armTop+10,true,AK);                  // down the right side
+    big(SD,ax-sw+5,armTop-8,false,AK);big(SD,ax+AW-4,armTop-3,true,AK);                  // flaring out at the tip
+    big(T,cx-tw2/2-2,armTop-th2+3,false,AK);                                           // the front crown bloom
+    big(SD,gx+(GW>>1)-5,Math.max(3,armTop-58),true,TK);                                 // one big bloom off the main column, well above the arm
     return {x:hcx,top:hcy-ry,cy:hcy};
   }
 
@@ -1553,7 +1555,7 @@ function drawSaturn(c,s){
 }
 // night: a tall alien shell glides in, hangs over the truck, draws it up in a pale haze and leaves; with no truck it just drifts across
 // a tall, dark, silent lens of a ship standing on its edge in the sky, lit only along one flank
-const UFO=["....ksmk....","...ksmddk...","...ksmddk...","..ksmddddk..","..ksmddddk..",".kssmdddddk.",".ksmddddddk.",".ksmddddddk.",".ksmddddddk.",".ksmddddddk.",".ksmddddddk.","kssmdddddddk","kssmdddddddk","kssddddddddk","kssddddddddk","kssddddddddk","kssddddddddk",".ksdddddddk.",".kddddddddk.",".kddddddddk.",".kddddddddk.",".kddddddddk.",".kddddddddk.","..kddddddk..","..kddddddk..","...kddddk...","...kddddk...","....kddk...."],UFOPAL={k:"#121318",d:"#2c2e35",m:"#4a4d57",s:"#7e828e"};
+const UFO=["....ksmk....","...ksmddk...","...ksmddk...","..ksmddddk..","..ksmddddk..",".kssmdddddk.",".ksmddddddk.",".ksmddddddk.",".ksmddddddk.",".ksmddddddk.",".ksmddddddk.","kssmdddddddk","kssmdddddddk","kssddddddddk","kssddddddddk","kssddddddddk","kssddddddddk",".ksdddddddk.",".kddddddddk.",".kddddddddk.",".kddddddddk.",".kddddddddk.",".kddddddddk.","..kddddddk..","..kddddddk..","...kddddk...","...kddddk...","....kddk...."],UFOPAL={k:"#2c2e35",d:"#2c2e35",m:"#4a4d57",s:"#7e828e"};
 const UFO_W=UFO[0].length,UFO_H=UFO.length;
 function stepUfo(s,tk){
   if(s.disco&&s.ufo){s.ufo.spin=(s.ufo.spin||0)+.22;s.ufo.t++;return s.ufo}         // night disco: frozen in the sky, tumbling end over end
