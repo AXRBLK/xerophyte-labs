@@ -271,6 +271,8 @@ body.night .startmenu .chk.ok{color:#6ade74}body.night .startmenu .chk.warn{colo
 .startmenu li button,.startmenu li a{display:flex;align-items:center;gap:8px;width:100%;padding:5px 8px;font:14px var(--font-ui);color:var(--ink);background:none;border:0;text-align:left;cursor:pointer;text-decoration:none}
 .startmenu li button:hover,.startmenu li a:hover,.startmenu li button:focus-visible{background:var(--title-a);color:#fff;outline:none}
 .startmenu li img{width:18px;height:18px;image-rendering:auto}
+.startmenu .smico{display:inline-flex;width:18px;height:18px;align-items:center;justify-content:center;color:#c8a43a}body.night .startmenu .smico{color:#f0dc8c}.startmenu .smico svg{width:16px;height:16px}
+.startmenu li button:hover .smico,.startmenu li button:focus-visible .smico{color:#fff}
 .startmenu hr{border:0;border-top:1px solid var(--chrome-lo);border-bottom:1px solid var(--chrome-hi);margin:3px 0}
 
 .muted{color:var(--mute)}
@@ -3134,7 +3136,11 @@ function build(){
   // start menu
   const ul=document.getElementById("startlist");ul.innerHTML="";
   Object.entries(WINS).filter(([id])=>!HIDDEN.has(id)).forEach(([id,w])=>{const li=document.createElement("li");li.innerHTML=`<button><img alt="" src="${sprite(w.icon)}">${esc(w.title)}</button>`;li.firstChild.onclick=()=>{toggleStart(false);openWin(id)};ul.appendChild(li)});
-  ul.insertAdjacentHTML("beforeend",'<hr class="adm">');
+  // night mode and disco mode, ticked while they're on
+  ul.insertAdjacentHTML("beforeend",'<hr><li><button id="smNight"></button></li><li><button id="smDisco"></button></li><hr class="adm">');
+  document.getElementById("smNight").onclick=()=>{toggleStart(false);SCENE.override=!SCENE.night;setNight(SCENE.override)};
+  document.getElementById("smDisco").onclick=()=>{toggleStart(false);setDisco(!SCENE.disco,true)};
+  startModes();
   // sheet tools only show in admin mode; the check says whether the site is reading the sheet
   const mark=SHEET_STATE==="ok"?'<span class="chk ok" title="Reading the sheet">✓</span>':SHEET_STATE==="partial"?'<span class="chk warn" title="Some tabs could not be read">!</span>':'<span class="chk off" title="Showing sample data">✗</span>';
   const rl=document.createElement("li");rl.className="adm";rl.innerHTML=`<button><img alt="" src="${sprite("globe")}">Refresh from sheet${mark}</button>`;rl.firstChild.onclick=()=>{toggleStart(false);boot(true)};ul.appendChild(rl);
@@ -3211,7 +3217,13 @@ function updateTray(){
   if(typeof fitIcons==="function")requestAnimationFrame(fitIcons);   // the live line changes the title block's height
 }
 function tick(){if(SCENE.override==null&&isNightNow()!==SCENE.night)setNight(!SCENE.night);const d=new Date();document.getElementById("clock").textContent=d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+", "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}).toLowerCase().replace(" ","")}
-function toggleStart(force){const m=document.getElementById("startmenu"),b=document.getElementById("startbtn");const on=force??m.hidden;m.hidden=!on;b.setAttribute("aria-expanded",on)}
+function startModes(){
+  const n=document.getElementById("smNight"),d=document.getElementById("smDisco");if(!n||!d)return;
+  const tick=on=>on?'<span class="chk ok" aria-hidden="true">✓</span>':"";
+  n.innerHTML=`<span class="smico">${ICON_MOON}</span>Night mode${tick(SCENE.night)}`;n.setAttribute("aria-pressed",!!SCENE.night);
+  d.innerHTML=`<img alt="" src="${sprite("disco")}">Disco mode${tick(SCENE.disco)}`;d.setAttribute("aria-pressed",!!SCENE.disco);
+}
+function toggleStart(force){startModes();const m=document.getElementById("startmenu"),b=document.getElementById("startbtn");const on=force??m.hidden;m.hidden=!on;b.setAttribute("aria-expanded",on)}
 document.getElementById("startbtn").onclick=e=>{e.stopPropagation();toggleStart()};
 document.addEventListener("click",e=>{if(!e.target.closest("#startmenu"))toggleStart(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){toggleStart(false);const a=Object.keys(WINS).find(k=>WINS[k].el.classList.contains("active")&&WINS[k].open);if(a)closeWin(a)}});
