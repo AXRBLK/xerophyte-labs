@@ -119,10 +119,10 @@ body.still .hero h1 .cursor{animation:none}
 .postcard .postmark small{font-size:8px}
 .postcard .stamp.posted .postmark{display:flex}
 /* the unsent-card nudge: the bottom-right corner folds up, a pencilled note appears, and the stamp wiggles */
-/* unsent-card nudge: the stamp's top-left corner peels up, showing its paper back, and the stamp gives a little wiggle */
+/* unsent-card nudge: just the stamp's top-left corner peels up, showing its paper back */
 .postcard .stamp::before{content:"";position:absolute;left:-5px;top:-5px;width:0;height:0;z-index:2;background:linear-gradient(135deg,#f6efdc 0 50%,#e8e0cc 50%,#d4c8ac 100%);box-shadow:2px 2px 3px rgba(58,46,38,.3);transition:width .3s,height .3s;pointer-events:none}
 .postcard.hint .stamp::before{width:26px;height:26px}
-.postcard.hint .stamp{animation:stampNudge .5s ease-in-out 3}
+
 @keyframes stampNudge{0%,100%{transform:rotate(2deg)}25%{transform:rotate(-6deg) scale(1.06)}75%{transform:rotate(7deg) scale(1.06)}}
 .postcard .cmsg{font:13px var(--font-ui);color:#4a3a2c}
 .postcard .cmsg.ok{color:#2f7a3a}.postcard .cmsg.err{color:#a83a2a}
