@@ -1575,7 +1575,7 @@ function sprtBob(c,rows,x,y,split,dy,flip,pal){
    (perched, blinking, peeking by day, hooting, flapping, gliding, striking, carrying) is derived from the same
    sprites, so all of them carry the detail. */
 function owlHiCanvas(){let cv=document.getElementById("owlhi");if(!cv){cv=document.createElement("canvas");cv.id="owlhi";cv.setAttribute("aria-hidden","true");document.getElementById("sky").after(cv)}return cv}
-const OWL_HI_CACHE=new Map();
+const OWL_HI_CACHE=new Map();let OWL_STYLE="fine";   // "fine" | "chevron" | "blocky"
 function owlHi(rows,part){
   const key=rows;let hit=OWL_HI_CACHE.get(key);if(hit)return hit;
   const H=rows.length,W=Math.max(...rows.map(r=>r.length)),at=(x,y)=>y<0||y>=H||x<0||x>=W?".":(rows[y][x]||".");
@@ -1583,10 +1583,11 @@ function owlHi(rows,part){
   for(let y=0;y<H;y++)for(let x=0;x<W;x++){                       // Scale2x
     const P=at(x,y),A=at(x,y-1),B=at(x+1,y),C=at(x-1,y),D=at(x,y+1);
     let e0=P,e1=P,e2=P,e3=P;
+    if(OWL_STYLE!=="blocky"){
     if(C===A&&C!==D&&A!==B&&(P==="."||A!=="."))e0=A;
     if(A===B&&A!==C&&B!==D&&(P==="."||A!=="."))e1=B;
     if(D===C&&D!==B&&C!==A&&(P==="."||D!=="."))e2=C;
-    if(B===D&&B!==A&&D!==C&&(P==="."||D!=="."))e3=D;
+    if(B===D&&B!==A&&D!==C&&(P==="."||D!=="."))e3=D;}
     g[y*2][x*2]=e0;g[y*2][x*2+1]=e1;g[y*2+1][x*2]=e2;g[y*2+1][x*2+1]=e3;
   }
   const h=(x,y)=>{let n=(x*374761393+y*668265263)^0x5bd1e995;n=Math.imul(n^(n>>>13),1274126177);return ((n^(n>>>16))>>>0)/4294967296};
@@ -1606,9 +1607,9 @@ function owlHi(rows,part){
       else if(c==="B"&&r<.18)out[y][x]="D";else if(c==="D"&&r<.15)out[y][x]="m";
       continue}
     if(y>bib+1){                                                       // chest: fine, wavy dark bars over pale feathers
-      const wave=Math.round(Math.sin(x*.85+y*.15)*.8);
-      if("LTwc".includes(c)){if((y+wave)%3===0)out[y][x]=r<.85?"D":"B";else if(c==="L"&&r<.25)out[y][x]="T"}
-      else if(c==="B"){if((y+wave)%3===0)out[y][x]="D";else if(r<.2)out[y][x]="L"}
+      const wave=OWL_STYLE==="chevron"?Math.round(Math.abs(x-WW/2)*.6):Math.round(Math.sin(x*.85+y*.15)*.8);
+      if("LTwc".includes(c)){if((y-wave+99)%(OWL_STYLE==="chevron"?4:3)===0)out[y][x]=r<.85?"D":"B";else if(c==="L"&&r<.25)out[y][x]="T"}
+      else if(c==="B"){if((y-wave+99)%(OWL_STYLE==="chevron"?4:3)===0)out[y][x]="D";else if(r<.2)out[y][x]="L"}
       else if(c==="D"&&r<.25)out[y][x]="m";
     }else if(y<bib-1){                                                 // crown, tufts and facial disc: soft mottling
       if(c==="B"){if(r<.22)out[y][x]="D";else if(r>.86)out[y][x]="L"}
