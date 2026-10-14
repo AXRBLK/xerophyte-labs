@@ -62,7 +62,7 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 @keyframes neon{
   0%,6%,12%{color:#7dff7a;text-shadow:0 0 3px #39ff3a,0 0 9px #39ff3a;}
   3%,9%{color:#2e6a2e;text-shadow:none}
-  70%{color:#7dff7a;text-shadow:0 0 3px #39ff3a,0 0 9px #39ff3a;}
+  70%,100%{color:#7dff7a;text-shadow:0 0 3px #39ff3a,0 0 9px #39ff3a;}
 }
 .hero .sub{transition:color .6s,text-shadow .6s,background-color .6s}
 body.still .hero h1 .cursor{animation:none}
@@ -390,6 +390,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 /* header: plain white text straight on the scene, no plates and no shadows */
 .hero h1,.hero .sub,.hero .live,body.night .hero h1,body.night .hero .sub,body.night .hero .live{background:none!important;color:#fff;text-shadow:none!important}
 .hero .live .wx{filter:none}
+.hero .sub,body.night .hero .sub{color:#7dff7a}   /* the field-station line stays neon green after its flicker */
 .hero h1 .cursor{display:none}   /* no blinking cursor once the title has typed out (the typing caret is separate) */
 @media (pointer:fine) and (min-width:501px),(pointer:none) and (min-width:501px){body.noMarquee .hero{top:calc(22px + 1vh)}}   /* no marquee: the header takes the very top */
 /* desktop: centred across the top third of the sky, smaller and lighter */
