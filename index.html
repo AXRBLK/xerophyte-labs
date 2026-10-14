@@ -397,7 +397,9 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 /* header: plain white text straight on the scene, no plates and no shadows */
 .hero h1,.hero .sub,.hero .live,body.night .hero h1,body.night .hero .sub,body.night .hero .live{background:none!important;color:#fff;text-shadow:none!important}
 .hero .live .wx{filter:none}
-.hero .sub,body.night .hero .sub{color:#7dff7a}   /* the field-station line stays neon green after its flicker */
+.hero .sub,body.night .hero .sub{color:#7dff7a}
+.hero .sub::before{content:"";display:inline-block;width:6px;height:6px;margin:0 8px 1px 0;border-radius:50%;background:#ff3b30;box-shadow:0 0 6px 1px rgba(255,59,48,.7);vertical-align:middle;animation:beacon 2.4s ease-in-out infinite}
+@keyframes beacon{0%,100%{opacity:.25;box-shadow:0 0 2px 0 rgba(255,59,48,.3)}50%{opacity:1;box-shadow:0 0 7px 2px rgba(255,59,48,.75)}}   /* the field-station line stays neon green after its flicker */
 .hero h1 .cursor{display:none}   /* no blinking cursor once the title has typed out (the typing caret is separate) */
 @media (pointer:fine) and (min-width:501px),(pointer:none) and (min-width:501px){body.noMarquee .hero{top:calc(22px + 1vh)}}   /* no marquee: the header takes the very top */
 /* desktop: centred across the top third of the sky, smaller and lighter */
@@ -1143,7 +1145,7 @@ function stepOwl(o,s){
   }else{
     const tg=o.path[0];if(!tg){o.state="home";o.timer=RI(40,160);return}
     if(tg.prey&&!tg.prey.caught){tg.x=tg.prey.x+6;tg.y=tg.prey.y-14}                 // track the frozen mouse
-    if(tg.prey&&tg.prey.escape&&Math.hypot(tg.x-o.x,tg.y-o.y)<22){const m=tg.prey;    // ...which bolts: the owl swoops on empty sand
+    if(tg.prey&&tg.prey.escape&&Math.hypot(tg.x-o.x,tg.y-o.y)<7){const m=tg.prey;    // ...which bolts: the owl swoops on empty sand
       m.marked=false;m.escape=false;m.state="hop";m.fast=true;m.hops=RI(6,9);m.ht=0;m.dir=m.x<o.x?-1:1;tg.prey=null;tg.swoop=true}
     const dx=tg.x-o.x,dy=tg.y-o.y,d=Math.hypot(dx,dy);
     o.strike=!!(tg.prey||tg.swoop)&&d<34;                                             // legs swing down, talons open, for the last stretch
@@ -1479,6 +1481,7 @@ function drawSaturn(c,s){
 const UFO=["........kggggk........","......kgBBBBBBgk......",".....kgBBwBBBBBgk.....","..kkkkkkkkkkkkkkkkkk..",".kssssssssssssssssssk.","kSsLsSsLsSssSsLsSsLsSk",".kSSSSSSSSSSSSSSSSSSk.","....kkSSSSSSSSSSkk...."],UFOPAL={g:"#9ad8b0",B:"#6aa8a0",w:"#e8fff0",k:"#3a4450",s:"#9aa4b6",S:"#626a80",L:"#626a80"};
 const UFO_W=UFO[0].length,UFO_H=UFO.length;
 function stepUfo(s,tk){
+  if(s.disco&&s.ufo){s.ufo.spin=(s.ufo.spin||0)+.22;s.ufo.t++;return s.ufo}         // night disco: frozen in the sky, tumbling end over end
   if(!shown("ufo")){s.ufo=null;return null}
   let u=s.ufo;const T=s.truck;
   if(!u){
@@ -1507,7 +1510,12 @@ function stepUfo(s,tk){
   if(u.x<-UFO_W-10||u.x>s.w+10||u.y<-UFO_H-4){s.ufo=null;return null}
   return u;
 }
+let UFO_CV=null;
 function drawUfo(c,u,s){
+  if(s.disco){if(!UFO_CV){UFO_CV=layer(UFO_W,UFO_H);sprt(UFO_CV.getContext("2d"),UFO,0,0,false,UFOPAL)}
+    const g=UFO_CV.getContext("2d"),lights=["#ff6a5a","#ffe070","#7ad0ff"];let k=0;
+    UFO.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==="L"){g.fillStyle=lights[(k+++(u.t>>1))%3];g.fillRect(i,j,1,1)}}));
+    c.save();c.imageSmoothingEnabled=false;c.translate(Math.round(u.x)+UFO_W/2,Math.round(u.y)+UFO_H/2);c.rotate(u.spin||0);c.drawImage(UFO_CV,-UFO_W/2,-UFO_H/2);c.restore();return}
   const x=Math.round(u.x),y=Math.round(u.y);
   if(u.state==="beam"&&u.beam>4&&s.truck&&s.truck.on){                // tractor beam down to the truck
     const T=s.truck,by=Math.round(T.y-(T.lift||0))+TRUCK.length,top=y+UFO_H-1,cx=x+UFO_W/2,a=.16+.06*Math.sin(u.t*.9);
@@ -1616,7 +1624,7 @@ function drawScene(){
     const x=Math.round(o.x),y=Math.round(o.y)+8,P=N?OWLPAL_N:OWLPAL;
     [-3,2].forEach(dx=>{c.fillStyle=P.T;c.fillRect(x+dx,y,2,3);c.fillStyle=P.B;c.fillRect(x+dx,y+2,2,1);c.fillStyle=P.k;
       if(carry){c.fillRect(x+dx-1,y+3,1,2);c.fillRect(x+dx+2,y+3,1,2)}                // curled round the mouse
-      else{c.fillRect(x+dx-1,y+3,4,1);c.fillStyle=P.c;c.fillRect(x+dx-2,y+4,1,1);c.fillRect(x+dx,y+4,1,1);c.fillRect(x+dx+2,y+4,1,1);c.fillRect(x+dx+3,y+4,1,1)}})}   // toes spread wide, pale hooked claws
+      else{c.fillRect(x+dx-1,y+3,4,1);c.fillStyle=P.k;c.fillRect(x+dx-2,y+4,1,1);c.fillRect(x+dx,y+4,1,1);c.fillRect(x+dx+2,y+4,1,1);c.fillRect(x+dx+3,y+4,1,1)}})}   // toes spread wide, black hooked claws
   if(carry)sprt(c,PREY,Math.round(o.x)-5,Math.round(o.y)+11,false,MOUSE);
 }
 
