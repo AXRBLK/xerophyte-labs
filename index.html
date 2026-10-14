@@ -968,6 +968,7 @@ function paintSky(){
    for(let x=0;x<w;x++)for(let y=0;y<H0;y++)if(gd[(y*w+x)*4+3]>0){top[x]=y;break}
    const sm=top.map((_,x)=>{let t=0,n=0;for(let j=-6;j<=6;j++){const v=top[Math.max(0,Math.min(w-1,x+j))];t+=v;n++}return t/n});
    SCENE.ridge=sm;SCENE.ridgeMean=sm.reduce((a,b)=>a+b,0)/w}
+  {const gx=giantCv.getContext("2d");gx.globalCompositeOperation="destination-out";gx.drawImage(bloomCv,0,0);gx.drawImage(flowerCv,0,0);gx.globalCompositeOperation="source-over"}   // blooms on the giant stay in front of it
   if(N){tint(ground,NIGHT_TINT);tint(plants,NIGHT_TINT);tint(giantCv,NIGHT_TINT);tint(clouds,NIGHT_TINT);tint(flowerCv,NIGHT_TINT)}
   // the lip of the cavity, copied so it can be drawn over the owl's lower body
 
