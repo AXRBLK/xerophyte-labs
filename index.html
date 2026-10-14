@@ -676,9 +676,9 @@ const OWL_PEEK_L=[".kBrYpYwwDDDrBk.",".kBrrrrddrrrrBk."],OWL_PEEK_R=[".kBrDDDwwY
 const OWL_BROW_L="..kDYYYDDwrrDk..",OWL_BROW_R="..kDrrwDDYYYDk..";  // daytime: one eye cracked open
 const owlFace=(eyes,brow)=>["..k..........k..","..Dk........kD..","...DBk....kBD...","...kDBkkkkBDk...","..kBLBLDDLBLBk..",brow||"..kDrrwDDwrrDk..",...eyes,".kDrrrkddkrrrDk.","..kDrrrkkrrrDk..","..kBWWWWWWWWBk..",".kBLwLwLLwLwLBk.",".kDBLBLBBLBLBDk.","kDBLTLTLLTLTLBDk","kDBBDBBDDBBDBBDk","kDBLTLTLLTLTLBDk","kDBBDBBDDBBDBBDk","kDBLTLTLLTLTLBDk","kDDBDBBDDBBDBDDk",".kDBLTLLLLTLBDk.",".kDBDBBDDBBDBDk.",".kDDBLTLLTLBDDk.","..kDBDBDDBDBDk..","..kDTLTkkTLTDk..","...kTTk..kTTk...","..ckckc..ckckc.."];   // feathered feet with pale hooked talons
 const OWL_FLY={
-  glide:["..................kk....kk..................", ".kk...............kDk..kDk...............kk.", "kBDkk............kDBBkkBBDk............kkDBk", "kLBDDkk.........kBLrrrrrrLBk.........kkDDBLk", ".kTLBBDkk.......kBrrwrrwrrBk.......kkDBBLTk.", ".kTLTLBBDkk.....kBrYYrrYYrBk.....kkDBBLTLTk.", "..kTLTLTBBDkk...kBrYprrpYrBk...kkDBBTLTLTk..", "..kTwTwTLBBDDkk.kBLrrrrrrLBk.kkDDBBLTwTwTk..", "...kTwTwTLTBBDDkBkBLrkkrLBkBkDDBBTLTwTwTk...", "...kkTwTwTLTLBBDBkBLLwwLLBkBDBBLTLTwTwTkk...", "....kkTwTwTLTLBBkDBLTLLTLBDkBBLTLTwTwTkk....", "......kkTkTkTLBkkDBTLTTLTBDkkBLTkTkTkk......", "........kk.k.kkkkDBLTLLTLBDkkkk.k.kk........", ".................kDBLTTLBDk.................", "..................kDBDDBDk..................", "..................kDkDDkDk..................", "...................kdkkdk...................", "............................................", "............................................", "............................................"],
-  up:["kBDkk.............kk....kk.............kkDBk", "kLBDDkk...........kDk..kDk...........kkDDBLk", ".kTLBBDk.........kDBBkkBBDk.........kDBBLTk.", ".kTLTLBBk.......kBLrrrrrrLBk.......kBBLTLTk.", "..kTLTLTDkk.....kBrrwrrwrrBk.....kkDTLTLTk..", "..kTwTwTBBDk....kBrYYrrYYrBk....kDBBTwTwTk..", "...kTwTwLBBDk...kBrYprrpYrBk...kDBBLwTwTk...", "...kkTwTTLTBDkk.kBLrrrrrrLBk.kkDBTLTTwTkk...", "....kkTwwTLTBDDkBkBLrkkrLBkBkDDBTLTwwTkk....", "......kkTwTLLBBDBkBLLwwLLBkBDBBLLTwTkk......", "........TkTkTLBBkDBLTLLTLBDkBBLTkTkT........", "........kk.kTLBkkDBTLTTLTBDkkBLTk.kk........", ".............kkkkDBLTLLTLBDkkkk.............", ".................kDBLTTLBDk.................", "..................kDBDDBDk..................", "..................kDkDDkDk..................", "...................kdkkdk...................", "............................................", "............................................", "............................................"],
-  down:["..................kk....kk..................", "..................kDk..kDk..................", ".................kDBBkkBBDk.................", "................kBLrrrrrrLBk................", "................kBrrwrrwrrBk................", "................kBrYYrrYYrBk................", "........kk.k.kkkkBrYprrpYrBkkkk.k.kk........", "......kkTkTkTLBkkBLrrrrrrLBkkBLTkTkTkk......", "....kkTwTwTLTLBBBkBLrkkrLBkBBBLTLTwTwTkk....", "...kkTwTwTLTLBBDBkBLLwwLLBkBDBBLTLTwTwTkk...", "...kTwTwTLTBBDDkkDBLTLLTLBDkkDDBBTLTwTwTk...", "..kTwTwTLBBDDkk.kDBTLTTLTBDk.kkDDBBLTwTwTk..", "..kTLTLTBBDkk...kDBLTLLTLBDk...kkDBBTLTLTk..", ".kTLTLBBDkk......kDBLTTLBDk......kkDBBLTLTk.", ".kTLBBDkk.........kDBDDBDk.........kkDBBLTk.", "kLBDDkk...........kDkDDkDk...........kkDDBLk", "kBDkk..............kdkkdk..............kkDBk", ".kk......................................kk.", "............................................", "............................................"]
+  glide:["..................kk....kk..................", ".kk...............kDk..kDk...............kk.", "kBDkk............kDBBkkBBDk............kkDBk", "kLBDDkk.........kBLDrTTrDLBk.........kkDDBLk", ".kTLBBDkk.......kBDwLrrLwDBk.......kkDBBLTk.", ".kTLTLBBDkk.....kBDYYwwYYDBk.....kkDBBLTLTk.", "..kTLTLTBBDkk...kBDYprrpYDBk...kkDBBTLTLTk..", "..kTwTwTLBBDDkk.kBDLrTTrLDBk.kkDDBBLTwTwTk..", "...kTwTwTLTBBDDkBkBDrkkrDBkBkDDBBTLTwTwTk...", "...kkTwTwTLTLBBDBkBTLwwLTBkBDBBLTLTwTwTkk...", "....kkTwTwTLTLBBkDBLTLLTLBDkBBLTLTwTwTkk....", "......kkTkTkTLBkkDBTLTTLTBDkkBLTkTkTkk......", "........kk.k.kkkkDBLTLLTLBDkkkk.k.kk........", ".................kDBLTTLBDk.................", "..................kDBDDBDk..................", "..................kDkDDkDk..................", "...................kdkkdk...................", "............................................", "............................................", "............................................"],
+  up:["kBDkk.............kk....kk.............kkDBk", "kLBDDkk...........kDk..kDk...........kkDDBLk", ".kTLBBDk.........kDBBkkBBDk.........kDBBLTk.", ".kTLTLBBk.......kBLDrTTrDLBk.......kBBLTLTk.", "..kTLTLTDkk.....kBDwLrrLwDBk.....kkDTLTLTk..", "..kTwTwTBBDk....kBDYYwwYYDBk....kDBBTwTwTk..", "...kTwTwLBBDk...kBDYprrpYDBk...kDBBLwTwTk...", "...kkTwTTLTBDkk.kBDLrTTrLDBk.kkDBTLTTwTkk...", "....kkTwwTLTBDDkBkBDrkkrDBkBkDDBTLTwwTkk....", "......kkTwTLLBBDBkBTLwwLTBkBDBBLLTwTkk......", "........TkTkTLBBkDBLTLLTLBDkBBLTkTkT........", "........kk.kTLBkkDBTLTTLTBDkkBLTk.kk........", ".............kkkkDBLTLLTLBDkkkk.............", ".................kDBLTTLBDk.................", "..................kDBDDBDk..................", "..................kDkDDkDk..................", "...................kdkkdk...................", "............................................", "............................................", "............................................"],
+  down:["..................kk....kk..................", "..................kDk..kDk..................", ".................kDBBkkBBDk.................", "................kBLDrTTrDLBk................", "................kBDwLrrLwDBk................", "................kBDYYwwYYDBk................", "........kk.k.kkkkBDYprrpYDBkkkk.k.kk........", "......kkTkTkTLBkkBDLrTTrLDBkkBLTkTkTkk......", "....kkTwTwTLTLBBBkBDrkkrDBkBBBLTLTwTwTkk....", "...kkTwTwTLTLBBDBkBTLwwLTBkBDBBLTLTwTwTkk...", "...kTwTwTLTBBDDkkDBLTLLTLBDkkDDBBTLTwTwTk...", "..kTwTwTLBBDDkk.kDBTLTTLTBDk.kkDDBBLTwTwTk..", "..kTLTLTBBDkk...kDBLTLLTLBDk...kkDBBTLTLTk..", ".kTLTLBBDkk......kDBLTTLBDk......kkDBBLTLTk.", ".kTLBBDkk.........kDBDDBDk.........kkDBBLTk.", "kLBDDkk...........kDkDDkDk...........kkDDBLk", "kBDkk..............kdkkdk..............kkDBk", ".kk......................................kk.", "............................................", "............................................"]
 };
 
 // soaring pose: each wing turned 20° down about its shoulder (nearest-neighbour rotation of the glide sprite)
@@ -983,15 +983,28 @@ function paintSky(){
     SCENE.giant={tx0:gx-(GW>>1),tx1:gx+(GW>>1),ax,AW,armTop,ay};
     // the front saguaro's night blooms, three times life size: a full crown on the right arm plus three more down its sides,
     // and one flaring out of the main column into the gap beside the arm
-    const big=(rows,x0,y0,flip,BK)=>{const w=rows[0].length,hh=rows.length,t=layer(w,hh);sprt(t.getContext("2d"),rows,0,0,flip,BLOOM);
-        bcx.imageSmoothingEnabled=false;const W2=Math.round(w*BK),H2=Math.round(hh*BK);bcx.drawImage(t,Math.round(x0),Math.round(y0),W2,H2);blooms.push({x:x0+W2/2,y:y0+H2/2,big:true,box:[Math.round(x0)-2,Math.round(y0)-2,W2+4,H2+4]})};
-    const cx=ax+(AW>>1),T=BLOOM_TOP,SD=BLOOM_SIDE,AK=2.4,TK=3.6,sw=SD[0].length*AK,tw2=T[0].length*AK,th2=T.length*AK;
-    // arm: six blooms clustered at the tip, drawn back to front so they tuck behind each other; all clear of the owl's hole
-    big(T,cx-tw2/2+5,armTop-th2-1,false,AK);                                           // a second crown bloom, behind
-    big(SD,ax+AW-4,armTop+22,true,AK);big(SD,ax+AW-4,armTop+10,true,AK);                  // down the right side
-    big(SD,ax-sw+5,armTop-8,false,AK);big(SD,ax+AW-4,armTop-3,true,AK);                  // flaring out at the tip
-    big(T,cx-tw2/2-2,armTop-th2+3,false,AK);                                           // the front crown bloom
-    big(SD,gx+(GW>>1)-5,Math.max(3,armTop-58),true,TK);                                 // one big bloom off the main column, well above the arm
+    // close-up blooms, drawn at full pixel detail: eight scalloped petals with faint veins and shade, a ring of yellow
+    // stamens round an orange heart, on a green floral tube. "side" blooms face sideways (tube toward the stem); "top" open skyward
+    const bloomPx=(cx,cy,r,kind,dir)=>{const sq=kind==="top"?.55:1,sx=kind==="side"?.72:1,P=(x,y,col)=>{bcx.fillStyle=col;bcx.fillRect(x,y,1,1)};
+      if(kind==="side"){const tl=Math.round(r*.9),th=Math.max(3,Math.round(r*.5));for(let k=0;k<tl;k++)for(let j=-(th>>1);j<=th>>1;j++){const X=Math.round(cx+dir*(r*sx*.6+k)),Y=cy+j+(k>tl*.6?Math.sign(j)*0:0);
+          P(X,Y,j<0?"#9cb882":j>0?"#5e7a4c":"#7e9a6a")}}
+      else{const tl=Math.round(r*.6);for(let k=0;k<tl;k++)for(let j=-1;j<=1;j++)P(cx+j,Math.round(cy+r*sq*.55+k),j<0?"#9cb882":j>0?"#5e7a4c":"#7e9a6a")}
+      const R=Math.ceil(r)+1;
+      for(let y=-R;y<=R;y++)for(let x=-R;x<=R;x++){
+        const ux=x/sx,uy=y/sq,d=Math.hypot(ux,uy),a=Math.atan2(uy,ux),edge=r*(.86+.14*Math.abs(Math.cos(a*4)));
+        if(d>edge)continue;const t=d/r,X=cx+x,Y=cy+y;
+        if(t<.13){P(X,Y,"#e8a830");continue}
+        if(t<.34){P(X,Y,(x+y)&1?"#ffd84a":"#fff0a0");continue}
+        const vein=Math.abs(((a/(Math.PI/4))%1+1)%1-.5)>.44,shade=(ux+uy)>r*.45,rim=d>edge-1;
+        P(X,Y,rim?"#dde4ee":vein?"#e6ecf4":shade?"#eef1f6":"#ffffff")}
+      blooms.push({x:cx,y:cy,big:true,box:[cx-R-(kind==="side"?R+2:2),cy-R-2,R*4+4,R*2+(kind==="top"?R:0)+6]})};
+    const cx=ax+(AW>>1);
+    // arm: six blooms clustered at the tip, back to front so they tuck behind each other; all clear of the owl's hole
+    bloomPx(cx+5,armTop-6,9,"top");                                       // a second crown bloom, behind
+    bloomPx(ax+AW+6,armTop+28,7,"side",-1);bloomPx(ax+AW+6,armTop+16,7,"side",-1);   // down the right side
+    bloomPx(ax-5,armTop-1,7,"side",1);bloomPx(ax+AW+6,armTop+3,7,"side",-1);          // flaring out at the tip
+    bloomPx(cx-2,armTop-3,10,"top");                                      // the front crown bloom
+    bloomPx(gx+(GW>>1)+9,Math.max(13,armTop-48),12,"side",-1);            // one big bloom off the main column, well above the arm
     return {x:hcx,top:hcy-ry,cy:hcy};
   }
 
@@ -1161,8 +1174,8 @@ const CHICK_SPOTS=[[],[[-4,15]],[[-9,13],[1,16]],[[-10,12],[2,12],[-4,17]],[[-10
 const SNAKE_COIL=["..........HHH...t.......",".........HHHeHHt........",".........crHHH..t.......",".........rc.............","..........cr...........Y",".......kcrrrrcrrk.....Y.","......kcdcrrcdcrrk....Y.","......krcrrrrcrrrk....W.","....kcrkkkkkkkkkkrrk..K.","...kcdcrrcdcrrcdcrrck.W.","...kbcrrrrcrrrrcrrrbkK..","..krkkkkkkkkkkkkkkkkrk..",".kdcrrcdcrrcdcrrcdcrrck.",".kbrrrrcrrrrcrrrrcrrrbk.","..kkkkkkkkkkkkkkkkkkkk..","........................"],SNAKEPAL={H:"#8a4a36",e:"#1a1210",t:"#d03838",d:"#5c3426",c:"#d8b48e",r:"#a8644a",K:"#2a2018",W:"#e8dcc0",b:"#ecd8b4",k:"#3a2418",Y:"#efe2c4"};
 // the hooting neighbour: a smaller, hand-drawn owl (scaling the big one garbled its eyes); a hoot = a little bow,
 // the white throat puffs, and a faint pixel-lettered "HOO" floats up and fades
-const OWL2=[".k........k.",".Dk......kD.","..DBkkkkBD..",".kBLBDDBLBk.",".kDrwDDwrDk.","kBrYYkkYYrBk","kBrYpkkpYrBk","kDrrkddkrrDk",".kDrrkkrrDk.",".kBWWWWWWBk.","kBLwLwwLwLBk","kDBLBLLBLBDk","kBLTLTTLTLBk","kDBBDBBDBBDk","kBLTLTTLTLBk",".kDBLTTLBDk.",".kDBDBBDBDk.","..kDTkkTDk..","..kdk..kdk.."];
-const OWL2_SHUT=OWL2.map((r,j)=>j===5?"kBrDDwwDDrBk":j===6?"kBrrrkkrrrBk":r);
+const OWL2=[".k........k.",".Dk......kD.","..DBkkkkBD..",".kBLBDDBLBk.",".kDrwDDwrDk.","kBYYYwwYYYBk","kBYpYddYpYBk","kDrrrkkrrrDk",".kDrrkkrrDk.",".kBWWWWWWBk.","kBLwLwwLwLBk","kDBLBLLBLBDk","kBLTLTTLTLBk","kDBBDBBDBBDk","kBLTLTTLTLBk",".kDBLTTLBDk.",".kDBDBBDBDk.","..kDTkkTDk..","..kdk..kdk.."];
+const OWL2_SHUT=OWL2.map((r,j)=>j===5?"kBDDDwwDDDBk":j===6?"kBrrrddrrrBk":r);
 const OWL2_HOOT=OWL2.map(r=>r==="kBLwLwwLwLBk"?"kBWWWWWWWWBk":r);
 const HOOTS=[0,1,1,1,0,0,0,1,1,0,1,1,0,1,1,1];                    // hoo, h'hoo, hoo, hoo
 function drawOwl2(c,s,o,hold){
