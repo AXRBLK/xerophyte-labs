@@ -1982,6 +1982,39 @@ function drawDeck(){
   [[7,H-8],[13,H-8]].forEach(([x,y])=>{c.fillStyle="#2a1814";c.fillRect(x-2,y-2,5,5);c.fillStyle="#c8c8d2";c.fillRect(x-1,y-1,3,3);P(x-1,y-1,"#f0f0f6")});
   c.fillStyle="#2a1814";c.fillRect(W-19,H-8,15,4);c.fillStyle="#9a9aa4";c.fillRect(W-18,H-7,6,2);c.fillStyle="#e8803a";c.fillRect(W-11,H-7,6,2);
 }
+/* keyboard media keys (play/pause, next, previous, stop) and the OS "now playing" panel.
+   Spotify plays inside its own frame, so the page holds the media session with a silent looping clip while music plays;
+   the browser then routes the media keys here and they drive the player. */
+const MEDIA={el:null};
+function silentClip(){
+  const n=8000,b=new Uint8Array(44+n),v=new DataView(b.buffer),t=(o,str)=>[...str].forEach((c,i)=>b[o+i]=c.charCodeAt(0));
+  t(0,"RIFF");v.setUint32(4,36+n,true);t(8,"WAVEfmt ");v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,8000,true);v.setUint32(28,8000,true);v.setUint16(32,1,true);v.setUint16(34,8,true);t(36,"data");v.setUint32(40,n,true);b.fill(128,44);
+  return URL.createObjectURL(new Blob([b],{type:"audio/wav"}));
+}
+function syncMedia(){
+  const playing=deckPlaying();
+  if(playing&&!MEDIA.el){MEDIA.el=new Audio(silentClip());MEDIA.el.loop=true;MEDIA.el.volume=.01}
+  if(MEDIA.el){if(playing&&MEDIA.el.paused)MEDIA.el.play().catch(()=>{});if(!playing&&!MEDIA.el.paused)MEDIA.el.pause()}
+  if(!("mediaSession" in navigator))return;
+  navigator.mediaSession.playbackState=playing?"playing":SPOT.ctl?"paused":"none";
+  const key=NOW.title+"|"+NOW.artist+"|"+NOW.art;
+  if(key!==MEDIA.key&&window.MediaMetadata){MEDIA.key=key;
+    navigator.mediaSession.metadata=new MediaMetadata({title:NOW.title||radioName(),artist:NOW.artist||"",album:radioName(),artwork:NOW.art?[{src:NOW.art,sizes:"300x300"}]:[]})}
+}
+if("mediaSession" in navigator){
+  const on=(a,f)=>{try{navigator.mediaSession.setActionHandler(a,f)}catch(e){}};
+  on("play",()=>AMP.play());on("pause",()=>AMP.pause());on("stop",()=>AMP.stop());
+  on("nexttrack",()=>AMP.next());on("previoustrack",()=>AMP.prev());
+}
+// some keyboards deliver media keys as ordinary key presses while the page has focus
+addEventListener("keydown",e=>{
+  const k=e.key;if(!SPOT.ctl)return;
+  if(k==="MediaPlayPause"){e.preventDefault();deckPlaying()?AMP.pause():AMP.play()}
+  else if(k==="MediaTrackNext"){e.preventDefault();AMP.next()}
+  else if(k==="MediaTrackPrevious"){e.preventDefault();AMP.prev()}
+  else if(k==="MediaStop"){e.preventDefault();AMP.stop()}
+});
 const AMP={
   play(){const C=SPOT.ctl;if(!C)return;SPOT.state.pos>0?C.resume():C.play()},
   pause(){SPOT.ctl&&SPOT.ctl.pause()},
@@ -1999,7 +2032,7 @@ function updateMini(){
   document.getElementById("miniTime").textContent=`${st} ${fmtT(s.pos)}`;
   ampText();
 }
-function ampUpdate(){updateMini();ampText();spinDeck();
+function ampUpdate(){updateMini();ampText();spinDeck();syncMedia();
   const s=SPOT.state,$=id=>document.getElementById(id);if(!$("ampTime"))return;
   $("ampTime").textContent=fmtT(s.pos);
   $("ampState").textContent=s.buffering?"LOADING":!s.paused?"PLAY":SPOT.stopped||!s.pos?"STOP":"PAUSE";
