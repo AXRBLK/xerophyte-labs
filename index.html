@@ -2086,15 +2086,40 @@ const radioName=()=>String(SET.radio_title||"").trim()||"Xerophyte FM";
    Spotify's public oEmbed and the artist from an iTunes search matched on title and length */
 // the skin's maker stamp: the radio name with its last word picked out, e.g. CHOLLA HUGGER RADIO
 const ampBrand=t=>{const w=String(t).trim().split(/\s+/);const last=w.length>1?w.pop():"";return esc(w.join(" "))+(last?` <b>${esc(last)}</b>`:"")};
-const NOW={uri:null,title:"",artist:"",started:false,art:""};
+const NOW={uri:null,title:"",artist:"",started:false,art:"",via:"",err:""};
+/* the embed talks to this page with postMessage; besides the controller's own events, dig through anything Spotify sends for a
+   track URI or a title/artist, so the now-playing line still fills in if playback_update arrives without playingURI */
+const RADIO_DEBUG=/radiodebug/.test(location.hash);
+function dig(o,depth,out){if(!o||depth>6)return out;if(typeof o==="string"){const m=o.match(/spotify:(track|episode):[A-Za-z0-9]{10,}/);if(m&&!out.uri)out.uri=m[0];return out}
+  if(typeof o!=="object")return out;
+  for(const k in o){const v=o[k];
+    if(!out.title&&/^(name|title|track_?name)$/i.test(k)&&typeof v==="string"&&v.length<200)out.title=v;
+    if(!out.artist&&/^artists?$/i.test(k)){if(typeof v==="string")out.artist=v;else if(Array.isArray(v)&&v.length)out.artist=v.map(a=>typeof a==="string"?a:a&&a.name).filter(Boolean).join(", ")}
+    dig(v,depth+1,out)}
+  return out}
+addEventListener("message",e=>{
+  let host="";try{host=new URL(e.origin).hostname}catch(_){}
+  if(!/(^|\.)spotify\.com$/.test(host))return;
+  let d=e.data;if(typeof d==="string"){try{d=JSON.parse(d)}catch(_){}}
+  const f=dig(d,0,{});SPOT.lastMsg=d;
+  if(RADIO_DEBUG)console.log("[radio] message",d,f);
+  if(f.uri&&f.uri!==NOW.uri){NOW.via="message";lookupTrack(f.uri,(SPOT.state&&SPOT.state.dur)||0)}
+  if(f.title&&!NOW.title){NOW.title=f.title;NOW.via=NOW.via||"message-meta";if(f.artist)NOW.artist=f.artist;ampText()}
+  radioDebug();
+});
+function radioDebug(){if(!RADIO_DEBUG)return;let b=document.getElementById("radiodbg");
+  if(!b){b=document.createElement("pre");b.id="radiodbg";b.style.cssText="position:fixed;left:8px;top:8px;z-index:9999;max-width:46vw;max-height:60vh;overflow:auto;background:#000c;color:#7dff7a;font:11px/1.35 monospace;padding:8px;margin:0;white-space:pre-wrap;pointer-events:auto";document.body.appendChild(b)}
+  const keys=o=>{try{return JSON.stringify(o).slice(0,600)}catch(_){return String(o)}};
+  b.textContent=`NOW uri: ${NOW.uri}\ntitle: ${NOW.title}\nartist: ${NOW.artist}\nvia: ${NOW.via}  started: ${NOW.started}\nerr: ${NOW.err}\nstate: ${keys(SPOT.state)}\nlast update: ${keys(SPOT.lastUpdate)}\nlast message: ${keys(SPOT.lastMsg)}`}
 function lookupTrack(uri,dur){
   const m=String(uri||"").match(/^spotify:(track|episode):([A-Za-z0-9]+)$/);if(!m||uri===NOW.uri)return;
-  NOW.uri=uri;NOW.title=NOW.artist="";ampText();
+  NOW.uri=uri;NOW.title=NOW.artist="";NOW.err="";ampText();radioDebug();
   const page=`https://open.spotify.com/${m[1]}/${m[2]}`;
   // Spotify's oEmbed first; if the browser blocks it, the same data through noembed.com (JSONP needs no CORS)
-  fetch(`https://open.spotify.com/oembed?url=${page}`).then(r=>r.ok?r.json():null).catch(()=>null)
+  fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(page)}`).then(r=>r.ok?r.json():null).catch(e=>{NOW.err="oembed: "+e;return null})
     .then(j=>j&&j.title?j:jsonp(`https://noembed.com/embed?url=${encodeURIComponent(page)}`))
     .then(j=>{
+      if(!j||!j.title){NOW.err+=" | noembed: "+(j&&j.error||"empty");radioDebug()}
       if(!j||NOW.uri!==uri)return;NOW.title=String(j.title||"").trim();NOW.art=j.thumbnail_url||"";if(NOW.art)loadArt(NOW.art);ampText();
       if(NOW.title&&m[1]==="track")findArtist(NOW.title,dur).then(a=>{if(NOW.uri!==uri||!a)return;
         if(a.artist){NOW.artist=a.artist;ampText()}
@@ -2192,7 +2217,8 @@ function loadSpotify(src){
       ctl.addListener("playback_update",e=>{const d=e.data||{};
         SPOT.state={paused:!!d.isPaused,pos:d.position||0,dur:d.duration||0,buffering:!!d.isBuffering};SPOT.at=performance.now();
         if(!d.isPaused){SPOT.stopped=false;NOW.started=true}
-        if(d.playingURI)lookupTrack(d.playingURI,d.duration||0);ampUpdate()});
+        SPOT.lastUpdate=d;const f=d.playingURI?{uri:d.playingURI}:dig(d,0,{});
+        if(f.uri)lookupTrack(f.uri,d.duration||0);ampUpdate();radioDebug()});
     });
   };
   if(SPOT.api){mount();return}
