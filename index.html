@@ -406,6 +406,8 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 #w-radio .amp-btns .pico,.miniamp .pico{color:#0c1a0c;filter:none}
 /* bigger player buttons: flat bright neon green with black icons */
 #w-radio .amp-btns button,#w-radio .amp-eject{min-width:42px!important;height:32px!important;background:#2cff3c!important;border-color:#9dffa4 #12a01e #12a01e #9dffa4!important;box-shadow:none}
+#w-radio .amp-btns button.on{background:#14b824!important;border-color:#0a6a14 #7af084 #7af084 #0a6a14!important;box-shadow:inset 1px 1px 0 rgba(0,0,0,.25)}
+#w-radio .amp-btns button.on .pico{transform:translate(1px,1px)}
 #w-radio .amp-btns button:active,#w-radio .amp-eject:active{background:#1fd92e!important;border-color:#12a01e #9dffa4 #9dffa4 #12a01e!important}
 #w-radio .amp-btns .pico{width:16px;height:16px}
 .miniamp button:not(.mini-lcd){height:28px!important;min-width:30px!important;background:#2cff3c!important;border-color:#9dffa4 #12a01e #12a01e #9dffa4!important;box-shadow:none}
@@ -514,6 +516,7 @@ folder:["................","..kkkkk.........",".kyyyyyk........","kyyyyyyykkkkkk
 letter:["................","................","................","kkkkkkkkkkkkkkkk","kwkwwwwwwwwwwkwk","kwwkwwwwwwwwkwwk","kwwwkwwwwwwkwwwk","kwwwwkwwwwkwwwwk","kwwwwwkkkkwwwwwk","kwwwwkwwwwkwwwwk","kwwwkwwwwwwkwwwk","kwwkwwwwwwwwkwwk","kkkkkkkkkkkkkkkk","................","................","................"],
 book:["................",".kkkkkkkkkkkk...",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSSwwwk..",".krrkwwwwwwwwk..",".krrkwSSSSSwwk..",".krrkwwwwwwwwk..",".krrkwSSSwwwwk..",".krrkwwwwwwwwk..",".krrkwwwwwwwwk..",".kkkkkkkkkkkkk..","................","................","................"],
 radio:["................","....kkkkkkkk....","....k......k....","kkkkkkkkkkkkkkkk","kssssssssssssssk","ksSSSssyyssSSSsk","kSkkkSsyysSkkkSk","kSkSkSssssSkSkSk","kSkkkSsrbsSkkkSk","ksSSSssssssSSSsk","kssssssssssssssk","kkkkkkkkkkkkkkkk","................","................","................","................"],
+binoculars:["................","................","...kkk....kkk...","..kSSSk..kSSSk..","..kSSSkkkkSSSk..",".kSSSSkSSkSSSSk.",".kSSSSkSSkSSSSk.",".kSSSSkkkkSSSSk.","kSSSSSk..kSSSSSk","kSSSSSk..kSSSSSk","kkkkkkk..kkkkkkk","kBBwBBk..kBBwBBk","kBbbbBk..kBbbbBk","kkkkkkk..kkkkkkk","................","................"],
 journal:["................","................",".kkkkkk..kkkkkk.","kwwwwwwkkwwwwwwk","kwkkkkwkkwwgwwwk","kwwwwwwkkwgggwgk","kwkkkkwkkwwgwggk","kwwwwwwkkwwgggwk","kwkkkwwkkwwgwwwk","kwwwwwwkkwwgwwwk","kwkkkkwkkwtttttk","kwwwwwwkkwwwwwwk","knnnnnnkknnnnnnk",".kkkkkkkkkkkkkk.","................","................"],
 postcard:["................","................","kkkkkkkkkkkkkkkk","kwwwwwwwkwwwkrrk","kwBBBBBwkwwwkrrk","kwBByBBwkwwwkkkk","kwBBBgBwkwwwwwwk","kwBgBgBwkwkkkkwk","kwttgttwkwwwwwwk","kwwwwwwwkwwwwwwk","kwwkkwwwkwkkkkwk","kwwwwwwwkwwwwwwk","kwwwwwwwkwkkkkwk","kkkkkkkkkkkkkkkk","................","................"],
 infosign:["................","...kkkkkkkkkk...","..knnnnnnnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnnnnnnnnk..","..knnnwwwnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnwwwwnnnk..","...kkkkkkkkkk...","......knnk......","......knnk......","....kkkkkkkk....","................"],
@@ -621,6 +624,16 @@ const OWL_FLY={
   down:["..................kk....kk..................", "..................kDk..kDk..................", ".................kDBBkkBBDk.................", "................kBLrrrrrrLBk................", "................kBrrwrrwrrBk................", "................kBrYYrrYYrBk................", "........kk.k.kkkkBrYprrpYrBkkkk.k.kk........", "......kkTkTkTLBkkBLrrddrrLBkkBLTkTkTkk......", "....kkTwTwTLTLBBBkBLrddrLBkBBBLTLTwTwTkk....", "...kkTwTwTLTLBBDBkBLLwwLLBkBDBBLTLTwTwTkk...", "...kTwTwTLTBBDDkkDBLTLLTLBDkkDDBBTLTwTwTk...", "..kTwTwTLBBDDkk.kDBTLTTLTBDk.kkDDBBLTwTwTk..", "..kTLTLTBBDkk...kDBLTLLTLBDk...kkDBBTLTLTk..", ".kTLTLBBDkk......kDBLTTLBDk......kkDBBLTLTk.", ".kTLBBDkk.........kDBDDBDk.........kkDBBLTk.", "kLBDDkk...........kDkDDkDk...........kkDDBLk", "kBDkk..............kdkkdk..............kkDBk", ".kk......................................kk.", "............................................", "............................................"]
 };
 
+// soaring pose: each wing turned 30° down about its shoulder (nearest-neighbour rotation of the glide sprite)
+function droopWings(rows,deg){
+  const H=rows.length+4,W=rows[0].length,out=[...Array(H)].map((_,y)=>[...(rows[y]||".".repeat(W))]);
+  const BL=16,BR=27,PY=5,a=deg*Math.PI/180,get=(x,y)=>(rows[y]||"")[x]||".";
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    if(x>=BL&&x<=BR)continue;const left=x<BL,px=left?BL:BR,t=left?-a:a,dx=x-px,dy=y-PY;
+    const sx=Math.round(px+dx*Math.cos(t)+dy*Math.sin(t)),sy=Math.round(PY-dx*Math.sin(t)+dy*Math.cos(t));
+    out[y][x]=(left?sx<BL:sx>BR)?get(sx,sy):"."}
+  return out.map(r=>r.join(""));
+}
 const CRITTERS={
   run:[
    ["...........kk.....","..........kNNk....","kk.......kNbNkkkkk",".kN.....kNNcNk....","..kN...kNNcc......","...kNNNNnNcc......","....kNnNnNnc......",".....kNNNNk.......","......kk.k........",".....k...k........","....kk....kk......"],
@@ -641,7 +654,7 @@ const CRITTERS={
   // front view in flight: both eyes stay visible on every wingbeat
   owlUp:OWL_FLY.up,
   owlDown:OWL_FLY.down,
-  owlGlide:OWL_FLY.glide,
+  owlGlide:droopWings(OWL_FLY.glide,30),
   chick:["..gggg..",".g....g.","gYp..pYg","gYY..YYg",".g.oo.g.","..gggg.."],
   chickBlink:["..gggg..",".g....g.","g......g","gGG..GGg",".g.oo.g.","..gggg.."],
   scorp:[["......sS.",".......S.","SS.SSSS..","s.s.s.s.."],["......sS.",".......S.","SS.SSSS..",".s.s.s.s."]],
@@ -938,6 +951,15 @@ function paintSky(){
   Object.assign(SCENE,{layers:{sky,orb,clouds,ground,plants,bloom:bloomCv,flowers:flowerCv},flowers,sr,H0,span,ctx:cv.getContext("2d"),groundA:layer(w,h),airA:layer(w,h),w,h,t:0,stars,toads,ravens,perches:usable,scorps,bats,mice,shoot:[],groundY,blooms:N?blooms:[]});
   SCENE.owl={nest,state:"home",blink:0,timer:RI(40,120),path:[],x:0,y:0,face:1};
   SCENE.runner={x:Math.round(w*.4),y:H0+Math.round(span*.52),dir:1,state:N?"asleep":"stand",timer:20};
+  // portraits of each plant for the Biodiversity Report, drawn with the same brushes as the scene (side effects undone afterwards)
+  {const sv=[c,bcx,fcx],pl=perches.length,bl=blooms.length,fl=flowers.length,P={};
+   const mk=(key,W,H,draw)=>{const cv2=layer(W,H),fc=layer(W,H),bc=layer(W,H);c=cv2.getContext("2d");fcx=fc.getContext("2d");bcx=bc.getContext("2d");draw(W,H);c.drawImage(fc,0,0);P[key]=cv2};
+   mk("sag",34,48,(W,H)=>saguaro(17,H-1,42,SAG[2],2));
+   mk("cho",26,32,(W,H)=>cholla(12,H-1,1.8,false));
+   mk("opu",28,26,(W,H)=>opuntia(10,H-1,1.15,false));
+   mk("cre",14,9,(W,H)=>{for(let k=0;k<4;k++)creosote(7+ri(-2,2),H-1-k)});
+   [c,bcx,fcx]=sv;perches.length=pl;blooms.length=bl;flowers.length=fl;SCENE.plantArt=P;
+   if(typeof BIO_IMG!=="undefined")Object.keys(P).forEach(k=>delete BIO_IMG[k])}
   clearInterval(SCENE.timer);
   drawScene();
   if(SCENE.motion)SCENE.timer=setInterval(drawScene,SCENE.disco?90:125);
@@ -1018,6 +1040,10 @@ function stepRaven(r,s){
   }
 }
 const OWL_FW=22,OWL_FH=8;
+// where the owlets sit in the cavity for each brood size (back row first)
+const CHICK_SPOTS=[[],[[-4,15]],[[-9,13],[1,16]],[[-10,12],[2,12],[-4,17]],[[-10,11],[2,11],[-8,17],[0,17]],
+  [[-10,10],[2,10],[-4,13],[-10,17],[2,17]],[[-11,10],[-4,10],[3,10],[-11,17],[-4,17],[3,17]]];
+const PREY=["..PBBB..",".BBBBBk.","tBBBBWW.","t..BWW..",".t......"];   // a mouse dangling from the owl's talons
 // by day the owl dozes, now and then cracking one eye open; the peeks come oftener as the afternoon wears on toward sunset (7pm)
 function dayPeek(o){
   const d=new Date(),h=d.getHours()+d.getMinutes()/60,pd=Math.min(1,Math.max(0,(h-6)/13));
@@ -1035,16 +1061,27 @@ function stepOwl(o,s){
     if(o.blink>0)o.blink--;else if(R()<(s.night?.03:.02))o.blink=RI(1,2);
     if(--o.timer<=0&&R()<(s.night?1/90:1/600)){
       // a sortie: flap out of the cavity, glide down to swoop at the ground, ride a thermal, then glide home
-      const gx=Math.max(20,Math.min(s.w-20,n.x+RI(30,Math.round(s.w*.6)))),gy=s.groundY()-8;
+      const prey=shown("desert_mice")&&R()<.7?(s.mice||[]).filter(m=>!m.caught&&m.x>20&&m.x<s.w-30).sort(()=>R()-.5)[0]:null;
+      if(prey)prey.marked=true;
+      const gx=prey?prey.x+6:Math.max(20,Math.min(s.w-20,n.x+RI(30,Math.round(s.w*.6)))),gy=prey?prey.y-14:s.groundY()-8;
       const cx=Math.max(30,Math.min(s.w-30,gx+RI(-30,30))),cy=s.H0*.3+RI(-8,8),r=RI(16,28),dir=R()<.5?1:-1,a0=R()*6.28,steps=Math.round(14*(1+R()*.6));
       const loop=[];for(let k=0;k<=steps;k++){const a=a0+dir*k*Math.PI*2/14;loop.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r*.5})}
-      o.path=[{x:n.x+RI(16,30),y:n.cy-RI(16,26),flap:true},{x:gx,y:gy},{x:gx+dir*20,y:gy-14,flap:true},...loop,{x:n.x+10,y:n.cy-10},{x:n.x,y:n.cy}];
+      o.path=[{x:n.x+RI(16,30),y:n.cy-RI(16,26),flap:true},{x:gx,y:gy,prey},{x:gx+dir*20,y:gy-14,flap:true},...loop,{x:n.x+10,y:n.cy-10},{x:n.x,y:n.cy}];
       o.state="fly";o.x=n.x;o.y=n.cy;o.flap=0;
     }
+  }else if(o.state==="feed"){                                                 // hovering at the cavity while the owlets take the mouse
+    o.flap=1;if(--o.timer<=0){o.prey=false;o.state="home";o.x=n.x;o.y=n.cy;o.timer=RI(40,160)}
   }else{
     const tg=o.path[0];if(!tg){o.state="home";o.timer=RI(40,160);return}
+    if(tg.prey&&!tg.prey.caught){tg.x=tg.prey.x+6;tg.y=tg.prey.y-14}                 // track the frozen mouse
     const dx=tg.x-o.x,dy=tg.y-o.y,d=Math.hypot(dx,dy);
-    if(d<1.6){o.path.shift();if(!o.path.length){o.state="home";o.timer=RI(40,160)}return}
+    if(d<1.6){
+      if(tg.prey){const m=tg.prey;m.marked=false;
+        if(!m.caught&&Math.hypot(m.x+6-o.x,m.y-14-o.y)<6){m.caught=true;m.respawn=RI(500,1100);o.prey=true;
+          o.path=[o.path[1],{x:n.x+10,y:n.cy-14},{x:n.x,y:n.top-4,flap:true}];o.path.unshift({x:o.x,y:o.y});}}   // skip the thermal: straight home
+      o.path.shift();
+      if(!o.path.length){if(o.prey&&shown("owl_chicks")&&owlChickN()>0){o.state="feed";o.feedT=o.timer=RI(32,48);o.x=n.x;o.y=n.top-4}else{o.prey=false;o.state="home";o.timer=RI(40,160)}}
+      return}
     const sp=Math.min(o.path.length<=2?.9:1.5,d);o.x+=dx/d*sp;o.y+=dy/d*sp;
     o.flap=tg.flap||dy/d<-.7?((s.t>>1)%3!==2?1:0):0; // wingbeats only when taking off or climbing hard
   }
@@ -1052,6 +1089,7 @@ function stepOwl(o,s){
 function stepMouse(m,s){
   // desert mouse: bursts of springy hops, pauses to nibble seeds, freezes when the owl is out
   const o=s.owl;
+  if(m.marked){m.state="freeze";m.yo=0;m.timer=20;return}
   if(o&&o.state==="fly"&&Math.hypot(o.x-m.x,o.y-m.y)<70){m.state="freeze";m.timer=RI(10,30);m.yo=0;return}
   m.timer--;
   if(m.state==="hop"){
@@ -1321,10 +1359,10 @@ function swayLayer(c,cv,list,s,box){
   list.forEach((f,i)=>{const [x,y,w,h]=box(f),dx=Math.round(Math.sin(t*.8+i*1.7+f.x*.13)*1.15);c.drawImage(cv,x,y,w,h,x+dx,y,w,h)});
 }
 // night: Saturn, a tiny ringed dot very far off, steady (planets don't twinkle); it slips behind the clouds and the moon
-const SATURN=[".yyy.","rrrrr",".yYy."],SATPAL={y:"#cdbf94",Y:"#a8996e",r:"#8a8a9c"};
+const SATURN=["......................",".........YYyy.........","........YYyyyy........",".....rrYYbbbbbbrr.....",".rrRR..Yyyyyyyy..RRrr.","rRRR..Yyyyyyyydd..RRRr",".rrrr..yyyyyydd..rrrr.",".....rrrrrrrrrrrr.....","........yyyddd........",".........yddd.........","......................"],SATPAL={y:"#e2cf98",Y:"#fff0c8",d:"#b8a272",b:"#c8a874",r:"#b4b0c8",R:"#dcd8ec"};
 function drawSaturn(c,s){
   if(!shown("saturn"))return;
-  if(!s.saturn||s.saturn.w!==s.w)s.saturn={w:s.w,x:Math.round(s.w*(.5+R()*.38)),y:Math.round(s.H0*(.1+R()*.14))};
+  if(!s.saturn||s.saturn.w!==s.w)s.saturn={w:s.w,x:Math.round(s.w*(.5+R()*.36)),y:Math.round(s.H0*(.18+R()*.14))};
   sprt(c,SATURN,s.saturn.x,s.saturn.y,false,SATPAL);
 }
 // night: a flying saucer glides in, parks over the trophy truck, beams it up and leaves; with no truck it just drifts across
@@ -1338,13 +1376,13 @@ function stepUfo(s,tk){
     if(!(truckMid&&T.marked)&&!(R()<1/5000))return null;              // only some trucks are marked for abduction
     const dir=R()<.5?1:-1;
     u=s.ufo={x:dir>0?-UFO_W-4:s.w+4,y:Math.round(s.H0*(.08+R()*.1)),vx:0,vy:0,dir,t:0,state:truckMid&&T.marked?"seek":"cross"};if(T)T.marked=false;
-    if(u.state==="cross"){u.vx=dir*.55}
+    if(u.state==="cross"){u.vx=dir*1.1}
   }
   u.t++;
   if(u.state==="seek"&&T&&T.on){                                     // ease in until parked over the truck, matching its speed
     const tx=T.x+TRUCK[0].length/2-UFO_W/2,ty=Math.max(s.H0*.18,T.y-30);
-    const cl=(v,m)=>Math.max(-m,Math.min(m,v)),wx=cl((tx-u.x)*.03,1.1)+T.dir*T.sp,wy=cl((ty-u.y)*.03,.6);
-    u.vx+=(wx-u.vx)*.08;u.vy+=(wy-u.vy)*.08;u.x+=u.vx;u.y+=u.vy;
+    const cl=(v,m)=>Math.max(-m,Math.min(m,v)),wx=cl((tx-u.x)*.05,2.2)+T.dir*T.sp,wy=cl((ty-u.y)*.05,1.2);
+    u.vx+=(wx-u.vx)*.14;u.vy+=(wy-u.vy)*.14;u.x+=u.vx;u.y+=u.vy;
     if(Math.abs(tx-u.x)<1.5&&Math.abs(ty-u.y)<1.2){u.state="beam";u.beam=0;T.held=true}
   }else if(u.state==="seek"){u.state="leave"}
   else if(u.state==="beam"){
@@ -1354,7 +1392,7 @@ function stepUfo(s,tk){
     else if(!T||!T.on){u.state="leave";u.hold=10}
   }else if(u.state==="leave"){
     if(u.hold>0){u.hold--;u.y+=Math.sin(u.t*.2)*.08}
-    else{u.vy-=.06;u.vx+=u.dir*.05;u.x+=u.vx;u.y+=u.vy}
+    else{u.vy-=.12;u.vx+=u.dir*.1;u.x+=u.vx;u.y+=u.vy}
   }else{u.x+=u.vx;u.y+=Math.sin(u.t*.06)*.15}
   if(u.x<-UFO_W-10||u.x>s.w+10||u.y<-UFO_H-4){s.ufo=null;return null}
   return u;
@@ -1417,7 +1455,9 @@ function drawScene(){
     const rs=hold?CRITTERS.stand:rr.state==="run"||rr.state==="hunt"?CRITTERS.run[s.t%2]:rr.state==="peck"||(rr.state==="eat"&&s.t%4<2)?CRITTERS.peck:CRITTERS.stand;
     g.fillStyle="#6e5e4c";g.fillRect(Math.round(rr.x)+4,Math.round(rr.y),9,1);(hold||rr.state==="stand"||rr.state==="peck")?sprtBob(g,rs,rr.x,rr.y-11,5,bob,rr.dir<0):sprt(g,rs,rr.x,rr.y-11,rr.dir<0);
   }
-  if(N&&shown("desert_mice"))(s.mice||[]).forEach(m=>{if(hold)m.yo=0;else stepMouse(m,s);
+  if(N&&shown("desert_mice"))(s.mice||[]).forEach(m=>{
+    if(m.caught){if(!hold&&--m.respawn<=0){m.caught=false;m.dir=R()<.5?1:-1;m.x=m.dir>0?2:s.w-20;m.state="hop";m.hops=RI(4,8);m.ht=0}return}
+    if(hold)m.yo=0;else stepMouse(m,s);
     const f=!hold&&m.state==="hop"&&m.yo<0?CRITTERS.mouseHop:CRITTERS.mouseSit;
     sprtBob(g,f,m.x,m.y-10+m.yo,5,hold?bob:m.state==="nibble"&&s.t%4<2?1:0,m.dir<0,MOUSE)});
   const tk=N&&shown("baja_truck")?stepTruck(s):null;
@@ -1436,6 +1476,7 @@ function drawScene(){
   const o=s.owl,owlOn=shown("owl");if(owlOn)stepOwl(o,s);let owlSprite=null,ox=0,oy=0;
   if(o.state==="home"){owlSprite=!N?(o.peek>0?CRITTERS["owlPeek"+o.peekEye]:CRITTERS.owlBlink):o.blink>0?CRITTERS.owlBlink:CRITTERS.owlHome;ox=o.nest.x-8;oy=o.nest.top+(N?3:4)}
   else{owlSprite=o.flap?((s.t>>1)%2?CRITTERS.owlUp:CRITTERS.owlDown):CRITTERS.owlGlide;ox=o.x-OWL_FW;oy=o.y-OWL_FH}
+  const carry=owlOn&&o.prey&&o.state==="fly";
   if(shown("ravens"))s.ravens.forEach(r=>{
     stepRaven(r,s);if(r.state==="gone")return;
     const f=r.state==="roost"?CRITTERS.ravenSleep:r.state==="perch"?CRITTERS.ravenPerch:r.flap>0?(Math.floor(s.t/3)%2?CRITTERS.ravenUp:CRITTERS.ravenDown):CRITTERS.ravenGlide;
@@ -1445,11 +1486,15 @@ function drawScene(){
   if(N)tint(A,"rgba(16,22,58,.5)");
   c.drawImage(A,0,0);
   if((o.state!=="home"||!owlOn)&&shown("owl_chicks")){
-    o.chicks=o.chicks||[{b:0},{b:0}];
-    o.chicks.forEach((ch,i)=>{if(ch.b>0)ch.b--;else if(R()<.025)ch.b=RI(1,3);
-      sprt(c,ch.b>0?CRITTERS.chickBlink:CRITTERS.chick,o.nest.x+(i?1:-9),o.nest.top+(i?16:13),false,CHICKPAL)});
+    const nc=owlChickN();if(!o.chicks||o.chicks.length!==nc)o.chicks=[...Array(nc)].map(()=>({b:0}));
+    const SPOTS=CHICK_SPOTS[nc]||CHICK_SPOTS[6],feeding=o.state==="feed";
+    o.chicks.map((ch,i)=>[ch,i]).sort((p,q)=>SPOTS[p[1]][1]-SPOTS[q[1]][1]).forEach(([ch,i])=>{if(ch.b>0)ch.b--;else if(R()<.025)ch.b=RI(1,3);
+      const [dx,dy]=SPOTS[i],hop=feeding&&(s.t+i)%2?-1:0;                                       // begging: they bounce while the parent feeds them
+      sprt(c,ch.b>0&&!feeding?CRITTERS.chickBlink:CRITTERS.chick,o.nest.x+dx,o.nest.top+dy+hop,false,CHICKPAL)});
+    if(feeding&&o.timer>o.feedT*.4)sprt(c,PREY,o.nest.x-5,o.nest.top+9,false,MOUSE);              // the mouse, until it's gone
   }
   if(owlOn)(o.state==="home"?sprtBob:(c,r,x,y,sp,dy,f,p)=>sprt(c,r,x,y,f,p))(c,owlSprite,ox,oy,10,bob,false,N?OWLPAL_N:o.state==="home"&&o.peek>0?OWLPAL_PEEK:OWLPAL_DAY); // asleep and shadowed by day; awake with bright eyes at night
+  if(carry)sprt(c,PREY,Math.round(o.x)-4,Math.round(o.y)+8,false,MOUSE);
 }
 
 /* ---------- Desert Map: pixel-rendered satellite/terrain with live weather ---------- */
@@ -1731,6 +1776,7 @@ function wildCount(name,def){
   const n=r?parseInt(String(r.count??"").trim(),10):NaN;return Number.isFinite(n)?Math.max(0,Math.min(20,n)):def;
 }
 const shown=name=>!HIDE_WILD.has(name);
+const owlChickN=()=>Math.min(6,wildCount("owl_chicks",2));
 function deskRow(id,label){
   const keys=[String(id).toLowerCase(),String(label).toLowerCase()];
   return (DATA.desktop||[]).find(r=>keys.includes(String(r.icon||"").trim().toLowerCase()));
@@ -2125,6 +2171,7 @@ function ampUpdate(){updateMini();ampText();spinDeck();syncMedia();
   $("ampState").textContent=s.buffering?"LOADING":!s.paused?"PLAY":SPOT.stopped||!s.pos?"STOP":"PAUSE";
   const pct=s.dur?Math.min(100,s.pos/s.dur*100):0;$("ampBar").style.width=pct+"%";$("ampSeek").setAttribute("aria-valuenow",Math.round(pct));
   const playing=!s.paused&&!s.buffering;
+  $("ampPlay").classList.toggle("on",!!SPOT.ctl&&!s.paused);$("ampPause").classList.toggle("on",!!SPOT.ctl&&s.paused&&!SPOT.stopped&&s.pos>0);   // held down while active
   if(playing&&!SPOT.viz)SPOT.viz=setInterval(()=>drawViz(false),110);
   if(!playing&&SPOT.viz){clearInterval(SPOT.viz);SPOT.viz=null;drawViz(true)}
 }
@@ -2216,13 +2263,13 @@ async function loadHistory(){
 /* ---------- Biodiversity Report: a field census of the scene's wildlife and flora, plus the Cacti tab collection ---------- */
 const FAUNA=[
   {key:"owl",common:"Great horned owl",sci:"Bubo virginianus",fam:"Strigidae",cls:"Aves",n:s=>1,when:"nocturnal; roosts in the saguaro cavity by day"},
-  {key:"owl_chicks",common:"Great horned owl (owlets)",sci:"Bubo virginianus",fam:"Strigidae",cls:"Aves",n:s=>2,when:"nestlings; visible while the parent hunts"},
+  {key:"owl_chicks",common:"Great horned owl (owlets)",sci:"Bubo virginianus",fam:"Strigidae",cls:"Aves",n:s=>owlChickN(),when:"nestlings; visible while the parent hunts"},
   {key:"roadrunner",common:"Greater roadrunner",sci:"Geococcyx californianus",fam:"Cuculidae",cls:"Aves",n:s=>1,when:"diurnal; hunts scorpions and lizards"},
   {key:"ravens",common:"Common raven",sci:"Corvus corax",fam:"Corvidae",cls:"Aves",n:s=>(s.ravens||[]).length,when:"diurnal; soars, perches and roosts on saguaros"},
   {key:"horned_lizards",common:"Flat-tailed horned lizard",sci:"Phrynosoma mcallii",fam:"Phrynosomatidae",cls:"Reptilia",n:s=>(s.toads||[]).length,when:"diurnal; buries in sand after dark"},
   {key:"scorpions",common:"Desert hairy scorpion",sci:"Hadrurus arizonensis",fam:"Caraboctonidae",cls:"Arachnida",n:s=>(s.scorps||[]).filter(p=>p.alive).length,when:"mostly nocturnal; fluoresces under moonlight"},
   {key:"bats",common:"Lesser long-nosed bat",sci:"Leptonycteris yerbabuenae",fam:"Phyllostomidae",cls:"Mammalia",n:s=>(s.bats||[]).length,when:"nocturnal; pollinates saguaro blooms"},
-  {key:"desert_mice",common:"Cactus mouse",sci:"Peromyscus eremicus",fam:"Cricetidae",cls:"Mammalia",n:s=>(s.mice||[]).length,when:"nocturnal; forages for seeds"}
+  {key:"desert_mice",common:"Cactus mouse",sci:"Peromyscus eremicus",fam:"Cricetidae",cls:"Mammalia",n:s=>(s.mice||[]).filter(m=>!m.caught).length,when:"nocturnal; forages for seeds"}
 ];
 const FLORA=[
   {key:"sag",common:"Saguaro",sci:"Carnegiea gigantea",fam:"Cactaceae"},
@@ -2241,6 +2288,9 @@ const BAT_HANG=[".K.K.",".KKK.","KKvKK","KKKKK",".KKK.","..K.."];
 function bioSprite(key){
   const m={owl:[CRITTERS.owlHome,OWLPAL],owl_chicks:[CRITTERS.chick,CHICKPAL],roadrunner:[CRITTERS.stand],ravens:[CRITTERS.ravenPerch,RAVENPAL],
     horned_lizards:[CRITTERS.toad],scorpions:[CRITTERS.scorp[0]],bats:[BAT_HANG],desert_mice:[CRITTERS.mouseSit,MOUSE]}[key];
+  const pa=SCENE.plantArt&&SCENE.plantArt[key];
+  if(pa){BIO_IMG[key]=BIO_IMG[key]||(()=>{const k=Math.max(2,Math.min(8,Math.floor(96/Math.max(pa.width,pa.height)))),cv=document.createElement("canvas");
+    cv.width=pa.width*k;cv.height=pa.height*k;const g=cv.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(pa,0,0,cv.width,cv.height);return cv.toDataURL()})();return BIO_IMG[key]}
   if(!m)return "";BIO_IMG[key]=BIO_IMG[key]||(()=>{const rows=m[0],w=Math.max(...rows.map(r=>r.length)),h=rows.length,k=Math.max(3,Math.min(6,Math.floor(84/Math.max(w,h))));
     const cv=document.createElement("canvas");cv.width=w*k;cv.height=h*k;const g=cv.getContext("2d");g.scale(k,k);sprt(g,rows,0,0,false,m[1]);return cv.toDataURL()})();
   return BIO_IMG[key];
@@ -2263,7 +2313,7 @@ function renderBio(body,status){
   const fauna=FAUNA.map(a=>{const on=shown(a.key),present=on&&(a.key==="bats"||a.key==="desert_mice"?N:true);
     const n=present?a.n(s):0;return {...a,on,n,act:on&&active(a)}});
   const floraRows=FLORA.map(p=>({...p,n:f[p.key]||0}));
-  const dF=diversity(fauna.filter(a=>a.key!=="owl_chicks").map(a=>a.n+(a.key==="owl"?2*(shown("owl_chicks")?1:0):0)));
+  const dF=diversity(fauna.filter(a=>a.key!=="owl_chicks").map(a=>a.n+(a.key==="owl"&&shown("owl_chicks")?owlChickN():0)));
   const dP=diversity(floraRows.map(p=>p.n));
   const cacti=(DATA.cacti||[]).filter(c=>c.name),bySp={};cacti.forEach(c=>{const k=(c.species||"Unidentified").trim();(bySp[k]=bySp[k]||[]).push(c)});
   const genera=new Set(Object.keys(bySp).map(k=>k.split(/\s+/)[0]));
@@ -2279,15 +2329,10 @@ function renderBio(body,status){
     <p class="bio-stats">Richness <b>S = ${dF.S}</b> · individuals <b>N = ${dF.N}</b> · Shannon <b>H′ = ${fmt(dF.H)}</b> · evenness <b>J′ = ${fmt(dF.E)}</b> · Simpson <b>1−D = ${fmt(dF.D)}</b></p>
     <h3>Flora (scene transect)</h3>
     <div class="tbl"><table class="biot"><thead><tr><th>Species</th><th>Family</th><th class="n">Count</th></tr></thead><tbody>
-    ${floraRows.map(p=>`<tr><td>${p.common}<br><i class="sci">${p.sci}</i></td><td>${p.fam}</td><td class="n big">${p.n}</td></tr>`).join("")}
+    ${floraRows.map(p=>`<tr><td class="sp" data-sp="${p.key}" data-rest="${esc(p.common)}">${p.common}<br><i class="sci">${p.sci}</i></td><td>${p.fam}</td><td class="n big">${p.n}</td></tr>`).join("")}
     <tr><td colspan="2" class="muted">Flowering: prickly-pear blooms${N?" · open saguaro night blooms":""}</td><td class="n">${(s.flowers||[]).length}${N?" · "+(s.blooms||[]).length:""}</td></tr>
     </tbody></table></div>
     <p class="bio-stats">Richness <b>S = ${dP.S}</b> · individuals <b>N = ${dP.N}</b> · Shannon <b>H′ = ${fmt(dP.H)}</b> · evenness <b>J′ = ${fmt(dP.E)}</b> · Simpson <b>1−D = ${fmt(dP.D)}</b></p>
-    <h3>Collection (Cacti tab)</h3>
-    ${cacti.length?`<div class="tbl"><table class="biot"><thead><tr><th>Species</th><th class="n">Specimens</th><th>Names</th></tr></thead><tbody>
-    ${Object.entries(bySp).sort((a,b)=>a[0].localeCompare(b[0])).map(([sp,cs])=>`<tr><td>${esc(cs[0].common_name||"")}<br><i class="sci">${esc(sp)}</i></td><td class="n big">${cs.length}</td><td class="wrap">${cs.map(c=>esc(c.name)).join(", ")}</td></tr>`).join("")}
-    </tbody></table></div>
-    <p class="bio-stats">${cacti.length} specimens · ${Object.keys(bySp).length} species · ${genera.size} genera · ${thirsty} need water, ${soon} due soon</p>`:`<p class="muted">No plants on the Cacti tab yet.</p>`}
   </div>`;
   if(status)status.innerHTML=`<span>${dF.S+dP.S} species observed</span><span>${N?"Night":"Day"} survey</span>`;
   bioTips(body);
@@ -2405,7 +2450,7 @@ function build(){
   defineWindow("map",{title:"Desert Map",icon:"map",w:Math.min(860,innerWidth-40),x:mob?16:Math.max(110,(innerWidth-860)/2),y:70,render:renderMap,status:true});
   defineWindow("radio",{title:radioName(),icon:"radio",w:380,x:innerWidth-595,y:64,render:renderRadio,status:true});
   defineWindow("today",{title:"Weather Now",icon:"sun",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
-  defineWindow("bio",{title:"Biodiversity Report",icon:"trailcam",w:660,x:cx(660),y:100,render:renderBio,menu:["File","Survey","Help"],status:true});
+  defineWindow("bio",{title:"Biodiversity Report",icon:"journal",w:660,x:cx(660),y:100,render:renderBio,menu:["File","Survey","Help"],status:true});
   defineWindow("log",{title:"Weather Log",icon:"chart",w:640,x:cx(640),y:110,render:renderLog,menu:["File","Edit","Chart"],status:true});
   const thirsty=(DATA.cacti||[]).filter(c=>c.name&&cactusState(c).status==="thirsty").length;
   HIDE_WILD=new Set((DATA.wildlife||[]).filter(r=>isNo(r.show)).map(r=>String(r.animal||"").trim().toLowerCase()));
@@ -2420,9 +2465,9 @@ function build(){
     const name=lab||label;if(WINS[id]&&lab){WINS[id].title=lab;WINS[id].el.querySelector(".bar b").textContent=lab;WINS[id].el.setAttribute("aria-label",lab)}
     ICONS.push({id,name,el:iconBtn(id,name,icon,badge)})};
   place(L,"cacti","My Cacti","saguaro",thirsty||"");place(L,"log","Weather Log","chart");
-  place(L,"today","Weather Now","sun");place(L,"bio","Biodiversity Report","trailcam");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
+  place(L,"today","Weather Now","sun");place(L,"bio","Biodiversity Report","journal");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
-    const pic=/^contact/i.test(String(p.title).trim())?"postcard":/^about/i.test(String(p.title).trim())?"infosign":/^field\s*notes/i.test(String(p.title).trim())?"journal":(p.icon||"folder").toLowerCase();
+    const pic=/^contact/i.test(String(p.title).trim())?"postcard":/^about/i.test(String(p.title).trim())?"infosign":/^field\s*notes/i.test(String(p.title).trim())?"binoculars":(p.icon||"folder").toLowerCase();
     const id="p"+i;defineWindow(id,{title:p.title,icon:pic,w:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
     place(L,id,p.title,pic);
   });
