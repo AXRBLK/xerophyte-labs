@@ -374,6 +374,13 @@ body.night .chip.thirsty{border-color:#e08aa2}
   .bar{cursor:default}
   .days{grid-template-columns:repeat(3,1fr)}
 }
+/* phones held sideways: windows don't span the whole width (the icons stay visible on the right), they sit higher
+   to use the short screen, and the taskbar drops most of the home-indicator padding */
+@media (pointer:coarse) and (orientation:landscape){
+  .win{left:calc(16px + env(safe-area-inset-left,0px))!important;right:auto;width:min(640px,calc(100vw - 220px))!important;top:calc(10px + env(safe-area-inset-top,0px))!important;max-height:calc(100% - 64px)}
+  .taskbar{padding-bottom:max(3px,calc(env(safe-area-inset-bottom,0px) - 14px))}
+  .startmenu{bottom:calc(40px + max(0px,env(safe-area-inset-bottom,0px) - 14px))}
+}
 /* phones and touch screens: finger-sized minimize / close buttons */
 @media (pointer:coarse),(max-width:500px){
   .bar{padding:4px 4px 4px 8px;gap:8px}
