@@ -1092,7 +1092,7 @@ const OWL_FW=22,OWL_FH=8,OWL_SETTLE=6,OWL_FADE=3;
 const CHICK_SPOTS=[[],[[-4,15]],[[-9,13],[1,16]],[[-10,12],[2,12],[-4,17]],[[-10,11],[2,11],[-8,17],[0,17]],
   [[-10,10],[2,10],[-4,13],[-10,17],[2,17]],[[-11,10],[-4,10],[3,10],[-11,17],[-4,17],[3,17]]];
 // resting rattlesnake, coiled with its head up, for the Biodiversity Report
-const SNAKE_COIL=["......HH....","....HHeHt...","....dHH.....","..crcdrc....",".rdcrrdcrc..","crrdcrrdcrrW","rdcrrdcrrdKW",".ccrrdccrcc."],SNAKEPAL={H:"#8a4a36",e:"#1a1210",t:"#d03838",d:"#5c3426",c:"#d8b48e",r:"#a8644a",K:"#2a2018",W:"#e8dcc0"};
+const SNAKE_COIL=["..........HHH...t.......",".........HHHeHHt........",".........crHHH..t.......",".........rc.............","..........cr...........Y",".......kcrrrrcrrk.....Y.","......kcdcrrcdcrrk....Y.","......krcrrrrcrrrk....W.","....kcrkkkkkkkkkkrrk..K.","...kcdcrrcdcrrcdcrrck.W.","...kbcrrrrcrrrrcrrrbkK..","..krkkkkkkkkkkkkkkkkrk..",".kdcrrcdcrrcdcrrcdcrrck.",".kbrrrrcrrrrcrrrrcrrrbk.","..kkkkkkkkkkkkkkkkkkkk..","........................"],SNAKEPAL={H:"#8a4a36",e:"#1a1210",t:"#d03838",d:"#5c3426",c:"#d8b48e",r:"#a8644a",K:"#2a2018",W:"#e8dcc0",b:"#ecd8b4",k:"#3a2418",Y:"#efe2c4"};
 // the hooting neighbour: a smaller, hand-drawn owl (scaling the big one garbled its eyes); a hoot = a little bow,
 // the white throat puffs, and a faint pixel-lettered "HOO" floats up and fades
 const OWL2=[".k........k.",".Dk......kD.","..DBkkkkBD..",".kBLBDDBLBk.",".kDrwDDwrDk.","kBrYYkkYYrBk","kBrYpkkpYrBk","kDrrrddrrrDk",".kDrrkkrrDk.",".kBWWWWWWBk.","kBLwLwwLwLBk","kDBLBLLBLBDk","kBLTLTTLTLBk","kDBBDBBDBBDk","kBLTLTTLTLBk",".kDBLTTLBDk.",".kDBDBBDBDk.","..kDTkkTDk..","..kdk..kdk.."];
@@ -1518,10 +1518,10 @@ function stepUfo(s,tk){
   }else if(u.state==="seek"){u.state="leave"}
   else if(u.state==="beam"){
     u.y+=Math.sin(u.t*.2)*.08;u.beam++;
-    if(u.beam>14&&T&&T.on){T.lift=(T.lift||0)*1.02+.35;          // the truck floats up, slowly then faster
+    if(u.beam>24&&T&&T.on){T.lift=(T.lift||0)*1.02+.3;          // the truck floats up, slowly then faster
       if(T.y-T.lift<=u.y+UFO_H-3){T.on=false;T.held=false;T.lift=0;T.wait=RI(600,1400);u.state="leave";u.hold=10}}
     else if(!T||!T.on){u.state="leave";u.hold=10}
-  }else if(u.state==="leave"){
+  }else if(u.state==="leave"){if(u.beam!=null)u.beam++;
     if(u.hold>0){u.hold--;u.y+=Math.sin(u.t*.2)*.08}
     else{u.vy-=.12;u.vx+=u.dir*.1;u.x+=u.vx;u.y+=u.vy}
   }else{u.x+=u.vx;u.y+=Math.sin(u.t*.06)*.15}
@@ -1535,12 +1535,15 @@ function drawUfo(c,u,s){
     UFO.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==="L"){g.fillStyle=lights[(k+++(u.t>>1))%3];g.fillRect(i,j,1,1)}}));
     c.save();c.imageSmoothingEnabled=false;c.translate(Math.round(u.x)+UFO_W/2,Math.round(u.y)+UFO_H/2);c.rotate(u.spin||0);c.drawImage(UFO_CV,-UFO_W/2,-UFO_H/2);c.restore();return}
   const x=Math.round(u.x),y=Math.round(u.y);
-  if(u.state==="beam"&&u.beam>4&&s.truck&&s.truck.on){                // tractor beam down to the truck
-    const T=s.truck,by=Math.round(T.y-(T.lift||0))+TRUCK.length,top=y+UFO_H-1,cx=x+UFO_W/2,a=.16+.06*Math.sin(u.t*.9);
-    const g=c.createLinearGradient(0,top,0,by);g.addColorStop(0,`rgba(225,228,236,${a+.08})`);g.addColorStop(1,`rgba(225,228,236,${a*.45})`);
-    c.fillStyle=g;c.beginPath();c.moveTo(cx-2,top);c.lineTo(cx+2,top);c.lineTo(cx+12,by);c.lineTo(cx-12,by);c.closePath();c.fill();
-    for(let k=0;k<3;k++){const yy=top+((u.t*2+k*11)%Math.max(1,by-top));c.fillStyle="rgba(240,242,250,.28)";c.fillRect(Math.round(cx-2-(yy-top)/(by-top+1)*10),yy,Math.round(4+(yy-top)/(by-top+1)*20),1)}
+  if((u.state==="beam"||u.state==="leave")&&u.beam!=null&&s.truck&&u.beam<90){              // no beam: dark rings ripple out across the sand, then the truck simply rises
+    const T=s.truck,gx=Math.round(T.x+TRUCK[0].length/2),gy=Math.round(T.y)+TRUCK.length;
+    if(!u.ringY){u.ringY=gy;u.ringX=gx}const RX=u.ringX;
+    [0,7,14].forEach((st,k)=>{const age=u.beam-st;if(age<0)return;const r=Math.min(30,4+age*.9),a=Math.max(0,.62-age*.012-k*.08);if(a<=0)return;
+      c.fillStyle=`rgba(12,10,18,${a.toFixed(3)})`;const n=Math.round(r*3);
+      for(let i=0;i<n;i++){const t=i/n*Math.PI*2,px=Math.round(RX+Math.cos(t)*r),py=Math.round(u.ringY+Math.sin(t)*r*.2);
+        if(Math.sin(t*7+k)>-.55)c.fillRect(px,py,1,1)}});                    // broken, brush-like strokes
   }
+
   sprt(c,UFO,x,y,false,UFOPAL);
   const lights=["#ff6a5a","#ffe070","#7ad0ff"];let k=0;
   UFO.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==="L"){c.fillStyle=lights[(k+++(u.t>>1))%3];c.fillRect(x+i,y+j,1,1)}}));
@@ -2452,7 +2455,7 @@ function bioSprite(key){
   const pa=SCENE.plantArt&&SCENE.plantArt[key];
   if(pa){BIO_IMG[key]=BIO_IMG[key]||(()=>{const k=Math.max(2,Math.min(8,Math.floor(96/Math.max(pa.width,pa.height)))),cv=document.createElement("canvas");
     cv.width=pa.width*k;cv.height=pa.height*k;const g=cv.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(pa,0,0,cv.width,cv.height);return cv.toDataURL()})();return BIO_IMG[key]}
-  if(!m)return "";BIO_IMG[key]=BIO_IMG[key]||(()=>{const rows=m[0],w=Math.max(...rows.map(r=>r.length)),h=rows.length,k=Math.max(3,Math.min(6,Math.floor(84/Math.max(w,h))));
+  if(!m)return "";BIO_IMG[key]=BIO_IMG[key]||(()=>{const rows=m[0],w=Math.max(...rows.map(r=>r.length)),h=rows.length,k=Math.max(3,Math.min(6,Math.floor(112/Math.max(w,h))));
     const cv=document.createElement("canvas");cv.width=w*k;cv.height=h*k;const g=cv.getContext("2d");g.scale(k,k);sprt(g,rows,0,0,false,m[1]);return cv.toDataURL()})();
   return BIO_IMG[key];
 }
