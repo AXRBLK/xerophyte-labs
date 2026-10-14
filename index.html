@@ -135,6 +135,14 @@ body.night .cform.postcard input,body.night .cform.postcard textarea{background:
 body.night .postcard .pc-msg textarea{background:transparent repeating-linear-gradient(180deg,transparent 0 21px,#c9d6e6 21px 22px)}
 body.night .postcard .cmsg.ok{color:#2f7a3a}body.night .postcard .cmsg.err{color:#a83a2a}
 @media (max-width:640px){.cform.postcard{grid-template-columns:1fr}.postcard .pc-left{padding:0 0 12px;border-right:0;border-bottom:2px solid #cdbd96}.postcard .pc-right{padding:12px 0 0}.postcard .stamp{width:84px;height:100px}.postcard .stamp canvas{width:50px;height:36px}}
+/* phones held upright: picture, then the To/From lines, then the message, with the stamp (send) in the bottom-right corner */
+@media (max-width:640px) and (orientation:portrait){
+  .cform.postcard{display:flex;flex-direction:column;gap:10px}
+  .postcard .pc-left,.postcard .pc-right{display:contents}
+  .postcard .pc-art{order:1}.postcard .pc-caption{order:2}.postcard .pc-to{order:3;margin-top:4px}.postcard .pc-line{order:4}
+  .postcard .pc-msg{order:5;margin-top:6px;padding-top:10px;border-top:2px solid #cdbd96}.postcard .pc-msg textarea{width:100%;box-sizing:border-box}
+  .postcard .cmsg{order:6}.postcard .stamp{order:7;align-self:flex-end;margin-top:2px}
+}
 .cform label{display:grid;gap:3px;font:13px var(--font-ui);color:var(--ink)}.cform label b{color:#a83a2a;font-weight:400}
 .cform input,.cform textarea{width:100%;box-sizing:border-box;padding:6px 7px;font:14px var(--font-data);color:var(--ink);background:#fffdf8;border:2px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo);border-radius:0}
 .cform textarea{resize:vertical;min-height:96px}
