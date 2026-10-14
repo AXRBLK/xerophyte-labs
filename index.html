@@ -1547,7 +1547,7 @@ function drawDisco(c,s){
   s.stars.forEach(sx=>{if(R()<.9){c.fillStyle=(Math.sin(s.t*sx.sp+sx.ph)>.3)?"#e8ecff":"#5c6690";c.fillRect(sx.x,sx.y,1,1)}});
 }
 /* daytime disco: a gang of dirt bikes tearing along the ridge of the near range, kicking up dust */
-// each rider: helmet/bike colour, jersey, and the helmet's accent (back stripe and peak)
+// each rider: helmet/bike colour, jersey, and the helmet's accent stripe (the peak matches the helmet; the goggle shield is blue)
 const RIDERS=[["#c8503c","#7a3428","#f4f0e8"],["#d8b048","#8a6a28","#1c1814"],["#4a86b8","#2a4e70","#f08a2a"],["#e8e4dc","#8a8680","#d83a3a"],["#5aa058","#2e6034","#f0d040"]];
 const BIKE_CACHE={};
 // dirt bike: kicked-up rear fender, long flat seat, tall forks, high front fender, number plate, big wheels; rider standing on the pegs
@@ -1596,7 +1596,7 @@ function drawBikes(c,s){
     const hop=(Math.floor(s.t/3)+i*5)%17===0?2:(Math.floor(s.t/3)+i*5)%17===1?1:0;
     const y=Math.round((rl+rr)/2)-16-hop;
     if(s.t%2===0)s.dust.push({x:x,y:y+15,life:5});
-    sprt(c,MINI_BIKE[s.t%2],x,y,false,{H:hc,V:ac,A:ac,G:"#1c1814",g:"#8ad0f0",J:jc,b:hc,s:"#c8c4bc",L:"#3a3634",P:"#f0ece4",k:"#1c1814",S:"#8a8680"});
+    sprt(c,MINI_BIKE[s.t%2],x,y,false,{H:hc,V:hc,A:ac,G:"#3a78c8",g:"#8ad0f0",J:jc,b:hc,s:"#c8c4bc",L:"#3a3634",P:"#f0ece4",k:"#1c1814",S:"#8a8680"});
   });
   s.dust=s.dust.filter(d=>{d.life--;d.x-=.6;d.y-=.2;c.fillStyle=d.life>3?"#d8c0a0":"#b8a088";c.fillRect(Math.round(d.x),Math.round(d.y),d.life>3?2:1,1);return d.life>0});
   if(g.x-g.riders[g.riders.length-1].off>s.w+20){g.x=-30;g.wait=RI(60,160);g.riders=lineup()}
