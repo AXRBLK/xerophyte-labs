@@ -747,6 +747,9 @@ function paintSky(){
   const w=Math.ceil(innerWidth/S),h=Math.ceil(innerHeight/S);
   // a frame can report zero size while it's still being laid out (previews, background tabs): wait for a real size
   if(w<8||h<8){clearInterval(SCENE.timer);SCENE.ctx=null;clearTimeout(paintSky.retry);paintSky.retry=setTimeout(paintSky,250);return}
+  // a repaint of the same scene (e.g. the sheet's wildlife counts arriving a moment after load) keeps every creature
+  // where it already is instead of snapping the whole desert back to its starting positions
+  const key=w+"x"+h+":"+(N?1:0),prev=SCENE.ctx&&SCENE.key===key?{toads:SCENE.toads,ravens:SCENE.ravens,scorps:SCENE.scorps,mice:SCENE.mice,bats:SCENE.bats,owl:SCENE.owl,owl2:SCENE.owl2,runner:SCENE.runner,t:SCENE.t}:null;
   cv.width=w;cv.height=h;
   let seed=1987;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
   const ri=(a,b)=>Math.floor(a+rnd()*(b-a+1));
@@ -964,6 +967,10 @@ function paintSky(){
   {const used=new Set(ravens.map(r=>r.target)),cand=usable.filter(p=>!used.has(p)&&Math.abs(p.x-nest.x)>60&&p.x>10&&p.x<w-14).sort((a,b)=>a.y-b.y);
    SCENE.owl2=N&&cand.length?{p:cand[Math.min(cand.length-1,ri(0,1))],timer:ri(20,90),hoot:0,blink:0,notes:[]}:null}
   SCENE.runner={x:Math.round(w*.4),y:H0+Math.round(span*.52),dir:1,state:N?"asleep":"stand",timer:20};
+  SCENE.key=key;
+  if(prev){["toads","ravens","scorps","mice","bats"].forEach(k=>{if(prev[k]&&SCENE[k])SCENE[k]=SCENE[k].map((c,i)=>prev[k][i]||c)});
+    if(prev.owl)SCENE.owl=Object.assign(prev.owl,{nest:SCENE.owl.nest});
+    if(prev.owl2&&SCENE.owl2)SCENE.owl2=prev.owl2;if(prev.runner)SCENE.runner=prev.runner;SCENE.t=prev.t||0}
   // portraits of each plant for the Biodiversity Report, drawn with the same brushes as the scene (side effects undone afterwards)
   {const sv=[c,bcx,fcx],pl=perches.length,bl=blooms.length,fl=flowers.length,P={};
    const mk=(key,W,H,draw)=>{const cv2=layer(W,H),fc=layer(W,H),bc=layer(W,H);c=cv2.getContext("2d");fcx=fc.getContext("2d");bcx=bc.getContext("2d");draw(W,H);c.drawImage(fc,0,0);P[key]=cv2};
@@ -1435,7 +1442,7 @@ const SATURN=["......................",".........YYyy.........","........YYyyyy.
 function drawSaturn(c,s){
   if(!shown("saturn"))return;
   if(!s.saturn||s.saturn.w!==s.w)s.saturn={w:s.w,x:Math.round(s.w*(.5+R()*.36)),y:Math.round(s.H0*(.18+R()*.14))};
-  const {x,y}=s.saturn;c.globalAlpha=.72;
+  const {x,y}=s.saturn;c.globalAlpha=.5;
   if(!s.disco){sprt(c,SATURN,x,y,false,SATPAL);c.globalAlpha=1;return}
   // disco: the ring pixels pick their shade by angle, and the shades march around the ring so it looks like it's spinning
   const RING=["#dcd8ec","#b4b0c8","#8e8aa8"],t=performance.now()/1000;
