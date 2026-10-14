@@ -1881,13 +1881,15 @@ const PLACES=[
 const ESRI="https://server.arcgisonline.com/ArcGIS/rest/services/";
 const TILES={
   sat:{url:ESRI+"World_Imagery/MapServer/tile/{z}/{y}/{x}",max:17},
-  topo:{url:ESRI+"World_Topo_Map/MapServer/tile/{z}/{y}/{x}",max:17},
+  // terrain: a classic contour-line topographic map (OpenTopoMap: SRTM elevation, OpenStreetMap data)
+  topo:{url:"https://tile.opentopomap.org/{z}/{x}/{y}.png",max:17},
+  relief:{url:ESRI+"World_Topo_Map/MapServer/tile/{z}/{y}/{x}",max:17},
   labels:{url:ESRI+"Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",max:17},
   // vegetation greenness (MODIS NDVI, latest 8-day composite) from NASA GIBS, laid over the terrain
   veg:{url:"https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/MODIS_Terra_NDVI_8Day/default/GoogleMapsCompatible_Level9/{z}/{y}/{x}.png",max:9},
   radar:null
 };
-const MAP={z:9,cx:0,cy:0,base:"topo",pix:2,radar:false,sel:"anza",cache:new Map(),wx:{},wxAt:0,W:0,H:0,raf:0,markers:[]};
+const MAP={z:9,cx:0,cy:0,base:"veg",pix:2,radar:false,sel:"anza",cache:new Map(),wx:{},wxAt:0,W:0,H:0,raf:0,markers:[]};
 const wsz=z=>256*Math.pow(2,z);
 const lon2x=(lon,z)=>(lon+180)/360*wsz(z);
 const lat2y=(lat,z)=>{const s=Math.sin(lat*Math.PI/180);return (.5-Math.log((1+s)/(1-s))/(4*Math.PI))*wsz(z)};
@@ -1924,7 +1926,7 @@ function mapRender(){
   const c=MAP.cv.getContext("2d"),p=MAP.pix;
   c.fillStyle="#b8a684";c.fillRect(0,0,MAP.cv.width,MAP.cv.height);
   c.imageSmoothingEnabled=true;
-  if(MAP.base==="veg"){drawLayer(c,TILES.topo,p);drawLayer(c,TILES.veg,p,.78)}else drawLayer(c,TILES[MAP.base],p);
+  if(MAP.base==="veg"){drawLayer(c,TILES.relief,p);drawLayer(c,TILES.veg,p,.78)}else drawLayer(c,TILES[MAP.base],p);
   if(MAP.radar&&TILES.radar)drawLayer(c,TILES.radar,p,.7);
   const lc=MAP.lcv.getContext("2d");lc.clearRect(0,0,MAP.lcv.width,MAP.lcv.height);
   if(MAP.base==="sat")drawLayer(lc,TILES.labels,1);
@@ -2012,7 +2014,7 @@ async function miniRadar(fig){
   let i=0,hold=0;
   const draw=()=>{
     if(!cv.isConnected){clearInterval(timer);return}
-    c.fillStyle="#b8a684";c.fillRect(0,0,W,H);tiles(TILES.topo);
+    c.fillStyle="#b8a684";c.fillRect(0,0,W,H);tiles(TILES.relief);
     if(R&&R.frames.length){const f=R.frames[i];tiles({url:`${R.host}${f.path}/256/{z}/{x}/{y}/2/1_1.png`},.75);
       const last=i===R.frames.length-1;cap.textContent=new Date(f.time*1000).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})+(last?" · latest":"");
       if(last){if(++hold>=4){hold=0;i=0}}else i++}
@@ -2037,7 +2039,7 @@ function renderMap(body,status){
   body.innerHTML=`<div class="maptools" role="toolbar" aria-label="Map controls">
       <button data-a="home">⌂ Anza-Borrego</button><button data-a="all">◎ All deserts</button>
       <span class="sep"></span>
-      <button data-base="topo" aria-pressed="true">Terrain</button><button data-base="veg" aria-pressed="false">Vegetation</button><button data-base="sat" aria-pressed="false">Satellite</button>
+      <button data-base="veg" aria-pressed="true">Vegetation</button><button data-base="topo" aria-pressed="false">Terrain</button><button data-base="sat" aria-pressed="false">Satellite</button>
       <button data-a="radar" aria-pressed="false">Radar</button>
       <span class="sep"></span>
       <button data-a="pix" title="Pixel size">Pixels 2×</button><button data-a="in" aria-label="Zoom in">+</button><button data-a="out" aria-label="Zoom out">−</button>
@@ -2045,7 +2047,7 @@ function renderMap(body,status){
     <div class="mapgrid">
       <div class="mapwrap" tabindex="0" aria-label="Map of North American deserts. Drag or use arrow keys to pan, plus and minus to zoom.">
         <canvas class="mapcv"></canvas><canvas class="maplabels"></canvas><div class="mapnight"></div><div class="mapmarks"></div>
-        <div class="mapattr">Maps © Esri · Vegetation NASA GIBS (MODIS NDVI) · Radar RainViewer · Weather Open-Meteo</div>
+        <div class="mapattr">Topo © OpenTopoMap (CC-BY-SA), © OpenStreetMap · Esri · Vegetation NASA GIBS · Radar RainViewer · Weather Open-Meteo</div>
       </div>
       <aside class="mapside"><div id="placeInfo" class="pl-info"></div><ol id="placeList" class="places">${PLACES.map(p=>`<li><button data-id="${p.id}" aria-pressed="${p.id===MAP.sel}"><span>${esc(p.name)}<small>${esc(p.region)}</small></span><i>—°</i></button></li>`).join("")}</ol></aside>
     </div>`;
@@ -2077,7 +2079,10 @@ function renderMap(body,status){
   function sizeMap(){
     const r=wrap.getBoundingClientRect();MAP.W=Math.round(r.width);MAP.H=Math.round(r.height);if(!MAP.W)return;
     MAP.cv.width=Math.ceil(MAP.W/MAP.pix);MAP.cv.height=Math.ceil(MAP.H/MAP.pix);MAP.lcv.width=MAP.W;MAP.lcv.height=MAP.H;
-    if(!MAP.placed){MAP.placed=true;const p=PLACES[0];MAP.z=p.z;MAP.cx=lon2x(p.lon,p.z);MAP.cy=lat2y(p.lat,p.z)}
+    if(!MAP.placed){MAP.placed=true;                                       // open on all the deserts at once
+      const lats=PLACES.map(p=>p.lat),lons=PLACES.map(p=>p.lon);let z=8;
+      while(z>3&&(lon2x(Math.max(...lons),z)-lon2x(Math.min(...lons),z)>MAP.W-80||lat2y(Math.min(...lats),z)-lat2y(Math.max(...lats),z)>MAP.H-80))z--;
+      MAP.z=z;MAP.cx=lon2x((Math.min(...lons)+Math.max(...lons))/2,z);MAP.cy=lat2y((Math.min(...lats)+Math.max(...lats))/2,z)}
     mapRender();
   }
   new ResizeObserver(sizeMap).observe(wrap);
