@@ -973,8 +973,16 @@ function paintSky(){
       if(depth===2){                                                     // slender arms that leave high and sweep up in a round elbow, hugging the trunk
         const aw=Math.max(4,tw-2),ay=base-Math.round(hh*(.42+.16*rnd())),gap=Math.round(aw*.7)+1,Rr=gap+aw/2,up=Math.round(hh*(.2+.16*rnd()));
         const edge=side>0?x+(tw>>1)-1:x-(tw>>1),acx=edge+side*Rr,r=aw/2;
-        for(let th=0;th<=90;th+=4){const t=th*Math.PI/180,cx=edge+side*Rr*Math.sin(t),cy=ay-Rr+Rr*Math.cos(t);
-          for(let yy=-Math.ceil(r);yy<=Math.ceil(r);yy++)for(let xx=-Math.ceil(r);xx<=Math.ceil(r);xx++){if(xx*xx+yy*yy>r*r+.3)continue;px(Math.round(cx+xx),Math.round(cy+yy),shadeAt((xx+r)/(2*r)))}}
+        // the elbow: a quarter-ring around (edge, ay-Rr), ribbed and shaded across the tube like the column it turns into,
+        // with grooves and spine clusters following the curve
+        {const ecx=edge,ecy=ay-Rr,R0=Rr-r,R1=Rr+r;
+         for(let yy=Math.floor(ecy-1);yy<=Math.ceil(ecy+R1);yy++)for(let xx=Math.floor(ecx-R1-1);xx<=Math.ceil(ecx+R1+1);xx++){
+           const dx=xx+.5-ecx,dy=yy+.5-ecy,d=Math.hypot(dx,dy);if(d<R0||d>=R1||dx*side<-.5||dy<-.5)continue;
+           const u=(d-R0)/(R1-R0),f=side>0?u:1-u,i=Math.min(aw-1,Math.floor(u*aw)),edgeRib=i===0||i===aw-1,groove=i%2===1&&!edgeRib;
+           let col=shadeAt(f);if(groove)col=mixHex(col,"#1e2a1a",.18);
+           const arc=Math.round(d*Math.atan2(Math.abs(dx),dy));            // distance travelled round the bend
+           if(!groove&&!edgeRib&&(arc+i*3)%4===0)col=f<.5?"#c8d8b0":"#8a9e78";
+           px(xx,yy,col)}}
         const ax=Math.round(acx-aw/2),top=Math.round(ay-Rr)-up;
         column(ax,top,aw,up+1);
         perches.push({x:ax+(aw>>1),y:top});if(rnd()<.7)tips.push({x:ax+(aw>>1),y:top,big:true,tw:aw});
