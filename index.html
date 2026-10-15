@@ -229,6 +229,7 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 body.still .potted.on .pot::after{animation:none}
 .potted.on .tag{color:#1e1208}   /* the picked plant shows by its watered pot, not a box */
 .potted:hover .sp{transform:translateY(-2px)}
+.potted,.potted:focus,.potted:focus-visible{outline:none;-webkit-tap-highlight-color:transparent}   /* no focus box over the plant: the watered pot shows the pick */
 .pane{margin-top:10px;padding:10px;background:var(--card);border:1px solid var(--line);font-size:12px}
 .pane .pane-hd{display:flex;gap:10px;align-items:center}
 .pane .pane-hd .sp{width:48px;height:48px;image-rendering:pixelated}
