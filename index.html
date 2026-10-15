@@ -1974,7 +1974,7 @@ function setDisco(on,user){
 const ORB={t0:0,p0:0,night:null};
 // where the sun or moon starts when the page opens (or the mode is switched by hand): low in the west, a couple of minutes
 // from setting, whatever the hour; from there the cycle just runs (set, a pause, rise on the other side, and so on)
-function arcStart(N){return .75}
+function arcStart(N){return N?.25:.75}   // the same spot either way: the moon travels east→west the other way round, so its .25 sits where the sun's .75 does
 
 function orbPos(s,N,rad){
   const now=performance.now()/1000;
@@ -1984,7 +1984,7 @@ function orbPos(s,N,rad){
   const cyc=1+REST/ARC;if(p>cyc)p=(p%cyc);                   // round again: rise from the left
   ORB.below=p>1;if(p>1)return null;
   const sr=rad||s.sr,top=Math.round(s.H0*.1)+sr,low=s.H0+sr+2;   // low = fully hidden behind the ranges
-  return {x:Math.round(s.w*(.06+.88*p)),y:Math.round(low-(low-top)*Math.pow(Math.sin(Math.PI*p),.7)),p};
+  return {x:Math.round(s.w*(N?.94-.88*p:.06+.88*p)),y:Math.round(low-(low-top)*Math.pow(Math.sin(Math.PI*p),.7)),p};
 }
 // day disco only: faint heat ripples, pixel rings that rise out of the mountain range every couple of seconds, widen and fade; drawn before the
 // mountains so they slip behind the ridgeline, and left where they started so they trail the moving sun
