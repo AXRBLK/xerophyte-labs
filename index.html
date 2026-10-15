@@ -20,7 +20,7 @@
 <link rel="icon" id="favicon" type="image/png" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&family=Caveat:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: full-bleed painted desert desktop, icon columns on both edges, draggable Win95 windows, taskbar pinned bottom. Dusk palette by day, moonlit palette (body.night) after 7pm local. */
 :root{
@@ -209,17 +209,24 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 .potted{position:relative;width:112px;height:160px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:24px;font:inherit;color:inherit}
 .potted .sp{width:64px;height:64px;image-rendering:pixelated;margin-bottom:-14px;position:relative;z-index:0;clip-path:inset(0 0 22% 0)}   /* roots trimmed: it's planted */
 .potted .pot{z-index:1}
-.potted .pot{position:relative;width:56px;height:32px;background:radial-gradient(ellipse 70% 90% at 38% 45%,#d47c50 0 45%,#c4673e 46% 70%,#a8522f 71%);border-radius:22% 22% 34% 34% / 26% 26% 48% 48%;box-shadow:inset -5px -3px 0 rgba(90,36,14,.28),inset 3px 0 0 rgba(255,210,170,.18)}   /* smooth, bulging a little at the middle */
+.potted .pot{position:relative;width:56px;height:32px;background:radial-gradient(ellipse 70% 90% at 38% 45%,#d47c50 0 45%,#c4673e 46% 70%,#a8522f 71%);border-radius:22% 22% 34% 34% / 26% 26% 48% 48%;box-shadow:inset -5px -3px 0 rgba(90,36,14,.28),inset 3px 0 0 rgba(255,210,170,.18);overflow:hidden}   /* smooth, bulging a little at the middle */
 .potted .pot::before{content:"";position:absolute;left:1px;right:1px;top:0;height:5px;border-radius:50% 50% 40% 40% / 100% 100% 60% 60%;background:linear-gradient(#e6a072,#c86e44);opacity:.9}   /* the rounded upper lip */
 /* the name on a placard hanging from the shelf's front edge, two little pins at the top; long names wrap (two lines) */
-/* the name on a little wooden marker standing on the shelf in front of the pot, written lightly by hand in capitals */
-.potted .tag{position:absolute;z-index:2;left:0;right:0;margin:0 auto;width:fit-content;bottom:56px;transform:rotate(-1.5deg);max-width:100px;padding:1px 6px 0;
+/* the name on a little wooden marker standing on the shelf in front of the pot, lettered like the taskbar's MODE label */
+.potted .tag{position:absolute;z-index:2;left:0;right:0;margin:0 auto;width:fit-content;bottom:56px;transform:rotate(-1.5deg);max-width:92px;padding:2px 5px 1px;
   background:linear-gradient(180deg,rgba(255,240,210,.35),rgba(0,0,0,0) 40%,rgba(80,50,20,.12)),repeating-linear-gradient(176deg,#c9a170 0 3px,#c29866 3px 4px,#cfa877 4px 7px,#bb905e 7px 8px);
   border:1px solid #7a5532;border-radius:2px;box-shadow:1px 2px 0 rgba(60,36,16,.35),inset 0 0 0 1px rgba(255,236,200,.25);
-  color:#3a2614;font:500 15px/14px "Caveat","Segoe Print","Bradley Hand","Chalkboard SE","Patrick Hand",cursive;letter-spacing:.06em;text-transform:uppercase;text-align:center;
-  overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;opacity:.97}
+  color:#3a2614;font:400 9px/11px var(--font-data);letter-spacing:.14em;text-transform:uppercase;text-align:center;
+  overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;opacity:.97}
 .potted.dormant .sp{filter:grayscale(.85) brightness(.9);opacity:.75}
 .potted.dormant .pot{filter:saturate(.35)}
+/* the picked plant has just been watered: the lower pot darkens unevenly as the terracotta soaks it up */
+.potted .pot::after{content:"";position:absolute;left:0;right:0;bottom:0;height:78%;opacity:0;
+  background:radial-gradient(ellipse 30% 40% at 22% 38%,rgba(60,18,4,.3),transparent 70%),radial-gradient(ellipse 24% 30% at 74% 30%,rgba(60,18,4,.26),transparent 70%),linear-gradient(to top,rgba(60,18,4,.78),rgba(64,20,5,.55) 50%,rgba(70,22,6,.3));
+  clip-path:polygon(0 34%,9% 26%,18% 36%,29% 20%,41% 31%,50% 17%,61% 29%,72% 15%,83% 31%,92% 22%,100% 30%,100% 100%,0 100%)}
+.potted.on .pot::after{opacity:1;animation:soak 1.4s ease-out both}
+@keyframes soak{from{opacity:0;transform:translateY(30%)}to{opacity:1;transform:none}}
+body.still .potted.on .pot::after{animation:none}
 .potted.on .tag{outline:2px solid var(--selbg,var(--link));outline-offset:1px;color:#1e1208}
 .potted:hover .sp{transform:translateY(-2px)}
 .pane{margin-top:10px;padding:10px;background:var(--card);border:1px solid var(--line);font-size:12px}
@@ -1553,7 +1560,7 @@ const OWL2_HOOT=OWL2.map(r=>r==="kBLwLwwLwLBk"?"kBWWWWWWWWBk":r);
 const HOOTS=[0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,1];                    // hoo … hoo … hoo, well spaced
 // now and then it turns its head a little to one side and back: the head rows (ears to beak) slide a pixel that way and
 // the pupils glance the same way, while the body stays put. Built padded a column each side so nothing is clipped
-const OWL2_TURN_CACHE=new Map();
+const OWL2_TURN_CACHE=new Map();let OWL2_HEADCV=null;
 function owl2Turn(rows,dir){const key=rows.join("")+dir;let t=OWL2_TURN_CACHE.get(key);if(t)return t;
   t=rows.map((r,j)=>{let q="."+r+".";if(!dir||j>8)return q;
     q=q.replace(/YppY/g,dir<0?"ppYY":"YYpp");                       // the pupils look the way the head turns
@@ -1566,8 +1573,12 @@ function drawOwl2(c,s,o,hold){
     if(o.lookT>0)o.lookT--;else{o.look=o.look?0:(R()<.5?-1:1);o.lookT=o.look?RI(10,28):RI(24,80)}}   // glance aside for a second or so, then back
   const on=o.hoot>0&&HOOTS[HOOTS.length-o.hoot];
   if(on&&(o.hoot===HOOTS.length||!HOOTS[HOOTS.length-o.hoot-1]))o.notes.push({x:x+w+1,y:y+2,life:16});
-  if(hold){const sw=Math.round(Math.sin(performance.now()/1000*Math.PI*1.07)*1.4);   // disco: eyes shut, swaying to the music
-    sprt(c,BIG.shut,x+sw,y,false,OWLPAL_N);o.notes=[];clearHoo();return}
+  if(hold){   // disco: eyes shut, the body stays put while the head rocks a full 45° side to side with the music
+    const HEAD=9,a=Math.sin(performance.now()/1000*Math.PI*1.07)*Math.PI/4;
+    sprt(c,BIG.shut.slice(HEAD),x,y+HEAD,false,OWLPAL_N);
+    let hc=OWL2_HEADCV;if(!hc){hc=OWL2_HEADCV=layer(w,HEAD);sprt(hc.getContext("2d"),BIG.shut.slice(0,HEAD),0,0,false,OWLPAL_N)}
+    const px=x+(w>>1),py=y+HEAD-1;c.save();c.imageSmoothingEnabled=false;c.translate(px,py);c.rotate(Math.round(a/(Math.PI/16))*(Math.PI/16));   // in steps, so it ticks like the rest of the pixels
+    c.drawImage(hc,-(w>>1),-(HEAD-1));c.restore();o.notes=[];clearHoo();return}
   sprt(c,owl2Turn(on?BIG.hoot:o.blink?BIG.shut:BIG.open,o.look||0),x-1,y+(on?1:0),false,OWLPAL_N);
   o.notes=o.notes.filter(n=>{n.life--;if(!hold){n.x+=.35;n.y-=.7}return n.life>0});
   // the hoots are real text (same face as the taskbar's MODE label), laid over the pixel scene
