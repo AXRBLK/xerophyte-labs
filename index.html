@@ -952,7 +952,7 @@ function stepFlyLeavers(c,s,owl){
     if(e.x<-50||e.x>s.w+50||e.y<-18)return false;
     if(e.k==="raven"){const f=(s.t>>1)%2?CRITTERS.ravenUp:CRITTERS.ravenDown;e.kk<1?sprtScaled(c,f,e.x,e.y,e.face<0,RAVENPAL,e.kk):sprt(c,f,e.x,e.y,e.face<0,RAVENPAL)}
     else if(e.k==="bat")sprt(c,CRITTERS.bat[(s.t>>1)%2],e.x,e.y);
-    else owlMini(c,(s.t>>1)%2?OWL2_FLY.up:OWL2_FLY.down,e.x,e.y);
+    else owlMini(c,(s.t>>1)%2?OWL2_FLY.upBack:OWL2_FLY.downBack,e.x,e.y);
     return true})}
 // the new mode's creatures wait just off the sides of the screen and come in as the curtain falls, a few at a time
 function arrivals(s,X){const w=s.w,F=X.dur/125,base=Math.round(F*.35),spread=Math.round(F*.9);
@@ -976,15 +976,23 @@ function enterStep(o){const E=o.enter;if(!E)return false;if(E.d>0){E.d--;return 
   return true}
 // the neighbour owl, small and in flight (arriving at dusk, leaving at dawn)
 // drawn by hand at its own size, like the perched one (scaling the big owl down turned it to mush)
-const OWL2_FLY={up:["k.................k","Dk...............kD","BDk..k.......k..kDB",".BDk.kDBBBBBDk.kDB.","..BDkDYYpdpYYDkDB..","...BkDBrrdrrBDkB...","....kBLTLTLTLBk....",".....kBLTLTLBk.....","......kDkkkDk......",".......kd.dk......."],
-  down:["...................","......k.....k......",".....kDBBBBBDk.....","....kDYYpdpYYDk....","..kkkDBrrdrrBDkkk..",".kDBBkBLTLTLBkBBDk.","kDB..kBLTLTLBk..BDk","kB....kBLTLBk....Bk","k......kDkDk......k",".......kd.dk......."]};
+// its own head and face (the perched sprite's ears, yellow eyes and white throat), with wings either side, so it's
+// plainly the same owl that lands on the saguaro
+const OWL2_WING={up:["........","kk......","BDkk....",".BLDkk..","..BTLDkk","...BTLDk","....BLDk",".....BDk","......kk","........","........","........","........"],
+  down:["........","........","........","........","......kk","..kkkkDk","kkDBLLDk","kDBTLTLk",".kBTkTkk","..k.k...","........","........","........"]};
+let OWL2_FLY_CACHE=null;
+const OWL2_FLY_F=()=>OWL2_FLY_CACHE||(OWL2_FLY_CACHE=(()=>{const B=OWL2_BIG().open,body=[...B.slice(0,13),...B.slice(-2)],o={};
+  // flying away it shows its back: the same ears and outline, the face and throat swapped for mottled back feathers
+  const back=body.map((r,j)=>j<10?r.replace(/[Yp]/g,"B").replace(/[dr]/g,"D").replace(/w/g,"L").replace(/W/g,"B"):r.replace(/W/g,"B"));
+  for(const k of ["up","down"]){const wrap=rows=>rows.map((r,j)=>{const L=OWL2_WING[k][j]||"........";return L+r+[...L].reverse().join("")});o[k]=wrap(body);o[k+"Back"]=wrap(back)}return o})());
+const OWL2_FLY={get up(){return OWL2_FLY_F().up},get down(){return OWL2_FLY_F().down},get upBack(){return OWL2_FLY_F().upBack},get downBack(){return OWL2_FLY_F().downBack}};
 function owlMini(c,f,x,y){const W=f[0].length,H=f.length;sprt(c,f,Math.round(x-W/2),Math.round(y-H/2),false,OWLPAL_N)}
 function owl2Arrive(c,s,o){const A=o.arr,h=OWL2_BIG().open.length,tx=o.p.x,ty=o.p.y-(h>>1)+2;clearHoo();
   if(A.d>0){A.d--;return}
   const dx=tx-A.x,dy=ty-A.y,d=Math.hypot(dx,dy);
   if(d<2.5){o.arr=null;drawOwl2(c,s,o,s.disco);return}
   const sp=Math.min(3.2,Math.max(1,d*.15));A.x+=dx/d*sp;A.y+=dy/d*sp;
-  owlMini(c,d<16?OWL2_FLY.up:(s.t>>1)%2?OWL2_FLY.up:OWL2_FLY.down,A.x,A.y)}
+  owlMini(c,d<16?OWL2_FLY.down:(s.t>>1)%2?OWL2_FLY.up:OWL2_FLY.down,A.x,A.y)}
 // the sky keeps its own time: once the sun has sunk fully behind the ranges the scene slowly turns to night and the moon
 // rises; once the moon has set, day returns with the sun coming up
 function orbHandoff(s){if(s.xfade||!ORB.below||ORB.night!==s.night)return;const n=!s.night;
@@ -1081,8 +1089,8 @@ function paintSky(){
 
   const SAG=[["#6a5c6c","#5c5060","#4e4454"],["#8c9878","#6e7c62","#55614c"],["#7e9270","#5f7456","#46583f"]];
   const perches=[],blooms=[];
-  function saguaro(x,base,hh,pal,depth){
-    let crown=null;const tips=[];
+  function saguaro(x,base,hh,pal,depth,trunk){
+    let crown=null;const tips=[],th=Math.max(hh,trunk||hh);   // th: the trunk's height; the arms are placed by hh
     const tw=depth===2?Math.max(7,Math.round(hh/9)):Math.max(3,Math.round(hh/8));
     // near saguaro: shaded across its width (sunlit left, shadowed right), grooved ribs, spine clusters, a rounded crown
     const shadeAt=(f)=>f<.15?mixHex(pal[0],"#eef4d8",.3):f<.45?pal[0]:f<.7?pal[1]:f<.9?pal[2]:mixHex(pal[2],"#1e2a1a",.3);
@@ -1092,9 +1100,9 @@ function paintSky(){
     const column=(x0,y0,ww,len)=>{if(depth===2&&ww>=5)return columnHi(x0,y0,ww,len);for(let i=0;i<ww;i++){const col=i===0?pal[0]:i===ww-1?pal[2]:(i%2?pal[1]:pal[0]);rect(x0+i,y0+1,1,len-1,col)}rect(x0+1,y0,ww-2,1,pal[0]);
       // the near (second-layer) saguaros get just a hint of spines: faint dots down every other rib
       if(depth===2&&ww>=4)for(let i=1;i<ww-1;i+=2)for(let y=y0+3+((i*2)%4);y<y0+len-1;y+=4)px(x0+i,y,i<ww/2?"#93a684":"#6e8262")};
-    column(x-(tw>>1),base-hh,tw,hh);
-    if(depth>0&&hh>=16)perches.push({x:x,y:base-hh,top:true,hh});
-    if(depth>0&&rnd()<.8)crown={x:x,y:base-hh,big:depth===2,tw};
+    column(x-(tw>>1),base-th,tw,th);
+    if(depth>0&&hh>=16)perches.push({x:x,y:base-th,top:true,hh:th});
+    if(depth>0&&rnd()<.8)crown={x:x,y:base-th,big:depth===2,tw};
     const arms=hh>40?ri(2,3):hh>18?ri(1,2):hh>10?ri(0,1):0;
     let side=rnd()<.5?-1:1;
     for(let a=0;a<arms;a++,side*=-1){
@@ -1123,7 +1131,7 @@ function paintSky(){
       if(depth===2)perches.push({x:ax+(aw>>1),y:ay-up});
       if(depth>0&&rnd()<.7)tips.push({x:ax+(aw>>1),y:ay-up,big:depth===2,tw:aw});
     }
-    if(depth>0&&hh>14)for(let i=0;i<3;i++)px(x-(tw>>1)+ri(0,tw-1),base-hh+ri(0,1),"#e8e0cc");
+    if(depth>0&&hh>14)for(let i=0;i<3;i++)px(x-(tw>>1)+ri(0,tw-1),base-th+ri(0,1),"#e8e0cc");
     if(crown)addBloom(crown);tips.forEach(addBloom);
   }
   function pad(cx,cy,rx,ry,fill,edge,far){
@@ -1280,11 +1288,15 @@ function paintSky(){
   // near saguaros: just the big one the neighbour owl sits on; the middle distance is left to the ocotillo
   // it stands a little left of where it used to (under the radio icon on phones), tall and close; but never so tall that
   // the owl on its crown would be hidden behind the desktop icons
-  let nearH=Math.round(Math.min(h,w*.8)*.5);
+  let nearH=Math.round(Math.min(h,w*.8)*.5),nearCap=Infinity;
   {const nx=Math.round(w*.72),base=Math.round(h*.99),owlH=(OWL2_BIG().open.length)+3;
    document.querySelectorAll(".icons").forEach(n=>{const r=n.getBoundingClientRect();if(!r.width||!r.height||!n.querySelector(".icon"))return;
      const l=r.left/S,rt=r.right/S,bt=r.bottom/S;if(nx+10<l||nx-10>rt)return;
-     nearH=Math.min(nearH,Math.max(Math.round(Math.min(h,w*.8)*.25),base-Math.ceil(bt)-owlH-2))})}
+     nearCap=Math.min(nearCap,Math.max(Math.round(Math.min(h,w*.8)*.25),base-Math.ceil(bt)-owlH-2))})}
+  nearH=Math.min(nearH,nearCap);
+  // its centre column stands well above its arms: the trunk is drawn about a quarter taller than the arms are scaled to
+  // (still kept clear of the desktop icons, so the owl on top stays in view)
+  const nearTrunk=Math.min(Math.round(nearH*1.25),Math.max(nearH,nearCap));
   const fixed=[[.72,.99,nearH/Math.min(h,w*.8)]];
   fixed.forEach(([fx,fy])=>taken.push([Math.round(w*fx),Math.round(h*fy),16]));
   const add=(n,kind,y0,y1,gap,extra)=>{for(let i=0;i<n;i++){const p=spot(y0,y1,gap);if(p)items.push([kind,p[0],p[1],...extra()])}};
@@ -1296,7 +1308,7 @@ function paintSky(){
   add(2.5*area,"cho",H0+Math.round(span*.5),H0+span-2,12,()=>[1.05+rnd()*.45,false]);
   add(1.2*area,"oco",H0+3,H0+Math.round(span*.45),9,()=>[.75+rnd()*.3,true]);
   add(1*area,"oco",H0+Math.round(span*.5),H0+span-2,14,()=>[1+rnd()*.35,false]);
-  fixed.forEach(([fx,fy,fh])=>items.push(["sag",Math.round(w*fx),Math.round(h*fy),Math.round(Math.min(h,w*.8)*fh),2]));
+  fixed.forEach(([fx,fy,fh])=>items.push(["sag",Math.round(w*fx),Math.round(h*fy),Math.round(Math.min(h,w*.8)*fh),2,nearTrunk]));
   // the farthest row (right at the horizon) is painted onto the ground layer, so the night truck on the far road
   // drives in front of it while every nearer plant still passes in front of the truck
   const plantCtx=c,FAR=H0+5;
@@ -1305,7 +1317,7 @@ function paintSky(){
   items.sort((a,b)=>a[2]-b[2]).forEach(it=>{
     c=it[2]<=FAR?gc:plantCtx;
     if(it[0]==="cre")creosote(it[1],it[2]);
-    else if(it[0]==="sag")saguaro(it[1],it[2],it[3],SAG[it[4]],it[4]);
+    else if(it[0]==="sag")saguaro(it[1],it[2],it[3],SAG[it[4]],it[4],it[5]);
     else if(it[0]==="cho")cholla(it[1],it[2],it[3],it[4]);
     else if(it[0]==="oco")ocotillo(it[1],it[2],it[3],it[4]);
     else opuntia(it[1],it[2],it[3],it[4]);
