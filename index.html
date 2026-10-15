@@ -1560,11 +1560,20 @@ const OWL2_HOOT=OWL2.map(r=>r==="kBLwLwwLwLBk"?"kBWWWWWWWWBk":r);
 const HOOTS=[0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,1];                    // hoo … hoo … hoo, well spaced
 // now and then it turns its head a little to one side and back: the head rows (ears to beak) slide a pixel that way and
 // the pupils glance the same way, while the body stays put. Built padded a column each side so nothing is clipped
-const OWL2_TURN_CACHE=new Map();let OWL2_HEADCV=null;
+const OWL2_TURN_CACHE=new Map();
 function owl2Turn(rows,dir){const key=rows.join("")+dir;let t=OWL2_TURN_CACHE.get(key);if(t)return t;
   t=rows.map((r,j)=>{let q="."+r+".";if(!dir||j>8)return q;
     q=q.replace(/YppY/g,dir<0?"ppYY":"YYpp");                       // the pupils look the way the head turns
     return dir<0?q.slice(1)+".":"."+q.slice(0,-1)});
+  OWL2_TURN_CACHE.set(key,t);return t}
+// the head turned on its neck (a yaw, not a tilt): inside the head's outline the face slides toward the way it turns
+// (1px ≈ 22°, 2px ≈ 45°) and the far side fills in with the brown of the back of the head; ear tufts travel with it
+function owl2Yaw(rows,d){const key=rows.join("")+"y"+d;let t=OWL2_TURN_CACHE.get(key);if(t)return t;
+  t=rows.map((r,j)=>{const q="."+r+".";if(!d||j>8)return q;
+    const a=q.search(/[^.]/),b=q.length-1-[...q].reverse().join("").search(/[^.]/);if(a<0||b-a<3)return q;
+    const inner=q.slice(a+1,b),fill=j<2?".":"B",n=Math.abs(d);
+    const moved=d>0?fill.repeat(n)+inner.slice(0,inner.length-n):inner.slice(n)+fill.repeat(n);
+    return q.slice(0,a+1)+moved+q.slice(b)});
   OWL2_TURN_CACHE.set(key,t);return t}
 function drawOwl2(c,s,o,hold){
   const p=o.p,BIG=OWL2_BIG(),w=BIG.open[0].length,h=BIG.open.length,x=p.x-(w>>1),y=p.y-h+2;
@@ -1573,12 +1582,9 @@ function drawOwl2(c,s,o,hold){
     if(o.lookT>0)o.lookT--;else{o.look=o.look?0:(R()<.5?-1:1);o.lookT=o.look?RI(10,28):RI(24,80)}}   // glance aside for a second or so, then back
   const on=o.hoot>0&&HOOTS[HOOTS.length-o.hoot];
   if(on&&(o.hoot===HOOTS.length||!HOOTS[HOOTS.length-o.hoot-1]))o.notes.push({x:x+w+1,y:y+2,life:16});
-  if(hold){   // disco: eyes shut, the body stays put while the head rocks a full 45° side to side with the music
-    const HEAD=9,a=Math.sin(performance.now()/1000*Math.PI*1.07)*Math.PI/4;
-    sprt(c,BIG.shut.slice(HEAD),x,y+HEAD,false,OWLPAL_N);
-    let hc=OWL2_HEADCV;if(!hc){hc=OWL2_HEADCV=layer(w,HEAD);sprt(hc.getContext("2d"),BIG.shut.slice(0,HEAD),0,0,false,OWLPAL_N)}
-    const px=x+(w>>1),py=y+HEAD-1;c.save();c.imageSmoothingEnabled=false;c.translate(px,py);c.rotate(Math.round(a/(Math.PI/16))*(Math.PI/16));   // in steps, so it ticks like the rest of the pixels
-    c.drawImage(hc,-(w>>1),-(HEAD-1));c.restore();o.notes=[];clearHoo();return}
+  if(hold){   // disco: eyes shut, body still, the head swivels on its neck to the beat, about 45° each way, the way owls turn
+    const k=Math.sin(performance.now()/1000*Math.PI*1.07),d=Math.round(k*2);
+    sprt(c,owl2Yaw(BIG.shut,d),x-1,y,false,OWLPAL_N);o.notes=[];clearHoo();return}
   sprt(c,owl2Turn(on?BIG.hoot:o.blink?BIG.shut:BIG.open,o.look||0),x-1,y+(on?1:0),false,OWLPAL_N);
   o.notes=o.notes.filter(n=>{n.life--;if(!hold){n.x+=.35;n.y-=.7}return n.life>0});
   // the hoots are real text (same face as the taskbar's MODE label), laid over the pixel scene
