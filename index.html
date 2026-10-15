@@ -1548,15 +1548,24 @@ const OWL2_W=k=>k.map(r=>r.slice(0,4)+r[3]+r.slice(4,9)+r[8]+r.slice(9)).flatMap
 const OWL2_SHUT=OWL2.map((r,j)=>j===5?"kBDDDwwDDDBk":j===6?"kBrrrddrrrBk":r);
 const OWL2_HOOT=OWL2.map(r=>r==="kBLwLwwLwLBk"?"kBWWWWWWWWBk":r);
 const HOOTS=[0,1,1,0,0,0,0,1,1,0,0,0,0,1,1,1];                    // hoo … hoo … hoo, well spaced
+// now and then it turns its head a little to one side and back: the head rows (ears to beak) slide a pixel that way and
+// the pupils glance the same way, while the body stays put. Built padded a column each side so nothing is clipped
+const OWL2_TURN_CACHE=new Map();
+function owl2Turn(rows,dir){const key=rows.join("")+dir;let t=OWL2_TURN_CACHE.get(key);if(t)return t;
+  t=rows.map((r,j)=>{let q="."+r+".";if(!dir||j>8)return q;
+    q=q.replace(/YppY/g,dir<0?"ppYY":"YYpp");                       // the pupils look the way the head turns
+    return dir<0?q.slice(1)+".":"."+q.slice(0,-1)});
+  OWL2_TURN_CACHE.set(key,t);return t}
 function drawOwl2(c,s,o,hold){
   const p=o.p,BIG=OWL2_BIG(),w=BIG.open[0].length,h=BIG.open.length,x=p.x-(w>>1),y=p.y-h+2;
   if(!hold){if(o.hoot>0)o.hoot--;else if(--o.timer<=0){o.hoot=HOOTS.length;o.timer=RI(40,140)}
-    if(o.blink>0)o.blink--;else if(R()<.02)o.blink=RI(1,2)}
+    if(o.blink>0)o.blink--;else if(R()<.02)o.blink=RI(1,2);
+    if(o.lookT>0)o.lookT--;else{o.look=o.look?0:(R()<.5?-1:1);o.lookT=o.look?RI(10,28):RI(24,80)}}   // glance aside for a second or so, then back
   const on=o.hoot>0&&HOOTS[HOOTS.length-o.hoot];
   if(on&&(o.hoot===HOOTS.length||!HOOTS[HOOTS.length-o.hoot-1]))o.notes.push({x:x+w+1,y:y+2,life:16});
   if(hold){const sw=Math.round(Math.sin(performance.now()/1000*Math.PI*1.07)*1.4);   // disco: eyes shut, swaying to the music
     sprt(c,BIG.shut,x+sw,y,false,OWLPAL_N);o.notes=[];clearHoo();return}
-  sprt(c,on?BIG.hoot:o.blink?BIG.shut:BIG.open,x,y+(on?1:0),false,OWLPAL_N);
+  sprt(c,owl2Turn(on?BIG.hoot:o.blink?BIG.shut:BIG.open,o.look||0),x-1,y+(on?1:0),false,OWLPAL_N);
   o.notes=o.notes.filter(n=>{n.life--;if(!hold){n.x+=.35;n.y-=.7}return n.life>0});
   // the hoots are real text (same face as the taskbar's MODE label), laid over the pixel scene
   const box=hooBox(),k=innerWidth/s.w;
