@@ -1047,6 +1047,7 @@ function owl2Arrive(c,s,o){const A=o.arr,h=OWL2_BIG().open.length,tx=o.p.x,ty=o.
 // rises; once the moon has set, day returns with the sun coming up
 function orbHandoff(s){if(s.xfade||!ORB.below||ORB.night!==s.night)return;const n=!s.night;
   SCENE.override=n;ORB.night=n;ORB.p0=0;ORB.t0=performance.now()/1000;ORB.below=false;setNight(n,true)}
+let SCRATCH_CV=null;
 const NIGHT_TINT="rgba(16,22,58,.58)";
 function paintSky(){
   const cv=document.getElementById("sky"),N=SCENE.night;
@@ -1157,6 +1158,9 @@ function paintSky(){
     let side=rnd()<.5?-1:1;
     for(let a=0;a<arms;a++,side*=-1){
       if(depth===2){                                                     // slender arms that leave high and sweep up in a round elbow, hugging the trunk
+        // one arm per side: a third would sit on top of the first and read as a doubled elbow. It's still worked out
+        // (off-canvas), so the dice fall the same for every plant painted after this one
+        const extra=a>=2,keepC=c;if(extra)c=(SCRATCH_CV||(SCRATCH_CV=layer(4,4))).getContext("2d");
         const aw=Math.max(4,tw-2),ay=base-Math.round(hh*(.42+.16*rnd())),gap=Math.round(aw*.7)+1,Rr=gap+aw/2,up=Math.round(hh*(.2+.16*rnd()));
         const edge=side>0?x+(tw>>1)-1:x-(tw>>1),acx=edge+side*Rr,r=aw/2;
         // the elbow: a quarter-ring around (edge, ay-Rr), ribbed and shaded across the tube like the column it turns into,
@@ -1171,6 +1175,7 @@ function paintSky(){
            px(xx,yy,col)}}
         const ax=Math.round(acx-aw/2),top=Math.round(ay-Rr)-up;
         column(ax,top,aw,up+1);
+        if(extra){rnd();c=keepC;continue}
         perches.push({x:ax+(aw>>1),y:top});if(rnd()<.7)tips.push({x:ax+(aw>>1),y:top,big:true,tw:aw});
         continue}
       const aw=Math.max(2,tw-1),ay=base-Math.round(hh*(.3+.3*rnd())),out=aw+ri(2,Math.max(3,tw>>1)),up=Math.round(hh*(.18+.18*rnd()));
@@ -1598,6 +1603,7 @@ function hooBox(){let b=document.getElementById("hoos");if(!b){b=document.create
 function clearHoo(){const b=document.getElementById("hoos");if(b&&b.childElementCount)b.innerHTML=""}
 // a whole, fluffy owlet for the Biodiversity Report hover
 const OWLET_BODY=["..wwwwww..", ".wwYYYYww.", "wwYppwppYw", "wwYppYppYw", "wwwYooYwww", "wwwwwwwwww", "wgwgwwgwgw", "wwgwggwgww", "wgwgwwgwgw", "wwwwwwwwww", ".wwgwwgww.", "..wwwwww..", "..oo..oo..", ".o.o..o.o."],OWLETPAL={w:"#d6d2dc",g:"#9a98a2",Y:"#f2c230",p:"#140c08",o:"#8a7040"};
+const OWLETPAL_N=Object.fromEntries(Object.entries(OWLETPAL).map(([k,v])=>[k,"Yp".includes(k)?v:mixHex(v,"#1a2250",.28)]));   // moonlit, eyes still bright
 // a mouse gripped across the back: body sagging, head drooping, feet and tail hanging (same coat as the live mice)
 const PREY=["....DDBBBB....", "..DDBBBBBB.PP.", ".DBBBBBBBBPppP", ".DBBBBBBBLBpP.", "tDBBBBBBBLkLw.", "tDBWWWWWLLLLnw", "t..BWW.WWLL.w.", "t..P.P..P.P...", ".t............"];
 // out of the ground layer the mouse misses the night wash the ground creatures get, so it carries its own
@@ -2266,11 +2272,14 @@ function drawScene(){
     [-3,2].forEach(dx=>{c.fillStyle=P.T;c.fillRect(x+dx,y,2,3);c.fillStyle=P.B;c.fillRect(x+dx,y+2,2,1);c.fillStyle=P.k;
       if(carry){c.fillRect(x+dx-1,y+3,1,2);c.fillRect(x+dx+2,y+3,1,2)}                // curled round the mouse
       else{c.fillRect(x+dx-1,y+3,4,1);c.fillStyle=P.k;c.fillRect(x+dx-2,y+4,1,1);c.fillRect(x+dx,y+4,1,1);c.fillRect(x+dx+2,y+4,1,1);c.fillRect(x+dx+3,y+4,1,1)}})}   // toes spread wide, black hooked claws
+  // disco: the owlets climb right up to the lip of the hole, whole fluffy bodies showing, and bounce and sway to the
+  // music (a back row a step higher when there are more than three); they duck back inside to beg when she brings food
   if(chickEdge){const nc=owlChickN();if(!o.chicks||o.chicks.length!==nc)o.chicks=[...Array(nc)].map(()=>({b:0}));
-    const beat=Math.floor(performance.now()/1000*1.07*2),gap=Math.min(8,Math.max(4,Math.floor(24/Math.max(1,nc)))),y0=o.nest.top+28;   // sitting on the lower rim
-    o.chicks.forEach((ch,i)=>{if(ch.b>0)ch.b--;else if(R()<.02)ch.b=RI(1,2);
-      const x=Math.round(o.nest.x-4+(i-(nc-1)/2)*gap),hop=(beat+i)%2?-2:0;                                        // each bounces on the beat, alternating with its neighbours
-      sprt(c,ch.b>0?CRITTERS.chickBlink:CRITTERS.chick,x,y0+hop,false,CHICKPAL)})}
+    const n=o.nest,tb=performance.now()/1000*Math.PI*1.07,front=Math.min(3,nc),back=nc-front,rim=n.top+33;
+    const place=(i,row)=>{const cnt=row?back:front,k=row?i-front:i;return n.x-Math.round((cnt-1)*8/2)+k*8};
+    [...o.chicks.keys()].sort((a,b)=>(a<front)-(b<front)).forEach(i=>{const row=i<front?0:1,ph=tb*2+i*1.3;
+      const hop=Math.round(Math.max(0,Math.sin(ph))*2),sw=Math.round(Math.sin(tb+i*.8)*1.2);
+      sprt(c,OWLET_BODY,place(i,row)-5+sw,rim-14-hop-(row?5:0),(i+Math.floor(tb/Math.PI))%2===1,N?OWLETPAL_N:OWLETPAL)})}
   if(carry){if(o.preyKind==="scorp")sprt(c,CRITTERS.scorp[0],Math.round(o.x)-7,Math.round(o.y)+14,false,N?GLOW:undefined);else sprt(c,PREY,Math.round(o.x)-7,Math.round(o.y)+13,false,N?MOUSE_N:MOUSE)}
   applyXfade(c,s);orbHandoff(s);
 }
