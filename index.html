@@ -1573,7 +1573,11 @@ function stepRaven(r,s){
   }else if(r.state==="perch"){
     if(R()<.03)r.face*=-1;
     if(r.caw>0)r.caw--;else if(R()<.02)r.caw=RI(2,4);                       // a croak now and then: the head dips
-    if(--r.timer<=0){r.state="takeoff";r.timer=14;r.vx=r.face*(.6+R()*.4);r.target=null}
+    if(--r.timer<=0){let sp=null;
+      // off the saguaro, more often than not it drops down to the sand to forage (if no other raven is down there)
+      if(R()<.65&&!s.ravens.some(o=>o!==r&&o.state==="ground"))sp=openGround(s,r);
+      if(sp){r.state="land";r.tx=sp.x;r.ty=sp.y-13.5;r.target=null}
+      else{r.state="takeoff";r.timer=14;r.vx=r.face*(.6+R()*.4);r.target=null}}
   }else if(r.state==="takeoff"){
     r.x+=r.vx;r.y-=r.climbTo?1.3:.9;r.flap=2;
     if(--r.timer<=0&&(!r.climbTo||r.y<=r.climbTo)){r.state="soar";r.cy=Math.max(H0*.12,r.y);r.climbTo=0}
