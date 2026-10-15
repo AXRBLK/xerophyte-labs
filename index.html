@@ -1008,16 +1008,17 @@ function stepFlyLeavers(c,s,owl){
     else owlMini(c,(s.t>>1)%2?OWL2_FLY.upBack:OWL2_FLY.downBack,e.x,e.y);
     return true})}
 // the new mode's creatures wait just off the sides of the screen and come in as the curtain falls, a few at a time
-function arrivals(s,X){const w=s.w,F=X.dur/125,base=Math.round(F*.35),spread=Math.round(F*.9);
-  const walk=(o,sp,st,after,hop)=>{const L=o.x<w/2;o.enter={tx:o.x,ty:o.y,d:base+RI(0,spread),sp,st,after,hop};o.x=L?-24:w+6;o.dir=L?1:-1};
+function arrivals(s,X){const w=s.w,F=X.dur/125,base=Math.round(F*.2),spread=Math.round(F*.45);   // the first ones show up early, the rest soon after
+  // (the middle ones come in from either side, alternately)
+  let alt=0;const walk=(o,sp,st,after,hop)=>{const L=Math.abs(o.x-w/2)<w*.15?(alt++%2===0):o.x<w/2;o.enter={tx:o.x,ty:o.y,d:base+RI(0,spread),sp,st,after,hop};o.x=L?-24:w+6;o.dir=L?1:-1};
   if(!s.night){
-    s.toads.forEach(t=>walk(t,1.4));
-    s.scorps.forEach(p=>walk(p,.8,"walk",{state:"pause",timer:RI(10,40)}));
-    walk(s.runner,3,"run",{state:"stand",timer:RI(10,30)});
+    s.toads.forEach(t=>walk(t,2.6));                        // they scurry in briskly, then settle to their own pace
+    s.scorps.forEach(p=>walk(p,2,"walk",{state:"pause",timer:RI(10,40)}));
+    walk(s.runner,4,"run",{state:"stand",timer:RI(10,30)});
     s.ravens.forEach(r=>{if(r.state!=="soar")return;r.x=r.vx>0?-27:w+27;r.enter={tx:r.x,ty:r.y,d:base+RI(0,spread),sp:99}});
   }else{
-    (s.mice||[]).forEach(m=>walk(m,2,"hop",{state:"pause",timer:RI(10,40),yo:0},1));
-    s.scorps.forEach(p=>walk(p,.8,"walk",{state:"pause",timer:RI(10,40)}));
+    (s.mice||[]).forEach(m=>walk(m,3,"hop",{state:"pause",timer:RI(10,40),yo:0},1));
+    s.scorps.forEach(p=>walk(p,2,"walk",{state:"pause",timer:RI(10,40)}));
     s.bats.forEach(b=>{const L=b.x<w/2;b.enter={tx:b.x,ty:b.y,d:base+RI(0,spread),sp:2.2};b.x=L?-10:w+4});
     if(s.owl2){const L=s.owl2.p.x<w/2;s.owl2.arr={x:L?-16:w+16,y:Math.round(s.H0*.12),d:base+RI(0,Math.round(F*.2))}}
   }}
