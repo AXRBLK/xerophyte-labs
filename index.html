@@ -701,7 +701,7 @@ sunthermo:["................","..y.y.......kkk.","...kkk......kwk.",".ykYYYk....
 campfire:["................","................",".......r........","......rr........","......rOr..r....",".....rOOr.rr....","....rOYOrrOr....","....rOYYOOOr....","....rOYYYYOr....",".....rOYYOr.....","..kn..rrrr..nk..","...knnnnnnnnk...","..knnkkkkkknnk..","...kk......kk...","................","................"],
 hilo:["................","kkkkkkkkkkkkkkkk","kwwwwwwwwwwwwwwk","kwwwwwwwwwrwwwwk","kwwwwrwwwwrwwwwk","kwrwwrwwrwrwwrwk","kwrwwrwwrwrwwrwk","kwrwwrwwrwbwwrwk","kwbwwbwwbwbwwbwk","kwbwwbwwbwbwwbwk","kwbwwbwwbwwwwbwk","kwwwwwwwwwwwwwwk","kkkkkkkkkkkkkkkk","................","................","................"],
 binoculars:["................","................","...kkk....kkk...","..kSSSk..kSSSk..","..kSSSkkkkSSSk..",".kSSSSkSSkSSSSk.",".kSSSSkSSkSSSSk.",".kSSSSkkkkSSSSk.","kSSSSSk..kSSSSSk","kSSSSSk..kSSSSSk","kkkkkkk..kkkkkkk","kBBwBBk..kBBwBBk","kBbbbBk..kBbbbBk","kkkkkkk..kkkkkkk","................","................"],
-geodome:["................","................","................","................","......kkkk......","....kkFFFFkk....","...kaaBppBFBk...","..kBaBFgGFBFBk..",".kFFFFFgGFgFFFk.",".kBFBgFgGGGBFBk.",".kBFBgggGFBBFyk.","kFggFFFgGFFFggFk","kBggBBFgGFBBggBk","knnnnnnnnnnnnnnk",".kkkkkkkkkkkkkk.","................"],   // My Cacti: a half-sphere glass geodesic dome greenhouse, its frames a pale tint of the glass
+greenhouse:["..........kk....","......kkkkaak...",".....kFBFkkaak..","....kFBFFFkkaak.","...kFBBFFBGknk..","..kFBgpFFBBGnk..",".kFBBgGFFBBBFkk.","kFFFFgGFFyFFFFFk","kBBBFgGFFgGFBBBk","kBBgFgGFFgGFBBBk","kBBgggGFFgGFggBk","kBBBFgGFFgGFggBk","nttttRtttttRtttn","nRRRRRRRRRRRRRRn","kkkkkkkkkkkkkkkk","................"],   // My Cacti: a peaked glass greenhouse, roof vent propped open, on a pale wooden foundation
 journal:["................","................",".kkkkkk..kkkkkk.","kwwwwwwkkwwwwwwk","kwkkkkwkkwwgwwwk","kwwwwwwkkwgggwgk","kwkkkkwkkwwgwggk","kwwwwwwkkwwgggwk","kwkkkwwkkwwgwwwk","kwwwwwwkkwwgwwwk","kwkkkkwkkwtttttk","kwwwwwwkkwwwwwwk","knnnnnnkknnnnnnk",".kkkkkkkkkkkkkk.","................","................"],
 postcard:["................","................","kkkkkkkkkkkkkkkk","kwwwwwwwkwwwkrrk","kwBBBBBwkwwwkrrk","kwBByBBwkwwwkkkk","kwBBBgBwkwwwwwwk","kwBgBgBwkwkkkkwk","kwttgttwkwwwwwwk","kwwwwwwwkwwwwwwk","kwwkkwwwkwkkkkwk","kwwwwwwwkwwwwwwk","kwwwwwwwkwkkkkwk","kkkkkkkkkkkkkkkk","................","................"],
 infosign:["................","...kkkkkkkkkk...","..knnnnnnnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnnnnnnnnk..","..knnnwwwnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnwwwwnnnk..","...kkkkkkkkkk...","......knnk......","......knnk......","....kkkkkkkk....","................"],
@@ -3456,7 +3456,7 @@ function build(){
   document.getElementById("startside").textContent=SET.start_label||"Xerophyte Labs";
 
   const mob=isMob(),cx=w=>Math.max(130,(innerWidth-w)/2);
-  defineWindow("cacti",{title:"My Cacti",icon:"geodome",w:640,x:mob?16:120,y:84,render:renderCacti,menu:["File","View","Help"],status:true});
+  defineWindow("cacti",{title:"My Cacti",icon:"greenhouse",w:640,x:mob?16:120,y:84,render:renderCacti,menu:["File","View","Help"],status:true});
   defineWindow("map",{title:"Desert Map",icon:"map",w:Math.min(860,innerWidth-40),x:mob?16:Math.max(110,(innerWidth-860)/2),y:70,render:renderMap,status:true});
   defineWindow("radio",{title:radioName(),icon:"radio",w:380,x:innerWidth-595,y:64,render:renderRadio,status:true});
   defineWindow("today",{title:"Weather Now",icon:"sunthermo",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
@@ -3476,7 +3476,7 @@ function build(){
     const name=lab||label;if(WINS[id]&&lab){WINS[id].title=lab;WINS[id].el.querySelector(".bar b").textContent=lab;WINS[id].el.setAttribute("aria-label",lab)}
     const ord=r?parseFloat(String(r.order??"").trim()):NaN;
     ICONS.push({id,name,el:iconBtn(id,name,icon,badge),ord:Number.isFinite(ord)?ord:Infinity,split:!!(r&&/^(y|yes|true|1|x|split)$/i.test(String(r.split??"").trim()))})};
-  place(L,"cacti","My Cacti","geodome");place(L,"log","Weather Log","hilo");
+  place(L,"cacti","My Cacti","greenhouse");place(L,"log","Weather Log","hilo");
   place(L,"today","Weather Now","sunthermo");place(L,"bio","Biodiversity Report","saguaro");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
     const pic=/^contact/i.test(String(p.title).trim())?"postcard":/^about/i.test(String(p.title).trim())?"campfire":/^field\s*notes/i.test(String(p.title).trim())?"binoculars":(p.icon||"folder").toLowerCase();
