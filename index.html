@@ -500,6 +500,11 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 .hero .live .wx{filter:none}
 .hero .sub,body.night .hero .sub{color:#7dff7a}
 .hero .live{opacity:0;transition:opacity .6s}
+/* the header keeps its full height from the first frame, so nothing below it (marquee, phone icons) moves when the
+   title types out or the live weather line arrives */
+.hero h1::before{content:"\200b"}
+.hero .live[hidden]{display:inline-flex!important;visibility:hidden}
+.hero .live{min-height:24px;box-sizing:border-box}
 .hero .live .fan{margin-left:8px;vertical-align:-4px;color:#7dff7a}.hero .live .fan .rotor{animation:fanspin 1s linear infinite;transform-box:view-box;transform-origin:8px 8px}
 @keyframes fanspin{to{transform:rotate(360deg)}}body.heroLit .hero .live{opacity:1}
 .hero .sub:not(.x)::before{visibility:hidden}body.heroLit .hero .sub::before{visibility:visible}
