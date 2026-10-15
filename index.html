@@ -505,6 +505,9 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 .hero h1::before{content:"\200b"}
 .hero .live[hidden]{display:inline-flex!important;visibility:hidden}
 .hero .live{min-height:24px;box-sizing:border-box}
+body:not(.noMarquee) .marquee[hidden]{display:block!important;visibility:hidden}
+.marquee .track{line-height:23px;vertical-align:top}
+.marquee .track:empty::before{content:"\200b"}
 .hero .live .fan{margin-left:8px;vertical-align:-4px;color:#7dff7a}.hero .live .fan .rotor{animation:fanspin 1s linear infinite;transform-box:view-box;transform-origin:8px 8px}
 @keyframes fanspin{to{transform:rotate(360deg)}}body.heroLit .hero .live{opacity:1}
 .hero .sub:not(.x)::before{visibility:hidden}body.heroLit .hero .sub::before{visibility:visible}
@@ -865,42 +868,118 @@ const ICON_SUN='<svg class="mico" viewBox="0 0 16 16" width="16" height="16" ari
 const ICON_MOON='<svg class="mico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="6" y="1" width="1" height="1"/><rect x="4" y="2" width="2" height="1"/><rect x="3" y="3" width="3" height="1"/><rect x="2" y="4" width="3" height="1"/><rect x="1" y="5" width="4" height="1"/><rect x="1" y="6" width="4" height="1"/><rect x="1" y="7" width="5" height="1"/><rect x="1" y="8" width="5" height="1"/><rect x="1" y="9" width="6" height="1"/><rect x="1" y="10" width="7" height="1"/><rect x="2" y="11" width="11" height="1"/><rect x="3" y="12" width="9" height="1"/><rect x="4" y="13" width="7" height="1"/><rect x="6" y="14" width="3" height="1"/></svg>';
 function isNightNow(){const h=new Date().getHours();return h>=19||h<6}
 function setNight(n,slow){
-  // keep the frame on screen so the new scene can dissolve in over it, block by block (nothing pops or jumps)
-  let old=null;const cv0=document.getElementById("sky");
-  try{if(SCENE.ctx&&cv0.width&&cv0.height&&SCENE.night!==undefined&&SCENE.night!==n)old={img:SCENE.ctx.getImageData(0,0,cv0.width,cv0.height),w:cv0.width,h:cv0.height,base:staticFrame(SCENE)}}catch(e){}
+  // a real switch, with the scene running: the old sky and backdrop are kept so the new ones can be drawn down over them
+  // like a curtain, top to bottom; the old mode's creatures slip away (behind a plant, or off the edge) and the new
+  // mode's arrive from the sides
+  const S0=SCENE,cv0=document.getElementById("sky");let X=null;
+  if(S0.ctx&&S0.layers&&S0.motion&&cv0.width&&cv0.height&&S0.night!==undefined&&S0.night!==n){
+    try{const sky=layer(cv0.width,cv0.height);skyPart(sky.getContext("2d"),S0,S0.night);
+      X={L:S0.layers,sky,oldN:S0.night,w:cv0.width,h:cv0.height,ex:leavers(S0)}}catch(e){X=null}}
+  SCENE.xfade=null;
   SCENE.night=n;document.body.classList.toggle("night",n);if(document.getElementById("title").textContent)neonTagline();
   // the button shows where a click takes you: a moon by day, a sun by night
   const b=document.getElementById("modebtn");if(b){b.innerHTML=(n?ICON_SUN:ICON_MOON)+'<span class="mlab">mode</span>';b.title=n?"Switch to day mode":"Switch to night mode";b.setAttribute("aria-label",b.title)}
   paintSky();
-  if(old&&SCENE.ctx&&cv0.width===old.w&&cv0.height===old.h){
-    // what stays put (the ranges, the plants, the big saguaro…) just fades from one palette to the other; what isn't in
-    // both scenes, or has moved (sun and moon, clouds, creatures), is found by comparing the edges of the two frames,
-    // and only those bits pixel-dissolve
-    SCENE.xfade=null;drawScene();
-    // a pixel belongs to the lasting scenery when the frame there is just its painted backdrop (sky, ranges, plants, the
-    // big saguaro) in both modes; anything drawn over the backdrop in either frame (sun, moon, creatures, blooms, the truck)
-    // or present in only one backdrop is a thing that comes, goes or moves
-    const W=old.w,H=old.h,nw=SCENE.ctx.getImageData(0,0,W,H).data,od=old.img.data,ob=old.base,nb=staticFrame(SCENE);
-    const bw=Math.ceil(W/2),bh=Math.ceil(H/2),chg=new Uint8Array(bw*bh),off=(a,b,i)=>Math.max(Math.abs(a[i]-b[i]),Math.abs(a[i+1]-b[i+1]),Math.abs(a[i+2]-b[i+2]))>18;
-    for(let i=0,p=0;p<W*H;p++,i+=4){if(off(od,ob,i)||off(nw,nb,i)||(ob[i+3]>0)!==(nb[i+3]>0)){const x=p%W,y=(p/W)|0;chg[(y>>1)*bw+(x>>1)]=1}}
-    const mask=new Uint8Array(bw*bh);
-    for(let y=0;y<bh;y++)for(let x=0;x<bw;x++){if(!chg[y*bw+x])continue;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const X=x+dx,Y=y+dy;if(X>=0&&Y>=0&&X<bw&&Y<bh)mask[Y*bw+X]=1}}
-    const noise=new Float32Array(bw*bh);for(let i=0;i<noise.length;i++)noise[i]=Math.random();
-    SCENE.xfade={old:old.img,noise,mask,bw,t0:performance.now(),dur:slow?12000:3500};drawScene()}
+  if(X&&SCENE.ctx&&cv0.width===X.w&&cv0.height===X.h){
+    X.t0=performance.now();X.dur=slow?12000:5000;
+    routeLeavers(SCENE,X.ex);SCENE.leavers=(SCENE.leavers||[]).concat(X.ex);delete X.ex;
+    arrivals(SCENE,X);SCENE.xfade=X;drawScene()}
   try{if(LIVE&&LIVE.current)updateTray()}catch(e){}   // swap the sun/moon in the live weather icon
 }
-// the painted backdrop on its own, as the scene's layers stack it (no sun or moon, no creatures, nothing moving)
-function staticFrame(s){const L=s.layers;if(!L||!L.sky)return null;const W=L.sky.width,H=L.sky.height,cv=layer(W,H),c=cv.getContext("2d");
-  c.drawImage(L.sky,0,0);if(L.clouds)c.drawImage(L.clouds,0,0);c.drawImage(L.ground,0,0);c.drawImage(L.plants,0,0);
-  if(L.flowers)c.drawImage(L.flowers,0,0);if(s.night&&L.bloom)c.drawImage(L.bloom,0,0);if(L.giant)c.drawImage(s.night?L.giant:(L.giantNoBloom||L.giant),0,0);
-  return c.getImageData(0,0,W,H).data}
-// mode change in progress: the old frame shows through in 2×2 blocks that drop away at random until only the new scene is left
-function applyXfade(c,s){const X=s.xfade;if(!X)return;const k=(performance.now()-X.t0)/X.dur;if(k>=1){s.xfade=null;return}
-  const cur=c.getImageData(0,0,c.canvas.width,c.canvas.height),D=cur.data,O=X.old.data,W=c.canvas.width,H=c.canvas.height,ease=k*k*(3-2*k),keep=1-ease;
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const b=(y>>1)*X.bw+(x>>1),i=(y*W+x)*4;
-    if(X.mask[b]){if(X.noise[b]<ease)continue;D[i]=O[i];D[i+1]=O[i+1];D[i+2]=O[i+2];continue}   // things that come or go: block by block
-    D[i]=O[i]*keep+D[i]*ease;D[i+1]=O[i+1]*keep+D[i+1]*ease;D[i+2]=O[i+2]*keep+D[i+2]*ease}       // everything else: its colours ease across
-  c.putImageData(cur,0,0)}
+// the curtain: a soft-edged band that slides from the top of the screen to the bottom; above it the new mode, below it the old
+function curtMask(s){const X=s.xfade,k=Math.min(1,(performance.now()-X.t0)/X.dur),e=k*k*(3-2*k),H=s.h,B=Math.max(8,Math.round(H*.3)),edge=e*(H+B);
+  const m=curtTmp(X,"mask",s),mc=m.getContext("2d");mc.clearRect(0,0,s.w,s.h);
+  const gr=mc.createLinearGradient(0,edge-B,0,edge);gr.addColorStop(0,"rgba(0,0,0,1)");gr.addColorStop(1,"rgba(0,0,0,0)");
+  mc.fillStyle=gr;mc.fillRect(0,0,s.w,s.h);X.e=e;return m}
+function curtTmp(X,k,s){let t=X["_"+k];if(!t||t.width!==s.w||t.height!==s.h)t=X["_"+k]=layer(s.w,s.h);return t}
+// one layer of the scene mid-curtain: the old version where the curtain hasn't reached, the new one where it has
+function curtDraw(c,s,oldL,newL){const X=s.xfade,M=X._mask;
+  const A=curtTmp(X,"a",s),a=A.getContext("2d");a.clearRect(0,0,s.w,s.h);
+  if(oldL){a.drawImage(oldL,0,0);a.globalCompositeOperation="destination-out";a.drawImage(M,0,0);a.globalCompositeOperation="source-over"}
+  if(newL){const B=curtTmp(X,"b",s),b=B.getContext("2d");b.clearRect(0,0,s.w,s.h);b.drawImage(newL,0,0);b.globalCompositeOperation="destination-in";b.drawImage(M,0,0);b.globalCompositeOperation="source-over";
+    a.globalCompositeOperation="lighter";a.drawImage(B,0,0);a.globalCompositeOperation="source-over"}
+  c.drawImage(A,0,0)}
+// the night wash on the creature layers, following the curtain down (or lifting with it at dawn)
+function curtTint(cv,s,col,toNight){const X=s.xfade,T=curtTmp(X,"t",s),t=T.getContext("2d");t.clearRect(0,0,s.w,s.h);t.fillStyle=col;t.fillRect(0,0,s.w,s.h);
+  t.globalCompositeOperation=toNight?"destination-in":"destination-out";t.drawImage(X._mask,0,0);t.globalCompositeOperation="source-over";
+  const c=cv.getContext("2d");c.globalCompositeOperation="source-atop";c.drawImage(T,0,0);c.globalCompositeOperation="source-over"}
+function applyXfade(c,s){const X=s.xfade;if(X&&performance.now()-X.t0>=X.dur)s.xfade=null}
+// the creatures of the mode that's ending
+function leavers(s){const out=[],w=s.w,inx=x=>x>-20&&x<w+4;
+  if(!s.night){
+    if(shown("horned_lizards"))s.toads.forEach(t=>{if(inx(t.x))out.push({k:"toad",x:t.x,y:t.y,dir:t.dir})});
+    if(shown("scorpions"))s.scorps.forEach(p=>{if(p.alive&&inx(p.x))out.push({k:"scorp",x:p.x,y:p.y,dir:p.dir})});
+    const rr=s.runner;if(shown("roadrunner")&&rr.state!=="away"&&rr.state!=="asleep"&&inx(rr.x))out.push({k:"runner",x:rr.x,y:rr.y,dir:rr.dir});
+    if(shown("ravens"))s.ravens.forEach(r=>{if(r.state!=="gone"&&inx(r.x))out.push({k:"raven",x:r.x,y:r.y,kk:r.k||1,fly:1})});
+  }else{
+    if(shown("desert_mice"))(s.mice||[]).forEach(m=>{if(!m.caught&&!m.marked&&inx(m.x))out.push({k:"mouse",x:m.x,y:m.y,dir:m.dir})});
+    if(shown("scorpions"))s.scorps.forEach(p=>{if(p.alive&&!p.marked&&inx(p.x))out.push({k:"scorpN",x:p.x,y:p.y,dir:p.dir})});
+    if(shown("bats"))s.bats.forEach(b=>{if(inx(b.x))out.push({k:"bat",x:b.x,y:b.y,fly:1})});
+    if(shown("owl")&&s.owl2){const o=s.owl2,A=o.arr,h=OWL2_BIG().open.length;out.push(A?{k:"owl2",x:A.x,y:A.y,fly:1}:{k:"owl2",x:o.p.x,y:o.p.y-(h>>1)+2,fly:1})}
+  }
+  return out}
+// walkers head for the nearest cactus and fade out behind it; fliers make for the nearer edge of the screen
+const HIDE_OFF={toad:[-6,-7],runner:[-8,-1],mouse:[-6,-1],scorp:[-5,-1],scorpN:[-5,-1]},WALK_SP={toad:1.4,runner:3,mouse:2,scorp:.8,scorpN:.8};
+function routeLeavers(s,ex){const used=new Map(),spots=s.hides||[];
+  ex.forEach(e=>{e.a=1;e.d=RI(0,8);
+    if(e.fly){const L=e.x<s.w/2;e.vx=(L?-1:1)*(e.k==="owl2"?3.4:e.k==="bat"?3.2:2.6*(e.kk||1));e.vy=e.k==="bat"?-.5:-.35;e.face=L?-1:1;return}
+    const off=HIDE_OFF[e.k];let best=null,bd=1e9;
+    spots.forEach(p=>{const d=Math.abs(p.x-e.x)+2*Math.abs(p.y+off[1]-e.y)+(used.get(p)||0)*30;if(d<bd){bd=d;best=p}});
+    e.sp=WALK_SP[e.k];
+    if(!best){e.tx=e.x<s.w/2?-30:s.w+30;e.ty=e.y}
+    else{const u=(used.get(best)||0)+1;used.set(best,u);e.tx=best.x+off[0]+(u>1?RI(-2,2):0);e.ty=best.y+off[1]}})}
+function stepGroundLeavers(g,s){
+  s.leavers=(s.leavers||[]).filter(e=>{if(e.fly)return true;let mv=false;
+    if(e.d>0)e.d--;
+    else if(e.tx!=null){const dx=e.tx-e.x,dy=e.ty-e.y,d=Math.hypot(dx,dy);
+      if(d<=e.sp){e.x=e.tx;e.y=e.ty;e.tx=null;e.hold=5}else{e.x+=dx/d*e.sp;e.y+=dy/d*e.sp;if(Math.abs(dx)>.5)e.dir=dx<0?-1:1;mv=true}}
+    else if(e.hold>0)e.hold--;else e.a-=1/14;
+    if(e.a<=0)return false;
+    g.globalAlpha=Math.max(0,e.a);
+    if(e.k==="toad")sprt(g,CRITTERS.toad,e.x,e.y,e.dir<0);
+    else if(e.k==="runner")sprt(g,mv?CRITTERS.run[s.t%2]:CRITTERS.stand,e.x,e.y-11,e.dir<0);
+    else if(e.k==="mouse"){let yo=0;if(mv){e.ht=(e.ht||0)+1;yo=[-1,-3,-4,-3,-1,0][e.ht%6]}sprt(g,yo<0?CRITTERS.mouseHop:CRITTERS.mouseSit,e.x,e.y-8+yo,e.dir<0,MOUSE)}
+    else drawScorp(g,e,mv?(s.t>>1)%2:0,0,e.k==="scorpN"?GLOW:undefined);
+    g.globalAlpha=1;return true})}
+function stepFlyLeavers(c,s,owl){
+  s.leavers=(s.leavers||[]).filter(e=>{if(!e.fly||(e.k==="owl2")!==owl)return true;
+    if(e.d>0)e.d--;else{e.x+=e.vx;e.y=Math.max(-20,e.y+e.vy)}
+    if(e.x<-50||e.x>s.w+50||e.y<-18)return false;
+    if(e.k==="raven"){const f=(s.t>>1)%2?CRITTERS.ravenUp:CRITTERS.ravenDown;e.kk<1?sprtScaled(c,f,e.x,e.y,e.face<0,RAVENPAL,e.kk):sprt(c,f,e.x,e.y,e.face<0,RAVENPAL)}
+    else if(e.k==="bat")sprt(c,CRITTERS.bat[(s.t>>1)%2],e.x,e.y);
+    else owlMini(c,(s.t>>1)%2?OWL2_FLY.up:OWL2_FLY.down,e.x,e.y);
+    return true})}
+// the new mode's creatures wait just off the sides of the screen and come in as the curtain falls, a few at a time
+function arrivals(s,X){const w=s.w,F=X.dur/125,base=Math.round(F*.35),spread=Math.round(F*.9);
+  const walk=(o,sp,st,after,hop)=>{const L=o.x<w/2;o.enter={tx:o.x,ty:o.y,d:base+RI(0,spread),sp,st,after,hop};o.x=L?-24:w+6;o.dir=L?1:-1};
+  if(!s.night){
+    s.toads.forEach(t=>walk(t,1.4));
+    s.scorps.forEach(p=>walk(p,.8,"walk",{state:"pause",timer:RI(10,40)}));
+    walk(s.runner,3,"run",{state:"stand",timer:RI(10,30)});
+    s.ravens.forEach(r=>{if(r.state!=="soar")return;r.x=r.vx>0?-27:w+27;r.enter={tx:r.x,ty:r.y,d:base+RI(0,spread),sp:99}});
+  }else{
+    (s.mice||[]).forEach(m=>walk(m,2,"hop",{state:"pause",timer:RI(10,40),yo:0},1));
+    s.scorps.forEach(p=>walk(p,.8,"walk",{state:"pause",timer:RI(10,40)}));
+    s.bats.forEach(b=>{const L=b.x<w/2;b.enter={tx:b.x,ty:b.y,d:base+RI(0,spread),sp:2.2};b.x=L?-10:w+4});
+    if(s.owl2){const L=s.owl2.p.x<w/2;s.owl2.arr={x:L?-16:w+16,y:Math.round(s.H0*.12),d:base+RI(0,Math.round(F*.2))}}
+  }}
+function enterStep(o){const E=o.enter;if(!E)return false;if(E.d>0){E.d--;return true}
+  const dx=E.tx-o.x,dy=E.ty-o.y,d=Math.hypot(dx,dy);
+  if(d<=E.sp){o.x=E.tx;o.y=E.ty;delete o.enter;if(E.after)Object.assign(o,E.after);return false}
+  o.x+=dx/d*E.sp;o.y+=dy/d*E.sp;if(Math.abs(dx)>.5&&o.dir!==undefined)o.dir=dx<0?-1:1;
+  if(E.st)o.state=E.st;if(E.hop){o.ht=(o.ht||0)+1;o.yo=[-1,-3,-4,-3,-1,0][o.ht%6]}
+  return true}
+// the neighbour owl, small and in flight (arriving at dusk, leaving at dawn)
+// drawn by hand at its own size, like the perched one (scaling the big owl down turned it to mush)
+const OWL2_FLY={up:["k.................k","Dk...............kD","BDk..k.......k..kDB",".BDk.kDBBBBBDk.kDB.","..BDkDYYpdpYYDkDB..","...BkDBrrdrrBDkB...","....kBLTLTLTLBk....",".....kBLTLTLBk.....","......kDkkkDk......",".......kd.dk......."],
+  down:["...................","......k.....k......",".....kDBBBBBDk.....","....kDYYpdpYYDk....","..kkkDBrrdrrBDkkk..",".kDBBkBLTLTLBkBBDk.","kDB..kBLTLTLBk..BDk","kB....kBLTLBk....Bk","k......kDkDk......k",".......kd.dk......."]};
+function owlMini(c,f,x,y){const W=f[0].length,H=f.length;sprt(c,f,Math.round(x-W/2),Math.round(y-H/2),false,OWLPAL_N)}
+function owl2Arrive(c,s,o){const A=o.arr,h=OWL2_BIG().open.length,tx=o.p.x,ty=o.p.y-(h>>1)+2;clearHoo();
+  if(A.d>0){A.d--;return}
+  const dx=tx-A.x,dy=ty-A.y,d=Math.hypot(dx,dy);
+  if(d<2.5){o.arr=null;drawOwl2(c,s,o,s.disco);return}
+  const sp=Math.min(3.2,Math.max(1,d*.15));A.x+=dx/d*sp;A.y+=dy/d*sp;
+  owlMini(c,d<16?OWL2_FLY.up:(s.t>>1)%2?OWL2_FLY.up:OWL2_FLY.down,A.x,A.y)}
 // the sky keeps its own time: once the sun has sunk fully behind the ranges the scene slowly turns to night and the moon
 // rises; once the moon has set, day returns with the sun coming up
 function orbHandoff(s){if(s.xfade||!ORB.below||ORB.night!==s.night)return;const n=!s.night;
@@ -915,6 +994,7 @@ function paintSky(){
   // a repaint of the same scene (e.g. the sheet's wildlife counts arriving a moment after load) keeps every creature
   // where it already is instead of snapping the whole desert back to its starting positions
   const key=w+"x"+h+":"+(N?1:0),prev=SCENE.ctx&&SCENE.key===key?{toads:SCENE.toads,ravens:SCENE.ravens,scorps:SCENE.scorps,mice:SCENE.mice,bats:SCENE.bats,owl:SCENE.owl,owl2:SCENE.owl2,runner:SCENE.runner,t:SCENE.t}:null;
+  if(SCENE.w&&(SCENE.w!==w||SCENE.h!==h)){SCENE.xfade=null;SCENE.leavers=[]}   // resized mid-change: just show the new scene
   cv.width=w;cv.height=h;
   let seed=1987;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
   const ri=(a,b)=>Math.floor(a+rnd()*(b-a+1));
@@ -1215,6 +1295,7 @@ function paintSky(){
   // the farthest row (right at the horizon) is painted onto the ground layer, so the night truck on the far road
   // drives in front of it while every nearer plant still passes in front of the truck
   const plantCtx=c,FAR=H0+5;
+  SCENE.hides=items.filter(it=>(it[0]==="opu"||it[0]==="cho"||(it[0]==="sag"&&it[4]===2))&&it[2]>H0+span*.3).map(it=>({x:it[1],y:it[2]}));   // cover for creatures leaving at a mode change
   SCENE.flora={sag:1,cho:0,opu:0,cre:0,oco:0};items.forEach(it=>{SCENE.flora[it[0]]=(SCENE.flora[it[0]]||0)+1});   // census for the Biodiversity Report (+1: the owl's giant saguaro)
   items.sort((a,b)=>a[2]-b[2]).forEach(it=>{
     c=it[2]<=FAR?gc:plantCtx;
@@ -1958,8 +2039,8 @@ function drawUfo(c,u,s){
   const lights=["#ff6a5a","#ffe070","#7ad0ff"];let k=0;
   UFO.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==="L"){c.fillStyle=lights[(k+++(u.t>>1))%3];c.fillRect(x+i,y+j,1,1)}}));
 }
-function drawScene(){
-  const s=SCENE,c=s.ctx;if(!c)return;s.t++;const N=s.night;
+// the sky: gradient, stars, shooting stars, Saturn, the sun or moon, clouds (and the disco versions of it all)
+function skyPart(c,s,N){
   if(s.disco&&N){drawDisco(c,s);drawSaturn(c,s);drawMoon(c,s)}else{
   c.drawImage(s.layers.sky,0,0);
   // twinkling stars
@@ -1985,7 +2066,13 @@ function drawScene(){
   }
   if(!N)c.drawImage(s.layers.clouds,0,0);                // day: sunset streaks in front of the sun
   if(s.disco&&!N)pulseSky(c,s);
-  c.drawImage(s.layers.ground,0,0);
+}
+function drawScene(){
+  const s=SCENE,c=s.ctx;if(!c)return;s.t++;const N=s.night;
+  // mid mode-change the new sky is drawn on its own and drawn down over the old one like a curtain
+  const XF=s.xfade&&s.xfade.L?s.xfade:null;if(XF)curtMask(s);
+  if(XF){const T=curtTmp(XF,"sk",s);skyPart(T.getContext("2d"),s,N);curtDraw(c,s,XF.sky,T)}else skyPart(c,s,N);
+  if(XF)curtDraw(c,s,XF.L.ground,s.layers.ground);else c.drawImage(s.layers.ground,0,0);
   if(s.disco&&!N&&shown("dirt_bikes"))drawBikes(c,s);
   const bob=s.disco?bobBeat():0;
 
@@ -1993,33 +2080,36 @@ function drawScene(){
   const G=s.groundA,g=G.getContext("2d");g.clearRect(0,0,s.w,s.h);
   // disco (day or night): every ground creature stops where it is and nods along
   const hold=s.disco;
-  if(!N&&shown("horned_lizards"))s.toads.forEach(t=>{if(hold)t.bob=0;else stepToad(t,s.w);g.fillStyle="#6e5e4c";g.fillRect(Math.round(t.x)+1,t.y+5,10,1);
+  if(!N&&shown("horned_lizards"))s.toads.forEach(t=>{if(hold)t.bob=0;else if(!enterStep(t))stepToad(t,s.w);g.fillStyle="#6e5e4c";g.fillRect(Math.round(t.x)+1,t.y+5,10,1);
     // disco: the head (front columns) nods on the beat while the body stays put
     if(bob)sprt(g,TOAD_BODY,t.x,t.y+t.bob,t.dir<0),sprt(g,TOAD_HEAD,t.x,t.y+t.bob+1,t.dir<0);else sprt(g,CRITTERS.toad,t.x,t.y+t.bob,t.dir<0)});
   if(!N&&shown("rattlesnake"))drawSnake(g,s,stepSnake(s,hold));else if(s.snake)s.snake={state:"wait",timer:RI(60,300)};
   const scorpOn=shown("scorpions");if(!scorpOn)s.scorps.forEach(p=>p.alive=false);
-  if(scorpOn&&!hold)s.scorps.forEach(p=>stepScorp(p,s));
+  if(scorpOn&&!hold)s.scorps.forEach(p=>{if(!enterStep(p))stepScorp(p,s)});
   if(!N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)drawScorp(g,p,hold?0:p.state==="walk"?(s.t>>1)%2:0,bob)});
-  const rr=s.runner;if(shown("roadrunner")&&!hold)stepRunner(rr,s);
+  const rr=s.runner;if(shown("roadrunner")&&!hold&&!enterStep(rr))stepRunner(rr,s);
   if(shown("roadrunner")&&rr.state!=="away"&&rr.state!=="asleep"){
     const rs=hold?CRITTERS.stand:rr.state==="run"||rr.state==="hunt"?CRITTERS.run[s.t%2]:rr.state==="peck"||(rr.state==="eat"&&s.t%4<2)?CRITTERS.peck:CRITTERS.stand;
     g.fillStyle="#6e5e4c";g.fillRect(Math.round(rr.x)+4,Math.round(rr.y),9,1);(hold||rr.state==="stand"||rr.state==="peck")?sprtBob(g,rs,rr.x,rr.y-11,5,bob,rr.dir<0):sprt(g,rs,rr.x,rr.y-11,rr.dir<0);
   }
   if(N&&shown("desert_mice"))(s.mice||[]).forEach(m=>{
     if(m.caught){if(!hold&&--m.respawn<=0){m.caught=false;m.dir=R()<.5?1:-1;m.x=m.dir>0?2:s.w-20;m.state="hop";m.hops=RI(4,8);m.ht=0}return}
-    if(hold)m.yo=0;else stepMouse(m,s);
+    if(hold)m.yo=0;else if(!enterStep(m))stepMouse(m,s);
     const f=!hold&&m.state==="hop"&&m.yo<0?CRITTERS.mouseHop:CRITTERS.mouseSit;
     sprtBob(g,f,m.x,m.y-8+m.yo,4,hold?bob:m.state==="nibble"&&s.t%4<2?1:0,m.dir<0,MOUSE)});
   const tk=N&&shown("baja_truck")?stepTruck(s):null;
   if(tk)sprt(g,TRUCK,tk.x,tk.y,tk.dir<0,TRUCKPAL,"kbgTwR");
-  if(N)tint(G,"rgba(16,22,58,.42)");
+  if(s.leavers&&s.leavers.length)stepGroundLeavers(g,s);           // the last mode's creatures, off to hide behind a cactus
+  if(XF)curtTint(G,s,"rgba(16,22,58,.42)",N);else if(N)tint(G,"rgba(16,22,58,.42)");
   c.drawImage(G,0,0);
   if(tk&&!(s.truck&&s.truck.lift))truckLights(c,tk);
   const ufo=N?stepUfo(s,tk):null;if(ufo)drawUfo(c,ufo,s);
   if(N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)drawScorp(c,p,hold?0:p.state==="walk"?(s.t>>1)%2:0,bob,GLOW)});
+  if(XF){curtDraw(c,s,XF.L.plants,s.layers.plants);curtDraw(c,s,XF.L.flowers,s.layers.flowers);
+    if(shown("night_blooms"))curtDraw(c,s,XF.oldN?XF.L.bloom:null,N?s.layers.bloom:null)}else{
   c.drawImage(s.layers.plants,0,0);
   swayLayer(c,s.layers.flowers,s.flowers,s,f=>[f.x-2,f.y-2,6,4]);
-  if(N&&shown("night_blooms"))swayLayer(c,s.layers.bloom,s.blooms,s,b=>{if(b.box)return b.box;if(!b.big)return [b.x-2,b.y-3,5,5];const hf=Math.max(2,(b.tw||6)>>1);return [b.x-hf-7,b.y-6,hf*2+15,12]});
+  if(N&&shown("night_blooms"))swayLayer(c,s.layers.bloom,s.blooms,s,b=>{if(b.box)return b.box;if(!b.big)return [b.x-2,b.y-3,5,5];const hf=Math.max(2,(b.tw||6)>>1);return [b.x-hf-7,b.y-6,hf*2+15,12]})}
 
   // things in the air (and the owl at its door) go in front of the plants
   const A=s.airA,a=A.getContext("2d");a.clearRect(0,0,s.w,s.h);
@@ -2029,14 +2119,16 @@ function drawScene(){
   const carry=owlOn&&o.prey&&o.state==="fly";
   const fade=owlOn&&o.state==="settle"&&o.timer<OWL_FADE?o.timer/OWL_FADE:null;   // last few frames: cross-fade the folded, sitting owl in
   if(shown("ravens")&&!N)s.ravens.forEach(r=>{                                  // ravens roost out of sight at night
-    stepRaven(r,s);if(r.state==="gone")return;
+    if(!enterStep(r))stepRaven(r,s);if(r.state==="gone")return;
     const f=r.state==="roost"?CRITTERS.ravenSleep:r.state==="perch"?CRITTERS.ravenPerch:r.flap>0?(Math.floor(s.t/3)%2?CRITTERS.ravenUp:CRITTERS.ravenDown):CRITTERS.ravenGlide;
     (r.state==="perch"||r.state==="roost")?sprtBob(a,f,r.x,r.y,5,bob||(r.caw>0?1:0),r.face<0,RAVENPAL):(r.k||1)<1?sprtScaled(a,f,r.x,r.y,r.face<0,RAVENPAL,r.k):sprt(a,f,r.x,r.y,r.face<0,RAVENPAL);
   });
-  if(shown("bats"))s.bats.forEach(b=>{stepBat(b,s);sprt(a,CRITTERS.bat[b.state==="feed"?s.t%2:(s.t>>1)%2],b.x,b.y)});
-  if(N)tint(A,"rgba(16,22,58,.5)");
+  if(shown("bats"))s.bats.forEach(b=>{if(!enterStep(b))stepBat(b,s);sprt(a,CRITTERS.bat[b.state==="feed"?s.t%2:(s.t>>1)%2],b.x,b.y)});
+  if(s.leavers&&s.leavers.length)stepFlyLeavers(a,s,false);
+  if(XF)curtTint(A,s,"rgba(16,22,58,.5)",N);else if(N)tint(A,"rgba(16,22,58,.5)");
   c.drawImage(A,0,0);
-  if(s.layers.giant)c.drawImage(N&&shown("night_blooms")?s.layers.giant:s.layers.giantNoBloom,0,0);                     // ravens and bats pass behind the big saguaro; the owl stays in front
+  if(XF&&s.layers.giant){const nb=shown("night_blooms");curtDraw(c,s,XF.oldN&&nb?XF.L.giant:XF.L.giantNoBloom,N&&nb?s.layers.giant:s.layers.giantNoBloom)}
+  else if(s.layers.giant)c.drawImage(N&&shown("night_blooms")?s.layers.giant:s.layers.giantNoBloom,0,0);                     // ravens and bats pass behind the big saguaro; the owl stays in front
   if((o.state!=="home"||!owlOn)&&shown("owl_chicks")){
     const nc=owlChickN();if(!o.chicks||o.chicks.length!==nc)o.chicks=[...Array(nc)].map(()=>({b:0}));
     const SPOTS=CHICK_SPOTS[nc]||CHICK_SPOTS[6],feeding=o.state==="feed";
@@ -2047,7 +2139,8 @@ function drawScene(){
     if(feeding){const f=1-o.timer/o.feedT;                                     // lowered from the talons, then gobbled
       if(f<.8){const k=Math.min(1,f/.45),py=Math.round(o.nest.top+5+k*7);c.globalAlpha=f<.5?1:1-(f-.5)/.3;if(o.preyKind==="scorp")sprt(c,CRITTERS.scorp[0],o.nest.x-7,py+1,false,N?GLOW:undefined);else sprt(c,PREY,o.nest.x-7,py,false,N?MOUSE_N:MOUSE);c.globalAlpha=1}}
   }
-  if(N&&shown("owl")&&s.owl2)drawOwl2(c,s,s.owl2,s.disco);else clearHoo();
+  if(N&&shown("owl")&&s.owl2){if(s.owl2.arr)owl2Arrive(c,s,s.owl2);else drawOwl2(c,s,s.owl2,s.disco)}else clearHoo();
+  if(s.leavers&&s.leavers.length)stepFlyLeavers(c,s,true);
   if(fade!==null)c.globalAlpha=Math.max(.15,fade);
   {const pal=N?OWLPAL_N:o.state==="home"&&o.peek>0?OWLPAL_PEEK:OWLPAL_DAY;
    if(owlOn){if(o.state==="home")sprtBob(c,owlBig(owlSprite),ox,oy,12,bob,false,pal);
@@ -3330,7 +3423,7 @@ function fitIcons(){
   // phones: title on top, then the marquee (if shown), then the icons, which must stop above the taskbar
   const mq=document.querySelector(".marquee"),hb=hero.getBoundingClientRect().bottom;
   if(mq)mq.style.top=Math.round(hb+8)+"px";
-  nav.style.top=Math.round((mq&&!mq.hidden?mq.getBoundingClientRect().bottom:hb)+10)+"px";
+  nav.style.top=Math.round((mq&&!document.body.classList.contains("noMarquee")?mq.getBoundingClientRect().bottom:hb)+10)+"px";
   const bar=document.querySelector(".taskbar").getBoundingClientRect().top;
   const room=()=>bar-8-nav.getBoundingClientRect().top;
   const used=()=>{let b=0;nav.querySelectorAll(".icon").forEach(i=>{b=Math.max(b,i.getBoundingClientRect().bottom)});return b-nav.getBoundingClientRect().top};
