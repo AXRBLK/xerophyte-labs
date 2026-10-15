@@ -205,16 +205,19 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 .looks .look.on{border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo);background:repeating-conic-gradient(var(--chrome) 0 25%,var(--chrome-hi) 0 50%) 0 0/2px 2px}
 @media (max-width:500px){.looks .look span{display:none}}
 /* cacti: the greenhouse shelf: pots on wooden planks, a name tag on each; pick one to see its particulars below */
-.shelf{display:flex;flex-wrap:wrap;justify-content:center;padding:6px 6px 0;background:#e9dcc6 repeating-linear-gradient(to bottom,transparent 0 118px,#a8774a 118px 124px,#7a5232 124px 128px,#5a3a22 128px 130px,rgba(60,40,20,.18) 130px 136px,transparent 136px 140px);border:2px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}
-.potted{position:relative;width:112px;height:140px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:22px;font:inherit;color:inherit}
+.shelf{display:flex;flex-wrap:wrap;justify-content:center;padding:6px 6px 0;background:#e9dcc6 repeating-linear-gradient(to bottom,transparent 0 104px,#a8774a 104px 110px,#7a5232 110px 114px,#5a3a22 114px 116px,rgba(60,40,20,.18) 116px 122px,transparent 122px 160px);border:2px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}
+.potted{position:relative;width:112px;height:160px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:24px;font:inherit;color:inherit}
 .potted .sp{width:64px;height:64px;image-rendering:pixelated;margin-bottom:-14px;position:relative;z-index:0;clip-path:inset(0 0 22% 0)}   /* roots trimmed: it's planted */
 .potted .pot{z-index:1}
 .potted .pot{position:relative;width:58px;height:30px;background:#c4673e;clip-path:polygon(0 0,100% 0,100% 6px,92% 6px,84% 100%,16% 100%,8% 6px,0 6px);box-shadow:inset -8px 0 0 #9c4c2c,inset 6px 0 0 #d8845a}
 .potted .pot::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:#d27a4e;box-shadow:inset 0 -2px 0 #a8522f}
-.potted .tag{position:absolute;left:50%;top:10px;transform:translateX(-50%);max-width:100px;padding:0 4px;background:#f6f1e2;color:#2a2018;border:1px solid #6a5a48;font:11px/14px var(--font-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* the name on a placard hanging from the shelf's front edge, two little pins at the top; long names wrap (two lines) */
+.potted .tag{position:relative;z-index:2;margin-top:5px;max-width:100px;padding:3px 7px 4px;background:#fbf6e6;color:#2a2018;border:1px solid #6a5a48;box-shadow:2px 2px 0 rgba(60,40,20,.28);
+  font:600 13px/15px var(--font-ui);text-align:center;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.potted .tag::before,.potted .tag::after{content:"";position:absolute;top:2px;width:2px;height:2px;background:#8a7458}.potted .tag::before{left:3px}.potted .tag::after{right:3px}
 .potted.dormant .sp{filter:grayscale(.85) brightness(.9);opacity:.75}
 .potted.dormant .pot{filter:saturate(.35)}
-.potted.on .tag{background:var(--selbg,var(--link));color:#fff;border-color:#000;outline:1px dotted #fff;outline-offset:-3px}
+.potted.on .tag{background:var(--selbg,var(--link));color:#fff;border-color:#000}
 .potted:hover .sp{transform:translateY(-2px)}
 .pane{margin-top:10px;padding:10px;background:var(--card);border:1px solid var(--line);font-size:12px}
 .pane .pane-hd{display:flex;gap:10px;align-items:center}
@@ -688,6 +691,7 @@ sunthermo:["................","..y.y.......kkk.","...kkk......kwk.",".ykYYYk....
 campfire:["................","................",".......r........","......rr........","......rOr..r....",".....rOOr.rr....","....rOYOrrOr....","....rOYYOOOr....","....rOYYYYOr....",".....rOYYOr.....","..kn..rrrr..nk..","...knnnnnnnnk...","..knnkkkkkknnk..","...kk......kk...","................","................"],
 hilo:["................","kkkkkkkkkkkkkkkk","kwwwwwwwwwwwwwwk","kwwwwwwwwwrwwwwk","kwwwwrwwwwrwwwwk","kwrwwrwwrwrwwrwk","kwrwwrwwrwrwwrwk","kwrwwrwwrwbwwrwk","kwbwwbwwbwbwwbwk","kwbwwbwwbwbwwbwk","kwbwwbwwbwwwwbwk","kwwwwwwwwwwwwwwk","kkkkkkkkkkkkkkkk","................","................","................"],
 binoculars:["................","................","...kkk....kkk...","..kSSSk..kSSSk..","..kSSSkkkkSSSk..",".kSSSSkSSkSSSSk.",".kSSSSkSSkSSSSk.",".kSSSSkkkkSSSSk.","kSSSSSk..kSSSSSk","kSSSSSk..kSSSSSk","kkkkkkk..kkkkkkk","kBBwBBk..kBBwBBk","kBbbbBk..kBbbbBk","kkkkkkk..kkkkkkk","................","................"],
+geodome:["................","......kkkk......",".....kaBBBk.....","....kaBmBBBk....","...kaBBBmBmBk...","..kmBBBpBmBBBk..","..kmmmmgmmmmmk..",".kaBmBlgGBmBBBk.",".kBBBmggGBgmBmk.",".kBBgBggGBgBmBk.","kmmmgmggGGGmmymk","kmBBggggGBBmggBk","kBggmBggGBmBggmk","kBggBBggGmBBggBk","knnnnnnnnnnnnnnk",".kkkkkkkkkkkkkk."],   // My Cacti: a glass geodesic dome greenhouse
 journal:["................","................",".kkkkkk..kkkkkk.","kwwwwwwkkwwwwwwk","kwkkkkwkkwwgwwwk","kwwwwwwkkwgggwgk","kwkkkkwkkwwgwggk","kwwwwwwkkwwgggwk","kwkkkwwkkwwgwwwk","kwwwwwwkkwwgwwwk","kwkkkkwkkwtttttk","kwwwwwwkkwwwwwwk","knnnnnnkknnnnnnk",".kkkkkkkkkkkkkk.","................","................"],
 postcard:["................","................","kkkkkkkkkkkkkkkk","kwwwwwwwkwwwkrrk","kwBBBBBwkwwwkrrk","kwBByBBwkwwwkkkk","kwBBBgBwkwwwwwwk","kwBgBgBwkwkkkkwk","kwttgttwkwwwwwwk","kwwwwwwwkwwwwwwk","kwwkkwwwkwkkkkwk","kwwwwwwwkwwwwwwk","kwwwwwwwkwkkkkwk","kkkkkkkkkkkkkkkk","................","................"],
 infosign:["................","...kkkkkkkkkk...","..knnnnnnnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnnnnnnnnk..","..knnnwwwnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnnwwnnnnk..","..knnnwwwwnnnk..","...kkkkkkkkkk...","......knnk......","......knnk......","....kkkkkkkk....","................"],
@@ -3081,7 +3085,7 @@ function renderCacti(body,status){
       ${c.gal.length?`<button class="detail-btn" data-i="${i}">Detail · ${c.gal.length} ${c.gal.length>1?"views":"view"} ▸</button>`:""}`};
   const sel=Math.min(list.length-1,Math.max(0,renderCacti.sel||0));
   if(look==="shelf")main=`<div class="shelf" role="listbox" aria-label="Cacti">${list.map((c,i)=>`<button class="potted ${c.st}${i===sel?" on":""}" data-sel="${i}" role="option" aria-selected="${i===sel}" title="${esc(c.name)}">
-      <img class="sp" alt="" src="${pic(c)}"><span class="pot"><span class="tag">${esc(c.name)}</span></span></button>`).join("")}</div>
+      <img class="sp" alt="" src="${pic(c)}"><span class="pot"></span><span class="tag">${esc(c.name)}</span></button>`).join("")}</div>
     <div class="pane shelf-pane">${card(list[sel],sel)}</div>`;
   if(look==="list"){
     const S=CACTI_SORT,val={nm:c=>c.name.toLowerCase(),sp:c=>(c.species||"").toLowerCase(),loc:c=>(c.location||"").toLowerCase(),since:c=>c.age?+c.age.from:0,age:c=>c.age?.days||0,st:c=>c.st==="active"?0:1};
@@ -3429,7 +3433,7 @@ function build(){
   document.getElementById("startside").textContent=SET.start_label||"Xerophyte Labs";
 
   const mob=isMob(),cx=w=>Math.max(130,(innerWidth-w)/2);
-  defineWindow("cacti",{title:"My Cacti",icon:"journal",w:640,x:mob?16:120,y:84,render:renderCacti,menu:["File","View","Help"],status:true});
+  defineWindow("cacti",{title:"My Cacti",icon:"geodome",w:640,x:mob?16:120,y:84,render:renderCacti,menu:["File","View","Help"],status:true});
   defineWindow("map",{title:"Desert Map",icon:"map",w:Math.min(860,innerWidth-40),x:mob?16:Math.max(110,(innerWidth-860)/2),y:70,render:renderMap,status:true});
   defineWindow("radio",{title:radioName(),icon:"radio",w:380,x:innerWidth-595,y:64,render:renderRadio,status:true});
   defineWindow("today",{title:"Weather Now",icon:"sunthermo",w:420,x:innerWidth-560,y:96,render:renderToday,status:true});
@@ -3449,7 +3453,7 @@ function build(){
     const name=lab||label;if(WINS[id]&&lab){WINS[id].title=lab;WINS[id].el.querySelector(".bar b").textContent=lab;WINS[id].el.setAttribute("aria-label",lab)}
     const ord=r?parseFloat(String(r.order??"").trim()):NaN;
     ICONS.push({id,name,el:iconBtn(id,name,icon,badge),ord:Number.isFinite(ord)?ord:Infinity,split:!!(r&&/^(y|yes|true|1|x|split)$/i.test(String(r.split??"").trim()))})};
-  place(L,"cacti","My Cacti","journal");place(L,"log","Weather Log","hilo");
+  place(L,"cacti","My Cacti","geodome");place(L,"log","Weather Log","hilo");
   place(L,"today","Weather Now","sunthermo");place(L,"bio","Biodiversity Report","saguaro");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
   (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
     const pic=/^contact/i.test(String(p.title).trim())?"postcard":/^about/i.test(String(p.title).trim())?"campfire":/^field\s*notes/i.test(String(p.title).trim())?"binoculars":(p.icon||"folder").toLowerCase();
