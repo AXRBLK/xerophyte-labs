@@ -1991,7 +1991,7 @@ function truckLights(c,t){
 }
 // night: the moon; in disco it slowly swells to 130% and hangs in front of the northern lights
 function drawMoon(c,s){
-  s.moonK=s.moonK||1;const want=s.disco?1.3:1;s.moonK+=Math.sign(want-s.moonK)*Math.min(.0035,Math.abs(want-s.moonK));
+  s.moonK=s.moonK||1;const want=s.disco?1.56:1;s.moonK+=Math.sign(want-s.moonK)*Math.min(want>s.moonK?.001:.004,Math.abs(want-s.moonK));   // disco: the moon swells by about half again, very slowly (over a minute or so); it settles back quicker
   const r=Math.round(s.sr*s.moonK),o=orbPos(s,true,r);if(!o){s.faceAt=0;s.faceTrig=false;return}c.drawImage(moonDisc(r),o.x-r,o.y-r);
   // disco, with the moon at the top of its arc: a face (the old man in the moon) surfaces, winks once, and sinks away
   const now=performance.now(),peak=Math.abs(o.p-.5)<.025;
