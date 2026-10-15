@@ -786,7 +786,7 @@ const SCENE={timer:null,night:false,override:null};
 const BAYER=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]].map(r=>r.map(v=>(v+.5)/16));
 const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
 // the eye is a single pixel (the smallest the scene grid allows), so it uses a deep red to read small rather than as a bright dot
-const RAVENPAL={K:"#0e0c14",k:"#1f1a2c",v:"#3d3769",e:"#962632"};
+const RAVENPAL={K:"#0e0c14",k:"#1f1a2c",v:"#3d3769",e:"#962632",g:"#2c2838"};
 const CPAL={k:"#29232c",K:"#0b0a12",N:"#5c4838",n:"#8a6e52",c:"#ddcfb8",b:"#7088aa",v:"#463e54",t:"#c4ab8a",T:"#a48d70",d:"#76624c",w:"#ece2d0",S:"#a8824e",s:"#6e5434"};
 const GLOW={S:"#8fe0cc",s:"#4c9a8c",T:"#c8fff0"}; // scorpions fluoresce under moonlight
 const OWLPAL={k:"#241a14",D:"#3e2c20",B:"#5c4230",L:"#8a6a4c",T:"#b08a5a",r:"#b8743e",w:"#d8d0c0",W:"#efe8da",Y:"#e8b828",p:"#0c0806",d:"#2e241c",c:"#d4ccbe"};
@@ -836,9 +836,10 @@ const CRITTERS={
   stand:["kk................",".kN.......kk......","..kN.....kNNk.....","...kN...kNbNkkkkk.","....kN.kNNcNk.....",".....kNNNNcc......","....kNnNnNcc......",".....kNNNNk.......","......k..k........","......k..k........",".....kk..kk......."],
   peck:["..................","kk................",".kN...............","..kN..............","...kNNNNnNNk......","....kNnNnNnNk.....",".....kNNNNkNbk....",".......k.k.kNNkkk.","......k...k.......","......k...k.......",".....kk...kk......"],
   // common raven, facing right: heavy bill, red eye, wedge tail, fingered primaries, blue-violet sheen
-  ravenUp:[".K....................",".KKK.K................","..KKKKK...............","...vKKKK..............","...KvvKKK.............","...KKKvvKK............","....KKKKvKKK..........",".KK...KKKKKKKK...KKK..","KKKKKKKKKkvvkKKKKKeKKK","KKK.KKKKKKKKKKKKKK...",".......KKKKKKKK.......",".........K..K........."],
-  ravenGlide:["....K.................","....KK.K..............","...KKKKKK.............","...KKvKKKK............","....KKvvKKK...........",".....KKKvvKK..........","......KKKKvKK.........",".KK....KKKKKKKK..KKK..","KKKKKKKKKkvvkKKKKKeKKK","KKK.KKKKKKKKKKKKKK...",".......KKKKKKKK.......",".........K..K........."],
-  ravenDown:["......................","......................","......................","......................","......................","......................","......................",".KK...KKKKKKKKKK.KKK..","KKKKKKKKKkvvkKKKKKeKKK","KKK.KKKKKKKKKKKKKK...",".....KKKKvvKKKK.......","...KKKKvvKK..K........","...KKKvKK.............","..KK.KK..............."],
+  ravenUp:[".......K.K.K............",".......KKKKK............","........KKKKK...........","........KKkkKK..........",".........KkvkKK.........",".........KKkvKKK...KKK..","....KK....KKvvkKKKKKKKK.","..KKKKKKKKKKKKKKKKKKKeKk","KKKKKKKKKKKKKKKKKKKKKKkk","..KKKKKKKKKKKKKKKKKKKk..","....KKKKKKKKKKKKKKKK....",".........KKKKKKKK......."],
+  ravenGlide:["........................","..K.K.K.................","..KKKKKKK...............","...KKKKKKKKK............","....KKKkkKKKKK..........","......KKkvvkKKKK...KKK..","....KK....KKvvkKKKKKKKK.","..KKKKKKKKKKKKKKKKKKKeKk","KKKKKKKKKKKKKKKKKKKKKKkk","..KKKKKKKKKKKKKKKKKKKk..","....KKKKKKKKKKKKKKKK....",".........KKKKKKKK......."],
+  ravenDown:["........................","........................","........................","........................","........................","...................KKK..","....KK....KKKKKKKKKKKKK.","..KKKKKKKKKKKKKKKKKKKeKk","KKKKKKKKKKKKKKKKKKKKKKkk","..KKKKKKkvvkKKKKKKKKKk..","....KKKKkvvkKKKKKKKK....",".....KKKkvkKKKKKK.......","....KKKKKKKKK...........","...KKKKKKK..............","..K.K.K................."],
+  ravenSmall:{"glide":[".K.K........","..KKKK......","...KKKKK.KK.","KK..KKKKKKKk","KKKKKKKKKKKk","..KKKKKKK...","....KKK....."],"up":["....K.K.....","....KKK.....",".....KKK.KK.","KK...KKKKKKk","KKKKKKKKKKKk","..KKKKKKK...","....KKK....."],"down":["............","............",".........KK.","KK.KKKKKKKKk","KKKKKKKKKKKk","..KKKKKKKK..",".KKKKK......","K.K........."]},   // far ravens: drawn small by hand (scaling the big one down shredded it)
   ravenPerch:["..............","........KKK...",".......KKKeK..","......KKKKKKKK","......KKKKKK..",".....KKKKKK...","....KKkvvKK...","...KKkvvvKK...","..KKkvvvKKK...",".KKKkvvKKK....","KKKKKKKKKK....","KK..KKKKK.....","K....K..K.....","....KKKKKK...."],
   ravenSleep:["..............","..............","........KKK...",".......KKKkK..","......KKKKKKKK","......KKKKKK..",".....KKKKKK...","....KKkvvKK...","...KKkvvvKK...","..KKkvvvKKK...",".KKKkvvKKK....","KKKKKKKKKK....","KK..KKKKK.....","....KKKKKK...."],
   toad:["......w.w..","..tdtdtTTT.",".tTtTtTTkTt","tdtTtdtTTT.","..t..t..t.."],
@@ -1003,7 +1004,7 @@ function stepFlyLeavers(c,s,owl){
   s.leavers=(s.leavers||[]).filter(e=>{if(!e.fly||(e.k==="owl2")!==owl)return true;
     if(e.d>0)e.d--;else{e.x+=e.vx;e.y=Math.max(-20,e.y+e.vy)}
     if(e.x<-50||e.x>s.w+50||e.y<-18)return false;
-    if(e.k==="raven"){const f=(s.t>>1)%2?CRITTERS.ravenUp:CRITTERS.ravenDown;e.kk<1?sprtScaled(c,f,e.x,e.y,e.face<0,RAVENPAL,e.kk):sprt(c,f,e.x,e.y,e.face<0,RAVENPAL)}
+    if(e.k==="raven"){const f=(s.t>>1)%2?CRITTERS.ravenUp:CRITTERS.ravenDown;e.kk<.95?sprt(c,ravenSmall(f),e.x+6,e.y+3,e.face<0,RAVENPAL):sprt(c,f,e.x,e.y,e.face<0,RAVENPAL)}
     else if(e.k==="bat")sprt(c,CRITTERS.bat[(s.t>>1)%2],e.x,e.y);
     else owlMini(c,(s.t>>1)%2?OWL2_FLY.upBack:OWL2_FLY.downBack,e.x,e.y);
     return true})}
@@ -1510,6 +1511,7 @@ function stepToad(t,w){
   else if(t.state==="pushup"){t.bob=(t.timer%2)?-1:0;if(t.timer<=0){t.bob=0;t.state="still";t.timer=RI(30,140)}}
   else if(t.timer<=0){const r=R();if(r<.55){t.state="scurry";t.timer=RI(2,6);if(R()<.4)t.dir*=-1}else if(r<.8){t.state="pushup";t.timer=6}else t.timer=RI(30,100)}
 }
+const ravenSmall=f=>f===CRITTERS.ravenUp?CRITTERS.ravenSmall.up:f===CRITTERS.ravenDown?CRITTERS.ravenSmall.down:CRITTERS.ravenSmall.glide;
 function stepRaven(r,s){
   const w=s.w,H0=s.H0;
   if(r.state==="roost"||r.state==="gone")return;
@@ -2239,7 +2241,7 @@ function drawScene(){
   if(shown("ravens")&&!N)s.ravens.forEach(r=>{                                  // ravens roost out of sight at night
     if(!enterStep(r))stepRaven(r,s);if(r.state==="gone")return;
     const f=r.state==="roost"?CRITTERS.ravenSleep:r.state==="perch"?CRITTERS.ravenPerch:r.flap>0?(Math.floor(s.t/3)%2?CRITTERS.ravenUp:CRITTERS.ravenDown):CRITTERS.ravenGlide;
-    (r.state==="perch"||r.state==="roost")?sprtBob(a,f,r.x,r.y,5,bob||(r.caw>0?1:0),r.face<0,RAVENPAL):(r.k||1)<1?sprtScaled(a,f,r.x,r.y,r.face<0,RAVENPAL,r.k):sprt(a,f,r.x,r.y,r.face<0,RAVENPAL);
+    (r.state==="perch"||r.state==="roost")?sprtBob(a,f,r.x,r.y,5,bob||(r.caw>0?1:0),r.face<0,RAVENPAL):(r.k||1)<.95?sprt(a,ravenSmall(f),r.x+6,r.y+3,r.face<0,RAVENPAL):sprt(a,f,r.x,r.y,r.face<0,RAVENPAL);
   });
   if(shown("bats"))s.bats.forEach(b=>{if(!enterStep(b))stepBat(b,s);sprt(a,CRITTERS.bat[b.state==="feed"?s.t%2:(s.t>>1)%2],b.x,b.y)});
   if(s.leavers&&s.leavers.length)stepFlyLeavers(a,s,false);
