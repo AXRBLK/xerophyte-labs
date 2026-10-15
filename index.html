@@ -921,14 +921,17 @@ function moonDisc(r){
 /* pixel-style SVG icons for the day/night switch (crisp at any screen density) */
 const ICON_SUN='<svg class="mico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="7" y="0" width="2" height="1"/><rect x="7" y="1" width="2" height="1"/><rect x="3" y="2" width="2" height="1"/><rect x="7" y="2" width="2" height="1"/><rect x="11" y="2" width="2" height="1"/><rect x="2" y="3" width="3" height="1"/><rect x="11" y="3" width="3" height="1"/><rect x="2" y="4" width="2" height="1"/><rect x="7" y="4" width="2" height="1"/><rect x="12" y="4" width="2" height="1"/><rect x="5" y="5" width="6" height="1"/><rect x="5" y="6" width="6" height="1"/><rect x="0" y="7" width="3" height="1"/><rect x="4" y="7" width="8" height="1"/><rect x="13" y="7" width="3" height="1"/><rect x="0" y="8" width="3" height="1"/><rect x="4" y="8" width="8" height="1"/><rect x="13" y="8" width="3" height="1"/><rect x="5" y="9" width="6" height="1"/><rect x="5" y="10" width="6" height="1"/><rect x="2" y="11" width="2" height="1"/><rect x="7" y="11" width="2" height="1"/><rect x="12" y="11" width="2" height="1"/><rect x="2" y="12" width="3" height="1"/><rect x="11" y="12" width="3" height="1"/><rect x="3" y="13" width="2" height="1"/><rect x="7" y="13" width="2" height="1"/><rect x="11" y="13" width="2" height="1"/><rect x="7" y="14" width="2" height="1"/><rect x="7" y="15" width="2" height="1"/></svg>';
 const ICON_MOON='<svg class="mico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="6" y="1" width="1" height="1"/><rect x="4" y="2" width="2" height="1"/><rect x="3" y="3" width="3" height="1"/><rect x="2" y="4" width="3" height="1"/><rect x="1" y="5" width="4" height="1"/><rect x="1" y="6" width="4" height="1"/><rect x="1" y="7" width="5" height="1"/><rect x="1" y="8" width="5" height="1"/><rect x="1" y="9" width="6" height="1"/><rect x="1" y="10" width="7" height="1"/><rect x="2" y="11" width="11" height="1"/><rect x="3" y="12" width="9" height="1"/><rect x="4" y="13" width="7" height="1"/><rect x="6" y="14" width="3" height="1"/></svg>';
-function isNightNow(){const h=new Date().getHours();return h>=19||h<6}
+// day or night by the clock in Anza-Borrego (not the visitor's own time zone); only read when the page opens, after that
+// the sky keeps its own time
+function isNightNow(){let h;try{h=+new Intl.DateTimeFormat("en-US",{timeZone:"America/Los_Angeles",hour:"numeric",hourCycle:"h23"}).format(new Date())}catch(e){h=new Date().getHours()}
+  return h>=19||h<6}
 function setNight(n,slow){
   // a real switch, with the scene running: the old sky and backdrop are kept so the new ones can be drawn down over them
   // like a curtain, top to bottom; the old mode's creatures slip away (behind a plant, or off the edge) and the new
   // mode's arrive from the sides
   const S0=SCENE,cv0=document.getElementById("sky");let X=null;
   if(S0.ctx&&S0.layers&&S0.motion&&cv0.width&&cv0.height&&S0.night!==undefined&&S0.night!==n){
-    try{const sky=layer(cv0.width,cv0.height);skyPart(sky.getContext("2d"),S0,S0.night);
+    try{const sky=layer(cv0.width,cv0.height);ORB.peek=true;try{skyPart(sky.getContext("2d"),S0,S0.night)}finally{ORB.peek=false}
       X={L:S0.layers,sky,oldN:S0.night,w:cv0.width,h:cv0.height,ex:leavers(S0)}}catch(e){X=null}}
   SCENE.xfade=null;
   SCENE.night=n;document.body.classList.toggle("night",n);if(document.getElementById("title").textContent)neonTagline();
@@ -1925,15 +1928,13 @@ function setDisco(on,user){
 /* sun and moon: on arrival they sit where the real clock puts them (highest at noon / midnight),
    then travel their arc in a few minutes, sink behind the mountains, and rise again from the east */
 const ORB={t0:0,p0:0,night:null};
-function arcStart(N){
-  const d=new Date(),h=d.getHours()+d.getMinutes()/60;let p;
-  if(!N)p=h<12?.5*(h-6)/6:.5+.5*(h-12)/7;                 // 6am rise · noon top · 7pm set
-  else{const hn=h>=12?h-19:h+5;p=hn<5?.5*hn/5:.5+.5*(hn-5)/6}  // 7pm rise · midnight top · 6am set
-  return Math.min(.92,Math.max(.06,p));
-}
+// where the sun or moon starts when the page opens (or the mode is switched by hand): low in the west, a couple of minutes
+// from setting, whatever the hour; from there the cycle just runs (set, a pause, rise on the other side, and so on)
+function arcStart(N){return .75}
+
 function orbPos(s,N,rad){
   const now=performance.now()/1000;
-  if(ORB.night!==N){ORB.night=N;ORB.t0=now;ORB.p0=arcStart(N)}
+  if(ORB.night!==N){if(ORB.peek)return null;ORB.night=N;ORB.t0=now;ORB.p0=arcStart(N)}   // (peek: drawing the outgoing sky, where the orb has already set)
   const ARC=420,REST=40;                                     // seconds to cross the sky, seconds spent below the ridge
   let p=ORB.p0+(now-ORB.t0)/ARC;
   const cyc=1+REST/ARC;if(p>cyc)p=(p%cyc);                   // round again: rise from the left
@@ -3634,7 +3635,7 @@ function updateTray(){
   else ll.hidden=true;
   if(typeof fitIcons==="function")requestAnimationFrame(fitIcons);   // the live line changes the title block's height
 }
-function tick(){if(SCENE.override==null&&isNightNow()!==SCENE.night)setNight(!SCENE.night);const d=new Date();document.getElementById("clock").textContent=d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+", "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}).toLowerCase().replace(" ","")}
+function tick(){const d=new Date();document.getElementById("clock").textContent=d.toLocaleDateString(undefined,{month:"short",day:"numeric"})+", "+d.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}).toLowerCase().replace(" ","")}
 function startModes(){
   const n=document.getElementById("smNight"),d=document.getElementById("smDisco");if(!n||!d)return;
   const tick=on=>on?'<span class="chk ok" aria-hidden="true">✓</span>':"";
