@@ -2117,11 +2117,7 @@ let UFO_CV=null;
 function drawUfo(c,u,s){
   if(u.k&&u.k<1){if(!UFO_CV){UFO_CV=layer(UFO_W,UFO_H);sprt(UFO_CV.getContext("2d"),UFO,0,0,false,UFOPAL)}     // far away: drawn small
     c.imageSmoothingEnabled=false;c.drawImage(UFO_CV,Math.round(u.x),Math.round(u.y),Math.max(1,Math.round(UFO_W*u.k)),Math.max(1,Math.round(UFO_H*u.k)));return}
-  if(s.disco){if(!UFO_CV){UFO_CV=layer(UFO_W,UFO_H);sprt(UFO_CV.getContext("2d"),UFO,0,0,false,UFOPAL)}
-    const g=UFO_CV.getContext("2d"),lights=["#ff6a5a","#ffe070","#7ad0ff"];let k=0;
-    UFO.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==="L"){g.fillStyle=lights[(k+++(u.t>>1))%3];g.fillRect(i,j,1,1)}}));
-    c.save();c.imageSmoothingEnabled=false;c.translate(Math.round(u.x)+UFO_W/2,Math.round(u.y)+UFO_H/2);if(u.spin)c.rotate(u.spin);c.drawImage(UFO_CV,-UFO_W/2,-UFO_H/2);c.restore();return}
-  const x=Math.round(u.x),y=Math.round(u.y);
+  // the pickup: dark rings ripple out across the sand under the truck (drawn in disco too, where the saucer now lives)
   if((u.state==="beam"||u.state==="leave")&&u.beam!=null&&s.truck&&u.beam<90){              // no beam: dark rings ripple out across the sand, then the truck simply rises
     const T=s.truck,gx=Math.round(T.x+TRUCK[0].length/2),gy=Math.round(T.y)+TRUCK.length;
     if(!u.ringY){u.ringY=gy;u.ringX=gx}const RX=u.ringX;
@@ -2130,6 +2126,11 @@ function drawUfo(c,u,s){
       for(let i=0;i<n;i++){const t=i/n*Math.PI*2,px=Math.round(RX+Math.cos(t)*r),py=Math.round(u.ringY+Math.sin(t)*r*.2);
         if(Math.sin(t*7+k)>-.55)c.fillRect(px,py,1,1)}});                    // broken, brush-like strokes
   }
+  if(s.disco){if(!UFO_CV){UFO_CV=layer(UFO_W,UFO_H);sprt(UFO_CV.getContext("2d"),UFO,0,0,false,UFOPAL)}
+    const g=UFO_CV.getContext("2d"),lights=["#ff6a5a","#ffe070","#7ad0ff"];let k=0;
+    UFO.forEach((r,j)=>[...r].forEach((ch,i)=>{if(ch==="L"){g.fillStyle=lights[(k+++(u.t>>1))%3];g.fillRect(i,j,1,1)}}));
+    c.save();c.imageSmoothingEnabled=false;c.translate(Math.round(u.x)+UFO_W/2,Math.round(u.y)+UFO_H/2);if(u.spin)c.rotate(u.spin);c.drawImage(UFO_CV,-UFO_W/2,-UFO_H/2);c.restore();return}
+  const x=Math.round(u.x),y=Math.round(u.y);
 
   sprt(c,UFO,x,y,false,UFOPAL);
   const lights=["#ff6a5a","#ffe070","#7ad0ff"];let k=0;
