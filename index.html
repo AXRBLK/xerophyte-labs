@@ -183,16 +183,8 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 .chip.thirsty{background:var(--bloom);color:#fff;border-color:#8a1f45}
 .chip.soon{background:#e8d29c;color:#1c1218}
 .chip.fine{background:#d4dfc8;color:#1c1218}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:10px}
-.cactus{display:grid;grid-template-columns:48px 1fr;gap:4px 10px;padding:10px;background:var(--card);border:1px solid var(--line);min-width:0}
-.cactus .pic{grid-row:span 3;display:flex;flex-direction:column;align-items:center;gap:6px;width:48px}
-.cactus img.sp{width:48px;height:48px;image-rendering:pixelated;object-fit:cover}
-.cactus img.logo{display:block;max-width:48px;max-height:32px;object-fit:contain}
-.cactus .logo-link{display:block;line-height:0;padding:2px;border:1px solid transparent}.cactus .logo-link:hover{border-color:var(--line)}
 .chip.active{background:#d4dfc8;color:#1c1218}.chip.dormant{background:#d8d2c8;color:#4a4048}
 .meter i.dormant{background:#a8a098}
-.cactus .detail-btn{grid-column:1/-1;justify-self:start;margin-top:6px;height:24px;padding:0 10px;font:13px var(--font-ui);color:var(--ink);background:var(--chrome);border:2px solid;border-color:var(--chrome-hi) var(--chrome-lo) var(--chrome-lo) var(--chrome-hi);cursor:pointer}
-.cactus .detail-btn:active{border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}
 #gallery{touch-action:pan-x pan-y;position:fixed;inset:0;z-index:9000;background:rgba(10,8,20,.55);display:grid;place-items:center;padding:16px}
 #gallery .gal-win{position:relative;left:auto!important;top:auto!important;width:min(820px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column}
 #gallery .gal-body{padding:10px;display:flex;flex-direction:column;gap:8px;min-height:0;overflow:auto;background:var(--paper)}
@@ -203,13 +195,9 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 #gallery figcaption{font:14px/1.5 var(--font-data);color:var(--ink2)}
 #gallery .gal-nav{display:flex;align-items:center;justify-content:center;gap:12px;font:13px var(--font-data)}
 #gallery .gal-nav button,#gallery .bar button{min-width:32px;height:24px;font:13px var(--font-ui);color:var(--ink);background:var(--chrome);border:2px solid;border-color:var(--chrome-hi) var(--chrome-lo) var(--chrome-lo) var(--chrome-hi);cursor:pointer}
-.cactus .nm{font-family:var(--font-ui);font-weight:600;font-size:16px;line-height:1.1;display:flex;justify-content:space-between;gap:6px;align-items:start}
-.cactus .sci{font-style:italic;color:var(--mute);font-size:12px;line-height:1.3}
-.cactus .meta{font-size:12px;color:var(--ink2)}
 .meter{grid-column:1/-1;height:10px;border:1px solid var(--ink);background:repeating-linear-gradient(90deg,var(--line2) 0 9px,var(--line) 9px 10px);margin-top:4px}
 .meter i{display:block;height:100%;background:var(--sage)}
 .meter i.soon{background:#d4b064}.meter i.thirsty{background:var(--bloom)}
-.cactus .note{grid-column:1/-1;font-size:12px;color:var(--ink2);border-top:1px dashed var(--line);padding-top:6px;margin-top:4px}
 
 /* cacti: view switcher */
 .summary .looks{margin-left:auto;display:inline-flex;gap:2px}
@@ -3067,11 +3055,11 @@ function clientDetail(c){
     .map(l=>{const i=l.indexOf("|"),u=(i<0?l:l.slice(0,i)).trim(),t=i<0?"":l.slice(i+1).trim();return /^https?:\/\//i.test(u)?{src:u,text:t}:{src:"",text:l}});
 }
 const safeURL=u=>{u=String(u||"").trim();if(!u)return "";if(!/^https?:\/\//i.test(u))u="https://"+u;return /^https:\/\/|^http:\/\//i.test(u)?u:""};
-// three ways to look at the collection, switched from the little toolbar (remembered per browser):
-// cards (the original), a greenhouse shelf of potted plants, and an Explorer-style details list
-const CACTI_LOOKS=[["cards","Cards"],["shelf","Shelf"],["list","Details"]];
+// two ways to look at the collection, switched from the little toolbar (remembered per browser):
+// a greenhouse shelf of potted plants (the default), and an Explorer-style details list
+const CACTI_LOOKS=[["shelf","Shelf"],["list","Details"]];
 let CACTI_SORT={k:"st",d:1};
-function cactiLook(){try{const v=localStorage.getItem("cactiLook");if(CACTI_LOOKS.some(l=>l[0]===v))return v}catch(e){}return "cards"}
+function cactiLook(){try{const v=localStorage.getItem("cactiLook");if(CACTI_LOOKS.some(l=>l[0]===v))return v}catch(e){}return "shelf"}
 function renderCacti(body,status){
   const list=(DATA.cacti||[]).filter(c=>c.name).map(c=>({...c,age:clientAge(c),st:clientStatus(c),gal:clientDetail(c)}))
     .sort((a,b)=>(a.st==="active"?0:1)-(b.st==="active"?0:1)||(b.age?.days??-1)-(a.age?.days??-1));
@@ -3081,18 +3069,6 @@ function renderCacti(body,status){
   const bar=`<div class="summary"><span class="chip active">${n("active")} active</span><span class="chip dormant">${n("dormant")} dormant</span>
     <span class="looks" role="group" aria-label="View">${CACTI_LOOKS.map(([k,t])=>`<button class="look${k===look?" on":""}" data-look="${k}" aria-pressed="${k===look}" title="${t} view">${LOOK_ICON[k]}<span>${t}</span></button>`).join("")}</span></div>`;
   let main="";
-  if(look==="cards")main=`<div class="grid">${list.map((c,i)=>{const a=c.age,url=urlOf(c),logo=safeURL(c.logo||c.logo_url);
-    const logoImg=logo?`<img class="logo" alt="${esc(c.name)} logo" src="${esc(logo)}" loading="lazy">`:"";
-    return `<article class="cactus">
-      <div class="pic"><img class="sp" alt="" src="${pic(c)}">
-        ${logoImg?(url?`<a class="logo-link" href="${esc(url)}" target="_blank" rel="noopener" title="${esc(url.replace(/^https?:\/\//,""))}">${logoImg}</a>`:logoImg):""}</div>
-      <div class="nm"><span>${esc(c.name)}</span><span class="chip ${c.st}">${c.st==="active"?"Active":"Dormant"}</span></div>
-      <div class="sci">${esc(c.species||"")}${c.common_name?` · ${esc(c.common_name)}`:""}</div>
-      <div class="meta">${esc(c.location||"")}${a?`${c.location?" · ":""}age ${a.txt} · ${mo(a.from)}–${a.to?mo(a.to):"now"}`:""}${url&&!logo?` · <a href="${esc(url)}" target="_blank" rel="noopener">website</a>`:""}</div>
-      <div class="meter" title="Age: how long we've worked together"><i class="${c.st}" style="width:${a?Math.max(3,Math.round(100*a.days/maxD)):0}%"></i></div>
-      ${c.notes?`<div class="note">${linkify(c.notes)}</div>`:""}
-      ${c.gal.length?`<button class="detail-btn" data-i="${i}">Detail · ${c.gal.length} ${c.gal.length>1?"views":"view"} ▸</button>`:""}
-    </article>`}).join("")}</div>`;
   // one plant's particulars: under the shelf, and beside the details list
   const card=(c,i)=>{if(!c)return "";const a=c.age,url=urlOf(c),logo=safeURL(c.logo||c.logo_url);
     return `<div class="pane-hd"><img class="sp" alt="" src="${pic(c)}"><div><div class="nm">${esc(c.name)} <span class="chip ${c.st}">${c.st==="active"?"Active":"Dormant"}</span></div>
@@ -3126,9 +3102,8 @@ function renderCacti(body,status){
   const longest=list.slice().sort((a,b)=>(b.age?.days||0)-(a.age?.days||0))[0];
   if(status)status.innerHTML=`<span>${list.length} ${list.length===1?"client":"clients"}</span><span>Longest: ${longest?esc(longest.name)+(longest.age?" · "+longest.age.txt:""):"—"}</span>`;
 }
-// tiny pixel icons for the view buttons (large icons / shelf / details), like an old file manager's toolbar
-const LOOK_ICON={cards:'<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="0" y="0" width="5" height="5"/><rect x="7" y="0" width="5" height="5"/><rect x="0" y="7" width="5" height="5"/><rect x="7" y="7" width="5" height="5"/></svg>',
-  shelf:'<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="0" width="2" height="4"/><rect x="8" y="1" width="2" height="3"/><rect x="1" y="4" width="4" height="2"/><rect x="7" y="4" width="4" height="2"/><rect x="0" y="6" width="12" height="1"/><rect x="2" y="7" width="1" height="2"/><rect x="9" y="7" width="1" height="2"/><rect x="0" y="11" width="12" height="1"/></svg>',
+// tiny pixel icons for the view buttons (shelf / details), like an old file manager's toolbar
+const LOOK_ICON={shelf:'<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="0" width="2" height="4"/><rect x="8" y="1" width="2" height="3"/><rect x="1" y="4" width="4" height="2"/><rect x="7" y="4" width="4" height="2"/><rect x="0" y="6" width="12" height="1"/><rect x="2" y="7" width="1" height="2"/><rect x="9" y="7" width="1" height="2"/><rect x="0" y="11" width="12" height="1"/></svg>',
   list:'<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="0" y="0" width="2" height="2"/><rect x="3" y="0" width="9" height="2"/><rect x="0" y="5" width="2" height="2"/><rect x="3" y="5" width="9" height="2"/><rect x="0" y="10" width="2" height="2"/><rect x="3" y="10" width="9" height="2"/></svg>'};
 function openGallery(title,items){
   let g=document.getElementById("gallery");if(g)g.remove();
