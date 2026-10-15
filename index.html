@@ -1980,7 +1980,7 @@ function orbPos(s,N,rad){
   const cyc=1+REST/ARC;if(p>cyc)p=(p%cyc);                   // round again: rise from the left
   ORB.below=p>1;if(p>1)return null;
   const sr=rad||s.sr,top=Math.round(s.H0*.1)+sr,low=s.H0+sr+2;   // low = fully hidden behind the ranges
-  return {x:Math.round(s.w*(N?.94-.88*p:.06+.88*p)),y:Math.round(low-(low-top)*Math.pow(Math.sin(Math.PI*p),.7)),p};
+  return {x:Math.round(s.w*(.06+.88*p)),y:Math.round(low-(low-top)*Math.pow(Math.sin(Math.PI*p),.7)),p};
 }
 // day disco only: faint heat ripples, pixel rings that rise out of the mountain range every couple of seconds, widen and fade; drawn before the
 // mountains so they slip behind the ridgeline, and left where they started so they trail the moving sun
