@@ -1288,16 +1288,22 @@ function paintSky(){
   // near saguaros: just the big one the neighbour owl sits on; the middle distance is left to the ocotillo
   // it stands a little left of where it used to (under the radio icon on phones), tall and close; but never so tall that
   // the owl on its crown would be hidden behind the desktop icons
-  let nearH=Math.round(Math.min(h,w*.8)*.5),nearCap=Infinity;
-  {const nx=Math.round(w*.72),base=Math.round(h*.99),owlH=(OWL2_BIG().open.length)+3;
-   document.querySelectorAll(".icons").forEach(n=>{const r=n.getBoundingClientRect();if(!r.width||!r.height||!n.querySelector(".icon"))return;
-     const l=r.left/S,rt=r.right/S,bt=r.bottom/S;if(nx+10<l||nx-10>rt)return;
-     nearCap=Math.min(nearCap,Math.max(Math.round(Math.min(h,w*.8)*.25),base-Math.ceil(bt)-owlH-2))})}
-  nearH=Math.min(nearH,nearCap);
+  // (tall phone screens size it by height as well as width, so it isn't left a stub at the bottom)
+  const nearBase=h>w*1.4?Math.min(h*.62,w*1.4):Math.min(h,w*.8);let nearH=Math.round(nearBase*.5),nearCap=Infinity;
+  // where it stands: a little right of centre, nudged left (up to ~.6 of the width) when that clears a column of phone icons
+  // above it and lets it grow taller
+  let nearFx=.72;
+  {const base=Math.round(h*.99),owlH=(OWL2_BIG().open.length)+3,icons=[...document.querySelectorAll(".icons .icon")].map(n=>n.offsetParent===null?null:n.getBoundingClientRect()).filter(r=>r&&r.width&&r.height);
+   const capAt=nx=>{let cap=Infinity;   // only the icons actually above it count; ±8 is half the owl on its crown
+     icons.forEach(r=>{const l=r.left/S,rt=r.right/S;if(nx+8<=l||nx-8>=rt)return;cap=Math.min(cap,Math.max(Math.round(Math.min(h,w*.8)*.25),base-Math.ceil(r.bottom/S)-owlH-2))});return cap};
+   let best=capAt(Math.round(w*.72));
+   for(let fx=.71;fx>=.6&&best<nearBase*.5*1.25;fx=Math.round((fx-.01)*100)/100){const c=capAt(Math.round(w*fx));if(c>best+8){best=c;nearFx=fx}}
+   nearCap=best}
+  nearH=Math.min(nearH,Math.max(Math.round(Math.min(h,w*.8)*.25),Math.round(nearCap/1.25)));
   // its centre column stands well above its arms: the trunk is drawn about a quarter taller than the arms are scaled to
   // (still kept clear of the desktop icons, so the owl on top stays in view)
   const nearTrunk=Math.min(Math.round(nearH*1.25),Math.max(nearH,nearCap));
-  const fixed=[[.72,.99,nearH/Math.min(h,w*.8)]];
+  const fixed=[[nearFx,.99,nearH/Math.min(h,w*.8)]];   // (fh is relative to the usual size unit; hh comes out as nearH)
   fixed.forEach(([fx,fy])=>taken.push([Math.round(w*fx),Math.round(h*fy),16]));
   const add=(n,kind,y0,y1,gap,extra)=>{for(let i=0;i<n;i++){const p=spot(y0,y1,gap);if(p)items.push([kind,p[0],p[1],...extra()])}};
   for(let i=0;i<6*area;i++)items.push(["cre",ri(0,w),H0+ri(2,span-2)]);
