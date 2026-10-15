@@ -3373,7 +3373,7 @@ function discoButton(on){
   clearInterval(discoButton.spin);clearInterval(discoButton.add);ball.querySelectorAll(".tw").forEach(t=>t.remove());
   if(!on){img.src=sprite("disco");return}
   let f=0;discoButton.spin=setInterval(()=>{if(document.body.classList.contains("still"))return;f=(f+1)%4;img.src=DISCO_FRAMES[f]},140);
-  const spots=[[17,4],[2,6],[15,15],[5,16]],cols=["#ffffff","#ffe9a8","#cfe0ff","#ffffff"];
+  const spots=[[17,4],[3,15]],cols=["#ffffff","#ffe9a8","#cfe0ff","#ffffff"];
   let n=0;const add=()=>{if(n>=spots.length){clearInterval(discoButton.add);return}const [x,y]=spots[n],t=document.createElement("i");t.className="tw";
     t.style.cssText=`left:${x}px;top:${y}px;--d:${(1.1+Math.random()*.9).toFixed(2)}s;--dl:-${(Math.random()).toFixed(2)}s;--c:${cols[n%cols.length]}`;ball.appendChild(t);n++};
   add();discoButton.add=setInterval(add,700);                       // one twinkle, then more and more
