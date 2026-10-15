@@ -3328,7 +3328,7 @@ function diversity(counts){
 // resting portraits for the Biodiversity Report: birds perched, never in flight
 const BAT_HANG=[".K.K.",".KKK.","KKvKK","KKKKK",".KKK.","..K.."];
 function bioSprite(key){
-  const m={owl:[CRITTERS.owlHome,OWLPAL],owl_chicks:[OWLET_BODY,OWLETPAL],roadrunner:[CRITTERS.stand],ravens:[CRITTERS.ravenPerch,RAVENPAL],
+  const m={owl:[CRITTERS.owlHome,OWLPAL],owl_chicks:[OWLET_BODY,OWLETPAL],roadrunner:[CRITTERS.stand],ravens:[CRITTERS.ravenFinePerch.perch,RAVENPAL,3],
     horned_lizards:[CRITTERS.toad],scorpions:[CRITTERS.scorp[0]],bats:[BAT_HANG],desert_mice:[CRITTERS.mouseSit,MOUSE],rattlesnake:[SNAKE_COIL,SNAKEPAL]}[key];
   if(key==="scorpions"){BIO_IMG[key]=BIO_IMG[key]||(()=>{               // two portraits: by day, and glowing under moonlight
     const rows=CRITTERS.scorp[0],w=Math.max(...rows.map(r=>r.length)),h=rows.length,k=6,pad=3,cw=(w+pad*2)*k,cv=document.createElement("canvas");
@@ -3340,7 +3340,7 @@ function bioSprite(key){
   const pa=SCENE.plantArt&&SCENE.plantArt[key];
   if(pa){BIO_IMG[key]=BIO_IMG[key]||(()=>{const k=Math.max(2,Math.min(8,Math.floor(96/Math.max(pa.width,pa.height)))),cv=document.createElement("canvas");
     cv.width=pa.width*k;cv.height=pa.height*k;const g=cv.getContext("2d");g.imageSmoothingEnabled=false;g.drawImage(pa,0,0,cv.width,cv.height);return cv.toDataURL()})();return BIO_IMG[key]}
-  if(!m)return "";BIO_IMG[key]=BIO_IMG[key]||(()=>{const rows=m[0],w=Math.max(...rows.map(r=>r.length)),h=rows.length,k=Math.max(3,Math.min(6,Math.floor(112/Math.max(w,h))));
+  if(!m)return "";BIO_IMG[key]=BIO_IMG[key]||(()=>{const rows=m[0],w=Math.max(...rows.map(r=>r.length)),h=rows.length,k=m[2]||Math.max(3,Math.min(6,Math.floor(112/Math.max(w,h))));
     const cv=document.createElement("canvas");cv.width=w*k;cv.height=h*k;const g=cv.getContext("2d");g.scale(k,k);sprt(g,rows,0,0,false,m[1]);return cv.toDataURL()})();
   return BIO_IMG[key];
 }
