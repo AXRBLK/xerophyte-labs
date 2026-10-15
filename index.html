@@ -862,20 +862,39 @@ function isNightNow(){const h=new Date().getHours();return h>=19||h<6}
 function setNight(n,slow){
   // keep the frame on screen so the new scene can dissolve in over it, block by block (nothing pops or jumps)
   let old=null;const cv0=document.getElementById("sky");
-  try{if(SCENE.ctx&&cv0.width&&cv0.height&&SCENE.night!==undefined&&SCENE.night!==n)old={img:SCENE.ctx.getImageData(0,0,cv0.width,cv0.height),w:cv0.width,h:cv0.height}}catch(e){}
+  try{if(SCENE.ctx&&cv0.width&&cv0.height&&SCENE.night!==undefined&&SCENE.night!==n)old={img:SCENE.ctx.getImageData(0,0,cv0.width,cv0.height),w:cv0.width,h:cv0.height,base:staticFrame(SCENE)}}catch(e){}
   SCENE.night=n;document.body.classList.toggle("night",n);if(document.getElementById("title").textContent)neonTagline();
   // the button shows where a click takes you: a moon by day, a sun by night
   const b=document.getElementById("modebtn");if(b){b.innerHTML=(n?ICON_SUN:ICON_MOON)+'<span class="mlab">mode</span>';b.title=n?"Switch to day mode":"Switch to night mode";b.setAttribute("aria-label",b.title)}
   paintSky();
-  if(old&&SCENE.ctx&&cv0.width===old.w&&cv0.height===old.h){const bw=Math.ceil(old.w/2),bh=Math.ceil(old.h/2),noise=new Float32Array(bw*bh);
-    for(let i=0;i<noise.length;i++)noise[i]=Math.random();
-    SCENE.xfade={old:old.img,noise,bw,t0:performance.now(),dur:slow?11000:2400};if(!SCENE.motion)drawScene()}
+  if(old&&SCENE.ctx&&cv0.width===old.w&&cv0.height===old.h){
+    // what stays put (the ranges, the plants, the big saguaro…) just fades from one palette to the other; what isn't in
+    // both scenes, or has moved (sun and moon, clouds, creatures), is found by comparing the edges of the two frames,
+    // and only those bits pixel-dissolve
+    SCENE.xfade=null;drawScene();
+    // a pixel belongs to the lasting scenery when the frame there is just its painted backdrop (sky, ranges, plants, the
+    // big saguaro) in both modes; anything drawn over the backdrop in either frame (sun, moon, creatures, blooms, the truck)
+    // or present in only one backdrop is a thing that comes, goes or moves
+    const W=old.w,H=old.h,nw=SCENE.ctx.getImageData(0,0,W,H).data,od=old.img.data,ob=old.base,nb=staticFrame(SCENE);
+    const bw=Math.ceil(W/2),bh=Math.ceil(H/2),chg=new Uint8Array(bw*bh),off=(a,b,i)=>Math.max(Math.abs(a[i]-b[i]),Math.abs(a[i+1]-b[i+1]),Math.abs(a[i+2]-b[i+2]))>18;
+    for(let i=0,p=0;p<W*H;p++,i+=4){if(off(od,ob,i)||off(nw,nb,i)||(ob[i+3]>0)!==(nb[i+3]>0)){const x=p%W,y=(p/W)|0;chg[(y>>1)*bw+(x>>1)]=1}}
+    const mask=new Uint8Array(bw*bh);
+    for(let y=0;y<bh;y++)for(let x=0;x<bw;x++){if(!chg[y*bw+x])continue;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const X=x+dx,Y=y+dy;if(X>=0&&Y>=0&&X<bw&&Y<bh)mask[Y*bw+X]=1}}
+    const noise=new Float32Array(bw*bh);for(let i=0;i<noise.length;i++)noise[i]=Math.random();
+    SCENE.xfade={old:old.img,noise,mask,bw,t0:performance.now(),dur:slow?12000:3500};drawScene()}
   try{if(LIVE&&LIVE.current)updateTray()}catch(e){}   // swap the sun/moon in the live weather icon
 }
+// the painted backdrop on its own, as the scene's layers stack it (no sun or moon, no creatures, nothing moving)
+function staticFrame(s){const L=s.layers;if(!L||!L.sky)return null;const W=L.sky.width,H=L.sky.height,cv=layer(W,H),c=cv.getContext("2d");
+  c.drawImage(L.sky,0,0);if(L.clouds)c.drawImage(L.clouds,0,0);c.drawImage(L.ground,0,0);c.drawImage(L.plants,0,0);
+  if(L.flowers)c.drawImage(L.flowers,0,0);if(s.night&&L.bloom)c.drawImage(L.bloom,0,0);if(L.giant)c.drawImage(s.night?L.giant:(L.giantNoBloom||L.giant),0,0);
+  return c.getImageData(0,0,W,H).data}
 // mode change in progress: the old frame shows through in 2×2 blocks that drop away at random until only the new scene is left
 function applyXfade(c,s){const X=s.xfade;if(!X)return;const k=(performance.now()-X.t0)/X.dur;if(k>=1){s.xfade=null;return}
-  const cur=c.getImageData(0,0,c.canvas.width,c.canvas.height),D=cur.data,O=X.old.data,W=c.canvas.width,H=c.canvas.height,ease=k*k*(3-2*k);
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(X.noise[(y>>1)*X.bw+(x>>1)]<ease)continue;const i=(y*W+x)*4;D[i]=O[i];D[i+1]=O[i+1];D[i+2]=O[i+2];D[i+3]=O[i+3]}
+  const cur=c.getImageData(0,0,c.canvas.width,c.canvas.height),D=cur.data,O=X.old.data,W=c.canvas.width,H=c.canvas.height,ease=k*k*(3-2*k),keep=1-ease;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const b=(y>>1)*X.bw+(x>>1),i=(y*W+x)*4;
+    if(X.mask[b]){if(X.noise[b]<ease)continue;D[i]=O[i];D[i+1]=O[i+1];D[i+2]=O[i+2];continue}   // things that come or go: block by block
+    D[i]=O[i]*keep+D[i]*ease;D[i+1]=O[i+1]*keep+D[i+1]*ease;D[i+2]=O[i+2]*keep+D[i+2]*ease}       // everything else: its colours ease across
   c.putImageData(cur,0,0)}
 // the sky keeps its own time: once the sun has sunk fully behind the ranges the scene slowly turns to night and the moon
 // rises; once the moon has set, day returns with the sun coming up
@@ -899,7 +918,9 @@ function paintSky(){
   // sky
   const sky=layer(w,h),skc=sky.getContext("2d");
   dither(skc,0,0,w,H0+2,(N?["#0b0e1f","#0e1226","#11162d","#151a34","#191f3b","#1e2442","#232a48","#29304d","#2f3652","#363c56"]:["#28243a","#352f48","#463b55","#5a4860","#705766","#88676c","#a07a72","#b78e7c","#c9a488","#d8ba98"]).map(hex));
-  if(N){for(let i=0;i<w*2.2;i++){const t=rnd(),x=Math.round(t*w),y=Math.round(H0*(.05+.5*t)+(rnd()-.5)*H0*.16);if(y<H0){skc.fillStyle=rnd()<.5?"#2a3158":"#232a4e";skc.fillRect(x,y,1,1)}}}
+  // faint sky speckle at night. The dice are rolled by day too, so everything placed after this (clouds, ranges and every
+  // plant) lands in exactly the same spot whatever the hour
+  for(let i=0;i<w*2.2;i++){const t=rnd(),x=Math.round(t*w),y=Math.round(H0*(.05+.5*t)+(rnd()-.5)*H0*.16);if(y<H0){const dk=rnd()<.5;if(N){skc.fillStyle=dk?"#2a3158":"#232a4e";skc.fillRect(x,y,1,1)}}}
 
   // sun (day) or moon (night)
   const sr=Math.round(Math.min(h,w*1.2)*(N?.084:.12));   // tall phone screens: size the sun and moon by width too
@@ -935,7 +956,8 @@ function paintSky(){
   for(let i=0;i<Math.max(4,w/45);i++){
     const cy=ri(Math.round(H0*.2),Math.round(H0*.62)),cx=ri(-20,w),len=ri(14,46);
     if(N&&i%2)continue;
-    rect(cx,cy,len,2,"#a8858e");rect(cx+ri(3,8),cy-2,Math.round(len*.5),2,"#b8949a");rect(cx+ri(-6,4),cy+2,Math.round(len*.7),1,"#8e7080");
+    const r2=i%2?(a,b)=>Math.floor(a+Math.random()*(b-a+1)):ri;    // the extra daytime streaks don't touch the scene's dice
+    rect(cx,cy,len,2,"#a8858e");rect(cx+r2(3,8),cy-2,Math.round(len*.5),2,"#b8949a");rect(cx+r2(-6,4),cy+2,Math.round(len*.7),1,"#8e7080");
   }
   c=gc;
   // distant ranges: three gentle, rolling layers fading into haze, with a saddle where the sun sets
