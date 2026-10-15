@@ -213,7 +213,7 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 .potted .pot::before{content:"";position:absolute;left:1px;right:1px;top:0;height:5px;border-radius:50% 50% 40% 40% / 100% 100% 60% 60%;background:linear-gradient(#e6a072,#c86e44);opacity:.9}   /* the rounded upper lip */
 /* the name on a placard hanging from the shelf's front edge, two little pins at the top; long names wrap (two lines) */
 /* the name on a little wooden marker standing on the shelf in front of the pot, lettered like the taskbar's MODE label */
-.potted .tag{position:absolute;z-index:2;left:0;right:0;margin:0 auto;width:fit-content;bottom:56px;transform:rotate(-1.5deg);max-width:92px;padding:2px 5px 1px;
+.potted .tag{position:absolute;z-index:2;left:0;right:0;margin:0 auto;width:fit-content;bottom:52px;transform:rotate(-1.5deg);max-width:92px;padding:2px 5px 1px;
   background:linear-gradient(180deg,rgba(255,240,210,.35),rgba(0,0,0,0) 40%,rgba(80,50,20,.12)),repeating-linear-gradient(176deg,#c9a170 0 3px,#c29866 3px 4px,#cfa877 4px 7px,#bb905e 7px 8px);
   border:1px solid #7a5532;border-radius:2px;box-shadow:1px 2px 0 rgba(60,36,16,.35),inset 0 0 0 1px rgba(255,236,200,.25);
   color:#3a2614;font:400 9px/11px var(--font-data);letter-spacing:.14em;text-transform:uppercase;text-align:center;
@@ -227,7 +227,7 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 .potted.on .pot::after{opacity:1;animation:soak 1.4s ease-out both}
 @keyframes soak{from{opacity:0;transform:translateY(30%)}to{opacity:1;transform:none}}
 body.still .potted.on .pot::after{animation:none}
-.potted.on .tag{outline:2px solid var(--selbg,var(--link));outline-offset:1px;color:#1e1208}
+.potted.on .tag{color:#1e1208}   /* the picked plant shows by its watered pot, not a box */
 .potted:hover .sp{transform:translateY(-2px)}
 .pane{margin-top:10px;padding:10px;background:var(--card);border:1px solid var(--line);font-size:12px}
 .pane .pane-hd{display:flex;gap:10px;align-items:center}
