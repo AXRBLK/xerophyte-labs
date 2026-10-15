@@ -1554,7 +1554,7 @@ function stepRaven(r,s){
     const free=s.perches.filter(p=>!s.ravens.some(o=>o.target===p));
     if(free.length&&(r.k||1)>=.85&&R()<.025&&r.x>0&&r.x<w){r.target=free[RI(0,free.length-1)];r.state="descend";r.circ=null}
     // now and then a near raven drops to the open ground to walk about and pick at things
-    else if((r.k||1)>=.85&&R()<.006&&r.x>30&&r.x<w-50&&!s.ravens.some(o=>o!==r&&o.state==="ground")){const sp=openGround(s,r);
+    else if((r.k||1)>=.85&&R()<.03&&r.x>30&&r.x<w-50&&!s.ravens.some(o=>o!==r&&o.state==="ground")){const sp=openGround(s,r);
       if(sp){r.state="land";r.circ=null;r.tx=sp.x;r.ty=sp.y-13.5}}
   }else if(r.state==="descend"){
     const tx=r.target.x-6,ty=r.target.y-13,dx=tx-r.x,dy=ty-r.y,d=Math.hypot(dx,dy);
