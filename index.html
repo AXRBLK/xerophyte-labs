@@ -2246,7 +2246,7 @@ function drawScene(){
   // disco: the owlets hop out to the lip of the hole and bounce to the music, until mum comes home with food: then
   // they scramble back inside and beg, beaks wide open
   const chickBeg=o.state==="feed"||(o.state==="fly"&&o.prey&&Math.hypot(o.x-o.nest.x,o.y-o.nest.cy)<80);   // mouths open as she comes in; shut as she settles
-  const chickEdge=s.disco&&!chickBeg&&shown("owl_chicks");
+  const chickEdge=s.disco&&!chickBeg&&shown("owl_chicks")&&owlOn&&o.state!=="home"&&o.state!=="settle";   // only while she's out: home to roost, they tuck back inside
   if((o.state!=="home"||!owlOn)&&shown("owl_chicks")&&!chickEdge){
     const nc=owlChickN();if(!o.chicks||o.chicks.length!==nc)o.chicks=[...Array(nc)].map(()=>({b:0}));
     const SPOTS=CHICK_SPOTS[nc]||CHICK_SPOTS[6],feeding=o.state==="feed";
