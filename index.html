@@ -1426,7 +1426,7 @@ function stepOwl(o,s){
           if(m.kind==="scorp"){m.alive=false;m.timer=RI(500,1100)}else{m.caught=true;m.respawn=RI(500,1100)}
           o.path=[o.path[1],{x:n.x+10,y:n.cy-14},{x:n.x,y:n.top-5,flap:true}];o.path.unshift({x:o.x,y:o.y});}}   // skip the thermal: straight home
       o.path.shift();
-      if(!o.path.length){if(o.prey&&shown("owl_chicks")&&owlChickN()>0){o.state="feed";o.feedT=o.timer=RI(16,22);o.x=n.x;o.y=n.top-5}else{o.prey=false;o.state="home";o.timer=RI(40,160)}}
+      if(!o.path.length){if(o.prey&&shown("owl_chicks")&&owlChickN()>0){o.state="feed";o.feedT=o.timer=RI(16,22);o.x=n.x;o.y=n.top-5;moonWink()}else{o.prey=false;o.state="home";o.timer=RI(40,160)}}
       return}
     const sp=Math.min(o.path.length<=2?.9:1.5,d);o.x+=dx/d*sp;o.y+=dy/d*sp;
     o.flap=tg.flap||dy/d<-.7?((s.t>>1)%3!==2?1:0):0; // wingbeats only when taking off or climbing hard
@@ -1754,14 +1754,16 @@ function truckLights(c,t){
 // night: the moon; in disco it slowly swells to 130% and hangs in front of the northern lights
 function drawMoon(c,s){
   s.moonK=s.moonK||1;const want=s.disco?1.3:1;s.moonK+=Math.sign(want-s.moonK)*Math.min(.0035,Math.abs(want-s.moonK));
-  const r=Math.round(s.sr*s.moonK),o=orbPos(s,true,r);if(!o)return;c.drawImage(moonDisc(r),o.x-r,o.y-r);
+  const r=Math.round(s.sr*s.moonK),o=orbPos(s,true,r);if(!o){s.faceAt=0;s.faceTrig=false;return}c.drawImage(moonDisc(r),o.x-r,o.y-r);
   // disco, with the moon at the top of its arc: a face (the old man in the moon) surfaces, winks once, and sinks away
   const now=performance.now(),peak=Math.abs(o.p-.5)<.025;
   if(s.disco&&peak&&!s.faceAt&&!s.faceDone)s.faceAt=now;
   if(!peak&&Math.abs(o.p-.5)>.06)s.faceDone=false;
   if(s.faceAt){const t=(now-s.faceAt)/1000,a=t<1.2?t/1.2:t<4.2?1:t<5.4?1-(t-4.2)/1.2:0,wink=t>2.6&&t<3.2;
-    if(t>=5.4||!s.disco){s.faceAt=0;s.faceDone=true}else moonFace(c,o.x,o.y,r,wink,a)}
+    if(t>=5.4||(!s.disco&&!s.faceTrig)){s.faceAt=0;s.faceTrig=false;s.faceDone=s.faceDone||peak}else moonFace(c,o.x,o.y,r,wink,a)}
 }
+// something worth a wink (a new song, the owl feeding her chicks, the saucer starting to spin): the face surfaces and winks
+function moonWink(){const s=SCENE;if(!s||!s.night||s.faceAt)return;s.faceAt=performance.now();s.faceTrig=true}
 // the face itself: shaded rather than drawn: deep-set eyes under heavy brows glancing sideways, a broad nose, round
 // lit cheeks and a sly closed-mouth smile, dithered softly into the moon's own tones (a: 0–1 fade, wink: right eye shut)
 function moonFace(c,ox,oy,r,wink,a){
@@ -1876,6 +1878,7 @@ function stepUfo(s,tk){
     // disco: a second after scooping up the truck it spins on the spot for three seconds, then heads home
     const now=performance.now();
     if(s.disco&&u.taken&&!u.spun){if(!u.spinAt){u.spinAt=now+1000;u.spinEnd=now+4000}
+      if(now>=u.spinAt&&!u.winked){u.winked=true;moonWink()}
       u.spin=now<u.spinAt?0:(now-u.spinAt)/1000*Math.PI*2*1.6;u.y+=Math.sin(u.t*.2)*.08;
       if(now>=u.spinEnd){u.spun=true;u.spin=0;u.hold=0}return u}
     if(u.hold>0){u.hold--;u.y+=Math.sin(u.t*.2)*.08}
@@ -2655,6 +2658,7 @@ function loadSpotify(src){
       ctl.addListener("playback_update",e=>{const d=e.data||{};
         SPOT.state={paused:!!d.isPaused,pos:d.position||0,dur:d.duration||0,buffering:!!d.isBuffering};SPOT.at=performance.now();
         if(!d.isPaused){SPOT.stopped=false;NOW.started=true}
+        const tk=d.playingURI||(d.duration?"d"+d.duration:"");if(tk&&!d.isPaused){if(SPOT.trackKey&&tk!==SPOT.trackKey)moonWink();SPOT.trackKey=tk}   // a new song: the moon winks
         SPOT.lastUpdate=d;const f=d.playingURI?{uri:d.playingURI}:dig(d,0,{});
         if(f.uri&&/^spotify:(track|episode):/.test(f.uri))lookupTrack(f.uri,d.duration||0);
         else if(d.duration&&(d.duration!==SPOT.lastDur||!NOW.title)){SPOT.lastDur=d.duration;const t=guessTrack(d.duration);   // a playlist: identify the song by its length
