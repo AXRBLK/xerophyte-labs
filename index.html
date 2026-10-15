@@ -2196,23 +2196,25 @@ function drawScene(){
   const G=s.groundA,g=G.getContext("2d");g.clearRect(0,0,s.w,s.h);
   // disco (day or night): every ground creature stops where it is and nods along
   const hold=s.disco;
-  if(!N&&shown("horned_lizards"))s.toads.forEach(t=>{if(hold)t.bob=0;else if(!enterStep(t))stepToad(t,s.w);g.fillStyle="#6e5e4c";g.fillRect(Math.round(t.x)+1,t.y+5,10,1);
+  if(!N&&shown("horned_lizards"))s.toads.forEach(t=>{if(t.enter)enterStep(t);else if(hold)t.bob=0;else stepToad(t,s.w);   // newcomers keep coming in, even mid-party
+    const tb=t.enter?0:bob;g.fillStyle="#6e5e4c";g.fillRect(Math.round(t.x)+1,t.y+5,10,1);
     // disco: the head (front columns) nods on the beat while the body stays put
-    if(bob)sprt(g,TOAD_BODY,t.x,t.y+t.bob,t.dir<0),sprt(g,TOAD_HEAD,t.x,t.y+t.bob+1,t.dir<0);else sprt(g,CRITTERS.toad,t.x,t.y+t.bob,t.dir<0)});
+    if(tb)sprt(g,TOAD_BODY,t.x,t.y+t.bob,t.dir<0),sprt(g,TOAD_HEAD,t.x,t.y+t.bob+1,t.dir<0);else sprt(g,CRITTERS.toad,t.x,t.y+t.bob,t.dir<0)});
   if(!N&&shown("rattlesnake"))drawSnake(g,s,stepSnake(s,hold));else if(s.snake)s.snake={state:"wait",timer:RI(60,300)};
   const scorpOn=shown("scorpions");if(!scorpOn)s.scorps.forEach(p=>p.alive=false);
-  if(scorpOn&&!hold)s.scorps.forEach(p=>{if(!enterStep(p))stepScorp(p,s)});
-  if(!N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)drawScorp(g,p,hold?0:p.state==="walk"?(s.t>>1)%2:0,bob)});
-  const rr=s.runner;if(shown("roadrunner")&&!hold&&!enterStep(rr))stepRunner(rr,s);
+  if(scorpOn)s.scorps.forEach(p=>{if(p.enter)enterStep(p);else if(!hold)stepScorp(p,s)});
+  if(!N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)drawScorp(g,p,hold&&!p.enter?0:p.state==="walk"?(s.t>>1)%2:0,p.enter?0:bob)});
+  const rr=s.runner;if(shown("roadrunner")){if(rr.enter)enterStep(rr);else if(!hold)stepRunner(rr,s)}
+  const rh=hold&&!rr.enter;
   if(shown("roadrunner")&&rr.state!=="away"&&rr.state!=="asleep"){
-    const rs=hold?CRITTERS.stand:rr.state==="run"||rr.state==="hunt"?CRITTERS.run[s.t%2]:rr.state==="peck"||(rr.state==="eat"&&s.t%4<2)?CRITTERS.peck:CRITTERS.stand;
-    g.fillStyle="#6e5e4c";g.fillRect(Math.round(rr.x)+4,Math.round(rr.y),9,1);(hold||rr.state==="stand"||rr.state==="peck")?sprtBob(g,rs,rr.x,rr.y-11,5,bob,rr.dir<0):sprt(g,rs,rr.x,rr.y-11,rr.dir<0);
+    const rs=rh?CRITTERS.stand:rr.state==="run"||rr.state==="hunt"?CRITTERS.run[s.t%2]:rr.state==="peck"||(rr.state==="eat"&&s.t%4<2)?CRITTERS.peck:CRITTERS.stand;
+    g.fillStyle="#6e5e4c";g.fillRect(Math.round(rr.x)+4,Math.round(rr.y),9,1);(rh||rr.state==="stand"||rr.state==="peck")?sprtBob(g,rs,rr.x,rr.y-11,5,rh?bob:0,rr.dir<0):sprt(g,rs,rr.x,rr.y-11,rr.dir<0);
   }
   if(N&&shown("desert_mice"))(s.mice||[]).forEach(m=>{
     if(m.caught){if(!hold&&--m.respawn<=0){m.caught=false;m.dir=R()<.5?1:-1;m.x=m.dir>0?2:s.w-20;m.state="hop";m.hops=RI(4,8);m.ht=0}return}
-    if(hold)m.yo=0;else if(!enterStep(m))stepMouse(m,s);
-    const f=!hold&&m.state==="hop"&&m.yo<0?CRITTERS.mouseHop:CRITTERS.mouseSit;
-    sprtBob(g,f,m.x,m.y-8+m.yo,4,hold?bob:m.state==="nibble"&&s.t%4<2?1:0,m.dir<0,MOUSE)});
+    const mh=hold&&!m.enter;if(m.enter)enterStep(m);else if(hold)m.yo=0;else stepMouse(m,s);
+    const f=!mh&&m.state==="hop"&&m.yo<0?CRITTERS.mouseHop:CRITTERS.mouseSit;
+    sprtBob(g,f,m.x,m.y-8+m.yo,4,mh?bob:m.state==="nibble"&&s.t%4<2?1:0,m.dir<0,MOUSE)});
   const tk=N&&shown("baja_truck")?stepTruck(s):null;
   if(tk)sprt(g,TRUCK,tk.x,tk.y,tk.dir<0,TRUCKPAL,"kbgTwR");
   if(s.leavers&&s.leavers.length)stepGroundLeavers(g,s);           // the last mode's creatures, off to hide behind a cactus
@@ -2220,7 +2222,7 @@ function drawScene(){
   c.drawImage(G,0,0);
   if(tk&&!(s.truck&&s.truck.lift))truckLights(c,tk);
   const ufo=N?stepUfo(s,tk):null;if(ufo)drawUfo(c,ufo,s);
-  if(N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)drawScorp(c,p,hold?0:p.state==="walk"?(s.t>>1)%2:0,bob,GLOW)});
+  if(N&&scorpOn)s.scorps.forEach(p=>{if(p.alive)drawScorp(c,p,hold&&!p.enter?0:p.state==="walk"?(s.t>>1)%2:0,p.enter?0:bob,GLOW)});
   if(XF){curtDraw(c,s,XF.L.plants,s.layers.plants);curtDraw(c,s,XF.L.flowers,s.layers.flowers);
     if(shown("night_blooms"))curtDraw(c,s,XF.oldN?XF.L.bloom:null,N?s.layers.bloom:null)}else{
   c.drawImage(s.layers.plants,0,0);
