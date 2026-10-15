@@ -1569,8 +1569,9 @@ function owl2Turn(rows,dir){const key=rows.join("")+dir;let t=OWL2_TURN_CACHE.ge
   OWL2_TURN_CACHE.set(key,t);return t}
 // the head turned on its neck (a yaw, not a tilt): inside the head's outline the face slides toward the way it turns
 // (1px ≈ 25°, 3px ≈ 75°, nearly in profile) and the far side fills in with the brown of the back of the head; ear tufts travel with it
-function owl2Yaw(rows,d){const key=rows.join("")+"y"+d;let t=OWL2_TURN_CACHE.get(key);if(t)return t;
-  t=rows.map((r,j)=>{const q="."+r+".";if(!d||j>8)return q;
+function owl2Yaw(rows,d){return owlYaw(rows,d,9,true)}
+function owlYaw(rows,d,H,pad){const key=rows.join("")+"y"+d+H+pad;let t=OWL2_TURN_CACHE.get(key);if(t)return t;
+  t=rows.map((r,j)=>{const q=pad?"."+r+".":r;if(!d||j>=H)return q;
     const a=q.search(/[^.]/),b=q.length-1-[...q].reverse().join("").search(/[^.]/);if(a<0||b-a<3)return q;
     const inner=q.slice(a+1,b),fill=j<2?".":"B",n=Math.abs(d);
     const moved=d>0?fill.repeat(n)+inner.slice(0,inner.length-n):inner.slice(n)+fill.repeat(n);
@@ -2218,7 +2219,7 @@ function drawScene(){
   // things in the air (and the owl at its door) go in front of the plants
   const A=s.airA,a=A.getContext("2d");a.clearRect(0,0,s.w,s.h);
   const o=s.owl,owlOn=shown("owl");if(owlOn)stepOwl(o,s);let owlSprite=null,ox=0,oy=0;
-  if(o.state==="home"){owlSprite=!N?(o.peek>0?CRITTERS["owlPeek"+o.peekEye]:CRITTERS.owlBlink):o.blink>0?CRITTERS.owlBlink:CRITTERS.owlHome;ox=o.nest.x-10;oy=o.nest.top+(N?2:3)}
+  if(o.state==="home"){owlSprite=s.disco?CRITTERS.owlBlink:!N?(o.peek>0?CRITTERS["owlPeek"+o.peekEye]:CRITTERS.owlBlink):o.blink>0?CRITTERS.owlBlink:CRITTERS.owlHome;ox=o.nest.x-10;oy=o.nest.top+(N?2:3)}
   else{owlSprite=o.flap?((s.t>>1)%2?CRITTERS.owlUp:CRITTERS.owlDown):CRITTERS.owlGlide;ox=o.x-OWL_FW;oy=o.y-OWL_FH}
   const carry=owlOn&&o.prey&&o.state==="fly";
   const fade=owlOn&&o.state==="settle"&&o.timer<OWL_FADE?o.timer/OWL_FADE:null;   // last few frames: cross-fade the folded, sitting owl in
@@ -2247,7 +2248,10 @@ function drawScene(){
   if(s.leavers&&s.leavers.length)stepFlyLeavers(c,s,true);
   if(fade!==null)c.globalAlpha=Math.max(.15,fade);
   {const pal=N?OWLPAL_N:o.state==="home"&&o.peek>0?OWLPAL_PEEK:OWLPAL_DAY;
-   if(owlOn){if(o.state==="home")sprtBob(c,owlBig(owlSprite),ox,oy,12,bob,false,pal);
+   if(owlOn){if(o.state==="home"){let rows=owlBig(owlSprite);
+       // disco: roosting with its eyes shut, head swivelling on its neck to the beat like its neighbour's, ~75° each way
+       if(s.disco)rows=owlYaw(rows,Math.round(Math.sin(performance.now()/1000*Math.PI*1.07)*4),12,false);
+       sprtBob(c,rows,ox,oy,12,s.disco?0:bob,false,pal)}
      else{sprt(c,owlBigFly(owlSprite),ox,oy,false,pal);sprt(c,OWL_FLYHEAD(),Math.round(o.x)-10,oy,false,pal)}}}   // in flight it wears the same face as when perched // asleep and shadowed by day; awake with bright eyes at night
   c.globalAlpha=1;if(fade!==null){c.globalAlpha=1-fade;sprt(c,owlBig(CRITTERS.owlHome),o.nest.x-10,o.nest.top+2,false,OWLPAL_N);c.globalAlpha=1}
   if(owlOn&&o.state==="fly"&&(o.strike||carry)){                                // feathered legs reaching down, talons spread (or gripping)
