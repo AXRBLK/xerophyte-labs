@@ -211,6 +211,53 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 .meter i.soon{background:#d4b064}.meter i.thirsty{background:var(--bloom)}
 .cactus .note{grid-column:1/-1;font-size:12px;color:var(--ink2);border-top:1px dashed var(--line);padding-top:6px;margin-top:4px}
 
+/* cacti: view switcher */
+.summary .looks{margin-left:auto;display:inline-flex;gap:2px}
+.looks .look{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 7px;font:12px var(--font-ui);color:var(--ink);background:var(--chrome);border:2px solid;border-color:var(--chrome-hi) var(--chrome-lo) var(--chrome-lo) var(--chrome-hi);cursor:pointer}
+.looks .look.on{border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo);background:repeating-conic-gradient(var(--chrome) 0 25%,var(--chrome-hi) 0 50%) 0 0/2px 2px}
+@media (max-width:500px){.looks .look span{display:none}}
+/* cacti: the greenhouse shelf: pots on wooden planks, a name tag on each; pick one to see its particulars below */
+.shelf{display:flex;flex-wrap:wrap;justify-content:center;padding:6px 6px 0;background:#e9dcc6 repeating-linear-gradient(to bottom,transparent 0 118px,#a8774a 118px 124px,#7a5232 124px 128px,#5a3a22 128px 130px,rgba(60,40,20,.18) 130px 136px,transparent 136px 140px);border:2px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}
+.potted{position:relative;width:112px;height:140px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:22px;font:inherit;color:inherit}
+.potted .sp{width:64px;height:64px;image-rendering:pixelated;margin-bottom:-14px;position:relative;z-index:0;clip-path:inset(0 0 22% 0)}   /* roots trimmed: it's planted */
+.potted .pot{z-index:1}
+.potted .pot{position:relative;width:58px;height:30px;background:#c4673e;clip-path:polygon(0 0,100% 0,100% 6px,92% 6px,84% 100%,16% 100%,8% 6px,0 6px);box-shadow:inset -8px 0 0 #9c4c2c,inset 6px 0 0 #d8845a}
+.potted .pot::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:#d27a4e;box-shadow:inset 0 -2px 0 #a8522f}
+.potted .tag{position:absolute;left:50%;top:10px;transform:translateX(-50%);max-width:100px;padding:0 4px;background:#f6f1e2;color:#2a2018;border:1px solid #6a5a48;font:11px/14px var(--font-ui);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.potted.dormant .sp{filter:grayscale(.85) brightness(.9);opacity:.75}
+.potted.dormant .pot{filter:saturate(.35)}
+.potted.on .tag{background:var(--selbg,var(--link));color:#fff;border-color:#000;outline:1px dotted #fff;outline-offset:-3px}
+.potted:hover .sp{transform:translateY(-2px)}
+.pane{margin-top:10px;padding:10px;background:var(--card);border:1px solid var(--line);font-size:12px}
+.pane .pane-hd{display:flex;gap:10px;align-items:center}
+.pane .pane-hd .sp{width:48px;height:48px;image-rendering:pixelated}
+.pane .pane-hd .logo-link,.pane .pane-hd>.logo{margin-left:auto}
+.pane .logo{max-width:64px;max-height:36px;object-fit:contain;display:block}
+.pane .nm{font:600 16px var(--font-ui);display:flex;gap:8px;align-items:center}
+.pane .sci{font-style:italic;color:var(--mute)}
+.pane dl{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:8px 0 0}
+.pane dt{color:var(--mute);font-family:var(--font-ui)}.pane dd{margin:0;color:var(--ink2);min-width:0;overflow-wrap:anywhere}
+.pane .note{font-size:12px;color:var(--ink2);border-top:1px dashed var(--line);padding-top:6px;margin-top:8px}
+.pane .detail-btn{margin-top:8px;height:24px;padding:0 10px;font:13px var(--font-ui);color:var(--ink);background:var(--chrome);border:2px solid;border-color:var(--chrome-hi) var(--chrome-lo) var(--chrome-lo) var(--chrome-hi);cursor:pointer}
+/* cacti: Explorer-style details list, with a preview pane */
+.explorer{display:block}
+.xl-wrap{overflow:auto;background:var(--card);border:2px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}
+.xl{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}
+.xl th{position:sticky;top:0;padding:0;z-index:1}
+.xl th button{display:block;width:100%;text-align:left;height:22px;padding:0 6px;font:12px var(--font-ui);color:var(--ink);background:var(--chrome);border:2px solid;border-color:var(--chrome-hi) var(--chrome-lo) var(--chrome-lo) var(--chrome-hi);cursor:pointer}
+.xl th button:active{border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}
+.xl td{vertical-align:middle;padding:3px 6px 3px 5px;border-bottom:1px dotted var(--line2);color:var(--ink2)}
+.xl td i{color:var(--mute)}
+.xl tr{cursor:default}.xl tbody tr:hover td{background:var(--band)}
+.xl tr.on td,.xl tr.on td>i{background:var(--selbg,var(--link))!important;color:#fff}
+.xl tr:focus{outline:1px dotted var(--ink);outline-offset:-2px}
+.xl .nmc{font-family:var(--font-ui);color:var(--ink)}.xl .nmc>span,.xl .agec>span{display:flex;align-items:center;gap:6px}
+.xl .nmc .sp{width:20px;height:20px;image-rendering:pixelated}
+.xl .mini{display:inline-block;width:40px;height:7px;border:1px solid currentColor;opacity:.85}.xl .mini i{display:block;height:100%;background:var(--sage)}.xl .mini i.dormant{background:#a8a098}
+.xl tr.on .chip{border-color:#fff}
+body.night .shelf{background-color:#2a2c44}
+body.night{--selbg:#4a5296}
+
 /* weather */
 .now{display:grid;grid-template-columns:auto 1fr;gap:4px 18px;align-items:center}
 .now .big{font-family:var(--font-display);font-size:48px;-webkit-font-smoothing:none;line-height:1;color:var(--link);font-variant-numeric:tabular-nums}
@@ -3020,17 +3067,24 @@ function clientDetail(c){
     .map(l=>{const i=l.indexOf("|"),u=(i<0?l:l.slice(0,i)).trim(),t=i<0?"":l.slice(i+1).trim();return /^https?:\/\//i.test(u)?{src:u,text:t}:{src:"",text:l}});
 }
 const safeURL=u=>{u=String(u||"").trim();if(!u)return "";if(!/^https?:\/\//i.test(u))u="https://"+u;return /^https:\/\/|^http:\/\//i.test(u)?u:""};
+// three ways to look at the collection, switched from the little toolbar (remembered per browser):
+// cards (the original), a greenhouse shelf of potted plants, and an Explorer-style details list
+const CACTI_LOOKS=[["cards","Cards"],["shelf","Shelf"],["list","Details"]];
+let CACTI_SORT={k:"st",d:1};
+function cactiLook(){try{const v=localStorage.getItem("cactiLook");if(CACTI_LOOKS.some(l=>l[0]===v))return v}catch(e){}return "cards"}
 function renderCacti(body,status){
   const list=(DATA.cacti||[]).filter(c=>c.name).map(c=>({...c,age:clientAge(c),st:clientStatus(c),gal:clientDetail(c)}))
     .sort((a,b)=>(a.st==="active"?0:1)-(b.st==="active"?0:1)||(b.age?.days??-1)-(a.age?.days??-1));
   const maxD=Math.max(1,...list.map(c=>c.age?.days||0)),n=s=>list.filter(c=>c.st===s).length;
   const mo=d=>d.toLocaleDateString(undefined,{month:"short",year:"numeric"});
-  body.innerHTML=`${exampleTag()}
-  <div class="summary"><span class="chip active">${n("active")} active</span><span class="chip dormant">${n("dormant")} dormant</span></div>
-  <div class="grid">${list.map((c,i)=>{const a=c.age,url=safeURL(c.website||c.url||c.link),logo=safeURL(c.logo||c.logo_url);
+  const look=cactiLook(),pic=c=>c.image_url?esc(c.image_url):sprite(cactusKind(c)),urlOf=c=>safeURL(c.website||c.url||c.link);
+  const bar=`<div class="summary"><span class="chip active">${n("active")} active</span><span class="chip dormant">${n("dormant")} dormant</span>
+    <span class="looks" role="group" aria-label="View">${CACTI_LOOKS.map(([k,t])=>`<button class="look${k===look?" on":""}" data-look="${k}" aria-pressed="${k===look}" title="${t} view">${LOOK_ICON[k]}<span>${t}</span></button>`).join("")}</span></div>`;
+  let main="";
+  if(look==="cards")main=`<div class="grid">${list.map((c,i)=>{const a=c.age,url=urlOf(c),logo=safeURL(c.logo||c.logo_url);
     const logoImg=logo?`<img class="logo" alt="${esc(c.name)} logo" src="${esc(logo)}" loading="lazy">`:"";
     return `<article class="cactus">
-      <div class="pic"><img class="sp" alt="" src="${c.image_url?esc(c.image_url):sprite(cactusKind(c))}">
+      <div class="pic"><img class="sp" alt="" src="${pic(c)}">
         ${logoImg?(url?`<a class="logo-link" href="${esc(url)}" target="_blank" rel="noopener" title="${esc(url.replace(/^https?:\/\//,""))}">${logoImg}</a>`:logoImg):""}</div>
       <div class="nm"><span>${esc(c.name)}</span><span class="chip ${c.st}">${c.st==="active"?"Active":"Dormant"}</span></div>
       <div class="sci">${esc(c.species||"")}${c.common_name?` · ${esc(c.common_name)}`:""}</div>
@@ -3039,11 +3093,43 @@ function renderCacti(body,status){
       ${c.notes?`<div class="note">${linkify(c.notes)}</div>`:""}
       ${c.gal.length?`<button class="detail-btn" data-i="${i}">Detail · ${c.gal.length} ${c.gal.length>1?"views":"view"} ▸</button>`:""}
     </article>`}).join("")}</div>`;
+  // one plant's particulars: under the shelf, and beside the details list
+  const card=(c,i)=>{if(!c)return "";const a=c.age,url=urlOf(c),logo=safeURL(c.logo||c.logo_url);
+    return `<div class="pane-hd"><img class="sp" alt="" src="${pic(c)}"><div><div class="nm">${esc(c.name)} <span class="chip ${c.st}">${c.st==="active"?"Active":"Dormant"}</span></div>
+      <div class="sci">${esc(c.species||"")}${c.common_name?` · ${esc(c.common_name)}`:""}</div></div>
+      ${logo?`${url?`<a class="logo-link" href="${esc(url)}" target="_blank" rel="noopener">`:""}<img class="logo" alt="${esc(c.name)} logo" src="${esc(logo)}">${url?"</a>":""}`:""}</div>
+      <dl><dt>Where</dt><dd>${esc(c.location||"—")}</dd><dt>Since</dt><dd>${a?`${mo(a.from)}–${a.to?mo(a.to):"now"}`:"—"}</dd><dt>Age</dt><dd>${a?a.txt:"—"}</dd>
+      ${url?`<dt>Site</dt><dd><a href="${esc(url)}" target="_blank" rel="noopener">${esc(url.replace(/^https?:\/\//,"").replace(/\/$/,""))}</a></dd>`:""}</dl>
+      <div class="meter" title="Age: how long we've worked together"><i class="${c.st}" style="width:${a?Math.max(3,Math.round(100*a.days/maxD)):0}%"></i></div>
+      ${c.notes?`<div class="note">${linkify(c.notes)}</div>`:""}
+      ${c.gal.length?`<button class="detail-btn" data-i="${i}">Detail · ${c.gal.length} ${c.gal.length>1?"views":"view"} ▸</button>`:""}`};
+  const sel=Math.min(list.length-1,Math.max(0,renderCacti.sel||0));
+  if(look==="shelf")main=`<div class="shelf" role="listbox" aria-label="Cacti">${list.map((c,i)=>`<button class="potted ${c.st}${i===sel?" on":""}" data-sel="${i}" role="option" aria-selected="${i===sel}" title="${esc(c.name)}">
+      <img class="sp" alt="" src="${pic(c)}"><span class="pot"><span class="tag">${esc(c.name)}</span></span></button>`).join("")}</div>
+    <div class="pane shelf-pane">${card(list[sel],sel)}</div>`;
+  if(look==="list"){
+    const S=CACTI_SORT,val={nm:c=>c.name.toLowerCase(),sp:c=>(c.species||"").toLowerCase(),loc:c=>(c.location||"").toLowerCase(),since:c=>c.age?+c.age.from:0,age:c=>c.age?.days||0,st:c=>c.st==="active"?0:1};
+    const rows=list.map((c,i)=>[c,i]).sort((p,q)=>{const a=val[S.k](p[0]),b=val[S.k](q[0]);return (a<b?-1:a>b?1:0)*S.d||p[1]-q[1]});
+    const th=(k,t)=>`<th><button data-sort="${k}"${S.k===k?` class="on"`:""}>${t}${S.k===k?(S.d>0?" ▴":" ▾"):""}</button></th>`;
+    main=`<div class="explorer"><div class="xl-wrap"><table class="xl"><thead><tr>${th("nm","Name")}${th("sp","Species")}${th("loc","Where")}${th("since","Since")}${th("age","Age")}${th("st","Status")}</tr></thead><tbody>
+      ${rows.map(([c,i])=>`<tr data-sel="${i}"${i===sel?` class="on"`:""} tabindex="0"><td class="nmc"><span><img class="sp" alt="" src="${pic(c)}">${esc(c.name)}</span></td><td><i>${esc(c.species||"")}</i></td><td>${esc(c.location||"")}</td>
+        <td>${c.age?mo(c.age.from):""}</td><td class="agec"><span><span class="mini"><i class="${c.st}" style="width:${c.age?Math.max(4,Math.round(100*c.age.days/maxD)):0}%"></i></span>${c.age?c.age.txt:""}</span></td><td><span class="chip ${c.st}">${c.st==="active"?"Active":"Dormant"}</span></td></tr>`).join("")}
+      </tbody></table></div><div class="pane xl-pane">${card(list[sel],sel)}</div></div>`}
+  body.innerHTML=`${exampleTag()}${bar}<div class="look-${look}">${main}</div>`;
+  const again=()=>renderCacti(body,status);
+  body.querySelectorAll("[data-look]").forEach(b=>b.onclick=()=>{try{localStorage.setItem("cactiLook",b.dataset.look)}catch(e){}again()});
+  body.querySelectorAll("[data-sel]").forEach(b=>{b.onclick=()=>{renderCacti.sel=+b.dataset.sel;again();const f=body.querySelector(`[data-sel="${b.dataset.sel}"]`);if(f)f.focus({preventScroll:true})};
+    b.ondblclick=()=>{const c=list[+b.dataset.sel];if(c.gal.length)openGallery(c.name,c.gal)};
+    b.onkeydown=e=>{if(e.key==="Enter"&&b.tagName==="TR")b.onclick()}});
+  body.querySelectorAll("[data-sort]").forEach(b=>b.onclick=()=>{const k=b.dataset.sort;CACTI_SORT=CACTI_SORT.k===k?{k,d:-CACTI_SORT.d}:{k,d:k==="age"||k==="since"?-1:1};again()});
   body.querySelectorAll(".detail-btn").forEach(b=>b.onclick=()=>{const c=list[+b.dataset.i];openGallery(c.name,c.gal)});
   const longest=list.slice().sort((a,b)=>(b.age?.days||0)-(a.age?.days||0))[0];
   if(status)status.innerHTML=`<span>${list.length} ${list.length===1?"client":"clients"}</span><span>Longest: ${longest?esc(longest.name)+(longest.age?" · "+longest.age.txt:""):"—"}</span>`;
 }
-// detail gallery: screenshots with a caption under each, stepped with the arrows (or swipe / keys)
+// tiny pixel icons for the view buttons (large icons / shelf / details), like an old file manager's toolbar
+const LOOK_ICON={cards:'<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="0" y="0" width="5" height="5"/><rect x="7" y="0" width="5" height="5"/><rect x="0" y="7" width="5" height="5"/><rect x="7" y="7" width="5" height="5"/></svg>',
+  shelf:'<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="2" y="0" width="2" height="4"/><rect x="8" y="1" width="2" height="3"/><rect x="1" y="4" width="4" height="2"/><rect x="7" y="4" width="4" height="2"/><rect x="0" y="6" width="12" height="1"/><rect x="2" y="7" width="1" height="2"/><rect x="9" y="7" width="1" height="2"/><rect x="0" y="11" width="12" height="1"/></svg>',
+  list:'<svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="0" y="0" width="2" height="2"/><rect x="3" y="0" width="9" height="2"/><rect x="0" y="5" width="2" height="2"/><rect x="3" y="5" width="9" height="2"/><rect x="0" y="10" width="2" height="2"/><rect x="3" y="10" width="9" height="2"/></svg>'};
 function openGallery(title,items){
   let g=document.getElementById("gallery");if(g)g.remove();
   g=document.createElement("div");g.id="gallery";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");g.setAttribute("aria-label",title+" detail");
