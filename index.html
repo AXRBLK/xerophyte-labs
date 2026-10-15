@@ -2677,7 +2677,7 @@ function loadSpotify(src){
       ctl.addListener("playback_update",e=>{const d=e.data||{};
         SPOT.state={paused:!!d.isPaused,pos:d.position||0,dur:d.duration||0,buffering:!!d.isBuffering};SPOT.at=performance.now();
         if(!d.isPaused){SPOT.stopped=false;NOW.started=true}
-        const tk=d.playingURI||(d.duration?"d"+d.duration:"");if(tk&&!d.isPaused){if(SPOT.trackKey&&tk!==SPOT.trackKey)moonWink();SPOT.trackKey=tk}   // a new song: the moon winks
+        const tk=d.duration?(/^spotify:(track|episode):/.test(d.playingURI||"")?d.playingURI:"d"+d.duration):"";   // a playlist only reports itself, so its songs are told apart by lengthif(tk&&!d.isPaused){if(SPOT.trackKey&&tk!==SPOT.trackKey)moonWink();SPOT.trackKey=tk}   // a new song: the moon winks
         SPOT.lastUpdate=d;const f=d.playingURI?{uri:d.playingURI}:dig(d,0,{});
         if(f.uri&&/^spotify:(track|episode):/.test(f.uri))lookupTrack(f.uri,d.duration||0);
         else if(d.duration&&(d.duration!==SPOT.lastDur||!NOW.title)){SPOT.lastDur=d.duration;const t=guessTrack(d.duration);   // a playlist: identify the song by its length
