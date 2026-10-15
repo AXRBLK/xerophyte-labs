@@ -523,9 +523,12 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 #w-radio .amp-btns button,#w-radio .amp-eject{min-width:42px!important;height:32px!important;background:#2cff3c!important;border-color:#9dffa4 #12a01e #12a01e #9dffa4!important;box-shadow:none}
 .miniamp button.on:not(.mini-lcd){background:#14b824!important;border-color:#0a6a14 #7af084 #7af084 #0a6a14!important;box-shadow:inset 1px 1px 0 rgba(0,0,0,.25)}
 .miniamp button.on .pico{transform:translate(1px,1px)}
+/* every mini-player button sinks in when pressed, not just play/pause */
+.miniamp button:not(.mini-lcd):active,.miniamp button.press:not(.mini-lcd){background:#14b824!important;border-color:#0a6a14 #7af084 #7af084 #0a6a14!important;box-shadow:inset 1px 1px 0 rgba(0,0,0,.25)}
+.miniamp button:not(.mini-lcd):active .pico,.miniamp button.press .pico{transform:translate(1px,1px)}
 #w-radio .amp-btns button.on{background:#14b824!important;border-color:#0a6a14 #7af084 #7af084 #0a6a14!important;box-shadow:inset 1px 1px 0 rgba(0,0,0,.25)}
 #w-radio .amp-btns button.on .pico{transform:translate(1px,1px)}
-#w-radio .amp-btns button:active,#w-radio .amp-eject:active{background:#1fd92e!important;border-color:#12a01e #9dffa4 #9dffa4 #12a01e!important}
+#w-radio .amp-btns button.press,#w-radio .amp-btns button:active,#w-radio .amp-eject:active{background:#1fd92e!important;border-color:#12a01e #9dffa4 #9dffa4 #12a01e!important}
 #w-radio .amp-btns .pico{width:16px;height:16px}
 .miniamp button:not(.mini-lcd){height:28px!important;min-width:30px!important;background:#2cff3c!important;border-color:#9dffa4 #12a01e #12a01e #9dffa4!important;box-shadow:none}
 .miniamp .pico{width:13px;height:13px}
@@ -856,13 +859,28 @@ function moonDisc(r){
 const ICON_SUN='<svg class="mico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="7" y="0" width="2" height="1"/><rect x="7" y="1" width="2" height="1"/><rect x="3" y="2" width="2" height="1"/><rect x="7" y="2" width="2" height="1"/><rect x="11" y="2" width="2" height="1"/><rect x="2" y="3" width="3" height="1"/><rect x="11" y="3" width="3" height="1"/><rect x="2" y="4" width="2" height="1"/><rect x="7" y="4" width="2" height="1"/><rect x="12" y="4" width="2" height="1"/><rect x="5" y="5" width="6" height="1"/><rect x="5" y="6" width="6" height="1"/><rect x="0" y="7" width="3" height="1"/><rect x="4" y="7" width="8" height="1"/><rect x="13" y="7" width="3" height="1"/><rect x="0" y="8" width="3" height="1"/><rect x="4" y="8" width="8" height="1"/><rect x="13" y="8" width="3" height="1"/><rect x="5" y="9" width="6" height="1"/><rect x="5" y="10" width="6" height="1"/><rect x="2" y="11" width="2" height="1"/><rect x="7" y="11" width="2" height="1"/><rect x="12" y="11" width="2" height="1"/><rect x="2" y="12" width="3" height="1"/><rect x="11" y="12" width="3" height="1"/><rect x="3" y="13" width="2" height="1"/><rect x="7" y="13" width="2" height="1"/><rect x="11" y="13" width="2" height="1"/><rect x="7" y="14" width="2" height="1"/><rect x="7" y="15" width="2" height="1"/></svg>';
 const ICON_MOON='<svg class="mico" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" shape-rendering="crispEdges" fill="currentColor"><rect x="6" y="1" width="1" height="1"/><rect x="4" y="2" width="2" height="1"/><rect x="3" y="3" width="3" height="1"/><rect x="2" y="4" width="3" height="1"/><rect x="1" y="5" width="4" height="1"/><rect x="1" y="6" width="4" height="1"/><rect x="1" y="7" width="5" height="1"/><rect x="1" y="8" width="5" height="1"/><rect x="1" y="9" width="6" height="1"/><rect x="1" y="10" width="7" height="1"/><rect x="2" y="11" width="11" height="1"/><rect x="3" y="12" width="9" height="1"/><rect x="4" y="13" width="7" height="1"/><rect x="6" y="14" width="3" height="1"/></svg>';
 function isNightNow(){const h=new Date().getHours();return h>=19||h<6}
-function setNight(n){
+function setNight(n,slow){
+  // keep the frame on screen so the new scene can dissolve in over it, block by block (nothing pops or jumps)
+  let old=null;const cv0=document.getElementById("sky");
+  try{if(SCENE.ctx&&cv0.width&&cv0.height&&SCENE.night!==undefined&&SCENE.night!==n)old={img:SCENE.ctx.getImageData(0,0,cv0.width,cv0.height),w:cv0.width,h:cv0.height}}catch(e){}
   SCENE.night=n;document.body.classList.toggle("night",n);if(document.getElementById("title").textContent)neonTagline();
   // the button shows where a click takes you: a moon by day, a sun by night
   const b=document.getElementById("modebtn");if(b){b.innerHTML=(n?ICON_SUN:ICON_MOON)+'<span class="mlab">mode</span>';b.title=n?"Switch to day mode":"Switch to night mode";b.setAttribute("aria-label",b.title)}
   paintSky();
+  if(old&&SCENE.ctx&&cv0.width===old.w&&cv0.height===old.h){const bw=Math.ceil(old.w/2),bh=Math.ceil(old.h/2),noise=new Float32Array(bw*bh);
+    for(let i=0;i<noise.length;i++)noise[i]=Math.random();
+    SCENE.xfade={old:old.img,noise,bw,t0:performance.now(),dur:slow?11000:2400};if(!SCENE.motion)drawScene()}
   try{if(LIVE&&LIVE.current)updateTray()}catch(e){}   // swap the sun/moon in the live weather icon
 }
+// mode change in progress: the old frame shows through in 2×2 blocks that drop away at random until only the new scene is left
+function applyXfade(c,s){const X=s.xfade;if(!X)return;const k=(performance.now()-X.t0)/X.dur;if(k>=1){s.xfade=null;return}
+  const cur=c.getImageData(0,0,c.canvas.width,c.canvas.height),D=cur.data,O=X.old.data,W=c.canvas.width,H=c.canvas.height,ease=k*k*(3-2*k);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){if(X.noise[(y>>1)*X.bw+(x>>1)]<ease)continue;const i=(y*W+x)*4;D[i]=O[i];D[i+1]=O[i+1];D[i+2]=O[i+2];D[i+3]=O[i+3]}
+  c.putImageData(cur,0,0)}
+// the sky keeps its own time: once the sun has sunk fully behind the ranges the scene slowly turns to night and the moon
+// rises; once the moon has set, day returns with the sun coming up
+function orbHandoff(s){if(s.xfade||!ORB.below||ORB.night!==s.night)return;const n=!s.night;
+  SCENE.override=n;ORB.night=n;ORB.p0=0;ORB.t0=performance.now()/1000;ORB.below=false;setNight(n,true)}
 const NIGHT_TINT="rgba(16,22,58,.58)";
 function paintSky(){
   const cv=document.getElementById("sky"),N=SCENE.night;
@@ -1701,7 +1719,7 @@ function orbPos(s,N,rad){
   const ARC=420,REST=40;                                     // seconds to cross the sky, seconds spent below the ridge
   let p=ORB.p0+(now-ORB.t0)/ARC;
   const cyc=1+REST/ARC;if(p>cyc)p=(p%cyc);                   // round again: rise from the left
-  if(p>1)return null;
+  ORB.below=p>1;if(p>1)return null;
   const sr=rad||s.sr,top=Math.round(s.H0*.1)+sr,low=s.H0+sr+2;   // low = fully hidden behind the ranges
   return {x:Math.round(s.w*(N?.94-.88*p:.06+.88*p)),y:Math.round(low-(low-top)*Math.pow(Math.sin(Math.PI*p),.7)),p};
 }
@@ -2014,6 +2032,7 @@ function drawScene(){
       if(carry){c.fillRect(x+dx-1,y+3,1,2);c.fillRect(x+dx+2,y+3,1,2)}                // curled round the mouse
       else{c.fillRect(x+dx-1,y+3,4,1);c.fillStyle=P.k;c.fillRect(x+dx-2,y+4,1,1);c.fillRect(x+dx,y+4,1,1);c.fillRect(x+dx+2,y+4,1,1);c.fillRect(x+dx+3,y+4,1,1)}})}   // toes spread wide, black hooked claws
   if(carry){if(o.preyKind==="scorp")sprt(c,CRITTERS.scorp[0],Math.round(o.x)-7,Math.round(o.y)+14,false,N?GLOW:undefined);else sprt(c,PREY,Math.round(o.x)-7,Math.round(o.y)+13,false,N?MOUSE_N:MOUSE)}
+  applyXfade(c,s);orbHandoff(s);
 }
 
 /* ---------- Desert Map: pixel-rendered satellite/terrain with live weather ---------- */
@@ -3383,6 +3402,8 @@ function discoButton(on){
   add();discoButton.add=setInterval(add,700);                       // one twinkle, then more and more
 }
 tick();setInterval(tick,30000);
+// a quick click can be over before :active paints, so hold the pressed look for a moment
+document.addEventListener("pointerdown",e=>{const b=e.target.closest("#miniamp button,#w-radio .amp-btns button");if(!b)return;b.classList.add("press");setTimeout(()=>b.classList.remove("press"),170)});
 document.getElementById("modebtn").onclick=()=>{SCENE.override=!SCENE.night;setNight(SCENE.override)};
 let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{paintSky()},150)});
 document.body.classList.toggle("admin",ADMIN);boot();
