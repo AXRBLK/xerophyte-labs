@@ -1567,7 +1567,7 @@ function owl2Turn(rows,dir){const key=rows.join("")+dir;let t=OWL2_TURN_CACHE.ge
     return dir<0?q.slice(1)+".":"."+q.slice(0,-1)});
   OWL2_TURN_CACHE.set(key,t);return t}
 // the head turned on its neck (a yaw, not a tilt): inside the head's outline the face slides toward the way it turns
-// (1px ≈ 22°, 2px ≈ 45°) and the far side fills in with the brown of the back of the head; ear tufts travel with it
+// (1px ≈ 25°, 3px ≈ 75°, nearly in profile) and the far side fills in with the brown of the back of the head; ear tufts travel with it
 function owl2Yaw(rows,d){const key=rows.join("")+"y"+d;let t=OWL2_TURN_CACHE.get(key);if(t)return t;
   t=rows.map((r,j)=>{const q="."+r+".";if(!d||j>8)return q;
     const a=q.search(/[^.]/),b=q.length-1-[...q].reverse().join("").search(/[^.]/);if(a<0||b-a<3)return q;
@@ -1582,8 +1582,8 @@ function drawOwl2(c,s,o,hold){
     if(o.lookT>0)o.lookT--;else{o.look=o.look?0:(R()<.5?-1:1);o.lookT=o.look?RI(10,28):RI(24,80)}}   // glance aside for a second or so, then back
   const on=o.hoot>0&&HOOTS[HOOTS.length-o.hoot];
   if(on&&(o.hoot===HOOTS.length||!HOOTS[HOOTS.length-o.hoot-1]))o.notes.push({x:x+w+1,y:y+2,life:16});
-  if(hold){   // disco: eyes shut, body still, the head swivels on its neck to the beat, about 45° each way, the way owls turn
-    const k=Math.sin(performance.now()/1000*Math.PI*1.07),d=Math.round(k*2);
+  if(hold){   // disco: eyes shut, body still, the head swivels on its neck to the beat, about 75° each way, the way owls turn
+    const k=Math.sin(performance.now()/1000*Math.PI*1.07),d=Math.round(k*3);   // ±3px ≈ 75° each way
     sprt(c,owl2Yaw(BIG.shut,d),x-1,y,false,OWLPAL_N);o.notes=[];clearHoo();return}
   sprt(c,owl2Turn(on?BIG.hoot:o.blink?BIG.shut:BIG.open,o.look||0),x-1,y+(on?1:0),false,OWLPAL_N);
   o.notes=o.notes.filter(n=>{n.life--;if(!hold){n.x+=.35;n.y-=.7}return n.life>0});
@@ -3520,7 +3520,13 @@ function build(){
   updateTray();fitIcons();
   // phones: once the icons have their final places, repaint so the near saguaro keeps its owl clear of them
   if(isMob()&&SCENE.ctx)setTimeout(paintSky,60);
+  // load the music player quietly in the background, off-screen, so Disco can start the music the instant it's tapped
+  // (phones only let sound start inside the tap itself; loading the player then would come too late and too slowly)
+  clearTimeout(build.pre);build.pre=setTimeout(preloadRadio,1500);
 }
+function preloadRadio(){const W=WINS.radio,src=spotifySrc(SET.spotify_url||SET.spotify_playlist);if(!W||!src||W.open||SPOT.ctl)return;
+  const body=W.el.querySelector(".body");if(body.dataset.built)return;
+  W.el.classList.add("stowed");W.el.hidden=false;W.render(body,W.el.querySelector(".status"))}
 // phones: shrink the icon grid just enough that it never runs into the title block at the bottom right
 function fitIcons(){
   const nav=document.getElementById("iconsLeft"),hero=document.querySelector(".hero");if(!nav||!hero)return;
