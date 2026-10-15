@@ -20,7 +20,7 @@
 <link rel="icon" id="favicon" type="image/png" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Pixelify+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&family=Caveat:wght@500&display=swap">
 <style>
 /* Layout: full-bleed painted desert desktop, icon columns on both edges, draggable Win95 windows, taskbar pinned bottom. Dusk palette by day, moonlit palette (body.night) after 7pm local. */
 :root{
@@ -209,15 +209,18 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 .potted{position:relative;width:112px;height:160px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:24px;font:inherit;color:inherit}
 .potted .sp{width:64px;height:64px;image-rendering:pixelated;margin-bottom:-14px;position:relative;z-index:0;clip-path:inset(0 0 22% 0)}   /* roots trimmed: it's planted */
 .potted .pot{z-index:1}
-.potted .pot{position:relative;width:58px;height:30px;background:#c4673e;clip-path:polygon(0 0,100% 0,100% 6px,92% 6px,84% 100%,16% 100%,8% 6px,0 6px);box-shadow:inset -8px 0 0 #9c4c2c,inset 6px 0 0 #d8845a}
-.potted .pot::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:#d27a4e;box-shadow:inset 0 -2px 0 #a8522f}
+.potted .pot{position:relative;width:56px;height:32px;background:radial-gradient(ellipse 70% 90% at 38% 45%,#d47c50 0 45%,#c4673e 46% 70%,#a8522f 71%);border-radius:22% 22% 34% 34% / 26% 26% 48% 48%;box-shadow:inset -5px -3px 0 rgba(90,36,14,.28),inset 3px 0 0 rgba(255,210,170,.18)}   /* smooth, bulging a little at the middle */
+.potted .pot::before{content:"";position:absolute;left:1px;right:1px;top:0;height:5px;border-radius:50% 50% 40% 40% / 100% 100% 60% 60%;background:linear-gradient(#e6a072,#c86e44);opacity:.9}   /* the rounded upper lip */
 /* the name on a placard hanging from the shelf's front edge, two little pins at the top; long names wrap (two lines) */
-.potted .tag{position:relative;z-index:2;margin-top:5px;max-width:100px;padding:3px 7px 4px;background:#fbf6e6;color:#2a2018;border:1px solid #6a5a48;box-shadow:2px 2px 0 rgba(60,40,20,.28);
-  font:600 13px/15px var(--font-ui);text-align:center;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.potted .tag::before,.potted .tag::after{content:"";position:absolute;top:2px;width:2px;height:2px;background:#8a7458}.potted .tag::before{left:3px}.potted .tag::after{right:3px}
+/* the name on a little wooden marker standing on the shelf in front of the pot, written lightly by hand in capitals */
+.potted .tag{position:absolute;z-index:2;left:0;right:0;margin:0 auto;width:fit-content;bottom:56px;transform:rotate(-1.5deg);max-width:100px;padding:1px 6px 0;
+  background:linear-gradient(180deg,rgba(255,240,210,.35),rgba(0,0,0,0) 40%,rgba(80,50,20,.12)),repeating-linear-gradient(176deg,#c9a170 0 3px,#c29866 3px 4px,#cfa877 4px 7px,#bb905e 7px 8px);
+  border:1px solid #7a5532;border-radius:2px;box-shadow:1px 2px 0 rgba(60,36,16,.35),inset 0 0 0 1px rgba(255,236,200,.25);
+  color:#3a2614;font:500 15px/14px "Caveat","Segoe Print","Bradley Hand","Chalkboard SE","Patrick Hand",cursive;letter-spacing:.06em;text-transform:uppercase;text-align:center;
+  overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;opacity:.97}
 .potted.dormant .sp{filter:grayscale(.85) brightness(.9);opacity:.75}
 .potted.dormant .pot{filter:saturate(.35)}
-.potted.on .tag{background:var(--selbg,var(--link));color:#fff;border-color:#000}
+.potted.on .tag{outline:2px solid var(--selbg,var(--link));outline-offset:1px;color:#1e1208}
 .potted:hover .sp{transform:translateY(-2px)}
 .pane{margin-top:10px;padding:10px;background:var(--card);border:1px solid var(--line);font-size:12px}
 .pane .pane-hd{display:flex;gap:10px;align-items:center}
