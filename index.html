@@ -453,6 +453,7 @@ body.night .chip.thirsty{border-color:#e08aa2}
   body{overflow:hidden}
   .hero h1{font-size:min(21.6px,calc((100vw - 56px) / 21))}
   .hero .sub,.hero .live{font-size:12px}
+  .hero .sub{white-space:nowrap;font-size:min(12px,calc((100vw - 48px) / 29))}   /* the tagline stays on one line on narrow phones */
   .icons{position:fixed;flex-direction:row;flex-wrap:wrap;bottom:auto}
   .icons.left{--k:1;left:auto;right:12px;width:164px;justify-content:flex-end;align-content:flex-start;gap:calc(6px*var(--k)) 4px}
   .icons.right{display:none}
@@ -505,6 +506,10 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 .hero h1::before{content:"\200b"}
 .hero .live[hidden]{display:inline-flex!important;visibility:hidden}
 .hero .live{min-height:24px;box-sizing:border-box}
+/* …and fixed line heights, so the pixel fonts arriving a moment later (they swap in over a fallback) can't change it either */
+.hero .sub{line-height:16px;min-height:20px;box-sizing:border-box}.hero .sub:empty::before{content:"\200b"}
+.hero .live{height:24px;line-height:16px}
+.marquee{line-height:0}
 body:not(.noMarquee) .marquee[hidden]{display:block!important;visibility:hidden}
 .marquee .track{line-height:23px;vertical-align:top}
 .marquee .track:empty::before{content:"\200b"}
@@ -3435,6 +3440,8 @@ function fitIcons(){
 }
 addEventListener("resize",()=>{clearTimeout(fitIcons.t);fitIcons.t=setTimeout(fitIcons,120)});
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>fitIcons());
+// backstop: if the header or marquee ever does change height (a long tagline, a font that measures differently), re-fit the icons
+if(window.ResizeObserver){const ro=new ResizeObserver(()=>{if(isMob())fitIcons()});[".hero",".marquee"].forEach(q=>{const n=document.querySelector(q);if(n)ro.observe(n)})}
 function typeTitle(){
   const h=document.getElementById("title"),chars=[...h.querySelectorAll(".ch")];
   clearTimeout(typeTitle.t);
