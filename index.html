@@ -940,6 +940,10 @@ function setNight(n,slow){
     try{const sky=layer(cv0.width,cv0.height);ORB.peek=true;try{skyPart(sky.getContext("2d"),S0,S0.night)}finally{ORB.peek=false}
       X={L:S0.layers,sky,oldN:S0.night,w:cv0.width,h:cv0.height,ex:leavers(S0)}}catch(e){X=null}}
   SCENE.xfade=null;
+  // switched by hand: the sun turns into the moon (or back) right where it hangs, then carries on its own way (the sun
+  // crosses left to right, the moon right to left), so the new one picks up the mirrored point of its own arc
+  if(!slow&&S0.night!==undefined&&S0.night!==n&&ORB.night===S0.night){const now=performance.now()/1000,cyc=1+40/420;let p=ORB.p0+(now-ORB.t0)/420;if(p>cyc)p%=cyc;
+    ORB.night=n;ORB.t0=now;ORB.p0=p>1?0:Math.max(0,1-p)}
   SCENE.night=n;document.body.classList.toggle("night",n);if(document.getElementById("title").textContent)neonTagline();
   // the button shows where a click takes you: a moon by day, a sun by night
   const b=document.getElementById("modebtn");if(b){b.innerHTML=(n?ICON_SUN:ICON_MOON)+'<span class="mlab">mode</span>';b.title=n?"Switch to day mode":"Switch to night mode";b.setAttribute("aria-label",b.title)}
