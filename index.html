@@ -212,8 +212,8 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 .potted .pot{position:relative;width:56px;height:32px;background:radial-gradient(ellipse 70% 90% at 38% 45%,#d47c50 0 45%,#c4673e 46% 70%,#a8522f 71%);border-radius:22% 22% 34% 34% / 26% 26% 48% 48%;box-shadow:inset -5px -3px 0 rgba(90,36,14,.28),inset 3px 0 0 rgba(255,210,170,.18);overflow:hidden}   /* smooth, bulging a little at the middle */
 .potted .pot::before{content:"";position:absolute;left:1px;right:1px;top:0;height:5px;border-radius:50% 50% 40% 40% / 100% 100% 60% 60%;background:linear-gradient(#e6a072,#c86e44);opacity:.9}   /* the rounded upper lip */
 /* the name on a placard hanging from the shelf's front edge, two little pins at the top; long names wrap (two lines) */
-/* the name on a little wooden marker standing on the shelf in front of the pot, lettered like the taskbar's MODE label */
-.potted .tag{position:absolute;z-index:2;left:0;right:0;margin:0 auto;width:fit-content;bottom:52px;transform:rotate(-1.5deg);max-width:92px;padding:2px 5px 1px;
+/* the name on a little wooden marker hanging off the front of the shelf, just catching the foot of the pot; lettered like the taskbar MODE label */
+.potted .tag{position:absolute;z-index:2;left:0;right:0;margin:0 auto;width:fit-content;top:101px;transform:rotate(-1.5deg);max-width:92px;padding:2px 5px 1px;
   background:linear-gradient(180deg,rgba(255,240,210,.35),rgba(0,0,0,0) 40%,rgba(80,50,20,.12)),repeating-linear-gradient(176deg,#c9a170 0 3px,#c29866 3px 4px,#cfa877 4px 7px,#bb905e 7px 8px);
   border:1px solid #7a5532;border-radius:2px;box-shadow:1px 2px 0 rgba(60,36,16,.35),inset 0 0 0 1px rgba(255,236,200,.25);
   color:#3a2614;font:400 9px/11px var(--font-data);letter-spacing:.14em;text-transform:uppercase;text-align:center;
@@ -1638,7 +1638,7 @@ function stepOwl(o,s){
     if(tg.prey&&!tg.prey.caught&&(tg.prey.kind!=="scorp"||tg.prey.alive)){tg.x=tg.prey.x+6;tg.y=tg.prey.y-14}   // track the frozen prey
     if(tg.prey&&tg.prey.escape&&Math.hypot(tg.x-o.x,tg.y-o.y)<7){const m=tg.prey;    // ...which bolts: the owl swoops on empty sand
       m.marked=false;m.escape=false;m.flee=RI(26,40);m.dir=m.x+6<o.x?-1:1;
-      if(m.kind==="scorp"){m.state="walk";m.timer=40}else{m.state="hop";m.fast=true;m.hops=RI(8,11);m.ht=0}
+      if(m.kind==="scorp"){m.state="walk";m.timer=40}else{m.state="hop";m.fast=true;m.hops=RI(8,11);m.ht=0;m.flee=RI(40,60);m.calm=RI(60,120)}
       tg.prey=null;tg.swoop=true}
     const dx=tg.x-o.x,dy=tg.y-o.y,d=Math.hypot(dx,dy);
     o.strike=!!(tg.prey||tg.swoop)&&d<34;                                             // legs swing down, talons open, for the last stretch
@@ -1709,7 +1709,13 @@ function stepMouse(m,s){
   // desert mouse: bursts of springy hops, pauses to nibble seeds, freezes when the owl is out
   const o=s.owl;
   if(m.marked){m.state="freeze";m.yo=0;m.timer=20;return}
-  if(m.flee>0){m.flee--;if(m.state!=="hop"){m.state="hop";m.fast=true;m.hops=RI(4,6);m.ht=0}}
+  // a narrow escape: it bolts straight away from the owl in long fast bounds, never doubling back, and off the edge if
+  // that's nearer; it only settles (and freezes for owls again) once it's well clear
+  if(m.flee>0){m.flee--;m.ht=(m.ht||0)+1;m.state="hop";m.fast=true;m.x+=m.dir*4;m.yo=[-2,-4,-5,-4,-2,0][m.ht%6];
+    if(m.x<-22||m.x>s.w+6){m.caught=true;m.respawn=RI(200,500);m.flee=0;m.yo=0}   // gone: it comes back later from a side
+    else if(m.flee===0){m.state="pause";m.timer=RI(20,50);m.yo=0;m.fast=false}
+    return}
+  if(m.calm>0)m.calm--;
   else if(o&&o.state==="fly"&&Math.hypot(o.x-m.x,o.y-m.y)<70){m.state="freeze";m.timer=RI(10,30);m.yo=0;return}
   m.timer--;
   if(m.state==="hop"){
