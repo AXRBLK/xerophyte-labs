@@ -46,6 +46,8 @@
 html,body{height:100%}
 body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-data);font-size:14px;overflow:hidden}
 #sky{position:fixed;inset:0;width:100%;height:100%;display:block;image-rendering:pixelated;image-rendering:crisp-edges}
+/* a second, finer layer over the scene (half-size pixels) for the ravens in flight, so their wings, tail and bill can carry more detail */
+#skyFine{position:fixed;inset:0;width:100%;height:100%;display:block;pointer-events:none;image-rendering:pixelated;image-rendering:crisp-edges}
 .scan{position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.10) 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
 
 /* marquee */
@@ -606,7 +608,7 @@ body:not(.noMarquee) .marquee[hidden]{display:block!important;visibility:hidden}
 </style>
 </head>
 <body>
-<canvas id="sky" aria-hidden="true"></canvas>
+<canvas id="sky" aria-hidden="true"></canvas><canvas id="skyFine" aria-hidden="true"></canvas>
 
 <div class="marquee" aria-hidden="true" hidden><div class="track" id="marquee"></div></div>
 
@@ -840,6 +842,8 @@ const CRITTERS={
   ravenGlide:["........................","..K.K.K.................","..KKKKKKK...............","...KKKKKKKKK............","....KKKkkKKKKK..........","......KKkvvkKKKK...KKK..","....KK....KKvvkKKKKKKKK.","..KKKKKKKKKKKKKKKKKKKeKk","KKKKKKKKKKKKKKKKKKKKKKkk","..KKKKKKKKKKKKKKKKKKKk..","....KKKKKKKKKKKKKKKK....",".........KKKKKKKK......."],
   ravenDown:["........................","........................","........................","........................","........................","...................KKK..","....KK....KKKKKKKKKKKKK.","..KKKKKKKKKKKKKKKKKKKeKk","KKKKKKKKKKKKKKKKKKKKKKkk","..KKKKKKkvvkKKKKKKKKKk..","....KKKKkvvkKKKKKKKK....",".....KKKkvkKKKKKK.......","....KKKKKKKKK...........","...KKKKKKK..............","..K.K.K................."],
   ravenSmall:{"glide":[".K.K........","..KKKK......","...KKKKK.KK.","KK..KKKKKKKk","KKKKKKKKKKKk","..KKKKKKK...","....KKK....."],"up":["....K.K.....","....KKK.....",".....KKK.KK.","KK...KKKKKKk","KKKKKKKKKKKk","..KKKKKKK...","....KKK....."],"down":["............","............",".........KK.","KK.KKKKKKKKk","KKKKKKKKKKKk","..KKKKKKKK..",".KKKKK......","K.K........."]},   // far ravens: drawn small by hand (scaling the big one down shredded it)
+  ravenFine:{"glide":["..KKK...........................................",".....KK.........................................",".KKKKKKKKK......................................","....KKKKKKKKK...................................",".....KKKKKKKKKKK................................","...KKKKKKKKKKKKKvK..............................","........KKKKKKKKKvvK............................",".........KKKKKkkKKKvvKK.........................","......KKK..KKKKKkkKKKvvKK............KKKK.......",".............KKKKKkkkKKvvKK.........KKKKKK......","...............KKKKKKkkKKvvK......KKKKKKKKgggg..",".................KKKKKKKKKKKKKKKKKKKKKKKeKKKKKK.",".............KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","........KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","...KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKggKKKKKKKK....","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKgggKKKK.....","...KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK.......","........KKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..........",".............KKKKKKKKKKKKKKKKKKKKKKK............","...................KKKKKKKKKKKK.................","................................................","................................................","................................................","................................................","................................................"],"up":["...................KKKK.........................","...............K...KKKKK........................","................KKKKKKKvK.......................","..................KKKkKvKK......................","..................KKKkKKvK......................","................KKKKKKkKvKK.....................","..................KKKKkKKvK.....................","...................KKKKkKvKK....................","...................KKKKkKKvKK........KKKK.......","...................KKKKKkKvKK.......KKKKKK......","....................KKKKkKKKKK....KKKKKKKKgggg..","...................KKKKKKKKKKKKKKKKKKKKKeKKKKKK.",".............KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","........KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","...KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKggKKKKKKKK....","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKgggKKKK.....","...KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK.......","........KKKKKKKKKKKKKKKKKKKKKKKKKKKKKK..........",".............KKKKKKKKKKKKKKKKKKKKKKK............","...................KKKKKKKKKKKK.................","................................................","................................................","................................................","................................................","................................................"],"down":["................................................","................................................","................................................","................................................","................................................","................................................","................................................","................................................",".....................................KKKK.......","....................................KKKKKK......","..................................KKKKKKKKgggg..","...................KKKKKKKKKKKKKKKKKKKKKeKKKKKK.",".............KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","........KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","...KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKggKKKKKKKK....","..KKKKKKKKKKKKKKKKKKKKKKKvKKKKKKKKKKgggKKKK.....","...KKKKKKKKKKKKKKKKKKKKvkKKKKKKKKKKKKKKKK.......","........KKKKKKKKKKKKKvkkKKKKKKKKKKKKKK..........",".............KKKKKKvkkKKKKKKKKKKKKKK............","...............KKvkkKKKKKKKKKKK.................","..............KKkkKKKK..........................","............KKKKKKKKK...........................","...........KKKKKKKK.............................","..........KKKKKK................................",".........KKKKK.................................."]},   // ravens in flight, drawn at twice the scene's resolution (see #skyFine)
+  ravenFineFar:{"glide":[".KKKK.............................","KKKKKKKK..........................","..KKKKKKKKK.......................","..KKKKKKKKKvK.....................","......KKKkkKvvK...................","....KK.KKKKkkKvvK........KKKK.....",".........KKKKkkKvvK.....KKKKKK....","..........KKKKKKKKKKKKKKKKKKKgggK.",".........KKKKKKKKKKKKKKKKKKKeKKKKK","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","KKKKKKKKKKKKKKKKKKKKKKKggKKKKKKK..","..KKKKKKKKKKKKKKKKKKKKKKKggKKK....","......KKKKKKKKKKKKKKKKKKKKK.......",".........KKKKKKKKKKKKKKKKK........",".............KKKKKKKKK............","..................................","..................................",".................................."],"up":["..........KKKKKK..................","...........K.KKKv.................","............KKkKvK................","...........KKKKkKv................",".............KKkKvK...............",".............KKKkKvK.....KKKK.....",".............KKKkKvK....KKKKKK....",".............KKKKKKKKKKKKKKKKgggK.",".........KKKKKKKKKKKKKKKKKKKeKKKKK","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","KKKKKKKKKKKKKKKKKKKKKKKggKKKKKKK..","..KKKKKKKKKKKKKKKKKKKKKKKggKKK....","......KKKKKKKKKKKKKKKKKKKKK.......",".........KKKKKKKKKKKKKKKKK........",".............KKKKKKKKK............","..................................","..................................",".................................."],"down":["..................................","..................................","..................................","..................................","..................................",".........................KKKK.....","........................KKKKKK....",".............KKKKKKKKKKKKKKKKgggK.",".........KKKKKKKKKKKKKKKKKKKeKKKKK","..KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK","KKKKKKKKKKKKKKKKKKKKKKKggKKKKKKK..","..KKKKKKKKKKKKKKkvKKKKKKKggKKK....","......KKKKKKKKkkvKKKKKKKKKK.......",".........KKKkkvKKKKKKKKKKK........","..........KkvKKKKKKKKK............",".........KKKKKK...................",".......KKKKK......................","......KKKK........................"]},
   ravenPerch:["..............","........KKK...",".......KKKeK..","......KKKKKKKK","......KKKKKK..",".....KKKKKK...","....KKkvvKK...","...KKkvvvKK...","..KKkvvvKKK...",".KKKkvvKKK....","KKKKKKKKKK....","KK..KKKKK.....","K....K..K.....","....KKKKKK...."],
   ravenSleep:["..............","..............","........KKK...",".......KKKkK..","......KKKKKKKK","......KKKKKK..",".....KKKKKK...","....KKkvvKK...","...KKkvvvKK...","..KKkvvvKKK...",".KKKkvvKKK....","KKKKKKKKKK....","KK..KKKKK.....","....KKKKKK...."],
   toad:["......w.w..","..tdtdtTTT.",".tTtTtTTkTt","tdtTtdtTTT.","..t..t..t.."],
@@ -1004,7 +1008,7 @@ function stepFlyLeavers(c,s,owl){
   s.leavers=(s.leavers||[]).filter(e=>{if(!e.fly||(e.k==="owl2")!==owl)return true;
     if(e.d>0)e.d--;else{e.x+=e.vx;e.y=Math.max(-20,e.y+e.vy)}
     if(e.x<-50||e.x>s.w+50||e.y<-18)return false;
-    if(e.k==="raven"){const f=(s.t>>1)%2?CRITTERS.ravenUp:CRITTERS.ravenDown;e.kk<.95?sprt(c,ravenSmall(f),e.x+6,e.y+3,e.face<0,RAVENPAL):sprt(c,f,e.x,e.y,e.face<0,RAVENPAL)}
+    if(e.k==="raven"){const f=(s.t>>1)%2?CRITTERS.ravenUp:CRITTERS.ravenDown;fineRaven(s,e.x,e.y,e.face<0,f,e.kk<.95)}
     else if(e.k==="bat")sprt(c,CRITTERS.bat[(s.t>>1)%2],e.x,e.y);
     else owlMini(c,(s.t>>1)%2?OWL2_FLY.upBack:OWL2_FLY.downBack,e.x,e.y);
     return true})}
@@ -1064,7 +1068,7 @@ function paintSky(){
   // where it already is instead of snapping the whole desert back to its starting positions
   const key=w+"x"+h+":"+(N?1:0),prev=SCENE.ctx&&SCENE.key===key?{toads:SCENE.toads,ravens:SCENE.ravens,scorps:SCENE.scorps,mice:SCENE.mice,bats:SCENE.bats,owl:SCENE.owl,owl2:SCENE.owl2,runner:SCENE.runner,t:SCENE.t}:null;
   if(SCENE.w&&(SCENE.w!==w||SCENE.h!==h)){SCENE.xfade=null;SCENE.leavers=[]}   // resized mid-change: just show the new scene
-  cv.width=w;cv.height=h;
+  cv.width=w;cv.height=h;{const fc=document.getElementById("skyFine");if(fc){fc.width=w*2;fc.height=h*2}}
   let seed=1987;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
   const ri=(a,b)=>Math.floor(a+rnd()*(b-a+1));
   const H0=Math.round(h*.64),span=h-H0;
@@ -1511,6 +1515,10 @@ function stepToad(t,w){
   else if(t.state==="pushup"){t.bob=(t.timer%2)?-1:0;if(t.timer<=0){t.bob=0;t.state="still";t.timer=RI(30,140)}}
   else if(t.timer<=0){const r=R();if(r<.55){t.state="scurry";t.timer=RI(2,6);if(R()<.4)t.dir*=-1}else if(r<.8){t.state="pushup";t.timer=6}else t.timer=RI(30,100)}
 }
+// a raven in flight on the fine layer: f is the coarse frame it would have used (to pick the wing position), far ones smaller
+function fineRaven(s,x,y,flip,f,far){const fc=s.fineCtx;if(!fc)return;
+  const set=far?CRITTERS.ravenFineFar:CRITTERS.ravenFine,rows=f===CRITTERS.ravenUp?set.up:f===CRITTERS.ravenDown?set.down:set.glide;
+  sprt(fc,rows,Math.round(x*2)+(far?7:0),Math.round(y*2)+(far?4:-1),flip,RAVENPAL);s.fineUsed=true}
 const ravenSmall=f=>f===CRITTERS.ravenUp?CRITTERS.ravenSmall.up:f===CRITTERS.ravenDown?CRITTERS.ravenSmall.down:CRITTERS.ravenSmall.glide;
 function stepRaven(r,s){
   const w=s.w,H0=s.H0;
@@ -2187,6 +2195,7 @@ function skyPart(c,s,N){
 }
 function drawScene(){
   const s=SCENE,c=s.ctx;if(!c)return;s.t++;const N=s.night;
+  {const fc=document.getElementById("skyFine");s.fineCtx=fc?fc.getContext("2d"):null;if(s.fineCtx&&(s.fineUsed||s.fineDirty)){s.fineCtx.clearRect(0,0,fc.width,fc.height)}s.fineDirty=s.fineUsed;s.fineUsed=false}
   // mid mode-change the new sky is drawn on its own and drawn down over the old one like a curtain
   const XF=s.xfade&&s.xfade.L?s.xfade:null;if(XF)curtMask(s);
   if(XF){const T=curtTmp(XF,"sk",s);skyPart(T.getContext("2d"),s,N);curtDraw(c,s,XF.sky,T)}else skyPart(c,s,N);
@@ -2241,14 +2250,19 @@ function drawScene(){
   if(shown("ravens")&&!N)s.ravens.forEach(r=>{                                  // ravens roost out of sight at night
     if(!enterStep(r))stepRaven(r,s);if(r.state==="gone")return;
     const f=r.state==="roost"?CRITTERS.ravenSleep:r.state==="perch"?CRITTERS.ravenPerch:r.flap>0?(Math.floor(s.t/3)%2?CRITTERS.ravenUp:CRITTERS.ravenDown):CRITTERS.ravenGlide;
-    (r.state==="perch"||r.state==="roost")?sprtBob(a,f,r.x,r.y,5,bob||(r.caw>0?1:0),r.face<0,RAVENPAL):(r.k||1)<.95?sprt(a,ravenSmall(f),r.x+6,r.y+3,r.face<0,RAVENPAL):sprt(a,f,r.x,r.y,r.face<0,RAVENPAL);
+    (r.state==="perch"||r.state==="roost")?sprtBob(a,f,r.x,r.y,5,bob||(r.caw>0?1:0),r.face<0,RAVENPAL):fineRaven(s,r.x,r.y,r.face<0,f,(r.k||1)<.95);
   });
   if(shown("bats"))s.bats.forEach(b=>{if(!enterStep(b))stepBat(b,s);sprt(a,CRITTERS.bat[b.state==="feed"?s.t%2:(s.t>>1)%2],b.x,b.y)});
   if(s.leavers&&s.leavers.length)stepFlyLeavers(a,s,false);
   if(XF)curtTint(A,s,"rgba(16,22,58,.5)",N);else if(N)tint(A,"rgba(16,22,58,.5)");
   c.drawImage(A,0,0);
   if(XF&&s.layers.giant){const nb=shown("night_blooms");curtDraw(c,s,XF.oldN&&nb?XF.L.giant:XF.L.giantNoBloom,N&&nb?s.layers.giant:s.layers.giantNoBloom)}
-  else if(s.layers.giant)c.drawImage(N&&shown("night_blooms")?s.layers.giant:s.layers.giantNoBloom,0,0);                     // ravens and bats pass behind the big saguaro; the owl stays in front
+  else if(s.layers.giant)c.drawImage(N&&shown("night_blooms")?s.layers.giant:s.layers.giantNoBloom,0,0);
+  // the fine ravens pass behind the big saguaro too: cut its shape out of their layer (and give stragglers the night wash)
+  if(s.fineUsed&&s.fineCtx){const fc=s.fineCtx,W2=fc.canvas.width,H2=fc.canvas.height;fc.imageSmoothingEnabled=false;
+    if(s.layers.giant){fc.globalCompositeOperation="destination-out";fc.drawImage(s.layers.giantNoBloom||s.layers.giant,0,0,W2,H2)}
+    if(N){fc.globalCompositeOperation="source-atop";fc.fillStyle="rgba(16,22,58,.5)";fc.fillRect(0,0,W2,H2)}
+    fc.globalCompositeOperation="source-over"}                     // ravens and bats pass behind the big saguaro; the owl stays in front
   // disco: the owlets hop out to the lip of the hole and bounce to the music, until mum comes home with food: then
   // they scramble back inside and beg, beaks wide open
   const chickBeg=o.state==="feed"||(o.state==="fly"&&o.prey&&Math.hypot(o.x-o.nest.x,o.y-o.nest.cy)<80);   // mouths open as she comes in; shut as she settles
