@@ -991,23 +991,21 @@ function leavers(s){const out=[],w=s.w,inx=x=>x>-20&&x<w+4;
     if(shown("owl")&&s.owl2){const o=s.owl2,A=o.arr,h=OWL2_BIG().open.length;out.push(A?{k:"owl2",x:A.x,y:A.y,fly:1}:{k:"owl2",x:o.p.x,y:o.p.y-(h>>1)+2,fly:1})}
   }
   return out}
-// walkers head for the nearest cactus and fade out behind it; fliers make for the nearer edge of the screen
-const HIDE_OFF={toad:[-6,-7],runner:[-8,-1],mouse:[-6,-1],scorp:[-5,-1],scorpN:[-5,-1]},WALK_SP={toad:1.4,runner:3,mouse:2,scorp:.8,scorpN:.8};
+// walkers and fliers alike leave by the nearer edge of the screen
+const HIDE_OFF={toad:[-6,-7],runner:[-8,-1],mouse:[-6,-1],scorp:[-5,-1],scorpN:[-5,-1]},WALK_SP={toad:2.2,runner:4,mouse:3,scorp:1.4,scorpN:1.4};
 function routeLeavers(s,ex){const used=new Map(),spots=s.hides||[];
   ex.forEach(e=>{e.a=1;e.d=RI(0,8);
     if(e.fly){const L=e.x<s.w/2;e.vx=(L?-1:1)*(e.k==="owl2"?3.4:e.k==="bat"?3.2:2.6*(e.kk||1));e.vy=e.k==="bat"?-.5:-.35;e.face=L?-1:1;return}
-    const off=HIDE_OFF[e.k];let best=null,bd=1e9;
-    spots.forEach(p=>{const d=Math.abs(p.x-e.x)+2*Math.abs(p.y+off[1]-e.y)+(used.get(p)||0)*30;if(d<bd){bd=d;best=p}});
-    e.sp=WALK_SP[e.k];
-    if(!best){e.tx=e.x<s.w/2?-30:s.w+30;e.ty=e.y}
-    else{const u=(used.get(best)||0)+1;used.set(best,u);e.tx=best.x+off[0]+(u>1?RI(-2,2):0);e.ty=best.y+off[1]}})}
+    // ground creatures stay where they are a moment, then head straight out the nearer side at their own pace (same row,
+    // no detours), and are gone once off screen
+    const L=e.x<s.w/2;e.sp=WALK_SP[e.k];e.dir=L?-1:1;e.tx=L?-30:s.w+30;e.ty=e.y;e.d=RI(2,14)})}
 function stepGroundLeavers(g,s){
   s.leavers=(s.leavers||[]).filter(e=>{if(e.fly)return true;let mv=false;
     if(e.d>0)e.d--;
     else if(e.tx!=null){const dx=e.tx-e.x,dy=e.ty-e.y,d=Math.hypot(dx,dy);
       if(d<=e.sp){e.x=e.tx;e.y=e.ty;e.tx=null;e.hold=5}else{e.x+=dx/d*e.sp;e.y+=dy/d*e.sp;if(Math.abs(dx)>.5)e.dir=dx<0?-1:1;mv=true}}
     else if(e.hold>0)e.hold--;else e.a-=1/14;
-    if(e.a<=0)return false;
+    if(e.a<=0||e.x<-28||e.x>s.w+28)return false;
     g.globalAlpha=Math.max(0,e.a);
     if(e.k==="toad")sprt(g,CRITTERS.toad,e.x,e.y,e.dir<0);
     else if(e.k==="runner")sprt(g,mv?CRITTERS.run[s.t%2]:CRITTERS.stand,e.x,e.y-11,e.dir<0);
