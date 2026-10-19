@@ -2627,7 +2627,8 @@ function toObjects(rows){
   return rows.slice(1).map(r=>Object.fromEntries(h.map((k,i)=>[k,(r[i]??"").trim()])));
 }
 async function loadTab(name){
-  const url=`https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(name)}`;
+  // a fresh address every time: Google otherwise hands back its cached copy of the tab for several minutes after an edit
+  const url=`https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(name)}&_=${Date.now()}`;
   const r=await fetch(url,{cache:"no-store"});if(!r.ok)throw new Error(r.status);
   return toObjects(parseCSV(await r.text()));
 }
@@ -3768,7 +3769,8 @@ function build(){
   startModes();
   // sheet tools only show in admin mode; the check says whether the site is reading the sheet
   const mark=SHEET_STATE==="ok"?'<span class="chk ok" title="Reading the sheet">✓</span>':SHEET_STATE==="partial"?'<span class="chk warn" title="Some tabs could not be read">!</span>':'<span class="chk off" title="Showing sample data">✗</span>';
-  const rl=document.createElement("li");rl.className="adm";rl.innerHTML=`<button><img alt="" src="${sprite("globe")}">Refresh from sheet${mark}</button>`;rl.firstChild.onclick=()=>{toggleStart(false);boot(true)};ul.appendChild(rl);
+  const rl=document.createElement("li");rl.className="adm";rl.innerHTML=`<button><img alt="" src="${sprite("globe")}">Refresh from sheet${mark}</button>`;rl.firstChild.onclick=()=>{toggleStart(false);sheetToast("Reading the sheet…");
+    boot(true).then(()=>sheetToast(SHEET_STATE==="ok"?"✓ Updated from the sheet":SHEET_STATE==="partial"?"! Some tabs couldn't be read":"✗ Couldn't reach the sheet",2600),()=>sheetToast("✗ Refresh failed",2600))};ul.appendChild(rl);
   if(CONFIG.SHEET_ID){const ed=document.createElement("li");ed.className="adm";ed.innerHTML=`<a href="https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/edit" target="_blank" rel="noopener"><img alt="" src="${sprite("book")}">Open the sheet</a>`;ul.appendChild(ed)}
   updateTray();fitIcons();
   // phones: once the icons have their final places, repaint so the near saguaro keeps its owl clear of them
@@ -3867,6 +3869,10 @@ document.getElementById("startbtn").onclick=e=>{e.stopPropagation();toggleStart(
 document.addEventListener("click",e=>{if(!e.target.closest("#startmenu"))toggleStart(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){toggleStart(false);const a=Object.keys(WINS).find(k=>WINS[k].el.classList.contains("active")&&WINS[k].open);if(a)closeWin(a)}});
 
+// a small note at the bottom of the screen while the sheet is re-read, and how it went
+function sheetToast(msg,ms){let t=document.getElementById("sheetToast");
+  if(!t){t=document.createElement("div");t.id="sheetToast";t.style.cssText="position:fixed;left:50%;bottom:56px;transform:translateX(-50%);z-index:9000;background:#1c1a24;color:#f4efe2;font:12px/1 monospace;padding:8px 12px;border:2px solid #f4efe2;box-shadow:3px 3px 0 #0006;pointer-events:none";document.body.appendChild(t)}
+  t.textContent=msg;t.hidden=false;clearTimeout(t.tm);if(ms)t.tm=setTimeout(()=>t.hidden=true,ms)}
 async function boot(refresh){
   const wasOpen=refresh?Object.keys(WINS).filter(k=>WINS[k].open&&!WINS[k].min):[];
   await loadAll();build();
