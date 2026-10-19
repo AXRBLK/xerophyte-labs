@@ -264,6 +264,7 @@ body.still .potted.on .pot::after{animation:none}
 .pane .pane-hd .logo-link,.pane .pane-hd>.logo{margin-left:auto}
 .pane .logo{max-width:64px;max-height:36px;object-fit:contain;display:block}
 .pane .nm{font:600 16px var(--font-ui);display:flex;gap:8px;align-items:center}
+.pane .nm .ext{display:inline-flex;padding:2px;color:#4a6a8c;line-height:0}.pane .nm .ext:hover{color:#1f6bff;background:rgba(31,107,255,.1)}
 .pane .sci{font-style:italic;color:var(--mute)}
 .pane dl{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:8px 0 0}
 .pane dt{color:var(--mute);font-family:var(--font-ui)}.pane dd{margin:0;color:var(--ink2);min-width:0;overflow-wrap:anywhere}
@@ -3322,12 +3323,14 @@ function renderCacti(body,status){
     <span class="looks" role="group" aria-label="View">${CACTI_LOOKS.map(([k,t])=>`<button class="look${k===look?" on":""}" data-look="${k}" aria-pressed="${k===look}" title="${t} view">${LOOK_ICON[k]}<span>${t}</span></button>`).join("")}</span></div>`;
   let main="";
   // one plant's particulars: under the shelf, and beside the details list
+  // a sample's website: a little pixel "open in new window" icon (a box with an arrow leaving it) beside its name
+  const EXT_ICON='<svg viewBox="0 0 12 12" width="14" height="14" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="M7 1h1v1h-1zM8 1h1v1h-1zM9 1h1v1h-1zM10 1h1v1h-1zM8 2h1v1h-1zM9 2h1v1h-1zM10 2h1v1h-1zM1 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM7 3h1v1h-1zM8 3h1v1h-1zM10 3h1v1h-1zM1 4h1v1h-1zM6 4h1v1h-1zM7 4h1v1h-1zM10 4h1v1h-1zM1 5h1v1h-1zM5 5h1v1h-1zM6 5h1v1h-1zM1 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM8 6h1v1h-1zM1 7h1v1h-1zM8 7h1v1h-1zM1 8h1v1h-1zM8 8h1v1h-1zM1 9h1v1h-1zM8 9h1v1h-1zM1 10h1v1h-1zM2 10h1v1h-1zM3 10h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1z"/></svg>';
   const card=(c,i)=>{if(!c)return "";const a=c.age,url=urlOf(c),logo=safeURL(c.logo||c.logo_url);
-    return `<div class="pane-hd"><img class="sp" alt="" src="${pic(c)}"><div><div class="nm">${esc(c.name)} <span class="chip ${c.st}">${c.st==="active"?"Active":"Dormant"}</span></div>
+    return `<div class="pane-hd"><img class="sp" alt="" src="${pic(c)}"><div><div class="nm">${esc(c.name)} <span class="chip ${c.st}">${c.st==="active"?"Active":"Dormant"}</span>${url?`<a class="ext" href="${esc(url)}" target="_blank" rel="noopener" title="${esc(url.replace(/^https?:\/\//,"").replace(/\/$/,""))}" aria-label="Visit ${esc(c.name)}'s site">${EXT_ICON}</a>`:""}</div>
       <div class="sci">${esc(c.species||"")}${c.common_name?` · ${esc(c.common_name)}`:""}</div></div>
       ${logo?`${url?`<a class="logo-link" href="${esc(url)}" target="_blank" rel="noopener">`:""}<img class="logo" alt="${esc(c.name)} logo" src="${esc(logo)}">${url?"</a>":""}`:""}</div>
       <dl><dt>Where</dt><dd>${esc(c.location||"—")}</dd><dt>Since</dt><dd>${a?`${mo(a.from)}–${a.to?mo(a.to):"now"}`:"—"}</dd><dt>Age</dt><dd>${a?a.txt:"—"}</dd>
-      ${url?`<dt>Site</dt><dd><a href="${esc(url)}" target="_blank" rel="noopener">${esc(url.replace(/^https?:\/\//,"").replace(/\/$/,""))}</a></dd>`:""}</dl>
+</dl>
       <div class="meter" title="Age: how long we've worked together"><i class="${c.st}" style="width:${a?Math.max(3,Math.round(100*a.days/maxD)):0}%"></i></div>
       ${c.notes?`<div class="note">${linkify(c.notes)}</div>`:""}
       ${c.gal.length?`<button class="detail-btn" data-i="${i}">Detail · ${c.gal.length} ${c.gal.length>1?"views":"view"} ▸</button>`:""}`};
