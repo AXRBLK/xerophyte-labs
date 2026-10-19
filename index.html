@@ -207,15 +207,15 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 .looks .look.on{border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo);background:repeating-conic-gradient(var(--chrome) 0 25%,var(--chrome-hi) 0 50%) 0 0/2px 2px}
 @media (max-width:500px){.looks .look span{display:none}}
 /* cacti: the greenhouse shelf: pots on wooden planks, a name tag on each; pick one to see its particulars below */
-.shelf{display:flex;flex-wrap:wrap;justify-content:center;padding:6px 6px 0;background:#e9dcc6 repeating-linear-gradient(to bottom,transparent 0 86px,#a8774a 86px 92px,#7a5232 92px 96px,#5a3a22 96px 98px,rgba(60,40,20,.18) 98px 104px,transparent 104px 112px);border:2px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}
-.potted{position:relative;width:84px;height:112px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:6px;font:inherit;color:inherit}
+.shelf{display:flex;flex-wrap:wrap;justify-content:center;padding:6px 6px 0;background:#e9dcc6 repeating-linear-gradient(to bottom,transparent 0 110px,#a8774a 110px 116px,#7a5232 116px 120px,#5a3a22 120px 122px,rgba(60,40,20,.18) 122px 128px,transparent 128px 136px);border:2px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}
+.potted{position:relative;width:84px;height:136px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:30px;font:inherit;color:inherit}
 .potted .sp{width:64px;height:64px;image-rendering:pixelated;margin-bottom:-14px;position:relative;z-index:0;clip-path:inset(0 0 22% 0)}   /* roots trimmed: it's planted */
 .potted .pot{z-index:1}
 .potted .pot{position:relative;width:56px;height:32px;background:radial-gradient(ellipse 70% 90% at 38% 45%,#d47c50 0 45%,#c4673e 46% 70%,#a8522f 71%);border-radius:22% 22% 34% 34% / 26% 26% 48% 48%;box-shadow:inset -5px -3px 0 rgba(90,36,14,.28),inset 3px 0 0 rgba(255,210,170,.18);overflow:hidden}   /* smooth, bulging a little at the middle */
 .potted .pot::before{content:"";position:absolute;left:1px;right:1px;top:0;height:5px;border-radius:50% 50% 40% 40% / 100% 100% 60% 60%;background:linear-gradient(#e6a072,#c86e44);opacity:.9}   /* the rounded upper lip */
 /* the name on a placard hanging from the shelf's front edge, two little pins at the top; long names wrap (two lines) */
 /* the name on a little wooden marker hanging off the front of the shelf, just catching the foot of the pot; lettered like the taskbar MODE label */
-.potted .tag{position:absolute;z-index:2;left:0;right:0;margin:0 auto;width:fit-content;top:83px;transform:rotate(-1.5deg);max-width:80px;padding:2px 5px 1px;
+.potted .tag{position:absolute;z-index:2;left:0;right:0;margin:0 auto;width:fit-content;top:107px;transform:rotate(-1.5deg);max-width:80px;padding:2px 5px 1px;
   background:linear-gradient(180deg,rgba(255,240,210,.35),rgba(0,0,0,0) 40%,rgba(80,50,20,.12)),repeating-linear-gradient(176deg,#c9a170 0 3px,#c29866 3px 4px,#cfa877 4px 7px,#bb905e 7px 8px);
   border:1px solid #7a5532;border-radius:2px;box-shadow:1px 2px 0 rgba(60,36,16,.35),inset 0 0 0 1px rgba(255,236,200,.25);
   color:#3a2614;font:700 8px/10px var(--font-data);letter-spacing:.1em;text-transform:uppercase;text-align:center;
@@ -229,6 +229,17 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 body.still .potted.on .pot::after{animation:none}
 .potted.on .tag{color:#1e1208}   /* the picked plant shows by its watered pot, not a box */
 .potted:hover .sp{transform:translateY(-2px)}
+/* the picked plant gets a little metal grow lamp hanging over it, with a warm cone of light falling on the plant */
+.potted .lamp{position:absolute;left:50%;top:0;width:30px;height:100px;margin-left:-15px;pointer-events:none;opacity:0;transform:translateY(-6px);transition:opacity .35s,transform .35s;z-index:3}
+.potted.on .lamp{opacity:1;transform:none}
+.potted .lamp::before{content:"";position:absolute;left:14px;top:0;width:2px;height:6px;background:#5a5650}                       /* the cord */
+.potted .lamp::after{content:"";position:absolute;left:3px;top:5px;width:24px;height:9px;border-radius:12px 12px 2px 2px;           /* the shade */
+  background:linear-gradient(90deg,#6e6c68,#c8c6c0 30%,#9a9892 55%,#5a5854);box-shadow:inset 0 -2px 0 #3e3c38,0 1px 0 #fff3b0}
+.potted.on .sp{filter:drop-shadow(0 0 3px rgba(255,226,140,.55))}
+.potted.on::before{content:"";position:absolute;left:50%;top:14px;width:54px;height:76px;margin-left:-27px;pointer-events:none;z-index:2;
+  background:radial-gradient(ellipse 50% 14% at 50% 0,rgba(255,240,170,.75),transparent),linear-gradient(rgba(255,232,150,.32),rgba(255,232,150,0));
+  clip-path:polygon(38% 0,62% 0,100% 100%,0 100%);animation:lampOn .5s ease-out}
+@keyframes lampOn{from{opacity:0}to{opacity:1}}
 .potted,.potted:focus,.potted:focus-visible{outline:none;-webkit-tap-highlight-color:transparent}   /* no focus box over the plant: the watered pot shows the pick */
 /* phones: a pot's particulars pop up as a card over the shelf (tap outside or × to put it away) */
 .pane-pop{position:fixed;inset:0;z-index:9500;background:rgba(20,14,24,.45);display:grid;place-items:center;padding:16px;animation:popIn .18s ease-out}
@@ -236,6 +247,7 @@ body.still .potted.on .pot::after{animation:none}
 .pane-pop .pop-x{position:absolute;right:6px;top:6px;width:30px;height:30px;font:18px/1 var(--font-ui);color:var(--ink);background:var(--chrome);border:2px solid;border-color:var(--chrome-hi) var(--chrome-lo) var(--chrome-lo) var(--chrome-hi);cursor:pointer;z-index:1}
 .pane-pop .pane-hd{padding-right:34px}
 @keyframes popIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+.cacti-intro{margin:0 0 10px;font-size:13px;line-height:1.5;color:var(--ink2)}.cacti-intro p{margin:0 0 .6em;max-width:none}.cacti-intro p:last-child{margin:0}
 .shelf-hint{margin-top:8px;text-align:center;font:11px var(--font-ui);color:var(--mute)}
 .pane{margin-top:10px;padding:10px;background:var(--card);border:1px solid var(--line);font-size:12px}
 .pane .pane-hd{display:flex;gap:10px;align-items:center}
@@ -689,6 +701,7 @@ const SAMPLE = {
   pages: [
     {title:"About",icon:"computer",side:"left",body:"Xerophyte Labs is a little desktop for my cacti and the Anza-Borrego weather they live in.\n\nEverything here comes from a Google Sheet, so I can log a watering from my phone and the site catches up on the next visit.",link:""},
     {title:"Field Notes",icon:"book",side:"left",body:"Oct 9: First cool morning in months. Roadrunner on the wall again, and two horned lizards sunning by the rock garden.\n\nSept 21: Gus got a deep soak after the last monsoon push.",link:""},
+    {title:"My Cacti intro",slug:"cacti",body:"Every pot on this shelf is a client. The ones in bloom are active right now; the green ones are resting between projects.\n\nLately I've been focused on Gus and Goldie.",link:""},
     {title:"Contact",icon:"letter",side:"left",body:"Trade cuttings, ask about pups, or tell me your Borrego rainfall total.\n\nhello@example.com",link:""}
   ]
 };
@@ -3227,7 +3240,7 @@ function renderCacti(body,status){
       ${c.gal.length?`<button class="detail-btn" data-i="${i}">Detail · ${c.gal.length} ${c.gal.length>1?"views":"view"} ▸</button>`:""}`};
   const sel=Math.min(list.length-1,Math.max(0,renderCacti.sel||0));
   if(look==="shelf")main=`<div class="shelf" role="listbox" aria-label="Cacti">${list.map((c,i)=>`<button class="potted ${c.st}${i===sel?" on":""}" data-sel="${i}" role="option" aria-selected="${i===sel}" title="${esc(c.name)}">
-      <img class="sp" alt="" src="${c.image_url?esc(c.image_url):shelfSprite(cactusKind(c),c.name,c.st==="active")}"><span class="pot"></span><span class="tag">${esc(c.name)}</span></button>`).join("")}</div>
+      <img class="sp" alt="" src="${c.image_url?esc(c.image_url):shelfSprite(cactusKind(c),c.name,c.st==="active")}"><span class="lamp" aria-hidden="true"></span><span class="pot"></span><span class="tag">${esc(c.name)}</span></button>`).join("")}</div>
     ${isMob()?(renderCacti.pop?`<div class="pane-pop" data-close="1"><div class="pane shelf-pane" role="dialog" aria-label="${esc(list[sel].name)}"><button class="pop-x" data-close="1" aria-label="Close">×</button>${card(list[sel],sel)}</div></div>`:`<div class="shelf-hint">Tap a pot to see its details</div>`)
       :`<div class="pane shelf-pane">${card(list[sel],sel)}</div>`}`;
   if(look==="list"){
@@ -3238,7 +3251,9 @@ function renderCacti(body,status){
       ${rows.map(([c,i])=>`<tr data-sel="${i}"${i===sel?` class="on"`:""} tabindex="0"><td class="nmc"><span><img class="sp" alt="" src="${pic(c)}">${esc(c.name)}</span></td><td><i>${esc(c.species||"")}</i></td><td>${esc(c.location||"")}</td>
         <td>${c.age?mo(c.age.from):""}</td><td class="agec"><span><span class="mini"><i class="${c.st}" style="width:${c.age?Math.max(4,Math.round(100*c.age.days/maxD)):0}%"></i></span>${c.age?c.age.txt:""}</span></td><td><span class="chip ${c.st}">${c.st==="active"?"Active":"Dormant"}</span></td></tr>`).join("")}
       </tbody></table></div><div class="pane xl-pane">${card(list[sel],sel)}</div></div>`}
-  body.innerHTML=`${exampleTag()}${bar}<div class="look-${look}">${main}</div>`;
+  const intro=(DATA.pages||[]).find(p=>/^(my[-_ ]?)?cacti$/i.test(String(p.slug||"").trim())&&String(p.body||"").trim());
+  const introHtml=intro?`<div class="cacti-intro">${String(intro.body).split(/\n\s*\n/).map(par=>`<p>${linkify(par).replace(/\n/g,"<br>")}</p>`).join("")}</div>`:"";
+  body.innerHTML=`${exampleTag()}${introHtml}${bar}<div class="look-${look}">${main}</div>`;
   const again=()=>renderCacti(body,status);
   body.querySelectorAll("[data-look]").forEach(b=>b.onclick=()=>{try{localStorage.setItem("cactiLook",b.dataset.look)}catch(e){}again()});
   body.querySelectorAll("[data-close]").forEach(b=>b.onclick=e=>{if(e.target!==b)return;renderCacti.pop=false;again()});
@@ -3599,7 +3614,9 @@ function build(){
     ICONS.push({id,name,el:iconBtn(id,name,icon,badge),ord:Number.isFinite(ord)?ord:Infinity,split:!!(r&&/^(y|yes|true|1|x|split)$/i.test(String(r.split??"").trim()))})};
   place(L,"cacti","My Cacti","greenhouse");place(L,"log","Weather Log","hilo");
   place(L,"today","Weather Now","sunthermo");place(L,"bio","Biodiversity Report","saguaro");place(L,"map","Desert Map","map");place(L,"radio",radioName(),"radio");
-  (DATA.pages||[]).filter(p=>p.title).forEach((p,i)=>{
+  // a Pages row with slug "cacti" isn't a window of its own: its body is the intro shown above the shelf in My Cacti
+  const isCactiIntro=p=>/^(my[-_ ]?)?cacti$/i.test(String(p.slug||"").trim());
+  (DATA.pages||[]).filter(p=>p.title&&!isCactiIntro(p)).forEach((p,i)=>{
     const pic=/^contact/i.test(String(p.title).trim())?"postcard":/^about/i.test(String(p.title).trim())?"campfire":/^field\s*notes/i.test(String(p.title).trim())?"binoculars":(p.icon||"folder").toLowerCase();
     const id="p"+i;defineWindow(id,{title:p.title,icon:pic,w:pic==="postcard"?760:440,x:mob?16:140+i*30,y:120+i*24,render:renderPage(p)});
     place(L,id,p.title,pic);
