@@ -51,7 +51,8 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 .scan{position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.10) 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
 
 /* marquee */
-.marquee{position:fixed;left:16px;right:16px;top:calc(12px + env(safe-area-inset-top,0px));border:2px solid var(--sand);overflow:hidden;white-space:nowrap;z-index:2;background:rgba(42,20,51,.12)}
+.marquee{position:fixed;left:16px;right:16px;top:calc(12px + env(safe-area-inset-top,0px));padding:2px 0;overflow:hidden;white-space:nowrap;z-index:2;opacity:.75;   /* no box: the words just tick in, faintly, fading in and out at the ends */
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
 .marquee .track{display:inline-block;padding:6px 0;font-family:var(--font-ui);font-size:17px;animation:scroll 60s linear infinite}
 @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
@@ -516,7 +517,6 @@ body.night .hero h1.typing .ch.caret{background:#eef0ff}
 body.night .hero h1{color:#f4f4ff}
 body.night .hero h1{background:rgba(8,10,26,.84)}
 body.night .hero .sub,body.night .hero .live{background:rgba(8,10,26,.86);color:#e2e6fa}
-body.night .marquee{background:rgba(8,10,26,.45)}
 body.night .icon span:last-child{background:rgba(10,13,32,.82);padding:1px 5px;color:#f0f2ff;text-shadow:none}
 body.night .icon:hover span:last-child,body.night .icon:focus-visible span:last-child{background:var(--title-b)}
 body.night .taskbar{background:rgba(8,10,24,.8);border-top-color:rgba(198,207,255,.45)}
@@ -3706,7 +3706,8 @@ function build(){
   document.title=t.join(" ").replace(/,/g,"")||"Xerophyte Labs";
   const words=(SET.marquee||"Always under construction").split("|").map(s=>s.trim()).filter(Boolean);
   // one word or phrase (no bars) is shown along with its translations; a list with bars is used just as written
-  const setRun=w=>{const run=w.join(" | ")+" | ";document.getElementById("marquee").textContent=(run.repeat(Math.ceil(30/w.length))).repeat(2)};
+  // wide gaps round each bar; each word bidi-isolated so Arabic doesn't swallow its neighbours
+  const setRun=w=>{const sep="\u00a0\u00a0\u00a0|\u00a0\u00a0\u00a0",run=w.map(x=>"\u2068"+x+"\u2069").join(sep)+sep;document.getElementById("marquee").textContent=(run.repeat(Math.ceil(30/w.length))).repeat(2)};
   // Settings › show_marquee: "no", "off", "false", "hide" or "0" hides the scrolling banner
   document.querySelector(".marquee").hidden=/^(no|off|false|hide|hidden|0)$/i.test(String(SET.show_marquee||"").trim());
   document.body.classList.toggle("noMarquee",document.querySelector(".marquee").hidden);
