@@ -579,7 +579,7 @@ body.still .marquee .track,body.still .lcd-scroll span,body.still .mini-title sp
 body:not(.noMarquee) .marquee[hidden]{display:block!important;visibility:hidden}
 .marquee .track{line-height:23px;vertical-align:top}
 .marquee .track:empty::before{content:"\200b"}
-.hero .live .fan{margin-left:8px;vertical-align:-4px;color:#7dff7a}.hero .live .fan .rotor{animation:fanspin 1s linear infinite;transform-box:view-box;transform-origin:8px 8px}
+.hero .live .fan{margin-left:8px;vertical-align:-4px;color:#ffffff}.hero .live .fan .rotor{animation:fanspin 1s linear infinite;transform-box:view-box;transform-origin:8px 8px}
 @keyframes fanspin{to{transform:rotate(360deg)}}body.heroLit .hero .live{opacity:1}
 .hero .sub:not(.x)::before{visibility:hidden}body.heroLit .hero .sub::before{visibility:visible}
 .hero .sub::before{content:"";display:inline-block;width:6px;height:6px;margin:0 8px 1px 0;border-radius:50%;background:#ff3b30;box-shadow:0 0 6px 1px rgba(255,59,48,.7);vertical-align:middle;animation:beacon 2.4s ease-in-out infinite}
@@ -3722,7 +3722,7 @@ function windFan(v,F){const mph=F?v:v/1.609,dur=mph<.5?0:Math.max(.18,4.2/Math.p
   const blade=[[7,2],[8,2],[7,3],[8,3],[9,3],[7,4],[8,4],[9,4],[7,5],[8,5],[7,6]].map(([x,y])=>`<rect x="${x}" y="${y}" width="1.02" height="1.02"/>`).join("");
   return `<svg class="fan" viewBox="0 0 16 16" width="20" height="20" aria-hidden="true">
     <g class="rotor" fill="currentColor" style="${dur?`animation-duration:${dur.toFixed(2)}s`:"animation:none"}">${[0,120,240].map(r=>`<g transform="rotate(${r} 8 8)">${blade}</g>`).join("")}
-    <rect x="7" y="7" width="2" height="2" fill="#ff3b30"/></g></svg>`}
+    <rect x="7" y="7" width="2" height="2" fill="#2348c8"/></g></svg>`}
 function updateTray(){
 
   const ll=document.getElementById("liveLine");
