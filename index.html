@@ -321,7 +321,7 @@ td.wrap{white-space:normal;min-width:140px}
 #bioTip img{image-rendering:pixelated;display:block}#bioTip span{font:11px var(--font-ui);color:var(--ink,#222)}
 .bio .sp-row{display:flex;align-items:center;gap:10px}.bio .sp-pic{flex:none;width:44px;height:44px;display:grid;place-items:center}
 .bio .sp-pic img{max-width:44px;max-height:44px;image-rendering:pixelated;object-fit:contain}
-.bio td.habits{font-size:11px;line-height:1.35;min-width:150px;white-space:normal}.bio .bio-head{margin:0 0 4px}.bio .bio-stats{margin:6px 0 0;font-size:12px}.bio .bio-note{margin-top:14px;font-size:11px}
+.bio td.habits{font-size:11px;line-height:1.35;min-width:150px;white-space:normal}.bio td.habits .obs{font-style:italic;color:#6a6274}.bio .bio-head{margin:0 0 4px}.bio .bio-stats{margin:6px 0 0;font-size:12px}.bio .bio-note{margin-top:14px;font-size:11px}
 .bio tr.off td{opacity:.5}
 .bio tr.unseen td{color:var(--mute)}.bio tr.unseen .sci{letter-spacing:.1em}
 .bio tr.sub td{font:600 11px var(--font-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);padding-top:10px}
@@ -673,7 +673,7 @@ const CONFIG = {
 };
 
 /* ---------- sample data (shown when no sheet is connected) ---------- */
-const WILDLIFE=["desert_mice","owl","owl_chicks","roadrunner","ravens","horned_lizards","scorpions","bats","night_blooms","shooting_stars","dirt_bikes","baja_truck","ufo","saturn","rattlesnake"];
+const WILDLIFE=["desert_mice","owl","owl_chicks","roadrunner","ravens","horned_lizards","scorpions","bats","night_blooms","shooting_stars","dirt_bikes","baja_truck","uap","moon_face","saturn","rattlesnake"];
 const SAMPLE = {
   desktop: [],
   wildlife: WILDLIFE.map(a=>({animal:a,show:"yes"})),
@@ -1991,7 +1991,7 @@ function setDisco(on,user){
     Object.keys(WINS).forEach(id=>{const W=WINS[id];if(id==="radio"||!W.open)return;const f=W.el.querySelector("form.postcard");if(f)f.dataset.hinted="1";closeWin(id)})}
   // phones: switching disco off by hand ends the party: the music pauses (and the turntable slides away)
   if(!on&&user&&SCENE.disco&&isMob()){clearInterval(SPOT.kick);try{SPOT.ctl&&SPOT.ctl.pause()}catch(e){}SPOT.state.paused=true}
-  if(on&&!SCENE.disco&&SCENE.night&&shown("ufo")&&!SCENE.ufo)SCENE.ufoLaunchAt=performance.now()+5000;   // the saucer leaves Saturn 5s in
+  if(on&&!SCENE.disco&&SCENE.night&&shown("uap")&&!SCENE.ufo)SCENE.ufoLaunchAt=performance.now()+5000;   // the saucer leaves Saturn 5s in
   if(!on)SCENE.ufoLaunchAt=0;
   SCENE.disco=on;document.body.classList.toggle("disco",on);renderTasks();
   discoButton(on);
@@ -2067,13 +2067,13 @@ function drawMoon(c,s){
   const r=Math.round(s.sr*s.moonK),o=orbPos(s,true,r);if(!o){s.faceAt=0;s.faceTrig=false;return}c.drawImage(moonDisc(r),o.x-r,o.y-r);
   // disco, with the moon at the top of its arc: a face (the old man in the moon) surfaces, winks once, and sinks away
   const now=performance.now(),peak=Math.abs(o.p-.5)<.025;
-  if(s.disco&&peak&&!s.faceAt&&!s.faceDone)s.faceAt=now;
+  if(s.disco&&peak&&!s.faceAt&&!s.faceDone&&shown("moon_face"))s.faceAt=now;
   if(!peak&&Math.abs(o.p-.5)>.06)s.faceDone=false;
   if(s.faceAt){const t=(now-s.faceAt)/1000,a=t<1.2?t/1.2:t<4.2?1:t<5.4?1-(t-4.2)/1.2:0,wink=t>2.6&&t<3.2;
     if(t>=5.4||(!s.disco&&!s.faceTrig)){s.faceAt=0;s.faceTrig=false;s.faceDone=s.faceDone||peak}else moonFace(c,o.x,o.y,r,wink,a)}
 }
 // something worth a wink (a new song, the owl feeding her chicks, the saucer starting to spin): the face surfaces and winks
-function moonWink(){const s=SCENE;if(!s||!s.night||s.faceAt)return;s.faceAt=performance.now();s.faceTrig=true}
+function moonWink(){const s=SCENE;if(!s||!s.night||s.faceAt||!shown("moon_face"))return;s.faceAt=performance.now();s.faceTrig=true}
 // the face itself: shaded rather than drawn: deep-set eyes under heavy brows glancing sideways, a broad nose, round
 // lit cheeks and a sly closed-mouth smile, dithered softly into the moon's own tones (a: 0–1 fade, wink: right eye shut)
 function moonFace(c,ox,oy,r,wink,a){
@@ -2164,7 +2164,7 @@ function stepUfo(s,tk){
     if(waiting){if(d<1.2)u.y+=Math.sin(u.t*.15)*.2;return u}
     if(d<1.2){if(truckOn){u.k=1;u.state="seek";u.vx=T.dir*T.sp;u.vy=0;T.marked=true}else if(mo){u.k=kEnd;u.state="landed"}else{u.k=1;u.state="cross";u.vx=(u.dir||1)*1.1}}
     return u}
-  if(!shown("ufo")){s.ufo=null;return null}
+  if(!shown("uap")){s.ufo=null;return null}
   let u=s.ufo;const T=s.truck;
   if(!u){return null;                                                 // no random saucers any more: only the disco one (above)
     const truckMid=tk&&T&&T.x>s.w*.2&&T.x<s.w*.7;
@@ -2690,10 +2690,14 @@ let HIDE_WILD=new Set();
 // Wildlife tab › count: how many of a creature live in the scene (blank keeps the default, 0 empties it, capped at 20)
 // Wildlife tab › habits: the text in the Biodiversity Log's Habits column, per row name (animal, regular or plant);
 // a blank cell keeps the built-in text
-function habitText(name,def){const r=((typeof DATA!=="undefined"&&DATA&&DATA.wildlife)||[]).find(r=>String(r.animal||"").trim().toLowerCase()===name);
-  const t=r&&String(r.habits??"").trim();return t||def}
+// Wildlife tab › observations: shown in place of the "??" while a row is unseen (sightings, rumours); blank keeps "??"
+// (row names are case-free; the old "ufo" row still counts as "uap")
+const wildKey=v=>{const k=String(v??"").trim().toLowerCase();return k==="ufo"?"uap":k};
+const wildRow=name=>((typeof DATA!=="undefined"&&DATA&&DATA.wildlife)||[]).find(r=>wildKey(r.animal)===name);
+function habitText(name,def){const r=wildRow(name),t=r&&String(r.habits??"").trim();return t||def}
+function obsText(name){const r=wildRow(name);return r?String(r.observations??"").trim():""}
 function wildCount(name,def){
-  const r=((typeof DATA!=="undefined"&&DATA&&DATA.wildlife)||[]).find(r=>String(r.animal||"").trim().toLowerCase()===name);
+  const r=wildRow(name);
   const n=r?parseInt(String(r.count??"").trim(),10):NaN;return Number.isFinite(n)?Math.max(0,Math.min(20,n)):def;
 }
 const shown=name=>!HIDE_WILD.has(name);
@@ -2891,14 +2895,19 @@ async function loadTrackList(src){
   const key="xl-tracks-"+src.id;
   try{const c=JSON.parse(localStorage.getItem(key)||"null");if(c&&Date.now()-c.t<6*3600e3&&c.list.length){TRACKS.list=c.list;SPOT.lastDur=0;TRACKS.status="cache "+c.list.length;radioDebug();return}}catch(_){}
   const page=`https://open.spotify.com/embed/${src.type}/${src.id}`;
-  const relays=[u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`,u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`];
+  // free relays come and go, so several are tried in turn (two of them wrap the page in JSON as "contents")
+  const relays=[u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+    u=>`https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,u=>`https://whateverorigin.org/get?url=${encodeURIComponent(u)}`,
+    u=>`https://api.cors.lol/?url=${encodeURIComponent(u)}`,u=>`https://corsproxy.io/?url=${encodeURIComponent(u)}`];
   for(const r of relays){
-    try{const html=await fetch(r(page)).then(x=>x.ok?x.text():"");
+    try{const ac=new AbortController(),to=setTimeout(()=>ac.abort(),8000);
+      let html=await fetch(r(page),{signal:ac.signal}).then(x=>x.ok?x.text():"").finally(()=>clearTimeout(to));
+      if(/^\s*\{/.test(html))try{html=JSON.parse(html).contents||""}catch(_){}
       const m=html.match(/<script[^>]*id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);if(!m)continue;
       const list=findTrackList(JSON.parse(m[1]));
       if(list&&list.length){TRACKS.list=list;TRACKS.status="loaded "+list.length;SPOT.lastDur=0;try{localStorage.setItem(key,JSON.stringify({t:Date.now(),list}))}catch(_){}radioDebug();return}
     }catch(e){TRACKS.status="relay failed: "+e}}
-  TRACKS.status="no track list";radioDebug();
+  TRACKS.status="no track list";TRACKS.failAt=Date.now();radioDebug();
 }
 function findTrackList(o,depth=0){
   if(!o||typeof o!=="object"||depth>12)return null;
@@ -2930,7 +2939,7 @@ function lookupTrack(uri,dur){
       if(!j||NOW.uri!==uri)return;NOW.title=String(j.title||"").trim();NOW.art=j.thumbnail_url||"";if(NOW.art)loadArt(NOW.art);ampText();
       if(NOW.title&&m[1]==="track")findArtist(NOW.title,dur).then(a=>{if(NOW.uri!==uri||!a)return;
         if(a.artist){NOW.artist=a.artist;ampText()}
-        if(a.art&&!DECK.art)loadArt(a.art,true)});                       // iTunes cover if Spotify's never arrived
+        if(a.art&&(!DECK.art||DECK.stand))loadArt(a.art,true)});                       // iTunes cover if Spotify's never arrived
     }).catch(()=>{});
 }
 function jsonp(url){
@@ -3011,6 +3020,9 @@ function cropDeck(){
 }
 function loadSpotify(src){
   loadTrackList(src);
+  // the playlist's (or album's) own cover goes on the record straight away; each song's cover replaces it once known
+  if(src&&src.id)fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(`https://open.spotify.com/${src.type}/${src.id}`)}`).then(r=>r.ok?r.json():null)
+    .then(j=>{if(j&&j.thumbnail_url&&!DECK.artSrc)loadArt(j.thumbnail_url,true,true)}).catch(()=>{});
   const fallback=()=>{
     const host=document.getElementById("spotHost");if(!host||SPOT.ctl)return;
     host.outerHTML=`<iframe title="Spotify player" src="https://open.spotify.com/embed/${src.type}/${src.id}?theme=0" width="100%" height="152" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" style="border:0;display:block"></iframe>`;
@@ -3025,9 +3037,11 @@ function loadSpotify(src){
       ctl.addListener("playback_update",e=>{const d=e.data||{};
         SPOT.state={paused:!!d.isPaused,pos:d.position||0,dur:d.duration||0,buffering:!!d.isBuffering};SPOT.at=performance.now();
         if(!d.isPaused){SPOT.stopped=false;NOW.started=true}
-        const tk=d.duration?(/^spotify:(track|episode):/.test(d.playingURI||"")?d.playingURI:"d"+d.duration):"";   // a playlist only reports itself, so its songs are told apart by lengthif(tk&&!d.isPaused){if(SPOT.trackKey&&tk!==SPOT.trackKey)moonWink();SPOT.trackKey=tk}   // a new song: the moon winks
+        const tk=d.duration?(/^spotify:(track|episode):/.test(d.playingURI||"")?d.playingURI:"d"+d.duration):"";   // a playlist only reports itself, so its songs are told apart by length
+        if(tk&&!d.isPaused){if(SPOT.trackKey&&tk!==SPOT.trackKey)moonWink();SPOT.trackKey=tk}   // a new song: the moon winks
         SPOT.lastUpdate=d;const f=d.playingURI?{uri:d.playingURI}:dig(d,0,{});
         if(f.uri&&/^spotify:(track|episode):/.test(f.uri))lookupTrack(f.uri,d.duration||0);
+        else if(d.duration&&!TRACKS.list&&TRACKS.failAt&&Date.now()-TRACKS.failAt>90e3){TRACKS.failAt=0;loadTrackList(SPOT.src)}   // no list yet: try the relays again now and then
         else if(d.duration&&(d.duration!==SPOT.lastDur||!NOW.title)){SPOT.lastDur=d.duration;const t=guessTrack(d.duration);   // a playlist: identify the song by its length
           if(t){NOW.uri=t.uri||("guess:"+t.title);NOW.title=t.title;NOW.artist=t.artist;NOW.via="track list";ampText();
             if(t.uri){const m=t.uri.match(/^spotify:track:(\w+)$/);if(m)fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent("https://open.spotify.com/track/"+m[1])}`).then(r=>r.ok?r.json():null).then(j=>{if(j&&j.thumbnail_url&&NOW.title===t.title){NOW.art=j.thumbnail_url;loadArt(NOW.art)}}).catch(()=>{})}}}
@@ -3059,8 +3073,8 @@ function kickPlay(){
 }
 /* ---------- the turntable: appears under the radio while music plays; the record spins with the album art on its label ---------- */
 const DECK={art:null,artSrc:"",raf:0,last:0,th:0};
-function loadArt(src,keep){
-  if(!src||src===DECK.artSrc)return;DECK.artSrc=src;if(!keep)DECK.art=null;
+function loadArt(src,keep,stand){
+  if(!src||src===DECK.artSrc)return;DECK.artSrc=src;DECK.stand=!!stand;if(!keep)DECK.art=null;
   const im=new Image();im.onload=()=>{if(DECK.artSrc!==src)return;const c=document.createElement("canvas");c.width=c.height=17;
     const x=c.getContext("2d");x.imageSmoothingEnabled=true;x.drawImage(im,0,0,17,17);DECK.art=c;drawDeck();
     // the real cover, full resolution, laid over the record's label and turning with it
@@ -3426,8 +3440,10 @@ const VISITORS=[
    n:s=>!s.night&&s.disco&&s.bikes&&s.bikes.wait<=0&&s.bikes.riders?s.bikes.riders.length:0,when:"diurnal, and only when the music's on; travel in loose packs along the ridgeline, kicking up dust and popping wheelies on the climbs"},
   {key:"truck",show:"baja_truck",row:"baja_truck",common:"Baja truck",sci:"Toyota tacoma prerunnerus",fam:"Offroadidae",cls:"Machina",
    n:s=>s.night&&s.truck&&s.truck.on?1:0,when:"nocturnal; cruises the far road, headlights on, tail lights glowing; occasionally abducted"},
-  {key:"ufo",show:"ufo",row:"ufo",common:"Unidentified flying object",sci:"Incognitus saturnii",fam:"Possibly Saturnian",cls:"Unclassified",
-   n:s=>s.ufo?1:0,when:"surfaces from Saturn at night-time dance parties; collects trucks; parks on the moon when there's nothing to take"}];
+  {key:"ufo",show:"uap",row:"uap",common:"Unidentified aerial phenomenon",sci:"Incognitus saturnii",fam:"Possibly Saturnian",cls:"Unclassified",
+   n:s=>s.ufo?1:0,when:"surfaces from Saturn at night-time dance parties; collects trucks; parks on the moon when there's nothing to take"},
+  {key:"moon",show:"moon_face",row:"moon_face",common:"Winking moon",sci:"Selene nictitans",fam:"Old man in the moon",cls:"Unconfirmed",
+   n:s=>s.night&&s.faceAt?1:0,when:"surfaces for a few seconds at the top of the moon's arc during night-time dance parties, or when something deserves it (a new song, the owlets fed, the saucer spinning); winks once and sinks back into the craters"}];
 const FLORA=[
   {key:"sag",row:"saguaro",common:"Saguaro",sci:"Carnegiea gigantea",fam:"Cactaceae",when:"slow-growing giant; arms after ~70 years; white blooms open at night in late spring, feeding bats; owls and woodpeckers nest in its cavities"},
   {key:"cho",row:"teddybear_cholla",common:"Teddybear cholla",sci:"Cylindropuntia bigelovii",fam:"Cactaceae",when:"spreads by dropped joints that root where they land; the spines shine silver at dawn; do not hug"},
@@ -3473,14 +3489,15 @@ function bioCanvas(key){
     horned_lizards:[CRITTERS.toad],scorpions:[CRITTERS.scorp[0]],bats:[BAT_HANG],desert_mice:[CRITTERS.mouseSit,MOUSE],rattlesnake:[SNAKE_COIL,SNAKEPAL],
     truck:[TRUCK,TRUCKPAL],ufo:[UFO,UFOPAL]}[key];
   if(key==="bikers")return bikeSprite(0,0);
+  if(key==="moon"){const r=10,cv=layer(r*2+2,r*2+2),g=cv.getContext("2d");g.drawImage(moonDisc(r),1,1);moonFace(g,r+1,r+1,r,true,1);return cv}
   if(!m)return null;const rows=m[0],w=Math.max(...rows.map(r=>r.length)),cv=layer(w,rows.length);sprt(cv.getContext("2d"),rows,0,0,false,m[1]);return cv}
-// an unseen species: just a dotted outline of where it would be, like an empty page in a field guide
+// an unseen species: just a very faint grey silhouette of where it would be, like an empty page in a field guide
 function bioOutline(key){const id="out_"+key;if(BIO_IMG[id])return BIO_IMG[id];const src=bioCanvas(key);if(!src)return "";
-  const w=src.width,h=src.height,a=src.getContext("2d").getImageData(0,0,w,h).data,on=(x,y)=>x>=0&&y>=0&&x<w&&y<h&&a[(y*w+x)*4+3]>0;
-  const k=Math.max(2,Math.min(5,Math.floor(44/Math.max(w,h)))),cv=layer((w+2)*k,(h+2)*k),c=cv.getContext("2d");c.fillStyle="#8c8494";
-  for(let y=-1;y<=h;y++)for(let x=-1;x<=w;x++){if(on(x,y))continue;if(!(on(x-1,y)||on(x+1,y)||on(x,y-1)||on(x,y+1)))continue;if((x+y)&1)continue;c.fillRect((x+1)*k,(y+1)*k,k,k)}
+  const w=src.width,h=src.height,a=src.getContext("2d").getImageData(0,0,w,h).data;
+  const k=Math.max(2,Math.min(5,Math.floor(44/Math.max(w,h)))),cv=layer(w*k,h*k),c=cv.getContext("2d");c.fillStyle="#e2dee0";
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(a[(y*w+x)*4+3]>0)c.fillRect(x*k,y*k,k,k);
   return BIO_IMG[id]=cv.toDataURL()}
-const spCell=(key,common,sci,unseen)=>{const src=unseen?bioOutline(key):(key==="bikers"||key==="truck"||key==="ufo")?visitorThumb(key):bioThumb(key);return `<td class="sp"><div class="sp-row"><span class="sp-pic">${src?`<img alt="" src="${src}">`:""}</span><span>${common}<br><i class="sci">${sci}</i></span></div></td>`};
+const spCell=(key,common,sci,unseen)=>{const src=unseen?bioOutline(key):(key==="bikers"||key==="truck"||key==="ufo"||key==="moon")?visitorThumb(key):bioThumb(key);return `<td class="sp"><div class="sp-row"><span class="sp-pic">${src?`<img alt="" src="${src}">`:""}</span><span>${common}<br><i class="sci">${sci}</i></span></div></td>`};
 function visitorThumb(key){const id="v_"+key;if(BIO_IMG[id])return BIO_IMG[id];const src=bioCanvas(key);if(!src)return "";
   const k=Math.max(2,Math.min(5,Math.floor(44/Math.max(src.width,src.height)))),cv=layer(src.width*k,src.height*k),c=cv.getContext("2d");c.imageSmoothingEnabled=false;c.drawImage(src,0,0,cv.width,cv.height);return BIO_IMG[id]=cv.toDataURL()}
 function bioTips(root){
@@ -3501,7 +3518,7 @@ function renderBio(body,status){
     const n=present?a.n(s):0;return {...a,on,n,act:on&&active(a)}});
   const visitors=VISITORS.map(v=>{const on=shown(v.show),n=on?v.n(s):0;return {...v,on,n,act:n>0}});
   // a row of the census; one that's absent right now shows only a dotted outline and question marks (resting ones are seen)
-  const bioRow=(a,unseen)=>unseen?`<tr class="unseen">${spCell(a.key,esc(a.common),"??",true)}<td>??<br><span class="muted">??</span></td><td class="n big">??</td><td>${a.n?"resting":"absent"}</td><td class="habits">??</td></tr>`
+  const bioRow=(a,unseen)=>unseen?`<tr class="unseen">${spCell(a.key,esc(a.common),"??",true)}<td>??<br><span class="muted">??</span></td><td class="n big">??</td><td>${a.n?"resting":"absent"}</td><td class="habits">${(o=>o?`<span class="obs">${linkify(o)}</span>`:"??")(obsText(a.row||a.key))}</td></tr>`
     :`<tr${a.on?"":' class="off"'}>${spCell(a.key,esc(a.common),esc(a.sci))}<td>${a.fam}<br><span class="muted">${a.cls}</span></td><td class="n big">${a.on?a.n:"—"}</td>
       <td>${!a.on?"not surveyed":a.n?(a.act?"active":"resting"):"absent"}</td><td class="habits">${linkify(habitText(a.row||a.key,a.when))}</td></tr>`;
   const floraRows=FLORA.map(p=>({...p,n:f[p.key]||0}));
@@ -3703,7 +3720,7 @@ function build(){
   defineWindow("bio",{title:"Biodiversity Report",icon:"saguaro",w:660,x:cx(660),y:100,render:renderBio,menu:["File","Survey","Help"],status:true});
   defineWindow("log",{title:"Weather Log",icon:"hilo",w:640,x:cx(640),y:110,render:renderLog,menu:["File","Edit","Chart"],status:true});
   const thirsty=(DATA.cacti||[]).filter(c=>c.name&&cactusState(c).status==="thirsty").length;
-  HIDE_WILD=new Set((DATA.wildlife||[]).filter(r=>isNo(r.show)).map(r=>String(r.animal||"").trim().toLowerCase()));
+  HIDE_WILD=new Set((DATA.wildlife||[]).filter(r=>isNo(r.show)).map(r=>wildKey(r.animal)));
   // a count column changes how many creatures there are, so repaint the scene with the sheet's numbers
   const sig=JSON.stringify((DATA.wildlife||[]).map(r=>[r.animal,r.count]));if(sig!==build.wildSig){const first=build.wildSig===undefined;build.wildSig=sig;
     if(SCENE.ctx&&(!first||(DATA.wildlife||[]).some(r=>String(r.count??"").trim()!=="")))paintSky()}
