@@ -3519,7 +3519,7 @@ function renderBio(body,status){
     const n=present?a.n(s):0;return {...a,on,n,act:on&&active(a)}});
   const visitors=VISITORS.map(v=>{const on=shown(v.show),n=on?v.n(s):0;return {...v,on,n,act:n>0}});
   // a row of the census; one that's absent right now shows only a dotted outline and question marks (resting ones are seen)
-  const bioRow=(a,unseen)=>unseen?`<tr class="unseen">${spCell(a.key,esc(a.common),"??",true)}<td>??<br><span class="muted">??</span></td><td class="n big">??</td><td>${a.n?"resting":"absent"}</td><td class="habits">${(o=>o?`<span class="obs">${linkify(o)}</span>`:"??")(obsText(a.row||a.key))}</td></tr>`
+  const bioRow=(a,unseen)=>unseen?`<tr class="unseen">${spCell(a.key,"??","??",true)}<td>??<br><span class="muted">??</span></td><td class="n big">??</td><td>${a.n?"resting":"absent"}</td><td class="habits">${(o=>o?`<span class="obs">${linkify(o)}</span>`:"??")(obsText(a.row||a.key))}</td></tr>`
     :`<tr${a.on?"":' class="off"'}>${spCell(a.key,esc(a.common),esc(a.sci))}<td>${a.fam}<br><span class="muted">${a.cls}</span></td><td class="n big">${a.on?a.n:"—"}</td>
       <td>${!a.on?"not surveyed":a.n?(a.act?"active":"resting"):"absent"}</td><td class="habits">${linkify(habitText(a.row||a.key,a.when))}</td></tr>`;
   const floraRows=FLORA.map(p=>({...p,n:f[p.key]||0}));
