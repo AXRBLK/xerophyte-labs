@@ -73,6 +73,8 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 .hero h1.typing .cursor{visibility:hidden}
 .hero h1 .cursor{display:inline-block;width:.5em;height:.82em;margin-left:.18em;vertical-align:-.04em;background:currentColor;box-shadow:2px 2px 0 rgba(40,36,58,.6);animation:blink 1.06s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
+/* the green line keeps its place but stays dark until the title has finished typing, then flickers on */
+.hero .sub{visibility:hidden}body.tagOn .hero .sub{visibility:visible}
 .hero .sub.neon{animation:neon 2.4s steps(1,end) 1 both}
 @keyframes neon{
   0%,6%,12%{color:#7dff7a;text-shadow:0 0 3px #39ff3a,0 0 9px #39ff3a;}
@@ -3713,6 +3715,7 @@ function neonTagline(){
   const t=document.getElementById("tagline");if(!t)return;
   // the red beacon and the live weather only come on once the green line has finished flashing
   const lit=()=>document.body.classList.add("heroLit");
+  document.body.classList.add("tagOn");
   if(document.body.classList.contains("still")){lit();return}
   t.classList.remove("neon");void t.offsetWidth;t.classList.add("neon");
   clearTimeout(neonTagline.t);neonTagline.t=setTimeout(lit,2400);
