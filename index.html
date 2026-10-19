@@ -2688,6 +2688,10 @@ document.addEventListener("click",e=>{
 const isNo=v=>/^(no|off|false|hide|hidden|0)$/i.test(String(v??"").trim());
 let HIDE_WILD=new Set();
 // Wildlife tab › count: how many of a creature live in the scene (blank keeps the default, 0 empties it, capped at 20)
+// Wildlife tab › habits: the text in the Biodiversity Log's Habits column, per row name (animal, regular or plant);
+// a blank cell keeps the built-in text
+function habitText(name,def){const r=((typeof DATA!=="undefined"&&DATA&&DATA.wildlife)||[]).find(r=>String(r.animal||"").trim().toLowerCase()===name);
+  const t=r&&String(r.habits??"").trim();return t||def}
 function wildCount(name,def){
   const r=((typeof DATA!=="undefined"&&DATA&&DATA.wildlife)||[]).find(r=>String(r.animal||"").trim().toLowerCase()===name);
   const n=r?parseInt(String(r.count??"").trim(),10):NaN;return Number.isFinite(n)?Math.max(0,Math.min(20,n)):def;
@@ -3418,18 +3422,18 @@ const FAUNA=[
 ];
 // not wildlife, strictly speaking: the scene's other regulars, logged with a straight face
 const VISITORS=[
-  {key:"bikers",show:"dirt_bikes",common:"Dirt bikers",sci:"Homo sapiens motocrossus",fam:"Twostrokidae",cls:"Weekend warriors",
+  {key:"bikers",show:"dirt_bikes",row:"dirt_bikes",common:"Dirt bikers",sci:"Homo sapiens motocrossus",fam:"Twostrokidae",cls:"Weekend warriors",
    n:s=>!s.night&&s.disco&&s.bikes&&s.bikes.wait<=0&&s.bikes.riders?s.bikes.riders.length:0,when:"diurnal, and only when the music's on; travel in loose packs along the ridgeline, kicking up dust and popping wheelies on the climbs"},
-  {key:"truck",show:"baja_truck",common:"Baja truck",sci:"Toyota tacoma prerunnerus",fam:"Offroadidae",cls:"Machina",
+  {key:"truck",show:"baja_truck",row:"baja_truck",common:"Baja truck",sci:"Toyota tacoma prerunnerus",fam:"Offroadidae",cls:"Machina",
    n:s=>s.night&&s.truck&&s.truck.on?1:0,when:"nocturnal; cruises the far road, headlights on, tail lights glowing; occasionally abducted"},
-  {key:"ufo",show:"ufo",common:"Unidentified flying object",sci:"Incognitus saturnii",fam:"Possibly Saturnian",cls:"Unclassified",
+  {key:"ufo",show:"ufo",row:"ufo",common:"Unidentified flying object",sci:"Incognitus saturnii",fam:"Possibly Saturnian",cls:"Unclassified",
    n:s=>s.ufo?1:0,when:"surfaces from Saturn at night-time dance parties; collects trucks; parks on the moon when there's nothing to take"}];
 const FLORA=[
-  {key:"sag",common:"Saguaro",sci:"Carnegiea gigantea",fam:"Cactaceae"},
-  {key:"cho",common:"Teddybear cholla",sci:"Cylindropuntia bigelovii",fam:"Cactaceae"},
-  {key:"opu",common:"Engelmann prickly pear",sci:"Opuntia engelmannii",fam:"Cactaceae"},
-  {key:"oco",common:"Ocotillo",sci:"Fouquieria splendens",fam:"Fouquieriaceae"},
-  {key:"cre",common:"Creosote bush",sci:"Larrea tridentata",fam:"Zygophyllaceae"}
+  {key:"sag",row:"saguaro",common:"Saguaro",sci:"Carnegiea gigantea",fam:"Cactaceae",when:"slow-growing giant; arms after ~70 years; white blooms open at night in late spring, feeding bats; owls and woodpeckers nest in its cavities"},
+  {key:"cho",row:"teddybear_cholla",common:"Teddybear cholla",sci:"Cylindropuntia bigelovii",fam:"Cactaceae",when:"spreads by dropped joints that root where they land; the spines shine silver at dawn; do not hug"},
+  {key:"opu",row:"prickly_pear",common:"Engelmann prickly pear",sci:"Opuntia engelmannii",fam:"Cactaceae",when:"flat pads stack into clumps; yellow spring flowers, then purple fruit (tunas) that ravens and coyotes love"},
+  {key:"oco",row:"ocotillo",common:"Ocotillo",sci:"Fouquieria splendens",fam:"Fouquieriaceae",when:"leafs out within days of rain and drops its leaves when dry; red flower spikes draw hummingbirds"},
+  {key:"cre",row:"creosote",common:"Creosote bush",sci:"Larrea tridentata",fam:"Zygophyllaceae",when:"the desert's smell after rain; clones in rings that can be thousands of years old"}
 ];
 function diversity(counts){
   const n=counts.filter(c=>c>0),N=n.reduce((a,b)=>a+b,0);if(!N)return {S:0,N:0,H:0,E:0,D:0};
@@ -3499,7 +3503,7 @@ function renderBio(body,status){
   // a row of the census; one that's absent right now shows only a dotted outline and question marks (resting ones are seen)
   const bioRow=(a,unseen)=>unseen?`<tr class="unseen">${spCell(a.key,esc(a.common),"??",true)}<td>??<br><span class="muted">??</span></td><td class="n big">??</td><td>${a.n?"resting":"absent"}</td><td class="habits">??</td></tr>`
     :`<tr${a.on?"":' class="off"'}>${spCell(a.key,esc(a.common),esc(a.sci))}<td>${a.fam}<br><span class="muted">${a.cls}</span></td><td class="n big">${a.on?a.n:"—"}</td>
-      <td>${!a.on?"not surveyed":a.n?(a.act?"active":"resting"):"absent"}</td><td class="habits">${esc(a.when)}</td></tr>`;
+      <td>${!a.on?"not surveyed":a.n?(a.act?"active":"resting"):"absent"}</td><td class="habits">${linkify(habitText(a.row||a.key,a.when))}</td></tr>`;
   const floraRows=FLORA.map(p=>({...p,n:f[p.key]||0}));
   const dF=diversity(fauna.filter(a=>a.key!=="owl_chicks").map(a=>a.n+(a.key==="owl"&&shown("owl_chicks")?owlChickN():0)));
   const dP=diversity(floraRows.map(p=>p.n));
@@ -3516,9 +3520,9 @@ function renderBio(body,status){
     </tbody></table></div>
     <p class="bio-stats">Richness <b>S = ${dF.S}</b> · individuals <b>N = ${dF.N}</b> · Shannon <b>H′ = ${fmt(dF.H)}</b> · evenness <b>J′ = ${fmt(dF.E)}</b> · Simpson <b>1−D = ${fmt(dF.D)}</b></p>
     <h3>Flora (scene transect)</h3>
-    <div class="tbl"><table class="biot"><thead><tr><th>Species</th><th>Family</th><th class="n">Count</th></tr></thead><tbody>
-    ${floraRows.map(p=>`<tr>${spCell(p.key,p.common,p.sci)}<td>${p.fam}</td><td class="n big">${p.n}</td></tr>`).join("")}
-    <tr><td colspan="2" class="muted">Flowering: prickly-pear blooms${N?" · open saguaro night blooms":""}</td><td class="n">${(s.flowers||[]).length}${N?" · "+(s.blooms||[]).length:""}</td></tr>
+    <div class="tbl"><table class="biot"><thead><tr><th>Species</th><th>Family</th><th class="n">Count</th><th>Habits</th></tr></thead><tbody>
+    ${floraRows.map(p=>`<tr>${spCell(p.key,p.common,p.sci)}<td>${p.fam}</td><td class="n big">${p.n}</td><td class="habits">${linkify(habitText(p.row,p.when))}</td></tr>`).join("")}
+    <tr><td colspan="2" class="muted">Flowering: prickly-pear blooms${N?" · open saguaro night blooms":""}</td><td class="n">${(s.flowers||[]).length}${N?" · "+(s.blooms||[]).length:""}</td><td></td></tr>
     </tbody></table></div>
     <p class="bio-stats">Richness <b>S = ${dP.S}</b> · individuals <b>N = ${dP.N}</b> · Shannon <b>H′ = ${fmt(dP.H)}</b> · evenness <b>J′ = ${fmt(dP.E)}</b> · Simpson <b>1−D = ${fmt(dP.D)}</b></p>
   </div>`;
