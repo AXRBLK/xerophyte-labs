@@ -209,7 +209,7 @@ body.night .cform input,body.night .cform textarea{background:#14162a}body.night
 .looks .look.on{border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo);background:repeating-conic-gradient(var(--chrome) 0 25%,var(--chrome-hi) 0 50%) 0 0/2px 2px}
 @media (max-width:500px){.looks .look span{display:none}}
 /* cacti: the greenhouse shelf: pots on wooden planks, a name tag on each; pick one to see its particulars below */
-.shelf{display:flex;flex-wrap:wrap;justify-content:center;padding:6px 6px 0;background:#e9dcc6 repeating-linear-gradient(to bottom,transparent 0 132px,#a8774a 132px 138px,#7a5232 138px 142px,#5a3a22 142px 144px,rgba(60,40,20,.18) 144px 150px,transparent 150px 158px);border:2px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}
+.shelf{display:flex;flex-wrap:wrap;justify-content:center;padding:6px 6px 0;background:repeating-linear-gradient(to bottom,transparent 0 132px,#a8774a 132px 138px,#7a5232 138px 142px,#5a3a22 142px 144px,rgba(60,40,20,.18) 144px 150px,transparent 150px 158px),var(--glass,none) 0 0/100% 100% no-repeat,#cfe9f5;image-rendering:pixelated;border:2px solid;border-color:var(--chrome-lo) var(--chrome-hi) var(--chrome-hi) var(--chrome-lo)}
 .potted{position:relative;width:84px;height:158px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:52px;font:inherit;color:inherit}
 .potted .sp{width:64px;height:64px;image-rendering:pixelated;margin-bottom:-14px;position:relative;z-index:0;clip-path:inset(0 0 22% 0)}   /* roots trimmed: it's planted */
 .potted .pot{z-index:1}
@@ -281,7 +281,7 @@ body.still .potted.on .pot::after{animation:none}
 .xl .nmc .sp{width:20px;height:20px;image-rendering:pixelated}
 .xl .mini{display:inline-block;width:40px;height:7px;border:1px solid currentColor;opacity:.85}.xl .mini i{display:block;height:100%;background:var(--sage)}.xl .mini i.dormant{background:#a8a098}
 .xl tr.on .chip{border-color:#fff}
-body.night .shelf{background-color:#2a2c44}
+body.night .shelf{background-color:#26304e}
 body.night{--selbg:#4a5296}
 
 /* weather */
@@ -321,6 +321,8 @@ td.wrap{white-space:normal;min-width:140px}
 .bio .sp-pic img{max-width:44px;max-height:44px;image-rendering:pixelated;object-fit:contain}
 .bio td.habits{font-size:11px;line-height:1.35;min-width:150px;white-space:normal}.bio .bio-head{margin:0 0 4px}.bio .bio-stats{margin:6px 0 0;font-size:12px}.bio .bio-note{margin-top:14px;font-size:11px}
 .bio tr.off td{opacity:.5}
+.bio tr.unseen td{color:var(--mute)}.bio tr.unseen .sci{letter-spacing:.1em}
+.bio tr.sub td{font:600 11px var(--font-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--mute);padding-top:10px}
 .bio .biot td{white-space:normal;vertical-align:top;line-height:1.35}.bio .biot .sci{font-size:11px;opacity:.8}.bio .biot td.big{font-size:15px;font-weight:600}
 
 /* taskbar */
@@ -3199,6 +3201,29 @@ function shelfSprite(kind,name,active){const key=kind+"|"+(active?name:"-");if(S
     SHELF_TIPS[k].forEach(([x,y],i)=>{px(x-1,y,m);px(x+1,y,m);px(x,y-1,l);px(x-1,y-1,m);px(x+1,y-1,m);px(x,y+1,d);px(x,y,"#f2c838");   // petals round a golden heart
       if(i%2===0){px(x-2,y,d);px(x+2,y,d)}})}
   return SHELF_CACHE[key]=cv.toDataURL()}
+// the greenhouse glass behind the shelf, in chunky pixels: pale blue panes (dithered, with diagonal glints) in a white
+// frame, and the sun (or the moon) shining through with a little trail of lens-flare rings
+const GLASS_CACHE={};
+function shelfGlass(w,h,night){const key=w+"x"+h+(night?"n":"d");if(GLASS_CACHE[key])return GLASS_CACHE[key];
+  const cv=layer(w,h),c=cv.getContext("2d"),P=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)},B=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
+  const top=night?[30,44,82]:[150,206,236],bot=night?[54,72,116]:[214,238,248];
+  for(let y=0;y<h;y++){const t=y/Math.max(1,h-1);for(let x=0;x<w;x++){const st=Math.floor(t*6+B[y&3][x&3]/16)/6;
+    P(x,y,`rgb(${top.map((v,i)=>Math.round(v+(bot[i]-v)*st)).join(",")})`)}}
+  const sx=Math.round(w*.82),sy=Math.round(h*.16),R=night?3:4;   // the sun (moon), with a soft dithered halo
+  for(let y=-R*4;y<=R*4;y++)for(let x=-R*4;x<=R*4;x++){const d=Math.hypot(x,y);if(d<=R)P(sx+x,sy+y,night?"#f2eedc":"#fffbe6");
+    else if(d<R*2&&B[(y+64)&3][(x+64)&3]<10)P(sx+x,sy+y,night?"#9aa4c8":"#fff3c0");else if(d<R*4&&B[(y+64)&3][(x+64)&3]<3)P(sx+x,sy+y,night?"#6e7aa8":"#fdf6d8")}
+  if(!night)for(let k=0;k<8;k++){const a=k*Math.PI/4,L=R*3.2;for(let i=R+2;i<L;i++)if(i%2)P(Math.round(sx+Math.cos(a)*i),Math.round(sy+Math.sin(a)*i),"#fffbe6")}   // rays
+  // lens flare: rings and dots running from the sun toward the lower left
+  const fl=[[.35,2,"#ffffff"],[.55,1,"#ffe9a8"],[.8,3,"#c8f0ff"],[1.1,1,"#ffffff"],[1.35,4,"#e6f8ff"]];
+  if(!night)fl.forEach(([f,r,col])=>{const fx=Math.round(sx-(sx-w*.25)*f),fy=Math.round(sy+(h*.75-sy)*f);
+    for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){const d=Math.hypot(x,y);if(r>2?(d>r-1.2&&d<=r):d<=r)P(fx+x,fy+y,col)}});
+  // glass glints: short diagonal streaks of brighter pixels
+  for(let k=0;k<Math.ceil(w/22);k++){const gx=Math.round((k+.3)*22),gy=Math.round(h*(.2+.5*((k*37)%10)/10));for(let i=0;i<5+(k%3)*2;i++)P(gx+i,gy-i,night?"rgba(200,215,255,.35)":"rgba(255,255,255,.75)")}
+  // the frame: white mullions every pane, a transom near the top
+  const pane=Math.max(18,Math.round(w/Math.max(2,Math.round(w/40))));
+  for(let x=0;x<w;x+=pane){for(let y=0;y<h;y++){P(x,y,night?"#8a94b4":"#f4fbff");P(x+1,y,night?"#5a6488":"#a8c8d8")}}
+  for(let x=0;x<w;x++){P(x,Math.round(h*.08),night?"#8a94b4":"#f4fbff");P(x,Math.round(h*.08)+1,night?"#5a6488":"#a8c8d8")}
+  return GLASS_CACHE[key]=cv.toDataURL()}
 function cactusKind(c){
   const t=`${c.type||""} ${c.species||""} ${c.common_name||""}`.toLowerCase();
   if(/saguaro|carnegiea/.test(t))return "saguaro";
@@ -3267,6 +3292,7 @@ function renderCacti(body,status){
   const introHtml=intro?`<div class="cacti-intro">${String(intro.body).split(/\n\s*\n/).map(par=>`<p>${linkify(par).replace(/\n/g,"<br>")}</p>`).join("")}</div>`:"";
   body.innerHTML=`${exampleTag()}${introHtml}${bar}<div class="look-${look}">${main}</div>`;
   const again=()=>renderCacti(body,status);
+  {const sh=body.querySelector(".shelf");if(sh)requestAnimationFrame(()=>{const r=sh.getBoundingClientRect();if(r.width)sh.style.setProperty("--glass",`url(${shelfGlass(Math.round(r.width/3),Math.round(r.height/3),SCENE.night)})`)})}
   body.querySelectorAll("[data-look]").forEach(b=>b.onclick=()=>{try{localStorage.setItem("cactiLook",b.dataset.look)}catch(e){}again()});
   body.querySelectorAll("[data-close]").forEach(b=>b.onclick=e=>{if(e.target!==b)return;renderCacti.pop=false;again()});
   body.querySelectorAll("[data-sel]").forEach(b=>{b.onclick=()=>{renderCacti.sel=+b.dataset.sel;if(look==="shelf")renderCacti.pop=true;again();const f=body.querySelector(`[data-sel="${b.dataset.sel}"]`);if(f)f.focus({preventScroll:true})};
@@ -3358,6 +3384,14 @@ const FAUNA=[
   {key:"rattlesnake",common:"Red diamond rattlesnake",sci:"Crotalus ruber",fam:"Viperidae",cls:"Reptilia",n:s=>s.snake&&(s.snake.state==="go"||s.snake.state==="enter")?1:0,when:"diurnal in cool months; shelters in burrows"},
   {key:"desert_mice",common:"Cactus mouse",sci:"Peromyscus eremicus",fam:"Cricetidae",cls:"Mammalia",n:s=>(s.mice||[]).filter(m=>!m.caught).length,when:"nocturnal; forages for seeds"}
 ];
+// not wildlife, strictly speaking: the scene's other regulars, logged with a straight face
+const VISITORS=[
+  {key:"bikers",show:"dirt_bikes",common:"Dirt bikers",sci:"Homo sapiens motocrossus",fam:"Twostrokidae",cls:"Weekend warriors",
+   n:s=>!s.night&&s.disco&&s.bikes&&s.bikes.wait<=0&&s.bikes.riders?s.bikes.riders.length:0,when:"diurnal, and only when the music's on; travel in loose packs along the ridgeline, kicking up dust and popping wheelies on the climbs"},
+  {key:"truck",show:"baja_truck",common:"Baja truck",sci:"Toyota tacoma prerunnerus",fam:"Offroadidae",cls:"Machina",
+   n:s=>s.night&&s.truck&&s.truck.on?1:0,when:"nocturnal; cruises the far road, headlights on, tail lights glowing; occasionally abducted"},
+  {key:"ufo",show:"ufo",common:"Unidentified flying object",sci:"Incognitus saturnii",fam:"Possibly Saturnian",cls:"Unclassified",
+   n:s=>s.ufo?1:0,when:"surfaces from Saturn at night-time dance parties; collects trucks; parks on the moon when there's nothing to take"}];
 const FLORA=[
   {key:"sag",common:"Saguaro",sci:"Carnegiea gigantea",fam:"Cactaceae"},
   {key:"cho",common:"Teddybear cholla",sci:"Cylindropuntia bigelovii",fam:"Cactaceae"},
@@ -3397,7 +3431,22 @@ function bioThumb(key){
     const rows=CRITTERS.scorp[0],w=Math.max(...rows.map(r=>r.length)),h=rows.length,k=4,cv=document.createElement("canvas");cv.width=w*k;cv.height=h*k;
     const g=cv.getContext("2d");g.scale(k,k);sprt(g,rows,0,0,false,N?GLOW:undefined);return BIO_IMG[id]=cv.toDataURL()}
   return bioSprite(key)}
-const spCell=(key,common,sci)=>{const src=bioThumb(key);return `<td class="sp"><div class="sp-row"><span class="sp-pic">${src?`<img alt="" src="${src}">`:""}</span><span>${common}<br><i class="sci">${sci}</i></span></div></td>`};
+// what a thumbnail is drawn from (a canvas), for the dotted "not seen" outline
+function bioCanvas(key){
+  const m={owl:[CRITTERS.owlHome,OWLPAL],owl_chicks:[OWLET_BODY,OWLETPAL],roadrunner:[CRITTERS.stand],ravens:[CRITTERS.ravenFinePerch.perch,RAVENPAL],
+    horned_lizards:[CRITTERS.toad],scorpions:[CRITTERS.scorp[0]],bats:[BAT_HANG],desert_mice:[CRITTERS.mouseSit,MOUSE],rattlesnake:[SNAKE_COIL,SNAKEPAL],
+    truck:[TRUCK,TRUCKPAL],ufo:[UFO,UFOPAL]}[key];
+  if(key==="bikers")return bikeSprite(0,0);
+  if(!m)return null;const rows=m[0],w=Math.max(...rows.map(r=>r.length)),cv=layer(w,rows.length);sprt(cv.getContext("2d"),rows,0,0,false,m[1]);return cv}
+// an unseen species: just a dotted outline of where it would be, like an empty page in a field guide
+function bioOutline(key){const id="out_"+key;if(BIO_IMG[id])return BIO_IMG[id];const src=bioCanvas(key);if(!src)return "";
+  const w=src.width,h=src.height,a=src.getContext("2d").getImageData(0,0,w,h).data,on=(x,y)=>x>=0&&y>=0&&x<w&&y<h&&a[(y*w+x)*4+3]>0;
+  const k=Math.max(2,Math.min(5,Math.floor(44/Math.max(w,h)))),cv=layer((w+2)*k,(h+2)*k),c=cv.getContext("2d");c.fillStyle="#8c8494";
+  for(let y=-1;y<=h;y++)for(let x=-1;x<=w;x++){if(on(x,y))continue;if(!(on(x-1,y)||on(x+1,y)||on(x,y-1)||on(x,y+1)))continue;if((x+y)&1)continue;c.fillRect((x+1)*k,(y+1)*k,k,k)}
+  return BIO_IMG[id]=cv.toDataURL()}
+const spCell=(key,common,sci,unseen)=>{const src=unseen?bioOutline(key):(key==="bikers"||key==="truck"||key==="ufo")?visitorThumb(key):bioThumb(key);return `<td class="sp"><div class="sp-row"><span class="sp-pic">${src?`<img alt="" src="${src}">`:""}</span><span>${common}<br><i class="sci">${sci}</i></span></div></td>`};
+function visitorThumb(key){const id="v_"+key;if(BIO_IMG[id])return BIO_IMG[id];const src=bioCanvas(key);if(!src)return "";
+  const k=Math.max(2,Math.min(5,Math.floor(44/Math.max(src.width,src.height)))),cv=layer(src.width*k,src.height*k),c=cv.getContext("2d");c.imageSmoothingEnabled=false;c.drawImage(src,0,0,cv.width,cv.height);return BIO_IMG[id]=cv.toDataURL()}
 function bioTips(root){
   let tip=document.getElementById("bioTip");if(!tip){tip=document.createElement("div");tip.id="bioTip";tip.hidden=true;tip.innerHTML="<img alt=''><span></span>";document.body.appendChild(tip)}
   const hide=()=>tip.hidden=true;
@@ -3414,6 +3463,11 @@ function renderBio(body,status){
   const active=a=>({rattlesnake:!N,owl:N,owl_chicks:N,roadrunner:!N,ravens:!N,horned_lizards:!N,scorpions:true,bats:N,desert_mice:N})[a.key];
   const fauna=FAUNA.map(a=>{const on=shown(a.key),present=on&&(a.key==="bats"||a.key==="desert_mice"?N:true);
     const n=present?a.n(s):0;return {...a,on,n,act:on&&active(a)}});
+  const visitors=VISITORS.map(v=>{const on=shown(v.show),n=on?v.n(s):0;return {...v,on,n,act:n>0}});
+  // a row of the census; one that's absent right now shows only a dotted outline and question marks (resting ones are seen)
+  const bioRow=(a,unseen)=>unseen?`<tr class="unseen">${spCell(a.key,esc(a.common),"??",true)}<td>??<br><span class="muted">??</span></td><td class="n big">??</td><td>${a.n?"resting":"absent"}</td><td class="habits">??</td></tr>`
+    :`<tr${a.on?"":' class="off"'}>${spCell(a.key,esc(a.common),esc(a.sci))}<td>${a.fam}<br><span class="muted">${a.cls}</span></td><td class="n big">${a.on?a.n:"—"}</td>
+      <td>${!a.on?"not surveyed":a.n?(a.act?"active":"resting"):"absent"}</td><td class="habits">${esc(a.when)}</td></tr>`;
   const floraRows=FLORA.map(p=>({...p,n:f[p.key]||0}));
   const dF=diversity(fauna.filter(a=>a.key!=="owl_chicks").map(a=>a.n+(a.key==="owl"&&shown("owl_chicks")?owlChickN():0)));
   const dP=diversity(floraRows.map(p=>p.n));
@@ -3425,8 +3479,8 @@ function renderBio(body,status){
     <p class="bio-head"><b>Field census</b> · ${esc(SET.location_name||"Anza-Borrego Desert")} · ${today}, ${time} · ${N?"nocturnal":"diurnal"} survey</p>
     <h3>Fauna</h3>
     <div class="tbl"><table class="biot"><thead><tr><th>Species</th><th>Family · class</th><th class="n">Count</th><th>Status</th><th>Habits</th></tr></thead><tbody>
-    ${fauna.map(a=>`<tr${a.on?"":' class="off"'}>${spCell(a.key,esc(a.common),esc(a.sci))}<td>${a.fam}<br><span class="muted">${a.cls}</span></td><td class="n big">${a.on?a.n:"—"}</td>
-      <td>${!a.on?"not surveyed":a.n?(a.act?"active":"resting"):"absent"}</td><td class="habits">${esc(a.when)}</td></tr>`).join("")}
+    ${fauna.map(a=>bioRow(a,a.on&&!a.n)).join("")}
+    ${visitors.length?`<tr class="sub"><td colspan="5">Other regulars</td></tr>${visitors.map(a=>bioRow(a,a.on&&!a.n)).join("")}`:""}
     </tbody></table></div>
     <p class="bio-stats">Richness <b>S = ${dF.S}</b> · individuals <b>N = ${dF.N}</b> · Shannon <b>H′ = ${fmt(dF.H)}</b> · evenness <b>J′ = ${fmt(dF.E)}</b> · Simpson <b>1−D = ${fmt(dF.D)}</b></p>
     <h3>Flora (scene transect)</h3>
