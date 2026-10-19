@@ -682,7 +682,7 @@ const SAMPLE = {
     {key:"title_line_2",value:"Xerophyte"},
     {key:"title_line_3",value:"Labs"},
     {key:"tagline",value:"Field station · Anza-Borrego Desert, CA"},
-    {key:"marquee",value:"Sunny|Soleado|晴れ|Ensoleillé|맑음|Sonnig|Ηλιόλουστο|مشمس|Ensolarado|Jua kali|Zonnig|Güneşli|धूप"},
+    {key:"marquee",value:"Sunny"},
     {key:"location_name",value:"Borrego Springs, CA"},
     {key:"latitude",value:"33.2559"},
     {key:"longitude",value:"-116.3750"},
@@ -3237,6 +3237,25 @@ function shelfGlass(w,h,night){const key=w+"x"+h+(night?"n":"d")+GLASS_SHEEN;if(
   for(let x=0;x<w;x+=pane){for(let y=0;y<h;y++){P(x,y,night?"#8a94b4":"#f4fbff");P(x+1,y,night?"#5a6488":"#a8c8d8")}}
   for(let x=0;x<w;x++){P(x,Math.round(h*.08),night?"#8a94b4":"#f4fbff");P(x,Math.round(h*.08)+1,night?"#5a6488":"#a8c8d8")}
   return GLASS_CACHE[key]=cv.toDataURL()}
+// Settings › marquee with a single word or phrase: shown in English plus Norwegian, Japanese, Spanish, Korean, German,
+// Arabic, Amharic, Mandarin and Portuguese. Looked up once from Google's free translate endpoint (MyMemory as a backup)
+// and remembered in the browser; a few common weather words are built in, so they work even offline
+const MARQUEE_LANGS=["no","ja","es","ko","de","ar","am","zh-CN","pt"];
+const MARQUEE_BUILTIN={sunny:["Solfylt","晴れ","Soleado","맑음","Sonnig","مشمس","ፀሐያማ","晴朗","Ensolarado"],
+  cloudy:["Overskyet","曇り","Nublado","흐림","Bewölkt","غائم","ደመናማ","多云","Nublado"],rainy:["Regnfullt","雨","Lluvioso","비","Regnerisch","ممطر","ዝናባማ","下雨","Chuvoso"],
+  windy:["Vindfullt","風が強い","Ventoso","바람이 부는","Windig","عاصف","ነፋሻማ","有风","Ventoso"],hot:["Varmt","暑い","Caluroso","더운","Heiß","حار","ሞቃት","炎热","Quente"],
+  "always under construction":["Alltid under arbeid","常に工事中","Siempre en construcción","항상 공사 중","Immer im Aufbau","دائمًا قيد الإنشاء","ሁልጊዜ በግንባታ ላይ","始终在建设中","Sempre em construção"]};
+async function marqueeTranslate(phrase){
+  const key="mq:"+phrase,b=MARQUEE_BUILTIN[phrase.trim().toLowerCase()];if(b)return [phrase,...b];
+  try{const c=JSON.parse(localStorage.getItem(key)||"null");if(c&&c.length===MARQUEE_LANGS.length+1)return c}catch(e){}
+  const one=async tl=>{try{const r=await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${tl}&dt=t&q=${encodeURIComponent(phrase)}`);
+      if(r.ok){const j=await r.json();const t=(j[0]||[]).map(x=>x[0]).join("");if(t)return t}}catch(e){}
+    try{const r=await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(phrase)}&langpair=en|${tl.split("-")[0]}`);
+      if(r.ok){const j=await r.json();const t=j&&j.responseData&&j.responseData.translatedText;if(t&&!/MYMEMORY WARNING/i.test(t))return t}}catch(e){}
+    return null};
+  const t=await Promise.all(MARQUEE_LANGS.map(one));const out=[phrase,...t.filter(Boolean)];
+  if(t.every(Boolean))try{localStorage.setItem(key,JSON.stringify(out))}catch(e){}
+  return out}
 function cactusKind(c){
   const t=`${c.type||""} ${c.species||""} ${c.common_name||""}`.toLowerCase();
   if(/saguaro|carnegiea/.test(t))return "saguaro";
@@ -3664,10 +3683,12 @@ function build(){
   document.getElementById("tagline").textContent=SET.tagline||"";
   document.title=t.join(" ").replace(/,/g,"")||"Xerophyte Labs";
   const words=(SET.marquee||"Always under construction").split("|").map(s=>s.trim()).filter(Boolean);
+  // one word or phrase (no bars) is shown along with its translations; a list with bars is used just as written
+  const setRun=w=>{const run=w.join(" | ")+" | ";document.getElementById("marquee").textContent=(run.repeat(Math.ceil(30/w.length))).repeat(2)};
   // Settings › show_marquee: "no", "off", "false", "hide" or "0" hides the scrolling banner
   document.querySelector(".marquee").hidden=/^(no|off|false|hide|hidden|0)$/i.test(String(SET.show_marquee||"").trim());
   document.body.classList.toggle("noMarquee",document.querySelector(".marquee").hidden);
-  const run=words.join(" · ")+" · ";document.getElementById("marquee").textContent=(run.repeat(Math.ceil(30/words.length))).repeat(2);
+  setRun(words);if(words.length===1)marqueeTranslate(words[0]).then(t=>{if(t&&t.length>1)setRun(t)});
   document.getElementById("startside").textContent=SET.start_label||"Xerophyte Labs";
 
   const mob=isMob(),cx=w=>Math.max(130,(innerWidth-w)/2);
