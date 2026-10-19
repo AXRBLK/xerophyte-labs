@@ -3203,8 +3203,8 @@ function shelfSprite(kind,name,active){const key=kind+"|"+(active?name:"-");if(S
   return SHELF_CACHE[key]=cv.toDataURL()}
 // the greenhouse glass behind the shelf, in chunky pixels: pale blue panes (dithered, with diagonal glints) in a white
 // frame, and the sun (or the moon) shining through with a little trail of lens-flare rings
-const GLASS_CACHE={};
-function shelfGlass(w,h,night){const key=w+"x"+h+(night?"n":"d");if(GLASS_CACHE[key])return GLASS_CACHE[key];
+const GLASS_CACHE={};let GLASS_SHEEN="glints";
+function shelfGlass(w,h,night){const key=w+"x"+h+(night?"n":"d")+GLASS_SHEEN;if(GLASS_CACHE[key])return GLASS_CACHE[key];
   const cv=layer(w,h),c=cv.getContext("2d"),P=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)},B=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]];
   const top=night?[30,44,82]:[150,206,236],bot=night?[54,72,116]:[214,238,248];
   for(let y=0;y<h;y++){const t=y/Math.max(1,h-1);for(let x=0;x<w;x++){const st=Math.floor(t*6+B[y&3][x&3]/16)/6;
@@ -3217,10 +3217,20 @@ function shelfGlass(w,h,night){const key=w+"x"+h+(night?"n":"d");if(GLASS_CACHE[
   const fl=[[.35,2,"#ffffff"],[.55,1,"#ffe9a8"],[.8,3,"#c8f0ff"],[1.1,1,"#ffffff"],[1.35,4,"#e6f8ff"]];
   if(!night)fl.forEach(([f,r,col])=>{const fx=Math.round(sx-(sx-w*.25)*f),fy=Math.round(sy+(h*.75-sy)*f);
     for(let y=-r;y<=r;y++)for(let x=-r;x<=r;x++){const d=Math.hypot(x,y);if(r>2?(d>r-1.2&&d<=r):d<=r)P(fx+x,fy+y,col)}});
-  // glass glints: short diagonal streaks of brighter pixels
-  for(let k=0;k<Math.ceil(w/22);k++){const gx=Math.round((k+.3)*22),gy=Math.round(h*(.2+.5*((k*37)%10)/10));for(let i=0;i<5+(k%3)*2;i++)P(gx+i,gy-i,night?"rgba(200,215,255,.35)":"rgba(255,255,255,.75)")}
   // the frame: white mullions every pane, a transom near the top
   const pane=Math.max(18,Math.round(w/Math.max(2,Math.round(w/40))));
+  // the sheen on the glass (GLASS_SHEEN picks the look)
+  const hi=night?"rgba(200,215,255,.35)":"rgba(255,255,255,.75)",hi2=night?"rgba(200,215,255,.18)":"rgba(255,255,255,.4)",ty=Math.round(h*.08)+2;
+  const st=GLASS_SHEEN;
+  if(st==="glints")for(let k=0;k<Math.ceil(w/22);k++){const gx=Math.round((k+.3)*22),gy=Math.round(h*(.2+.5*((k*37)%10)/10));for(let i=0;i<5+(k%3)*2;i++)P(gx+i,gy-i,hi)}
+  if(st==="bands")for(let x0=0;x0<w;x0+=pane){for(let i=0;i<h;i++){const y=ty+i,a=x0+4+Math.round(i*.6);if(y>=h)break;   // two long parallel sheen bands per pane
+      [[a,hi],[a+1,hi],[a+4,hi2]].forEach(([x,col])=>{const xx=x%pane;if(xx>2&&xx<pane-1)P(x0+xx,y,col)})}}
+  if(st==="frosted"){let r=7;for(let y=ty;y<h;y++)for(let x=0;x<w;x++){r=(r*1103515245+12345)&0x7fffffff;if(r%23===0)P(x,y,hi2)}   // a light frost speckle, brighter in each pane's top corner
+    for(let x0=0;x0<w;x0+=pane)for(let i=0;i<7;i++)for(let j=0;j<7-i;j++)if((i+j)%2===0)P(x0+3+i,ty+1+j,hi)}
+  if(st==="wavy")for(let y=ty+3;y<h;y+=5)for(let x=0;x<w;x++){const off=Math.round(Math.sin(x*.25+y*.7)*1.2);if(x%3!==1)P(x,y+off,hi2)}   // old wavy glass ripples
+  if(st==="wavy")for(let x0=0;x0<w;x0+=pane){for(let i=0;i<6;i++){P(x0+3+i,ty+1,hi);P(x0+3,ty+1+i,hi)}}
+  if(st==="drops"){let r=11;for(let k=0;k<w*h/60;k++){r=(r*1103515245+12345)&0x7fffffff;const x=r%w;r=(r*1103515245+12345)&0x7fffffff;const y=ty+2+r%Math.max(1,h-ty-4);   // condensation beads, a few running
+      P(x,y,hi);P(x+1,y+1,hi2);if(k%9===0)for(let i=2;i<6;i++)P(x,y+i,hi2)}}
   for(let x=0;x<w;x+=pane){for(let y=0;y<h;y++){P(x,y,night?"#8a94b4":"#f4fbff");P(x+1,y,night?"#5a6488":"#a8c8d8")}}
   for(let x=0;x<w;x++){P(x,Math.round(h*.08),night?"#8a94b4":"#f4fbff");P(x,Math.round(h*.08)+1,night?"#5a6488":"#a8c8d8")}
   return GLASS_CACHE[key]=cv.toDataURL()}
