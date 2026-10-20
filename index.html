@@ -3598,7 +3598,7 @@ function contactForm(body,caption){
   const to=String(SET.contact_email||"").trim();
   const f=document.createElement("form");f.className="cform postcard";f.noValidate=true;
   f.innerHTML=`<div class="pc-left">
-      <div class="pc-art"><canvas width="320" height="200" aria-hidden="true"></canvas><span class="pc-greet"><small>Greetings from</small>${esc(SET.location_short||"Anza-Borrego")}</span></div>
+      <div class="pc-art"><canvas width="480" height="300" aria-hidden="true"></canvas><span class="pc-greet"><small>Greetings from</small>${esc(SET.location_short||"Anza-Borrego")}</span></div>
       ${caption?`<p class="pc-caption">${esc(caption)}</p>`:""}
       <label class="pc-msg"><span class="pc-req">Message <b>*</b></span><textarea name="message" rows="6" required placeholder="Dear Xerophyte Labs,"></textarea></label>
     </div>
@@ -3647,15 +3647,19 @@ function contactForm(body,caption){
 
 /* the postcard's picture: a sunset over the Anza-Borrego badlands, a big saguaro, prickly pear with fruit; and a tiny stamp */
 function paintPostcard(cv,st){
-  // the picture is 160×100, painted at double resolution so the raven can be the scene's own finer one
-  if(cv){const c=cv.getContext("2d");c.setTransform(2,0,0,2,0,0);const W=160,H=100,px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)},rect=(x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h)};
+  // the scene is laid out 160×100, but the card shows a closer crop of its right-hand side (120×75: the ocotillo, a
+  // rattlesnake beside it, the banded hills behind), painted at 4 canvas pixels a unit so the raven and snake can be
+  // the scene's own finer sprites (2 canvas pixels a dot)
+  if(cv){const c=cv.getContext("2d"),OX=40,OY=25,base=()=>c.setTransform(4,0,0,4,-OX*4,-OY*4);base();
+    const fine=(rows,x,y,flip,pal)=>{c.setTransform(2,0,0,2,-OX*4,-OY*4);sprt(c,rows,x*2,y*2,flip,pal);base()};
+    const W=160,H=100,px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)},rect=(x,y,w,h,col)=>{c.fillStyle=col;c.fillRect(x,y,w,h)};
     let seed=4242;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647,R=(a,b)=>a+rnd()*(b-a);
     const nz=(x,f,ph)=>Math.sin(x*f+ph)*.55+Math.sin(x*f*2.3+ph*1.7)*.3+Math.sin(x*f*5.1+ph*.6)*.15;
     // sky: deep to pale blue, softly dithered, with a couple of shaded cumulus
     const sky=["#3a74c0","#4682c8","#5590d0","#689ed6","#7eaedc","#96bee2","#b0d0e8","#c8dcea"];
     for(let y=0;y<62;y++){const t=y/62*(sky.length-1),k=Math.floor(t),f=t-k;for(let x=0;x<W;x++)px(x,y,((x*3+y)%4<f*4)?sky[Math.min(sky.length-1,k+1)]:sky[k])}
     const cloud=(x0,y0,w)=>{for(let i=0;i<w;i++){const h=Math.round(3+3*Math.sin(i/w*Math.PI)+(Math.sin(i*.9)>0?1:0));for(let k=0;k<h;k++)px(x0+i,y0-k,k===h-1||k===h-2?"#ffffff":k<2?"#c8d6e6":"#eef3f8")}};
-    cloud(14,16,30);cloud(98,10,36);cloud(66,26,14);
+    cloud(14,16,30);cloud(98,10,36);cloud(150,40,14);
     // far ranges, hazy
     for(let x=0;x<W;x++){const y=Math.round(44+6*nz(x,.035,1));rect(x,y,1,H-y,(x+y)%3?"#9a9ac0":"#8c8cb6")}
     for(let x=0;x<W;x++){const y=Math.round(50+4*nz(x,.06,4));rect(x,y,1,H-y,(x+y)%3?"#b49aa8":"#a88e9e")}
@@ -3679,12 +3683,12 @@ function paintPostcard(cv,st){
         px(X,Y,t%4===0?"#4a5a30":"#6a7a48");if(t>len-4)px(X,Y,t>len-2?"#ff6a3a":"#e8402a")}}};
     oco(30,98,6);oco(136,96,5);
     // teddybear cholla glowing in the light
-    for(let y=82;y<95;y++)for(let i=0;i<2;i++)px(116+i,y,"#4a3a2c");
-    for(let j=0;j<9;j++){const a=-Math.PI/2+(j/8-.5)*2.2,len=4+Math.round(R(0,2));for(let t=0;t<len;t++){const X=Math.round(117+Math.cos(a)*(t+1.5)),Y=Math.round(82+Math.sin(a)*(t+1.5));px(X,Y,"#e9dcab");px(X+1,Y,"#cdbd86")}}
-    // wildlife: a raven gliding overhead (the scene's finer bird), a roadrunner mid-dash, a rattlesnake coiled on the sand
-    c.setTransform(1,0,0,1,0,0);sprt(c,CRITTERS.ravenFine.glide,206,10,true,RAVENPAL);c.setTransform(2,0,0,2,0,0);
+    for(let y=82;y<95;y++)for(let i=0;i<2;i++)px(104+i,y,"#4a3a2c");
+    for(let j=0;j<9;j++){const a=-Math.PI/2+(j/8-.5)*2.2,len=4+Math.round(R(0,2));for(let t=0;t<len;t++){const X=Math.round(105+Math.cos(a)*(t+1.5)),Y=Math.round(82+Math.sin(a)*(t+1.5));px(X,Y,"#e9dcab");px(X+1,Y,"#cdbd86")}}
+    // wildlife: a raven gliding overhead, a roadrunner mid-dash, and a rattlesnake coiled on the sand by the ocotillo
+    fine(CRITTERS.ravenFine.glide,120,30,true,RAVENPAL);
     sprt(c,CRITTERS.run[1],64,86,false);
-    c.setTransform(1,0,0,1,0,0);sprt(c,SNAKE_COIL,166,176,true,SNAKEPAL);c.setTransform(2,0,0,2,0,0);
+    fine(SNAKE_COIL,123,88,true,SNAKEPAL);
   }
   if(st){const c=st.getContext("2d"),px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)};
     for(let y=0;y<22;y++)for(let x=0;x<30;x++)px(x,y,y>16?((x+y)%5?"#e8cc9a":"#d4b07a"):y>13?"#f4dcae":"#fbe9cc");   // pale desert morning
