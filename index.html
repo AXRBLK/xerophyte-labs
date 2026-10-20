@@ -3913,7 +3913,7 @@ function sheetToast(msg,ms){let t=document.getElementById("sheetToast");
 /* ---------- landing: the veil, the note and the field-camera switch ---------- */
 // Settings › landing_page (yes/no) turns it on; landing_text is the note (simple HTML ok); landing_button the switch's label;
 // landing_switch the look (slide, rocker or shutter); landing_filter the veil (shade, dither or camera).
-// Once switched on it stays off for the rest of the visit. Preview any look with #landing=rocker,camera on the address.
+// It greets every page load. Preview any look with #landing=rocker,camera on the address.
 const LP={on:false,t:0,raf:0,B:28,tm:0};
 // the scene behind the veil, redrawn in blocks of LP.B screen pixels
 function lpPix(){const cv=document.getElementById("lpPix"),a=document.getElementById("sky"),b=document.getElementById("skyFine");if(!cv||!a)return;
@@ -3921,7 +3921,7 @@ function lpPix(){const cv=document.getElementById("lpPix"),a=document.getElement
   const c=cv.getContext("2d");c.imageSmoothingEnabled=true;c.imageSmoothingQuality="high";
   try{c.drawImage(a,0,0,w,h);if(b&&b.width)c.drawImage(b,0,0,w,h)}catch(e){}}
 const LP_HASH=(()=>{const m=(location.hash||"").match(/landing(?:=([\w,]+))?/i);return m?(m[1]||"").toLowerCase().split(","):null})();
-function lpWanted(){if(LP_HASH)return true;try{if(sessionStorage.getItem("xl-landed")==="1")return false}catch(e){}return /^(yes|on|true|1|show)$/i.test(String(SET.landing_page??"").trim())}
+function lpWanted(){if(LP_HASH)return true;return /^(yes|on|true|1|show)$/i.test(String(SET.landing_page??"").trim())}
 function lpPick(list,key,def){const h=(LP_HASH||[]).find(x=>list.includes(x));if(h)return h;const v=String(SET[key]??"").trim().toLowerCase();return list.includes(v)?v:def}
 function landing(){
   const el=document.getElementById("landing");if(!el)return;
@@ -3937,7 +3937,7 @@ function landing(){
 function lpFlip(){if(LP.on)return;LP.on=true;const t0=performance.now();
   const step=now=>{LP.t=Math.min(1,(now-t0)/260);lpDraw();if(LP.t<1)requestAnimationFrame(step);else setTimeout(lpLift,380)};requestAnimationFrame(step)}
 // switched on: the veil lifts while the camera hunts for focus (blocks coarse → fine → a little soft → sharp), then the desktop
-function lpLift(){const el=document.getElementById("landing");try{sessionStorage.setItem("xl-landed","1")}catch(e){}
+function lpLift(){const el=document.getElementById("landing");
   clearInterval(LP.tm);el.classList.add("focus");
   const steps=document.body.classList.contains("still")?[1]:[28,18,11,6,3,6,11,7,4,2,1],dt=130;
   steps.forEach((B,i)=>setTimeout(()=>{LP.B=B;lpPix()},i*dt));
@@ -3974,7 +3974,7 @@ function lpDraw(){
     if(!dy)P(10,10,"#fff",2,2);                                                 // the glint, gone when pressed
   }
 }
-(()=>{let k="0";try{if(sessionStorage.getItem("xl-landed")!=="1")k=localStorage.getItem("xl-landing")}catch(e){}   // last visit's setting: veil up at once, no flash of the desktop
+(()=>{let k="0";try{k=localStorage.getItem("xl-landing")}catch(e){}   // last visit's setting: veil up at once, no flash of the desktop
   if(k==="1"||LP_HASH){document.body.classList.add("landing");const el=document.getElementById("landing");el.hidden=false;el.className="f-shade";LP.tm=setInterval(lpPix,220)}})();
 async function boot(refresh){
   const wasOpen=refresh?Object.keys(WINS).filter(k=>WINS[k].open&&!WINS[k].min):[];
