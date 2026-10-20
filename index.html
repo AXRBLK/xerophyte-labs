@@ -69,7 +69,10 @@ body.landing .hero{z-index:8001}
   mask:linear-gradient(#000 0 0) top left/26px 26px no-repeat,linear-gradient(#000 0 0) top right/26px 26px no-repeat,linear-gradient(#000 0 0) bottom left/26px 26px no-repeat,linear-gradient(#000 0 0) bottom right/26px 26px no-repeat}   /* viewfinder corners */
 #landing .lp-text{max-width:min(560px,100%);font:16px/1.6 var(--font-ui);color:#f4ece0;text-shadow:1px 1px 0 #000}
 #landing .lp-text p{margin:0 0 .6em}#landing .lp-text a{color:#9ec4ff}
-#landing:not(.typing):not(.typed) .lp-text{visibility:hidden}
+#landing:not(.txt) .lp-text{visibility:hidden}
+#landing.txt .lp-text{animation:lpBlinkIn .6s steps(1) both}
+@keyframes lpBlinkIn{0%{opacity:0}12%{opacity:1}24%{opacity:0}38%{opacity:1}52%{opacity:.35}66%{opacity:1}}
+body.still #landing.txt .lp-text{animation:none}
 #landing .lp-sw{transition:opacity .6s}#landing:not(.typed) .lp-sw{opacity:0;pointer-events:none}
 #landing .lp-sw{display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px;border:0;background:none;color:inherit;cursor:pointer;font:inherit}
 #landing .lp-sw canvas{image-rendering:pixelated;display:block}
@@ -3877,7 +3880,7 @@ function typeTitle(){
 function neonTagline(){
   const t=document.getElementById("tagline");if(!t)return;
   // the red beacon and the live weather only come on once the green line has finished flashing
-  const lit=()=>document.body.classList.add("heroLit");
+  const lit=()=>{document.body.classList.add("heroLit");document.dispatchEvent(new Event("herolit"))};   // the landing note waits for this
   document.body.classList.add("tagOn");
   if(document.body.classList.contains("still")){lit();return}
   t.classList.remove("neon");void t.offsetWidth;t.classList.add("neon");
@@ -3935,20 +3938,12 @@ function landing(){
   const txt=String(SET.landing_text||"").trim();document.getElementById("lpText").innerHTML=txt.split(/\n\s*\n/).map(p=>`<p>${linkify(p).replace(/\n/g,"<br>")}</p>`).join("");
   document.getElementById("lpLbl").textContent=String(SET.landing_button||"").trim()||"Turn on Field Camera";
   document.body.classList.add("landing");lpDraw();
-  // the header types first; then the note types in (quicker), and only then does the switch appear
-  el.classList.remove("typing","typed");clearTimeout(LP.typeT);
-  const go=()=>{if(!el.classList.contains("typing")&&!el.classList.contains("typed"))lpType()};
-  if(typeTitle.done)go();else{document.addEventListener("titletyped",go,{once:true});LP.typeT=setTimeout(go,9000)}LP.B=28;lpPix();clearInterval(LP.tm);LP.tm=setInterval(lpPix,220);
+  // the header types, the tagline and live weather come on; then the whole note blinks in, and the switch 2s after that
+  el.classList.remove("txt","typed");clearTimeout(LP.typeT);
+  const go=()=>{if(el.classList.contains("txt"))return;el.classList.add("txt");LP.typeT=setTimeout(()=>el.classList.add("typed"),document.body.classList.contains("still")?0:2000)};
+  if(document.body.classList.contains("heroLit"))go();else{document.addEventListener("herolit",go,{once:true});LP.typeT=setTimeout(go,12000)}LP.B=28;lpPix();clearInterval(LP.tm);LP.tm=setInterval(lpPix,220);
   document.getElementById("lpSw").onclick=lpFlip;
 }
-function lpType(){const el=document.getElementById("landing"),box=document.getElementById("lpText");
-  const nodes=[],walk=n=>{for(const ch of n.childNodes){if(ch.nodeType===3){nodes.push([ch,ch.textContent]);ch.textContent=""}else walk(ch)}};walk(box);
-  const fin=()=>{nodes.forEach(([n,t])=>n.textContent=t);el.classList.remove("typing");el.classList.add("typed")};
-  el.classList.add("typing");if(document.body.classList.contains("still")||!nodes.length){fin();return}
-  let i=0,j=0;const step=()=>{if(i>=nodes.length){LP.typeT=setTimeout(fin,250);return}
-    const [n,t]=nodes[i];n.textContent=t.slice(0,++j);let wait=12+Math.random()*16;
-    if(j>=t.length){i++;j=0;wait+=n.parentNode&&n.parentNode.nextSibling===null?60:220}else if(/[.,;:]/.test(t[j-1]))wait+=90;
-    LP.typeT=setTimeout(step,wait)};LP.typeT=setTimeout(step,200)}
 function lpFlip(){if(LP.on)return;LP.on=true;const t0=performance.now();
   const step=now=>{LP.t=Math.min(1,(now-t0)/({lever:520,dial:520,toggle:300,missile:900}[LP.look]||260));lpDraw();if(LP.t<1)requestAnimationFrame(step);else setTimeout(lpLift,380)};requestAnimationFrame(step)}
 // switched on: the veil lifts while the camera hunts for focus (blocks coarse → fine → a little soft → sharp), then the desktop
