@@ -55,7 +55,7 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 #landing{position:fixed;inset:0;z-index:8000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;text-align:center;color:#f4ece0}
 body.landing #landing{display:flex}
 body.landing .hero{z-index:8001}
-#landing .veil{position:absolute;inset:0;z-index:-1;pointer-events:none;transition:opacity 1.1s ease-in}
+#landing .veil{position:absolute;inset:0;z-index:-1;pointer-events:none;transition:opacity 3s ease-in-out}
 /* the desert behind, in big blocks, kept moving (redrawn a few times a second); turning the camera on focuses it */
 #landing .pix{position:absolute;inset:0;z-index:-2;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
 #landing.focus .veil{opacity:0}
@@ -74,7 +74,7 @@ body.landing .hero{z-index:8001}
 #landing .lp-sw span{font:400 13px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:#f4ece0;text-shadow:1px 1px 0 #000}
 #landing .lp-sw:hover canvas{filter:brightness(1.12)}
 #landing .lp-sw:focus-visible{outline:2px dashed #66ff4d;outline-offset:6px}
-#landing.focus .lp-text,#landing.focus .lp-sw{opacity:0;transition:opacity .4s}
+#landing.focus .lp-text,#landing.focus .lp-sw{opacity:0;transition:opacity .8s}
 /* marquee */
 .marquee{position:fixed;left:16px;right:16px;top:calc(12px + env(safe-area-inset-top,0px));padding:2px 0;overflow:hidden;white-space:nowrap;z-index:2;opacity:.75;   /* no box: the words just tick in, faintly, fading in and out at the ends */
   -webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
@@ -3939,7 +3939,7 @@ function lpFlip(){if(LP.on)return;LP.on=true;const t0=performance.now();
 // switched on: the veil lifts while the camera hunts for focus (blocks coarse → fine → a little soft → sharp), then the desktop
 function lpLift(){const el=document.getElementById("landing");
   clearInterval(LP.tm);el.classList.add("focus");
-  const steps=document.body.classList.contains("still")?[1]:[28,18,11,6,3,6,11,7,4,2,1],dt=130;
+  const steps=document.body.classList.contains("still")?[1]:[28,24,20,16,12,9,6,4,3,5,8,10,8,6,4,3,2,1],dt=190;   // a slow pull to focus, a small overshoot back out, then it settles
   steps.forEach((B,i)=>setTimeout(()=>{LP.B=B;lpPix()},i*dt));
   setTimeout(()=>{document.body.classList.remove("landing");el.hidden=true;el.classList.remove("focus")},steps.length*dt+150)}
 // the switch, drawn in chunky pixels (k canvas pixels a dot)
