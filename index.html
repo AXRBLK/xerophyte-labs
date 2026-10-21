@@ -3738,10 +3738,11 @@ function paintPostcard(cv,st){
     // teddybear cholla glowing in the light
     for(let y=82;y<95;y++)for(let i=0;i<2;i++)px(104+i,y,"#4a3a2c");
     for(let j=0;j<9;j++){const a=-Math.PI/2+(j/8-.5)*2.2,len=4+Math.round(R(0,2));for(let t=0;t<len;t++){const X=Math.round(105+Math.cos(a)*(t+1.5)),Y=Math.round(82+Math.sin(a)*(t+1.5));px(X,Y,"#e9dcab");px(X+1,Y,"#cdbd86")}}
-    // wildlife: a raven gliding overhead, a roadrunner mid-dash, and a rattlesnake coiled on the sand by the ocotillo
+    // wildlife: a raven gliding overhead and a rattlesnake coiled on the sand by the ocotillo
     fine(CRITTERS.ravenFineFar?CRITTERS.ravenFineFar.glide:CRITTERS.ravenFine.glide,140,45,true,RAVENPAL);
-    sprt(c,CRITTERS.run[1],82,75,false,RRPAL);
-    fine(SNAKE_COIL,118,85,true,SNAKEPAL);
+    // the rattlesnake 20% larger than the scene's fine sprites: drawn on its own, then scaled up without smoothing
+    {const sw=SNAKE_COIL[0].length,sh=SNAKE_COIL.length,sv=layer(sw,sh);sprt(sv.getContext("2d"),SNAKE_COIL,0,0,true,SNAKEPAL);
+     const z=1.2,w=sw*z/2,h=sh*z/2,x=124-w/2,y=93-h;c.imageSmoothingEnabled=false;c.drawImage(sv,x,y,w,h)}
   }
   if(st){const c=st.getContext("2d"),px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)};
     for(let y=0;y<22;y++)for(let x=0;x<30;x++)px(x,y,y>16?((x+y)%5?"#e8cc9a":"#d4b07a"):y>13?"#f4dcae":"#fbe9cc");   // pale desert morning
