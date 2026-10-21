@@ -52,8 +52,8 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 
 /* landing: a dark veil over everything but the header, a note from the sheet, and one big pixel switch that turns on the
    field camera (the veil lifts). Settings › landing_page yes/no; landing_text; landing_button; landing_switch; landing_filter */
-#landing{position:fixed;inset:0;z-index:8000;display:none;text-align:center;color:#f4ece0}
-#landing .lp-in{position:absolute;inset:0;--lpTop:24px;-webkit-mask-image:linear-gradient(transparent calc(var(--lpTop) - 16px),#000 var(--lpTop));mask-image:linear-gradient(transparent calc(var(--lpTop) - 16px),#000 var(--lpTop));display:flex;flex-direction:column;align-items:center;gap:22px;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
+#landing{position:fixed;top:0;left:0;right:0;height:100vh;height:100lvh;z-index:8000;display:none;text-align:center;color:#f4ece0}
+#landing .lp-in{position:absolute;top:0;left:0;right:0;height:100vh;height:100svh;--lpTop:24px;-webkit-mask-image:linear-gradient(transparent calc(var(--lpTop) - 16px),#000 var(--lpTop));mask-image:linear-gradient(transparent calc(var(--lpTop) - 16px),#000 var(--lpTop));display:flex;flex-direction:column;align-items:center;gap:22px;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 #landing .lp-text{margin-top:auto}#landing .lp-sw{margin-bottom:auto}   /* centred when it fits; starts below the header and scrolls when it doesn't */
 
 body.landing #landing{display:flex}
@@ -72,12 +72,16 @@ body.landing .hero{z-index:8001}
   mask:linear-gradient(#000 0 0) top left/26px 26px no-repeat,linear-gradient(#000 0 0) top right/26px 26px no-repeat,linear-gradient(#000 0 0) bottom left/26px 26px no-repeat,linear-gradient(#000 0 0) bottom right/26px 26px no-repeat}   /* viewfinder corners */
 @media (max-width:500px),(max-height:500px){   /* phones: smaller note; STANDBY at the foot, clear of the header; corners tucked in */
   #landing .lp-in{gap:16px}#landing .lp-text{font-size:14px;line-height:1.5}
+  #landing.f-camera .lp-in{padding-bottom:calc(46px + env(safe-area-inset-bottom,0px))}   /* room for STANDBY */
   #landing.f-camera .veil::after{inset:10px}
   #landing.f-camera .veil::before{left:24px;top:auto;bottom:calc(24px + env(safe-area-inset-bottom,0px))}
 }
-@media (max-height:500px){#landing .lp-text{font-size:13px;line-height:1.45;max-width:min(640px,100%)}#landing .lp-text p{margin-bottom:.4em}}
+@media (max-height:500px) and (orientation:landscape){   /* phones on their side: the note on the left, the switch beside it */
+  #landing .lp-in{flex-direction:row;align-items:center;justify-content:center;gap:28px}
+  #landing .lp-text{margin:0;font-size:13px;line-height:1.45;max-width:min(520px,62%);text-align:left}#landing .lp-text p{margin-bottom:.4em}#landing .lp-text hr{margin:.6em 0;width:40%}
+  #landing .lp-sw{margin:0;flex:none}}
 #landing .lp-text{max-width:min(560px,100%);font:16px/1.6 var(--font-ui);color:#f4ece0;text-shadow:1px 1px 0 #000}
-#landing .lp-text p{margin:0 0 .6em}#landing .lp-text hr{border:0;border-top:1px solid rgba(244,236,224,.3);width:60%;margin:1em auto}#landing .lp-text a{color:#9ec4ff}
+#landing .lp-text p{margin:0 0 .6em}#landing .lp-text p:last-child{margin-bottom:0}#landing .lp-text hr{border:0;border-top:1px solid rgba(244,236,224,.3);width:60%;margin:1em auto}#landing .lp-text a{color:#9ec4ff}
 #landing:not(.txt) .lp-text{visibility:hidden}
 #landing.txt .lp-text{animation:lpBlinkIn .6s steps(1) both}
 @keyframes lpBlinkIn{0%{opacity:0}12%{opacity:1}24%{opacity:0}38%{opacity:1}52%{opacity:.35}66%{opacity:1}}
@@ -3944,7 +3948,7 @@ function landing(){
   if(!lpWanted()){document.body.classList.remove("landing");el.hidden=true;return}
   const look=lpPick(["slide","rocker","shutter","lever","dial","toggle","missile"],"landing_switch","rocker"),veil=lpPick(["shade","dither","camera"],"landing_filter","shade");
   el.className="f-"+veil;el.hidden=false;LP.look=look;LP.on=false;LP.t=0;
-  const txt=String(SET.landing_text||"").trim();document.getElementById("lpText").innerHTML=txt.split(/\n\s*\n/).map(p=>`<p>${linkify(p).replace(/\n/g,"<br>")}</p>`).join("");
+  const txt=String(SET.landing_text||"").trim();document.getElementById("lpText").innerHTML=txt.split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean).map(p=>/^<hr\s*\/?>$/i.test(p)?"<hr>":`<p>${linkify(p).replace(/\n/g,"<br>")}</p>`).join("");
   document.getElementById("lpLbl").textContent=String(SET.landing_button||"").trim()||"Turn on Field Camera";
   document.body.classList.add("landing");lpDraw();lpFit();if(!LP.fitOn){LP.fitOn=1;addEventListener("resize",()=>{lpFit();lpDraw()});document.addEventListener("herolit",()=>setTimeout(lpFit,50))}
   // the header types, the tagline and live weather come on; then the whole note blinks in, and the switch 2s after that
@@ -3955,7 +3959,12 @@ function landing(){
 }
 // keep the note and switch below the header (on phones the header sits at the top of the screen)
 function lpFit(){const el=document.getElementById("landing"),h=document.querySelector(".hero");if(!el||!h)return;
-  const r=h.getBoundingClientRect(),top=r.top<innerHeight/2?r.bottom:0;const pt=Math.round(Math.max(24,top+18)),box=document.getElementById("lpIn");box.style.paddingTop=pt+"px";box.style.setProperty("--lpTop",(top?pt-4:0)+"px")}
+  const r=h.getBoundingClientRect(),top=r.top<innerHeight/2?r.bottom:0;const pt=Math.round(Math.max(24,top+18)),box=document.getElementById("lpIn");box.style.paddingTop=pt+"px";box.style.setProperty("--lpTop",(top?pt-4:0)+"px");
+  // then shrink the note and the switch together until everything fits on one screen, no scrolling
+  const tx=document.getElementById("lpText"),land=innerHeight<520,mob=isMob()||innerWidth<=500;
+  let fs=land?14:mob?15:16,k=land?4:mob?5:6,gap=land?12:mob?16:22;
+  const apply=()=>{tx.style.fontSize=fs+"px";box.style.gap=gap+"px";LP.k=k;lpDraw()};apply();
+  for(let i=0;i<40&&box.scrollHeight>box.clientHeight+1;i++){if(fs>10)fs-=.5;if(i%3===2&&k>2)k--;if(gap>8)gap-=1;apply()}}
 function lpFlip(){if(LP.on)return;LP.on=true;const t0=performance.now();
   const step=now=>{LP.t=Math.min(1,(now-t0)/({lever:520,dial:520,toggle:300,missile:900}[LP.look]||260));lpDraw();if(LP.t<1)requestAnimationFrame(step);else setTimeout(lpLift,380)};requestAnimationFrame(step)}
 // switched on: the veil lifts while the camera hunts for focus (blocks coarse → fine → a little soft → sharp), then the desktop
@@ -3970,7 +3979,7 @@ function lpLift(){const el=document.getElementById("landing");
   setTimeout(()=>{document.body.classList.remove("landing");el.hidden=true;el.classList.remove("focus")},steps.length*dt+150)}
 // the switch, drawn in chunky pixels (k canvas pixels a dot)
 function lpDraw(){
-  const cv=document.getElementById("lpCv");if(!cv)return;const look=LP.look,t=LP.t,k=innerHeight<520?3:isMob()?4:6;
+  const cv=document.getElementById("lpCv");if(!cv)return;const look=LP.look,t=LP.t,k=LP.k||(innerHeight<520?3:isMob()?4:6);
   const S={slide:[34,18],rocker:[22,30],shutter:[30,30],lever:[30,34],dial:[32,32],toggle:[24,32],missile:[26,36]}[look];cv.width=S[0]*k;cv.height=S[1]*k;cv.style.width=cv.width+"px";cv.style.height=cv.height+"px";
   const c=cv.getContext("2d"),P=(x,y,col,w=1,h=1)=>{c.fillStyle=col;c.fillRect(x*k,y*k,w*k,h*k)};c.clearRect(0,0,cv.width,cv.height);
   const G="#66ff4d",GD="#2fbf1c",INK="#0c0c14",CR="#f4efe2";
