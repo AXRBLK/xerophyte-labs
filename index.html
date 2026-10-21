@@ -86,6 +86,8 @@ body.landing .hero{z-index:8001}
 #landing.txt .lp-text{animation:lpBlinkIn .6s steps(1) both}
 @keyframes lpBlinkIn{0%{opacity:0}12%{opacity:1}24%{opacity:0}38%{opacity:1}52%{opacity:.35}66%{opacity:1}}
 body.still #landing.txt .lp-text{animation:none}
+body.landing .icon,body.iconsWait .icon{visibility:hidden}
+body.iconsIn .icon{animation:lpBlinkIn .5s steps(1) both}   /* after the landing: the scene first, then the icons and labels flick on */
 #landing:not(.typed) .lp-sw{visibility:hidden;pointer-events:none}#landing.typed .lp-sw{animation:lpBlinkIn .6s steps(1) both}body.still #landing.typed .lp-sw{animation:none}   /* the switch flicks on */
 #landing .lp-sw{display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px;border:0;background:none;color:inherit;cursor:pointer;font:inherit}
 #landing .lp-sw canvas{image-rendering:pixelated;display:block}
@@ -3942,10 +3944,8 @@ function lpPix(fade){const A=document.getElementById("lpPix"),A2=document.getEle
   const w=Math.max(1,Math.ceil(innerWidth/LP.B)),h=Math.max(1,Math.ceil(innerHeight/LP.B));if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}
   const c=cv.getContext("2d");c.imageSmoothingEnabled=LP.B>2;c.imageSmoothingQuality="high";
   try{c.drawImage(a,0,0,w,h);if(b&&b.width)c.drawImage(b,0,0,w,h)}catch(e){}
-  // the rest of the desktop in the same blocks, so nothing pops in when the veil lifts: the icons and the taskbar
-  const B=LP.B;try{document.querySelectorAll(".icon > span:last-child").forEach(sp=>{const r=sp.getBoundingClientRect(),bg=getComputedStyle(sp).backgroundColor;if(r.width&&bg&&!/rgba\(0, 0, 0, 0\)|transparent/.test(bg)){c.fillStyle=bg;c.fillRect(r.left/B,r.top/B,r.width/B,r.height/B)}});
-    document.querySelectorAll(".icon .badge img").forEach(im=>{const r=im.getBoundingClientRect();if(r.width&&im.complete)c.drawImage(im,r.left/B,r.top/B,r.width/B,r.height/B)});
-    const tb=document.querySelector(".taskbar");if(tb){const r=tb.getBoundingClientRect(),cs=getComputedStyle(tb);c.fillStyle=cs.backgroundColor;c.fillRect(r.left/B,r.top/B,r.width/B,(r.height+40)/B);
+  // the taskbar in the same blocks, so it doesn't pop in when the veil lifts (the icons come last, on their own)
+  const B=LP.B;try{const tb=document.querySelector(".taskbar");if(tb){const r=tb.getBoundingClientRect(),cs=getComputedStyle(tb);c.fillStyle=cs.backgroundColor;c.fillRect(r.left/B,r.top/B,r.width/B,(r.height+40)/B);
       c.fillStyle=cs.borderTopColor;c.fillRect(r.left/B,r.top/B,r.width/B,Math.max(1/B,1/B));
       tb.querySelectorAll("img,canvas").forEach(im=>{const q=im.getBoundingClientRect();if(q.width)try{c.drawImage(im,q.left/B,q.top/B,q.width/B,q.height/B)}catch(e){}})}}catch(e){}
   if(fade&&cv!==LP.front){cv.classList.add("on");LP.front.classList.remove("on");LP.front=cv}}
@@ -3992,7 +3992,9 @@ function lpLift(){const el=document.getElementById("landing");
   steps.push(1);
   steps.forEach((B,i)=>setTimeout(()=>{if(B!==LP.B){LP.B=B;lpPix()}},i*dt));
   setTimeout(()=>el.classList.add("reveal"),steps.length*dt);
-  setTimeout(()=>{document.body.classList.remove("landing");el.hidden=true;el.classList.remove("focus","reveal")},steps.length*dt+900)}
+  setTimeout(()=>{document.body.classList.add("iconsWait");document.body.classList.remove("landing");el.hidden=true;el.classList.remove("focus","reveal");
+    setTimeout(()=>{const ic=[...document.querySelectorAll(".icon")];ic.forEach((b,i)=>b.style.animationDelay=(i*90)+"ms");
+      document.body.classList.add("iconsIn");document.body.classList.remove("iconsWait");setTimeout(()=>{document.body.classList.remove("iconsIn");ic.forEach(b=>b.style.animationDelay="")},ic.length*90+700)},500)},steps.length*dt+900)}
 // the switch, drawn in chunky pixels (k canvas pixels a dot)
 function lpDraw(){
   const cv=document.getElementById("lpCv");if(!cv)return;const look=LP.look,t=LP.t,k=LP.k||(innerHeight<520?3:isMob()?4:6);
