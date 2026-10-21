@@ -62,9 +62,10 @@ body.landing .hero{z-index:8001}
 /* the desert behind, in big blocks, kept moving (redrawn a few times a second); turning the camera on focuses it */
 #landing .pix{position:absolute;inset:0;z-index:-2;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
 #landing.focus .veil{opacity:0}
+#landing .pix{transition:opacity .8s ease-out}#landing.reveal .pix{opacity:0}   /* the sharp picture hands over to the live desktop */
 #landing.f-shade .veil{background:rgba(8,8,18,.66)}
 #landing.f-dither .veil{background:rgba(8,8,18,.55) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Crect width='2' height='2' fill='%2306060e'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%2306060e'/%3E%3C/svg%3E") 0 0/4px 4px;image-rendering:pixelated}
-#landing.f-camera .veil{background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.35) 2px 3px),radial-gradient(ellipse 75% 70% at 50% 50%,rgba(10,24,14,.72),rgba(2,6,4,.95) 100%)}
+#landing.f-camera .veil{background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.35) 2px 3px),radial-gradient(ellipse 75% 70% at 50% 50%,rgba(10,24,14,.58),rgba(2,6,4,.86) 100%)}
 #landing.f-camera .veil::before{content:"\25CF  STANDBY";position:absolute;right:19px;top:74%;transform:translate(50%,-50%) rotate(-90deg);white-space:nowrap;font:400 12px/1 var(--font-display);letter-spacing:.14em;color:#8eff7a;opacity:.8;animation:lpBlink 1.2s steps(2) infinite}
 @keyframes lpBlink{50%{opacity:.25}}
 #landing.f-camera .veil::after{content:"";position:absolute;inset:18px;border:2px solid rgba(160,255,150,.25);
@@ -76,9 +77,9 @@ body.landing .hero{z-index:8001}
   #landing.f-camera .veil::before{right:11px}
 }
 @media (max-height:500px) and (orientation:landscape){   /* phones on their side: the note on the left, the switch beside it */
-  #landing .lp-in{flex-direction:row;align-items:center;justify-content:center;gap:32px;padding-left:calc(env(safe-area-inset-left,0px) + 44px);padding-right:calc(env(safe-area-inset-right,0px) + 44px)}
-  #landing .lp-text{margin:0;font-size:13px;line-height:1.45;max-width:min(520px,62%);text-align:left}#landing .lp-text p{margin-bottom:.4em}#landing .lp-text hr{margin:.6em 0;width:40%}
-  #landing .lp-sw{margin:0;flex:none}}
+  #landing .lp-in{flex-direction:row;align-items:flex-start;justify-content:center;gap:32px;padding-left:calc(env(safe-area-inset-left,0px) + 44px);padding-right:calc(env(safe-area-inset-right,0px) + 44px)}
+  #landing .lp-text{font-size:13px;line-height:1.45;max-width:min(520px,62%);text-align:left}#landing .lp-text p{margin-bottom:.4em}#landing .lp-text hr{margin:.6em 0;width:40%}
+  #landing .lp-text,#landing .lp-sw{margin-top:auto;margin-bottom:auto}#landing .lp-sw{flex:none}}
 #landing .lp-text{max-width:min(560px,100%);font:16px/1.6 var(--font-ui);color:#f4ece0;text-shadow:1px 1px 0 #000}
 #landing .lp-text p{margin:0 0 .6em}#landing .lp-text p:last-child{margin-bottom:0}#landing .lp-text hr{border:0;border-top:1px solid rgba(244,236,224,.3);width:60%;margin:1em auto}#landing .lp-text a{color:#9ec4ff}
 #landing:not(.txt) .lp-text{visibility:hidden}
@@ -3932,12 +3933,18 @@ function sheetToast(msg,ms){let t=document.getElementById("sheetToast");
 // Settings › landing_page (yes/no) turns it on; landing_text is the note (simple HTML ok); landing_button the switch's label;
 // landing_switch the look (slide, rocker, shutter, lever, dial, toggle or missile); landing_filter the veil (shade, dither or camera).
 // It greets every page load. Preview any look with #landing=rocker,camera on the address.
-const LP={on:false,t:0,raf:0,B:28,tm:0};
+const LP={on:false,t:0,raf:0,B:14,tm:0};
 // the scene behind the veil, redrawn in blocks of LP.B screen pixels
 function lpPix(){const cv=document.getElementById("lpPix"),a=document.getElementById("sky"),b=document.getElementById("skyFine");if(!cv||!a)return;
   const w=Math.max(1,Math.ceil(innerWidth/LP.B)),h=Math.max(1,Math.ceil(innerHeight/LP.B));if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}
-  const c=cv.getContext("2d");c.imageSmoothingEnabled=true;c.imageSmoothingQuality="high";
-  try{c.drawImage(a,0,0,w,h);if(b&&b.width)c.drawImage(b,0,0,w,h)}catch(e){}}
+  const c=cv.getContext("2d");c.imageSmoothingEnabled=LP.B>2;c.imageSmoothingQuality="high";
+  try{c.drawImage(a,0,0,w,h);if(b&&b.width)c.drawImage(b,0,0,w,h)}catch(e){}
+  // the rest of the desktop in the same blocks, so nothing pops in when the veil lifts: the icons and the taskbar
+  const B=LP.B;try{document.querySelectorAll(".icon > span:last-child").forEach(sp=>{const r=sp.getBoundingClientRect(),bg=getComputedStyle(sp).backgroundColor;if(r.width&&bg&&!/rgba\(0, 0, 0, 0\)|transparent/.test(bg)){c.fillStyle=bg;c.fillRect(r.left/B,r.top/B,r.width/B,r.height/B)}});
+    document.querySelectorAll(".icon .badge img").forEach(im=>{const r=im.getBoundingClientRect();if(r.width&&im.complete)c.drawImage(im,r.left/B,r.top/B,r.width/B,r.height/B)});
+    const tb=document.querySelector(".taskbar");if(tb){const r=tb.getBoundingClientRect(),cs=getComputedStyle(tb);c.fillStyle=cs.backgroundColor;c.fillRect(r.left/B,r.top/B,r.width/B,(r.height+40)/B);
+      c.fillStyle=cs.borderTopColor;c.fillRect(r.left/B,r.top/B,r.width/B,Math.max(1/B,1/B));
+      tb.querySelectorAll("img,canvas").forEach(im=>{const q=im.getBoundingClientRect();if(q.width)try{c.drawImage(im,q.left/B,q.top/B,q.width/B,q.height/B)}catch(e){}})}}catch(e){}}
 const LP_HASH=(()=>{const m=(location.hash||"").match(/landing(?:=([\w,]+))?/i);return m?(m[1]||"").toLowerCase().split(","):null})();
 function lpWanted(){if(LP_HASH)return true;return /^(yes|on|true|1|show)$/i.test(String(SET.landing_page??"").trim())}
 function lpPick(list,key,def){const h=(LP_HASH||[]).find(x=>list.includes(x));if(h)return h;const v=String(SET[key]??"").trim().toLowerCase();return list.includes(v)?v:def}
@@ -3947,16 +3954,19 @@ function landing(){
   if(!lpWanted()){document.body.classList.remove("landing");el.hidden=true;return}
   const look=lpPick(["slide","rocker","shutter","lever","dial","toggle","missile"],"landing_switch","rocker"),veil=lpPick(["shade","dither","camera"],"landing_filter","shade");
   el.className="f-"+veil;el.hidden=false;LP.look=look;LP.on=false;LP.t=0;
-  const txt=String(SET.landing_text||"").trim();document.getElementById("lpText").innerHTML=txt.split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean).map(p=>/^<hr\s*\/?>$/i.test(p)?"<hr>":`<p>${linkify(p).replace(/\n/g,"<br>")}</p>`).join("");
+  const txt=String(SET.landing_text||"").trim();document.getElementById("lpText").innerHTML=lpBlocks(txt);
   document.getElementById("lpLbl").textContent=String(SET.landing_button||"").trim()||"Turn on Field Camera";
   document.body.classList.add("landing");lpDraw();lpFit();if(!LP.fitOn){LP.fitOn=1;addEventListener("resize",()=>{lpFit();lpDraw()});try{document.fonts.ready.then(()=>lpFit());document.fonts.addEventListener("loadingdone",()=>lpFit())}catch(e){}document.addEventListener("herolit",()=>setTimeout(lpFit,50))}
   // the header types, the tagline and live weather come on; then the whole note blinks in, and the switch 2s after that
   el.classList.remove("txt","typed");clearTimeout(LP.typeT);
   const go=()=>{if(el.classList.contains("txt"))return;lpFit();el.classList.add("txt");LP.typeT=setTimeout(()=>el.classList.add("typed"),document.body.classList.contains("still")?0:2000)};
-  if(document.body.classList.contains("heroLit"))go();else{document.addEventListener("herolit",go,{once:true});LP.typeT=setTimeout(go,12000)}LP.B=28;lpPix();clearInterval(LP.tm);LP.tm=setInterval(lpPix,220);
+  if(document.body.classList.contains("heroLit"))go();else{document.addEventListener("herolit",go,{once:true});LP.typeT=setTimeout(go,12000)}LP.B=14;lpPix();clearInterval(LP.tm);LP.tm=setInterval(lpPix,220);
   document.getElementById("lpSw").onclick=lpFlip;
 }
 // keep the note and switch below the header (on phones the header sits at the top of the screen)
+// the note: a blank line, or a line with only <br>, starts a new paragraph; a line with only <hr> draws a divider
+function lpBlocks(txt){const out=[];let cur=[];const flush=()=>{if(cur.length)out.push(`<p>${cur.map(l=>linkify(l)).join("<br>")}</p>`);cur=[]};
+  String(txt).replace(/\r/g,"").split("\n").forEach(l=>{const t=l.trim();if(!t||/^<br\s*\/?>$/i.test(t))flush();else if(/^<hr\s*\/?>$/i.test(t)){flush();out.push("<hr>")}else cur.push(t)});flush();return out.join("")}
 function lpFit(){const el=document.getElementById("landing"),h=document.querySelector(".hero");if(!el||!h)return;
   const r=h.getBoundingClientRect(),top=r.top<innerHeight/2?r.bottom:0;const pt=Math.round(Math.max(40,top+32)),box=document.getElementById("lpIn");box.style.paddingTop=pt+"px";box.style.setProperty("--lpTop",(top?pt-4:0)+"px");
   // then shrink the note and the switch together until everything fits on one screen, no scrolling
@@ -3970,16 +3980,17 @@ function lpFlip(){if(LP.on)return;LP.on=true;const t0=performance.now();
 function lpLift(){const el=document.getElementById("landing");
   clearInterval(LP.tm);el.classList.add("focus");
   // the lens hunts slowly: in, back out, three times, each pass closer, then it lands sharp
-  const keys=[28,5,15,3,9,2,5,1],seg=800,dt=80,steps=[];
+  const keys=[14,3,9,2,6,2,4,1],seg=800,dt=80,steps=[];
   if(document.body.classList.contains("still"))steps.push(1);
   else for(let i=0;i<keys.length-1;i++)for(let f=0;f<seg/dt;f++){const u=f/(seg/dt),e=u*u*(3-2*u);steps.push(Math.max(1,Math.round(keys[i]+(keys[i+1]-keys[i])*e)))}
   steps.push(1);
   steps.forEach((B,i)=>setTimeout(()=>{if(B!==LP.B){LP.B=B;lpPix()}},i*dt));
-  setTimeout(()=>{document.body.classList.remove("landing");el.hidden=true;el.classList.remove("focus")},steps.length*dt+150)}
+  setTimeout(()=>el.classList.add("reveal"),steps.length*dt);
+  setTimeout(()=>{document.body.classList.remove("landing");el.hidden=true;el.classList.remove("focus","reveal")},steps.length*dt+900)}
 // the switch, drawn in chunky pixels (k canvas pixels a dot)
 function lpDraw(){
   const cv=document.getElementById("lpCv");if(!cv)return;const look=LP.look,t=LP.t,k=LP.k||(innerHeight<520?3:isMob()?4:6);
-  const S={slide:[34,18],rocker:[22,30],shutter:[30,30],lever:[30,34],dial:[32,32],toggle:[24,32],missile:[26,36]}[look];cv.width=S[0]*k;cv.height=S[1]*k;cv.style.width=cv.width+"px";cv.style.height=cv.height+"px";
+  const S={slide:[34,18],rocker:[22,30],shutter:[30,30],lever:[30,34],dial:[32,32],toggle:[24,32],missile:[26,36]}[look];cv.width=S[0]*k;cv.height=S[1]*k;const sc=(isMob()||innerWidth<=500)?.75:1;cv.style.width=Math.round(cv.width*sc)+"px";cv.style.height=Math.round(cv.height*sc)+"px";
   const c=cv.getContext("2d"),P=(x,y,col,w=1,h=1)=>{c.fillStyle=col;c.fillRect(x*k,y*k,w*k,h*k)};c.clearRect(0,0,cv.width,cv.height);
   const G="#66ff4d",GD="#2fbf1c",INK="#0c0c14",CR="#f4efe2";
   const font={O:["111","101","101","101","111"],N:["1001","1101","1011","1001","1001"],F:["111","100","110","100","100"],I:["1","1","1","1","1"]};
