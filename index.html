@@ -53,7 +53,7 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 /* landing: a dark veil over everything but the header, a note from the sheet, and one big pixel switch that turns on the
    field camera (the veil lifts). Settings › landing_page yes/no; landing_text; landing_button; landing_switch; landing_filter */
 #landing{position:fixed;top:0;left:0;right:0;height:100vh;height:100lvh;z-index:8000;display:none;text-align:center;color:#f4ece0}
-#landing .lp-in{position:absolute;top:0;left:0;right:0;height:100vh;height:100svh;--lpTop:24px;-webkit-mask-image:linear-gradient(transparent calc(var(--lpTop) - 16px),#000 var(--lpTop));mask-image:linear-gradient(transparent calc(var(--lpTop) - 16px),#000 var(--lpTop));display:flex;flex-direction:column;align-items:center;gap:22px;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
+#landing .lp-in{position:absolute;top:0;left:0;right:0;height:100vh;height:100svh;--lpTop:24px;-webkit-mask-image:linear-gradient(transparent calc(var(--lpTop) - 16px),#000 var(--lpTop));mask-image:linear-gradient(transparent calc(var(--lpTop) - 16px),#000 var(--lpTop));display:flex;flex-direction:column;align-items:center;gap:22px;padding:40px 56px calc(48px + env(safe-area-inset-bottom,0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 #landing .lp-text{margin-top:auto}#landing .lp-sw{margin-bottom:auto}   /* centred when it fits; starts below the header and scrolls when it doesn't */
 
 body.landing #landing{display:flex}
@@ -71,13 +71,13 @@ body.landing .hero{z-index:8001}
   -webkit-mask:linear-gradient(#000 0 0) top left/26px 26px no-repeat,linear-gradient(#000 0 0) top right/26px 26px no-repeat,linear-gradient(#000 0 0) bottom left/26px 26px no-repeat,linear-gradient(#000 0 0) bottom right/26px 26px no-repeat;
   mask:linear-gradient(#000 0 0) top left/26px 26px no-repeat,linear-gradient(#000 0 0) top right/26px 26px no-repeat,linear-gradient(#000 0 0) bottom left/26px 26px no-repeat,linear-gradient(#000 0 0) bottom right/26px 26px no-repeat}   /* viewfinder corners */
 @media (max-width:500px),(max-height:500px){   /* phones: smaller note; STANDBY at the foot, clear of the header; corners tucked in */
-  #landing .lp-in{gap:16px}#landing .lp-text{font-size:14px;line-height:1.5}
-  #landing.f-camera .lp-in{padding-bottom:calc(46px + env(safe-area-inset-bottom,0px))}   /* room for STANDBY */
+  #landing .lp-in{gap:16px;padding-left:34px;padding-right:34px}#landing .lp-text{font-size:14px;line-height:1.5}
+  #landing.f-camera .lp-in{padding-bottom:calc(58px + env(safe-area-inset-bottom,0px))}   /* room for STANDBY */
   #landing.f-camera .veil::after{inset:10px}
   #landing.f-camera .veil::before{left:24px;top:auto;bottom:calc(24px + env(safe-area-inset-bottom,0px))}
 }
 @media (max-height:500px) and (orientation:landscape){   /* phones on their side: the note on the left, the switch beside it */
-  #landing .lp-in{flex-direction:row;align-items:center;justify-content:center;gap:28px}
+  #landing .lp-in{flex-direction:row;align-items:center;justify-content:center;gap:32px;padding-left:calc(env(safe-area-inset-left,0px) + 44px);padding-right:calc(env(safe-area-inset-right,0px) + 44px)}
   #landing .lp-text{margin:0;font-size:13px;line-height:1.45;max-width:min(520px,62%);text-align:left}#landing .lp-text p{margin-bottom:.4em}#landing .lp-text hr{margin:.6em 0;width:40%}
   #landing .lp-sw{margin:0;flex:none}}
 #landing .lp-text{max-width:min(560px,100%);font:16px/1.6 var(--font-ui);color:#f4ece0;text-shadow:1px 1px 0 #000}
@@ -3897,7 +3897,7 @@ function neonTagline(){
   document.body.classList.add("tagOn");
   if(document.body.classList.contains("still")){lit();return}
   t.classList.remove("neon");void t.offsetWidth;t.classList.add("neon");
-  clearTimeout(neonTagline.t);neonTagline.t=setTimeout(lit,2400);
+  clearTimeout(neonTagline.t);neonTagline.t=setTimeout(lit,document.body.classList.contains("landing")?700:2400);   // on the landing page the weather comes on sooner
 }
 // a little three-blade fan beside the weather that spins with the wind: still air barely turns it, a gale whirls it
 function windFan(v,F){const mph=F?v:v/1.609,dur=mph<.5?0:Math.max(.18,4.2/Math.pow(mph,.8));   // a chunky 8-bit three-blade fan that spins with the wind
@@ -3959,7 +3959,7 @@ function landing(){
 }
 // keep the note and switch below the header (on phones the header sits at the top of the screen)
 function lpFit(){const el=document.getElementById("landing"),h=document.querySelector(".hero");if(!el||!h)return;
-  const r=h.getBoundingClientRect(),top=r.top<innerHeight/2?r.bottom:0;const pt=Math.round(Math.max(24,top+18)),box=document.getElementById("lpIn");box.style.paddingTop=pt+"px";box.style.setProperty("--lpTop",(top?pt-4:0)+"px");
+  const r=h.getBoundingClientRect(),top=r.top<innerHeight/2?r.bottom:0;const pt=Math.round(Math.max(40,top+32)),box=document.getElementById("lpIn");box.style.paddingTop=pt+"px";box.style.setProperty("--lpTop",(top?pt-4:0)+"px");
   // then shrink the note and the switch together until everything fits on one screen, no scrolling
   const tx=document.getElementById("lpText"),land=innerHeight<520,mob=isMob()||innerWidth<=500;
   let fs=land?14:mob?15:16,k=land?4:mob?5:6,gap=land?12:mob?16:22;
