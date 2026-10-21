@@ -865,6 +865,7 @@ const BAYER=[[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]].map(r=>r.map(v=>(v+.
 const hex=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
 // the eye is a single pixel (the smallest the scene grid allows), so it uses a deep red to read small rather than as a bright dot
 const RAVENPAL={K:"#0e0c14",k:"#1f1a2c",v:"#3d3769",e:"#962632",g:"#2c2838"};
+const RRPAL={k:"#2a2018",N:"#4a3626",n:"#8a6a48",t:"#c8ab82",c:"#e8dcc4",w:"#f4efe2",b:"#4f86d0",o:"#e3783a",s:"#9a9284"};
 const CPAL={k:"#29232c",K:"#0b0a12",N:"#5c4838",n:"#8a6e52",c:"#ddcfb8",b:"#7088aa",v:"#463e54",t:"#c4ab8a",T:"#a48d70",d:"#76624c",w:"#ece2d0",S:"#a8824e",s:"#6e5434"};
 const GLOW={S:"#8fe0cc",s:"#4c9a8c",T:"#c8fff0"}; // scorpions fluoresce under moonlight
 const OWLPAL={k:"#241a14",D:"#3e2c20",B:"#5c4230",L:"#8a6a4c",T:"#b08a5a",r:"#b8743e",w:"#d8d0c0",W:"#efe8da",Y:"#e8b828",p:"#0c0806",d:"#2e241c",c:"#d4ccbe"};
@@ -907,12 +908,14 @@ function droopWings(rows,deg){
   return out.map(r=>r.join(""));
 }
 const CRITTERS={
+  // greater roadrunner, facing right: shaggy dark crest, blue-and-orange skin behind the eye, long straight bill,
+  // streaked brown-and-buff back flecked white, cream belly, long tail cocked up behind, long grey legs (24×15)
   run:[
-   ["...........kk.....","..........kNNk....","kk.......kNbNkkkkk",".kN.....kNNcNk....","..kN...kNNcc......","...kNNNNnNcc......","....kNnNnNnc......",".....kNNNNk.......","......kk.k........",".....k...k........","....kk....kk......"],
-   ["...........kk.....","..........kNNk....","kk.......kNbNkkkkk",".kN.....kNNcNk....","..kN...kNNcc......","...kNNNNnNcc......","....kNnNnNnc......",".....kNNNNk.......",".......kk.........",".......k.k........","......kk..kk......"]
+   ["........................","........................","................kkk.....","...............kNkNk....","..............kNNNNk....","tN............kwbNNkkkkk",".NnNN..........koNkk....","..NnnNN.....kkktNtk.....","...NnnnNkkkkNtNtNck.....","....NnnnnNwNnNtccck.....",".....NnnNwNnNnccck......","......NNNnNnNwkkk.......","..........s....s........",".........s......s.......","........ss.......ss....."],
+   ["........................","........................","................kkk.....","...............kNkNk....","..............kNNNNk....","tN............kwbNNkkkkk",".NnNN..........koNkk....","..NnnNN.....kkktNtk.....","...NnnnNkkkkNtNtNck.....","....NnnnnNwNnNtccck.....",".....NnnNwNnNnccck......","......NNNnNnNwkkk.......","............ss..........","...........s..s.........","..........ss..ss........"]
   ],
-  stand:["kk................",".kN.......kk......","..kN.....kNNk.....","...kN...kNbNkkkkk.","....kN.kNNcNk.....",".....kNNNNcc......","....kNnNnNcc......",".....kNNNNk.......","......k..k........","......k..k........",".....kk..kk......."],
-  peck:["..................","kk................",".kN...............","..kN..............","...kNNNNnNNk......","....kNnNnNnNk.....",".....kNNNNkNbk....",".......k.k.kNNkkk.","......k...k.......","......k...k.......",".....kk...kk......"],
+  stand:["................k.k.....","...............kNkNk....","..............kNNNNk....","..............kwbNNkkkkk","...............koNkk....","..............ktNtk.....","tN...........ktNtNk.....",".NnN......kkkNtNtck.....","..NnNN..kkNnNwNnccck....","...NnnNNNnNwNnNnccck....","....NnnnNnNnNwNccck.....","......NNkkNnNnkkkk......","...........s..s.........","..........s...s.........",".........ss...ss........"],
+  peck:["........................","........................","........................","........................","........................","tN......................",".NnN....................","..NnN.....kkkkk.........","...NnNNNNNnNwNnkk.......","....NnnnnwNnNnNtNk......",".....NnnnnNwNnccNtk.....","......NNNkNnNnccktNk....","...........s..s..kwbNkkk","..........s...s...koNk..",".........ss...ss........"],
   // common raven, facing right: heavy bill, red eye, wedge tail, fingered primaries, blue-violet sheen
   ravenUp:[".......K.K.K............",".......KKKKK............","........KKKKK...........","........KKkkKK..........",".........KkvkKK.........",".........KKkvKKK...KKK..","....KK....KKvvkKKKKKKKK.","..KKKKKKKKKKKKKKKKKKKeKk","KKKKKKKKKKKKKKKKKKKKKKkk","..KKKKKKKKKKKKKKKKKKKk..","....KKKKKKKKKKKKKKKK....",".........KKKKKKKK......."],
   ravenGlide:["........................","..K.K.K.................","..KKKKKKK...............","...KKKKKKKKK............","....KKKkkKKKKK..........","......KKkvvkKKKK...KKK..","....KK....KKvvkKKKKKKKK.","..KKKKKKKKKKKKKKKKKKKeKk","KKKKKKKKKKKKKKKKKKKKKKkk","..KKKKKKKKKKKKKKKKKKKk..","....KKKKKKKKKKKKKKKK....",".........KKKKKKKK......."],
@@ -1079,7 +1082,7 @@ function stepGroundLeavers(g,s){
     if(e.a<=0||e.x<-28||e.x>s.w+28)return false;
     g.globalAlpha=Math.max(0,e.a);
     if(e.k==="toad")sprt(g,CRITTERS.toad,e.x,e.y,e.dir<0);
-    else if(e.k==="runner")sprt(g,mv?CRITTERS.run[s.t%2]:CRITTERS.stand,e.x,e.y-11,e.dir<0);
+    else if(e.k==="runner")sprt(g,mv?CRITTERS.run[s.t%2]:CRITTERS.stand,e.x,e.y-15,e.dir<0,RRPAL);
     else if(e.k==="mouse"){let yo=0;if(mv){e.ht=(e.ht||0)+1;yo=[-1,-3,-4,-3,-1,0][e.ht%6]}sprt(g,yo<0?CRITTERS.mouseHop:CRITTERS.mouseSit,e.x,e.y-8+yo,e.dir<0,MOUSE)}
     else drawScorp(g,e,mv?(s.t>>1)%2:0,0,e.k==="scorpN"?GLOW:undefined);
     g.globalAlpha=1;return true})}
@@ -1563,8 +1566,8 @@ function stepRunner(rr,s){
   }
   if(rr.state==="hunt"){
     const p=rr.target;if(!p||!p.alive){rr.state="stand";rr.timer=RI(10,30);return}
-    const tgt=p.x+4,mid=rr.x+8;if(Math.abs(tgt-mid)>8)rr.dir=tgt>mid?1:-1; // commit to a facing, then close in beak-first
-    const dx=tgt-(rr.x+(rr.dir>0?14:2)),dy=p.y-rr.y;
+    const tgt=p.x+4,mid=rr.x+12;if(Math.abs(tgt-mid)>8)rr.dir=tgt>mid?1:-1; // commit to a facing, then close in beak-first
+    const dx=tgt-(rr.x+(rr.dir>0?21:2)),dy=p.y-rr.y;
     if(Math.abs(dx)<3&&Math.abs(dy)<2){rr.state="eat";rr.timer=12;p.alive=false;p.timer=RI(240,600);return}
     rr.x+=Math.sign(dx)*Math.min(3.6,Math.abs(dx));rr.y+=Math.sign(dy)*Math.min(1.6,Math.abs(dy));
   }
@@ -2330,7 +2333,7 @@ function drawScene(){
   const rh=hold&&!rr.enter;
   if(shown("roadrunner")&&rr.state!=="away"&&rr.state!=="asleep"){
     const rs=rh?CRITTERS.stand:rr.state==="run"||rr.state==="hunt"?CRITTERS.run[s.t%2]:rr.state==="peck"||(rr.state==="eat"&&s.t%4<2)?CRITTERS.peck:CRITTERS.stand;
-    g.fillStyle="#6e5e4c";g.fillRect(Math.round(rr.x)+4,Math.round(rr.y),9,1);(rh||rr.state==="stand"||rr.state==="peck")?sprtBob(g,rs,rr.x,rr.y-11,5,rh?bob:0,rr.dir<0):sprt(g,rs,rr.x,rr.y-11,rr.dir<0);
+    g.fillStyle="#6e5e4c";g.fillRect(Math.round(rr.x)+7,Math.round(rr.y),11,1);(rh||rr.state==="stand"||rr.state==="peck")?sprtBob(g,rs,rr.x,rr.y-15,7,rh?bob:0,rr.dir<0,RRPAL):sprt(g,rs,rr.x,rr.y-15,rr.dir<0,RRPAL);
   }
   if(N&&shown("desert_mice"))(s.mice||[]).forEach(m=>{
     if(m.caught){if(!hold&&--m.respawn<=0){m.caught=false;m.dir=R()<.5?1:-1;m.x=m.dir>0?2:s.w-20;m.state="hop";m.hops=RI(4,8);m.ht=0}return}
@@ -3512,7 +3515,7 @@ function diversity(counts){
 // resting portraits for the Biodiversity Report: birds perched, never in flight
 const BAT_HANG=[".K.K.",".KKK.","KKvKK","KKKKK",".KKK.","..K.."];
 function bioSprite(key){
-  const m={owl:[CRITTERS.owlHome,OWLPAL],owl_chicks:[OWLET_BODY,OWLETPAL],roadrunner:[CRITTERS.stand],ravens:[CRITTERS.ravenFinePerch.perch,RAVENPAL,3],
+  const m={owl:[CRITTERS.owlHome,OWLPAL],owl_chicks:[OWLET_BODY,OWLETPAL],roadrunner:[CRITTERS.stand,RRPAL],ravens:[CRITTERS.ravenFinePerch.perch,RAVENPAL,3],
     horned_lizards:[CRITTERS.toad],scorpions:[CRITTERS.scorp[0]],bats:[BAT_HANG],desert_mice:[CRITTERS.mouseSit,MOUSE],rattlesnake:[SNAKE_COIL,SNAKEPAL]}[key];
   if(key==="scorpions"){BIO_IMG[key]=BIO_IMG[key]||(()=>{               // two portraits: by day, and glowing under moonlight
     const rows=CRITTERS.scorp[0],w=Math.max(...rows.map(r=>r.length)),h=rows.length,k=6,pad=3,cw=(w+pad*2)*k,cv=document.createElement("canvas");
@@ -3537,7 +3540,7 @@ function bioThumb(key){
   return bioSprite(key)}
 // what a thumbnail is drawn from (a canvas), for the dotted "not seen" outline
 function bioCanvas(key){
-  const m={owl:[CRITTERS.owlHome,OWLPAL],owl_chicks:[OWLET_BODY,OWLETPAL],roadrunner:[CRITTERS.stand],ravens:[CRITTERS.ravenFinePerch.perch,RAVENPAL],
+  const m={owl:[CRITTERS.owlHome,OWLPAL],owl_chicks:[OWLET_BODY,OWLETPAL],roadrunner:[CRITTERS.stand,RRPAL],ravens:[CRITTERS.ravenFinePerch.perch,RAVENPAL],
     horned_lizards:[CRITTERS.toad],scorpions:[CRITTERS.scorp[0]],bats:[BAT_HANG],desert_mice:[CRITTERS.mouseSit,MOUSE],rattlesnake:[SNAKE_COIL,SNAKEPAL],
     truck:[TRUCK,TRUCKPAL],ufo:[UFO,UFOPAL]}[key];
   if(key==="bikers")return bikeSprite(0,0);
@@ -3737,13 +3740,13 @@ function paintPostcard(cv,st){
     for(let j=0;j<9;j++){const a=-Math.PI/2+(j/8-.5)*2.2,len=4+Math.round(R(0,2));for(let t=0;t<len;t++){const X=Math.round(105+Math.cos(a)*(t+1.5)),Y=Math.round(82+Math.sin(a)*(t+1.5));px(X,Y,"#e9dcab");px(X+1,Y,"#cdbd86")}}
     // wildlife: a raven gliding overhead, a roadrunner mid-dash, and a rattlesnake coiled on the sand by the ocotillo
     fine(CRITTERS.ravenFineFar?CRITTERS.ravenFineFar.glide:CRITTERS.ravenFine.glide,140,45,true,RAVENPAL);
-    sprt(c,CRITTERS.run[1],84,79,false);
+    sprt(c,CRITTERS.run[1],82,75,false,RRPAL);
     fine(SNAKE_COIL,118,85,true,SNAKEPAL);
   }
   if(st){const c=st.getContext("2d"),px=(x,y,col)=>{c.fillStyle=col;c.fillRect(x,y,1,1)};
     for(let y=0;y<22;y++)for(let x=0;x<30;x++)px(x,y,y>16?((x+y)%5?"#e8cc9a":"#d4b07a"):y>13?"#f4dcae":"#fbe9cc");   // pale desert morning
     for(let y=0;y<5;y++)for(let x=0;x<5;x++)if((x-2)**2+(y-2)**2<6)px(23+x,2+y,"#f2b85a");
-    sprt(c,CRITTERS.run[0],5,7,false)}
+    sprt(c,CRITTERS.run[0],4,6,false,RRPAL)}
 }
 
 /* ---------- build desktop ---------- */
