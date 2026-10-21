@@ -52,10 +52,13 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 
 /* landing: a dark veil over everything but the header, a note from the sheet, and one big pixel switch that turns on the
    field camera (the veil lifts). Settings › landing_page yes/no; landing_text; landing_button; landing_switch; landing_filter */
-#landing{position:fixed;inset:0;z-index:8000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:24px;text-align:center;color:#f4ece0}
+#landing{position:fixed;inset:0;z-index:8000;display:none;text-align:center;color:#f4ece0}
+#landing .lp-in{position:absolute;inset:0;--lpTop:24px;-webkit-mask-image:linear-gradient(transparent calc(var(--lpTop) - 16px),#000 var(--lpTop));mask-image:linear-gradient(transparent calc(var(--lpTop) - 16px),#000 var(--lpTop));display:flex;flex-direction:column;align-items:center;gap:22px;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
+#landing .lp-text{margin-top:auto}#landing .lp-sw{margin-bottom:auto}   /* centred when it fits; starts below the header and scrolls when it doesn't */
+
 body.landing #landing{display:flex}
 body.landing .hero{z-index:8001}
-#landing .veil{position:absolute;inset:0;z-index:-1;pointer-events:none;transition:opacity 3s ease-in-out}
+#landing .veil{position:absolute;inset:0;z-index:-1;pointer-events:none;transition:opacity 4.5s ease-in-out}
 /* the desert behind, in big blocks, kept moving (redrawn a few times a second); turning the camera on focuses it */
 #landing .pix{position:absolute;inset:0;z-index:-2;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
 #landing.focus .veil{opacity:0}
@@ -67,8 +70,14 @@ body.landing .hero{z-index:8001}
 #landing.f-camera .veil::after{content:"";position:absolute;inset:18px;border:2px solid rgba(160,255,150,.25);
   -webkit-mask:linear-gradient(#000 0 0) top left/26px 26px no-repeat,linear-gradient(#000 0 0) top right/26px 26px no-repeat,linear-gradient(#000 0 0) bottom left/26px 26px no-repeat,linear-gradient(#000 0 0) bottom right/26px 26px no-repeat;
   mask:linear-gradient(#000 0 0) top left/26px 26px no-repeat,linear-gradient(#000 0 0) top right/26px 26px no-repeat,linear-gradient(#000 0 0) bottom left/26px 26px no-repeat,linear-gradient(#000 0 0) bottom right/26px 26px no-repeat}   /* viewfinder corners */
+@media (max-width:500px),(max-height:500px){   /* phones: smaller note; STANDBY at the foot, clear of the header; corners tucked in */
+  #landing .lp-in{gap:16px}#landing .lp-text{font-size:14px;line-height:1.5}
+  #landing.f-camera .veil::after{inset:10px}
+  #landing.f-camera .veil::before{left:24px;top:auto;bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-height:500px){#landing .lp-text{font-size:13px;line-height:1.45;max-width:min(640px,100%)}#landing .lp-text p{margin-bottom:.4em}}
 #landing .lp-text{max-width:min(560px,100%);font:16px/1.6 var(--font-ui);color:#f4ece0;text-shadow:1px 1px 0 #000}
-#landing .lp-text p{margin:0 0 .6em}#landing .lp-text a{color:#9ec4ff}
+#landing .lp-text p{margin:0 0 .6em}#landing .lp-text hr{border:0;border-top:1px solid rgba(244,236,224,.3);width:60%;margin:1em auto}#landing .lp-text a{color:#9ec4ff}
 #landing:not(.txt) .lp-text{visibility:hidden}
 #landing.txt .lp-text{animation:lpBlinkIn .6s steps(1) both}
 @keyframes lpBlinkIn{0%{opacity:0}12%{opacity:1}24%{opacity:0}38%{opacity:1}52%{opacity:.35}66%{opacity:1}}
@@ -669,7 +678,7 @@ body:not(.noMarquee) .marquee[hidden]{display:block!important;visibility:hidden}
 
 <div class="marquee" aria-hidden="true" hidden><div class="track" id="marquee"></div></div>
 
-<div id="landing" hidden aria-modal="true" role="dialog" aria-label="Welcome"><canvas class="pix" id="lpPix" aria-hidden="true"></canvas><div class="veil"></div><div class="lp-text" id="lpText"></div><button class="lp-sw" id="lpSw" type="button"><canvas id="lpCv"></canvas><span id="lpLbl">Turn on Field Camera</span></button></div>
+<div id="landing" hidden aria-modal="true" role="dialog" aria-label="Welcome"><canvas class="pix" id="lpPix" aria-hidden="true"></canvas><div class="veil"></div><div class="lp-in" id="lpIn"><div class="lp-text" id="lpText"></div><button class="lp-sw" id="lpSw" type="button"><canvas id="lpCv"></canvas><span id="lpLbl">Turn on Field Camera</span></button></div></div>
 <div class="hero"><h1 id="title"></h1><div class="sub" id="tagline"></div><div class="live" id="liveLine" hidden></div></div>
 
 <nav class="icons left" id="iconsLeft" aria-label="Desktop"></nav>
@@ -3937,24 +3946,31 @@ function landing(){
   el.className="f-"+veil;el.hidden=false;LP.look=look;LP.on=false;LP.t=0;
   const txt=String(SET.landing_text||"").trim();document.getElementById("lpText").innerHTML=txt.split(/\n\s*\n/).map(p=>`<p>${linkify(p).replace(/\n/g,"<br>")}</p>`).join("");
   document.getElementById("lpLbl").textContent=String(SET.landing_button||"").trim()||"Turn on Field Camera";
-  document.body.classList.add("landing");lpDraw();
+  document.body.classList.add("landing");lpDraw();lpFit();if(!LP.fitOn){LP.fitOn=1;addEventListener("resize",()=>{lpFit();lpDraw()});document.addEventListener("herolit",()=>setTimeout(lpFit,50))}
   // the header types, the tagline and live weather come on; then the whole note blinks in, and the switch 2s after that
   el.classList.remove("txt","typed");clearTimeout(LP.typeT);
   const go=()=>{if(el.classList.contains("txt"))return;el.classList.add("txt");LP.typeT=setTimeout(()=>el.classList.add("typed"),document.body.classList.contains("still")?0:2000)};
   if(document.body.classList.contains("heroLit"))go();else{document.addEventListener("herolit",go,{once:true});LP.typeT=setTimeout(go,12000)}LP.B=28;lpPix();clearInterval(LP.tm);LP.tm=setInterval(lpPix,220);
   document.getElementById("lpSw").onclick=lpFlip;
 }
+// keep the note and switch below the header (on phones the header sits at the top of the screen)
+function lpFit(){const el=document.getElementById("landing"),h=document.querySelector(".hero");if(!el||!h)return;
+  const r=h.getBoundingClientRect(),top=r.top<innerHeight/2?r.bottom:0;const pt=Math.round(Math.max(24,top+18)),box=document.getElementById("lpIn");box.style.paddingTop=pt+"px";box.style.setProperty("--lpTop",(top?pt-4:0)+"px")}
 function lpFlip(){if(LP.on)return;LP.on=true;const t0=performance.now();
   const step=now=>{LP.t=Math.min(1,(now-t0)/({lever:520,dial:520,toggle:300,missile:900}[LP.look]||260));lpDraw();if(LP.t<1)requestAnimationFrame(step);else setTimeout(lpLift,380)};requestAnimationFrame(step)}
 // switched on: the veil lifts while the camera hunts for focus (blocks coarse → fine → a little soft → sharp), then the desktop
 function lpLift(){const el=document.getElementById("landing");
   clearInterval(LP.tm);el.classList.add("focus");
-  const steps=document.body.classList.contains("still")?[1]:[28,24,20,16,12,9,6,4,3,5,8,10,8,6,4,3,2,1],dt=190;   // a slow pull to focus, a small overshoot back out, then it settles
-  steps.forEach((B,i)=>setTimeout(()=>{LP.B=B;lpPix()},i*dt));
+  // the lens hunts slowly: in, back out, three times, each pass closer, then it lands sharp
+  const keys=[28,5,15,3,9,2,5,1],seg=800,dt=80,steps=[];
+  if(document.body.classList.contains("still"))steps.push(1);
+  else for(let i=0;i<keys.length-1;i++)for(let f=0;f<seg/dt;f++){const u=f/(seg/dt),e=u*u*(3-2*u);steps.push(Math.max(1,Math.round(keys[i]+(keys[i+1]-keys[i])*e)))}
+  steps.push(1);
+  steps.forEach((B,i)=>setTimeout(()=>{if(B!==LP.B){LP.B=B;lpPix()}},i*dt));
   setTimeout(()=>{document.body.classList.remove("landing");el.hidden=true;el.classList.remove("focus")},steps.length*dt+150)}
 // the switch, drawn in chunky pixels (k canvas pixels a dot)
 function lpDraw(){
-  const cv=document.getElementById("lpCv");if(!cv)return;const look=LP.look,t=LP.t,k=isMob()?5:6;
+  const cv=document.getElementById("lpCv");if(!cv)return;const look=LP.look,t=LP.t,k=innerHeight<520?3:isMob()?4:6;
   const S={slide:[34,18],rocker:[22,30],shutter:[30,30],lever:[30,34],dial:[32,32],toggle:[24,32],missile:[26,36]}[look];cv.width=S[0]*k;cv.height=S[1]*k;cv.style.width=cv.width+"px";cv.style.height=cv.height+"px";
   const c=cv.getContext("2d"),P=(x,y,col,w=1,h=1)=>{c.fillStyle=col;c.fillRect(x*k,y*k,w*k,h*k)};c.clearRect(0,0,cv.width,cv.height);
   const G="#66ff4d",GD="#2fbf1c",INK="#0c0c14",CR="#f4efe2";
