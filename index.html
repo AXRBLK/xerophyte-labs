@@ -52,7 +52,7 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
 
 /* landing: a dark veil over everything but the header, a note from the sheet, and one big pixel switch that turns on the
    field camera (the veil lifts). Settings › landing_page yes/no; landing_text; landing_button; landing_switch; landing_filter */
-#landing{position:fixed;top:0;left:0;right:0;height:100vh;height:100lvh;z-index:8000;display:none;text-align:center;color:#f4ece0}
+#landing{position:fixed;top:0;left:0;right:0;height:100vh;height:100lvh;z-index:8000;display:none;background:#05060c;text-align:center;color:#f4ece0}
 #landing .lp-in{position:absolute;top:0;left:0;right:0;height:100vh;height:100svh;--lpTop:24px;-webkit-mask-image:linear-gradient(transparent calc(var(--lpTop) - 16px),#000 var(--lpTop));mask-image:linear-gradient(transparent calc(var(--lpTop) - 16px),#000 var(--lpTop));display:flex;flex-direction:column;align-items:center;gap:22px;padding:40px 56px calc(48px + env(safe-area-inset-bottom,0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
 #landing .lp-text{margin-top:auto}#landing .lp-sw{margin-bottom:auto}   /* centred when it fits; starts below the header and scrolls when it doesn't */
 
@@ -86,7 +86,7 @@ body.landing .hero{z-index:8001}
 #landing.txt .lp-text{animation:lpBlinkIn .6s steps(1) both}
 @keyframes lpBlinkIn{0%{opacity:0}12%{opacity:1}24%{opacity:0}38%{opacity:1}52%{opacity:.35}66%{opacity:1}}
 body.still #landing.txt .lp-text{animation:none}
-#landing .lp-sw{transition:opacity .6s}#landing:not(.typed) .lp-sw{opacity:0;pointer-events:none}
+#landing:not(.typed) .lp-sw{visibility:hidden;pointer-events:none}#landing.typed .lp-sw{animation:lpBlinkIn .6s steps(1) both}body.still #landing.typed .lp-sw{animation:none}   /* the switch flicks on */
 #landing .lp-sw{display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px;border:0;background:none;color:inherit;cursor:pointer;font:inherit}
 #landing .lp-sw canvas{image-rendering:pixelated;display:block}
 #landing .lp-sw span{font:400 13px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:#f4ece0;text-shadow:1px 1px 0 #000}
@@ -683,6 +683,7 @@ body:not(.noMarquee) .marquee[hidden]{display:block!important;visibility:hidden}
 <div class="marquee" aria-hidden="true" hidden><div class="track" id="marquee"></div></div>
 
 <div id="landing" hidden aria-modal="true" role="dialog" aria-label="Welcome"><canvas class="pix on" id="lpPix" aria-hidden="true"></canvas><canvas class="pix" id="lpPix2" aria-hidden="true"></canvas><div class="veil"></div><div class="lp-in" id="lpIn"><div class="lp-text" id="lpText"></div><button class="lp-sw" id="lpSw" type="button"><canvas id="lpCv"></canvas><span id="lpLbl">Turn on Field Camera</span></button></div></div>
+<script>try{if(localStorage.getItem("xl-landing")!=="0"||/landing/i.test(location.hash)){document.body.classList.add("landing");var lp=document.getElementById("landing");lp.hidden=false;lp.className="f-shade"}}catch(e){}</script>
 <div class="hero"><h1 id="title"></h1><div class="sub" id="tagline"></div><div class="live" id="liveLine" hidden></div></div>
 
 <nav class="icons left" id="iconsLeft" aria-label="Desktop"></nav>
@@ -4052,7 +4053,7 @@ function lpDraw(){
     if(!dy)P(10,10,"#fff",2,2);                                                 // the glint, gone when pressed
   }
 }
-(()=>{let k="0";try{k=localStorage.getItem("xl-landing")}catch(e){}   // last visit's setting: veil up at once, no flash of the desktop
+(()=>{let k="1";try{k=localStorage.getItem("xl-landing")||"1"}catch(e){}   // last visit's setting: veil up at once, no flash of the desktop
   if(k==="1"||LP_HASH){document.body.classList.add("landing");const el=document.getElementById("landing");el.hidden=false;el.className="f-shade";setTimeout(()=>lpPix(),300)}})();
 async function boot(refresh){
   const wasOpen=refresh?Object.keys(WINS).filter(k=>WINS[k].open&&!WINS[k].min):[];
