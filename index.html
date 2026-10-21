@@ -3961,11 +3961,11 @@ function landing(){
   const op=parseFloat(String(SET.landing_opacity??"").replace("%",""));el.style.setProperty("--lpVeil",isFinite(op)?Math.max(0,Math.min(1,op>1?op/100:op)):1);LP.look=look;LP.on=false;LP.t=0;
   const txt=String(SET.landing_text||"").trim();document.getElementById("lpText").innerHTML=lpBlocks(txt);
   document.getElementById("lpLbl").textContent=String(SET.landing_button||"").trim()||"Turn on Field Camera";
-  document.body.classList.add("landing");lpDraw();lpFit();if(!LP.fitOn){LP.fitOn=1;addEventListener("resize",()=>{lpFit();lpDraw()});try{document.fonts.ready.then(()=>lpFit());document.fonts.addEventListener("loadingdone",()=>lpFit())}catch(e){}document.addEventListener("herolit",()=>setTimeout(lpFit,50))}
+  document.body.classList.add("landing");lpDraw();lpFit();if(!LP.fitOn){LP.fitOn=1;addEventListener("resize",()=>{lpFit();lpDraw();if(document.body.classList.contains("landing")&&!LP.on)lpPix()});try{document.fonts.ready.then(()=>lpFit());document.fonts.addEventListener("loadingdone",()=>lpFit())}catch(e){}document.addEventListener("herolit",()=>setTimeout(lpFit,50))}
   // the header types, the tagline and live weather come on; then the whole note blinks in, and the switch 2s after that
   el.classList.remove("txt","typed");clearTimeout(LP.typeT);
   const go=()=>{if(el.classList.contains("txt"))return;lpFit();el.classList.add("txt");LP.typeT=setTimeout(()=>el.classList.add("typed"),document.body.classList.contains("still")?0:2000)};
-  if(document.body.classList.contains("heroLit"))go();else{document.addEventListener("herolit",go,{once:true});LP.typeT=setTimeout(go,12000)}LP.B=14;lpPix();clearInterval(LP.tm);LP.tm=setInterval(()=>lpPix(true),2200);
+  if(document.body.classList.contains("heroLit"))go();else{document.addEventListener("herolit",go,{once:true});LP.typeT=setTimeout(go,12000)}LP.B=14;lpPix();clearInterval(LP.tm);LP.tm=0;setTimeout(()=>lpPix(),400);   // a still frame: no ghosting from moving creatures
   document.getElementById("lpSw").onclick=lpFlip;
 }
 // keep the note and switch below the header (on phones the header sits at the top of the screen)
@@ -4053,7 +4053,7 @@ function lpDraw(){
   }
 }
 (()=>{let k="0";try{k=localStorage.getItem("xl-landing")}catch(e){}   // last visit's setting: veil up at once, no flash of the desktop
-  if(k==="1"||LP_HASH){document.body.classList.add("landing");const el=document.getElementById("landing");el.hidden=false;el.className="f-shade";LP.tm=setInterval(()=>lpPix(true),2200)}})();
+  if(k==="1"||LP_HASH){document.body.classList.add("landing");const el=document.getElementById("landing");el.hidden=false;el.className="f-shade";setTimeout(()=>lpPix(),300)}})();
 async function boot(refresh){
   const wasOpen=refresh?Object.keys(WINS).filter(k=>WINS[k].open&&!WINS[k].min):[];
   await loadAll();build();if(!refresh)landing();
