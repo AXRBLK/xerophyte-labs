@@ -65,7 +65,7 @@ body.landing .hero{z-index:8001}
 #landing.f-shade .veil{background:rgba(8,8,18,.66)}
 #landing.f-dither .veil{background:rgba(8,8,18,.55) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Crect width='2' height='2' fill='%2306060e'/%3E%3Crect x='2' y='2' width='2' height='2' fill='%2306060e'/%3E%3C/svg%3E") 0 0/4px 4px;image-rendering:pixelated}
 #landing.f-camera .veil{background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.35) 2px 3px),radial-gradient(ellipse 75% 70% at 50% 50%,rgba(10,24,14,.72),rgba(2,6,4,.95) 100%)}
-#landing.f-camera .veil::before{content:"\25CF  STANDBY";position:absolute;left:19px;top:50%;transform:translate(-50%,-50%) rotate(-90deg);white-space:nowrap;font:400 12px/1 var(--font-display);letter-spacing:.14em;color:#8eff7a;opacity:.8;animation:lpBlink 1.2s steps(2) infinite}
+#landing.f-camera .veil::before{content:"\25CF  STANDBY";position:absolute;right:19px;top:74%;transform:translate(50%,-50%) rotate(-90deg);white-space:nowrap;font:400 12px/1 var(--font-display);letter-spacing:.14em;color:#8eff7a;opacity:.8;animation:lpBlink 1.2s steps(2) infinite}
 @keyframes lpBlink{50%{opacity:.25}}
 #landing.f-camera .veil::after{content:"";position:absolute;inset:18px;border:2px solid rgba(160,255,150,.25);
   -webkit-mask:linear-gradient(#000 0 0) top left/26px 26px no-repeat,linear-gradient(#000 0 0) top right/26px 26px no-repeat,linear-gradient(#000 0 0) bottom left/26px 26px no-repeat,linear-gradient(#000 0 0) bottom right/26px 26px no-repeat;
@@ -73,7 +73,7 @@ body.landing .hero{z-index:8001}
 @media (max-width:500px),(max-height:500px){   /* phones: smaller note; corners tucked in */
   #landing .lp-in{gap:16px;padding-left:34px;padding-right:34px}#landing .lp-text{font-size:14px;line-height:1.5}
   #landing.f-camera .veil::after{inset:10px}
-  #landing.f-camera .veil::before{left:11px}
+  #landing.f-camera .veil::before{right:11px}
 }
 @media (max-height:500px) and (orientation:landscape){   /* phones on their side: the note on the left, the switch beside it */
   #landing .lp-in{flex-direction:row;align-items:center;justify-content:center;gap:32px;padding-left:calc(env(safe-area-inset-left,0px) + 44px);padding-right:calc(env(safe-area-inset-right,0px) + 44px)}
