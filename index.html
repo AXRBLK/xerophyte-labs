@@ -684,7 +684,7 @@ body:not(.noMarquee) .marquee[hidden]{display:block!important;visibility:hidden}
 
 <div class="marquee" aria-hidden="true" hidden><div class="track" id="marquee"></div></div>
 
-<div id="landing" hidden aria-modal="true" role="dialog" aria-label="Welcome"><canvas class="pix" id="lpPix" aria-hidden="true"></canvas><canvas class="pix" id="lpPix2" aria-hidden="true"></canvas><div class="veil"></div><div class="lp-in" id="lpIn"><div class="lp-text" id="lpText"></div><button class="lp-sw" id="lpSw" type="button"><canvas id="lpCv"></canvas><span id="lpLbl">Turn on Field Camera</span></button></div></div>
+<div id="landing" hidden aria-modal="true" role="dialog" aria-label="Welcome"><canvas class="pix" id="lpPix" aria-hidden="true"></canvas><div class="veil"></div><div class="lp-in" id="lpIn"><div class="lp-text" id="lpText"></div><button class="lp-sw" id="lpSw" type="button"><canvas id="lpCv"></canvas><span id="lpLbl">Turn on Field Camera</span></button></div></div>
 <script>try{if(localStorage.getItem("xl-landing")!=="0"||/landing/i.test(location.hash)){var lc={};try{lc=JSON.parse(localStorage.getItem("xl-lp")||"{}")}catch(e){}
   document.body.classList.add("landing");var lp=document.getElementById("landing");lp.hidden=false;lp.className="f-"+(lc.f||"shade");if(lc.o!=null)lp.style.setProperty("--lpVeil",lc.o);window.LP_LAST=lc}}catch(e){}</script>
 <div class="hero"><h1 id="title"></h1><div class="sub" id="tagline"></div><div class="live" id="liveLine" hidden></div></div>
@@ -3946,17 +3946,21 @@ function sheetToast(msg,ms){let t=document.getElementById("sheetToast");
 // It greets every page load. Preview any look with #landing=rocker,camera on the address.
 const LP={on:false,t:0,raf:0,B:(window.LP_LAST&&+window.LP_LAST.b)||14,B0:(window.LP_LAST&&+window.LP_LAST.b)||14,tm:0};
 // the scene behind the veil, redrawn in blocks of LP.B screen pixels
-// fade=true: draw into the hidden copy and cross-fade to it, so the desert drifts rather than hops
-function lpPix(fade){const A=document.getElementById("lpPix"),A2=document.getElementById("lpPix2");LP.front=LP.front||A;
-  const cv=fade?(LP.front===A?A2:A):LP.front,a=document.getElementById("sky"),b=document.getElementById("skyFine");if(!cv||!a)return;
-  const w=Math.max(1,Math.ceil(innerWidth/LP.B)),h=Math.max(1,Math.ceil(innerHeight/LP.B));if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h}
-  const c=cv.getContext("2d");c.imageSmoothingEnabled=LP.B>2;c.imageSmoothingQuality="high";
-  try{c.drawImage(a,0,0,w,h);if(b&&b.width)c.drawImage(b,0,0,w,h)}catch(e){}
+// the desert behind the veil in blocks of LP.B screen pixels. ease=true (the live loop) blends each new frame in a little
+// at a time, like a slow shutter, so moving creatures smear gently instead of hopping block to block. Everything is
+// measured against the landing layer itself, so phone toolbars sliding in and out don't rescale or shift the picture.
+function lpPix(ease){const cv=document.getElementById("lpPix"),a=document.getElementById("sky"),b=document.getElementById("skyFine");if(!cv||!a)return;
+  const B=LP.B,pr=cv.getBoundingClientRect();if(!pr.width||!pr.height)return;
+  const w=Math.max(1,Math.ceil(pr.width/B)),h=Math.max(1,Math.ceil(pr.height/B)),fresh=cv.width!==w||cv.height!==h;if(fresh){cv.width=w;cv.height=h}
+  const T=LP.tmp||(LP.tmp=document.createElement("canvas"));if(T.width!==w||T.height!==h){T.width=w;T.height=h}
+  const t=T.getContext("2d");t.imageSmoothingEnabled=B>2;t.imageSmoothingQuality="high";t.clearRect(0,0,w,h);
+  const put=(el)=>{const r=el.getBoundingClientRect();if(r.width)try{t.drawImage(el,(r.left-pr.left)/B,(r.top-pr.top)/B,r.width/B,r.height/B)}catch(e){}};
+  put(a);if(b&&b.width)put(b);
   // the taskbar in the same blocks, so it doesn't pop in when the veil lifts (the icons come last, on their own)
-  const B=LP.B;try{const tb=document.querySelector(".taskbar");if(tb){const r=tb.getBoundingClientRect(),cs=getComputedStyle(tb);c.fillStyle=cs.backgroundColor;c.fillRect(r.left/B,r.top/B,r.width/B,(r.height+40)/B);
-      c.fillStyle=cs.borderTopColor;c.fillRect(r.left/B,r.top/B,r.width/B,Math.max(1/B,1/B));
-      tb.querySelectorAll("img,canvas").forEach(im=>{const q=im.getBoundingClientRect();if(q.width)try{c.drawImage(im,q.left/B,q.top/B,q.width/B,q.height/B)}catch(e){}})}}catch(e){}
-  if(fade&&cv!==LP.front){cv.classList.add("on");LP.front.classList.remove("on");LP.front=cv}else if(!cv.classList.contains("on"))requestAnimationFrame(()=>cv.classList.add("on"))}
+  try{const tb=document.querySelector(".taskbar");if(tb){const r=tb.getBoundingClientRect(),cs=getComputedStyle(tb);t.fillStyle=cs.backgroundColor;t.fillRect((r.left-pr.left)/B,(r.top-pr.top)/B,r.width/B,(r.height+40)/B);
+      t.fillStyle=cs.borderTopColor;t.fillRect((r.left-pr.left)/B,(r.top-pr.top)/B,r.width/B,1/B);tb.querySelectorAll("img,canvas").forEach(put)}}catch(e){}
+  const c=cv.getContext("2d");c.globalAlpha=ease&&!fresh&&LP.drawn?.18:1;c.drawImage(T,0,0);c.globalAlpha=1;LP.drawn=true;
+  if(!cv.classList.contains("on"))requestAnimationFrame(()=>cv.classList.add("on"))}
 const LP_HASH=(()=>{const m=(location.hash||"").match(/landing(?:=([\w,]+))?/i);return m?(m[1]||"").toLowerCase().split(","):null})();
 function lpWanted(){if(LP_HASH)return true;return /^(yes|on|true|1|show)$/i.test(String(SET.landing_page??"").trim())}
 function lpPick(list,key,def){const h=(LP_HASH||[]).find(x=>list.includes(x));if(h)return h;const v=String(SET[key]??"").trim().toLowerCase();return list.includes(v)?v:def}
@@ -3977,7 +3981,7 @@ function landing(){
   // the header types, the tagline and live weather come on; then the whole note blinks in, and the switch 2s after that
   el.classList.remove("txt","typed");clearTimeout(LP.typeT);
   const go=()=>{if(el.classList.contains("txt"))return;lpFit();el.classList.add("txt");LP.typeT=setTimeout(()=>el.classList.add("typed"),document.body.classList.contains("still")?0:2000)};
-  if(document.body.classList.contains("heroLit"))go();else{document.addEventListener("herolit",go,{once:true});LP.typeT=setTimeout(go,12000)}LP.B=LP.B0;lpPix();clearInterval(LP.tm);lpPix();LP.tm=setInterval(()=>{if(!LP.on)lpPix()},90);   // live, about 11 frames a second: the desert keeps moving, block by block
+  if(document.body.classList.contains("heroLit"))go();else{document.addEventListener("herolit",go,{once:true});LP.typeT=setTimeout(go,12000)}LP.B=LP.B0;lpPix();clearInterval(LP.tm);lpPix();LP.tm=setInterval(()=>{if(!LP.on)lpPix(true)},90);   // live, about 11 frames a second: the desert keeps moving, block by block
   document.getElementById("lpSw").onclick=lpFlip;
 }
 // keep the note and switch below the header (on phones the header sits at the top of the screen)
@@ -4076,7 +4080,7 @@ function lpDraw(){
   }
 }
 (()=>{let k="1";try{k=localStorage.getItem("xl-landing")||"1"}catch(e){}   // last visit's setting: veil up at once, no flash of the desktop
-  if(k==="1"||LP_HASH){document.body.classList.add("landing");const el=document.getElementById("landing");el.hidden=false;el.className=el.className||"f-shade";if(window.LP_LAST&&window.LP_LAST.f){setTimeout(()=>lpPix(),300);LP.tm=setInterval(()=>{if(!LP.on)lpPix()},90)}}})();   // first visit: wait for the sheet before showing the desert
+  if(k==="1"||LP_HASH){document.body.classList.add("landing");const el=document.getElementById("landing");el.hidden=false;el.className=el.className||"f-shade";if(window.LP_LAST&&window.LP_LAST.f){setTimeout(()=>lpPix(),300);LP.tm=setInterval(()=>{if(!LP.on)lpPix(true)},90)}}})();   // first visit: wait for the sheet before showing the desert
 async function boot(refresh){
   const wasOpen=refresh?Object.keys(WINS).filter(k=>WINS[k].open&&!WINS[k].min):[];
   await loadAll();build();if(!refresh)landing();
