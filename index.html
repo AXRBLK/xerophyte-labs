@@ -54,7 +54,7 @@ body{margin:0;background:var(--dusk);color:var(--sand);font-family:var(--font-da
    field camera (the veil lifts). Settings › landing_page yes/no; landing_text; landing_button; landing_switch; landing_filter */
 #landing{position:fixed;top:0;left:0;right:0;height:100vh;height:100lvh;z-index:8000;display:none;background:#05060c;text-align:center;color:#f4ece0}
 #landing .lp-in{position:absolute;top:0;left:0;right:0;height:100vh;height:100svh;--lpTop:24px;-webkit-mask-image:linear-gradient(transparent calc(var(--lpTop) - 16px),#000 var(--lpTop));mask-image:linear-gradient(transparent calc(var(--lpTop) - 16px),#000 var(--lpTop));display:flex;flex-direction:column;align-items:center;gap:22px;padding:40px 56px calc(48px + env(safe-area-inset-bottom,0px));overflow-y:auto;-webkit-overflow-scrolling:touch}
-#landing .lp-text{margin-top:auto}#landing .lp-sw{margin-bottom:auto}   /* centred when it fits; starts below the header and scrolls when it doesn't */
+#landing .lp-text{margin-top:auto}#landing .lp-ctl{margin-bottom:auto}   /* centred when it fits; starts below the header and scrolls when it doesn't */
 
 body.landing #landing{display:flex}
 body.landing .hero{z-index:8001}
@@ -79,7 +79,7 @@ body.landing .hero{z-index:8001}
 @media (max-height:500px) and (orientation:landscape){   /* phones on their side: the note on the left, the switch beside it */
   #landing .lp-in{flex-direction:row;align-items:flex-start;justify-content:center;gap:32px;padding-left:calc(env(safe-area-inset-left,0px) + 44px);padding-right:calc(env(safe-area-inset-right,0px) + 44px)}
   #landing .lp-text{font-size:13px;line-height:1.45;max-width:min(520px,62%);text-align:left}#landing .lp-text p{margin-bottom:.4em}#landing .lp-text hr{margin:.6em 0;width:40%}
-  #landing .lp-text,#landing .lp-sw{margin-top:auto;margin-bottom:auto}#landing .lp-sw{flex:none}}
+  #landing .lp-text,#landing .lp-ctl{margin-top:auto;margin-bottom:auto}#landing .lp-ctl{flex:none}}
 #landing .lp-text{max-width:min(560px,100%);font:16px/1.6 var(--font-ui);color:#f4ece0;text-shadow:1px 1px 0 #000}
 #landing .lp-text p{margin:0 0 .6em}#landing .lp-text p:last-child{margin-bottom:0}#landing .lp-text hr{border:0;border-top:1px solid rgba(244,236,224,.3);width:60%;margin:1em auto}#landing .lp-text a{color:#9ec4ff}
 #landing:not(.txt) .lp-text{visibility:hidden}
@@ -88,13 +88,28 @@ body.landing .hero{z-index:8001}
 body.still #landing.txt .lp-text{animation:none}
 body.landing .icon,body.iconsWait .icon{visibility:hidden}
 body.iconsIn .icon{animation:lpBlinkIn .5s steps(1) both}   /* after the landing: the scene first, then the icons and labels flick on */
-#landing:not(.typed) .lp-sw{visibility:hidden;pointer-events:none}#landing.typed .lp-sw{animation:lpBlinkIn .6s steps(1) both}body.still #landing.typed .lp-sw{animation:none}   /* the switch flicks on */
+#landing:not(.typed) .lp-ctl{visibility:hidden;pointer-events:none}#landing.typed .lp-ctl{animation:lpBlinkIn .6s steps(1) both}body.still #landing.typed .lp-ctl{animation:none}   /* the switch flicks on */
 #landing .lp-sw{display:flex;flex-direction:column;align-items:center;gap:12px;padding:6px;border:0;background:none;color:inherit;cursor:pointer;font:inherit}
 #landing .lp-sw canvas{image-rendering:pixelated;display:block}
 #landing .lp-sw span{font:400 13px/1 var(--font-display);letter-spacing:.14em;text-transform:uppercase;color:#f4ece0;text-shadow:1px 1px 0 #000}
 #landing .lp-sw:hover canvas{filter:brightness(1.12)}
 #landing .lp-sw:focus-visible{outline:2px dashed #66ff4d;outline-offset:6px}
-#landing.focus .lp-text,#landing.focus .lp-sw{visibility:hidden}
+#landing.focus .lp-text,#landing.focus .lp-ctl{visibility:hidden}
+#landing .lp-ctl{display:flex;flex-direction:column;align-items:center;gap:10px}
+/* locked: the switch sits dark and won't move until the password is right */
+#landing .lp-sw:disabled{cursor:not-allowed}#landing .lp-sw:disabled canvas{filter:grayscale(.75) brightness(.55)}#landing .lp-sw:disabled span{opacity:.5}
+#landing .lp-gate{display:flex;flex-direction:column;align-items:center;gap:8px;margin:0}
+#landing .lp-soon{margin:0;font:400 12px/1 var(--font-display);letter-spacing:.16em;text-transform:uppercase;color:#8eff7a;text-shadow:1px 1px 0 #000}
+#landing .lp-gate input{width:150px;padding:6px 8px;font:13px/1 var(--font-ui);text-align:center;letter-spacing:.2em;color:#f4ece0;background:rgba(0,0,0,.45);border:1px solid rgba(244,236,224,.35);border-radius:0;outline:none}
+#landing .lp-gate input::placeholder{color:rgba(244,236,224,.45);letter-spacing:.1em}
+#landing .lp-gate input:focus{border-color:#8eff7a}
+#landing .lp-gate.bad input{border-color:#ff5a4a;animation:lpShake .35s steps(6)}
+@keyframes lpShake{20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+#landing.unlocked .lp-gate{display:none}
+/* the taskbar stays usable over the landing page, but only the radio and Contact work */
+body.landing .taskbar{z-index:8002}body.landing .startmenu{z-index:8003}body.landing .win{z-index:8004!important}
+body.landing .tray .modebtn,body.landing .startmenu li button:not([data-lp]),body.landing .startmenu li a{opacity:.4;pointer-events:none}
+body.landing #lpIn{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
 /* marquee */
 .marquee{position:fixed;left:16px;right:16px;top:calc(12px + env(safe-area-inset-top,0px));padding:2px 0;overflow:hidden;white-space:nowrap;z-index:2;opacity:.75;   /* no box: the words just tick in, faintly, fading in and out at the ends */
   -webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}
@@ -684,7 +699,7 @@ body:not(.noMarquee) .marquee[hidden]{display:block!important;visibility:hidden}
 
 <div class="marquee" aria-hidden="true" hidden><div class="track" id="marquee"></div></div>
 
-<div id="landing" hidden aria-modal="true" role="dialog" aria-label="Welcome"><canvas class="pix" id="lpPix" aria-hidden="true"></canvas><div class="veil"></div><div class="lp-in" id="lpIn"><div class="lp-text" id="lpText"></div><button class="lp-sw" id="lpSw" type="button"><canvas id="lpCv"></canvas><span id="lpLbl">Turn on Field Camera</span></button></div></div>
+<div id="landing" hidden aria-modal="true" role="dialog" aria-label="Welcome"><canvas class="pix" id="lpPix" aria-hidden="true"></canvas><div class="veil"></div><div class="lp-in" id="lpIn"><div class="lp-text" id="lpText"></div><div class="lp-ctl"><button class="lp-sw" id="lpSw" type="button" disabled><canvas id="lpCv"></canvas><span id="lpLbl">Turn on Field Camera</span></button><form class="lp-gate" id="lpGate" autocomplete="off"><p class="lp-soon" id="lpSoon">Coming soon!</p><input id="lpPw" type="password" placeholder="password" aria-label="Password" spellcheck="false" autocapitalize="off"></form></div></div></div>
 <script>try{if(localStorage.getItem("xl-landing")!=="0"||/landing/i.test(location.hash)){var lc={};try{lc=JSON.parse(localStorage.getItem("xl-lp")||"{}")}catch(e){}
   document.body.classList.add("landing");var lp=document.getElementById("landing");lp.hidden=false;lp.className="f-"+(lc.f||"shade");if(lc.o!=null)lp.style.setProperty("--lpVeil",lc.o);window.LP_LAST=lc}}catch(e){}</script>
 <div class="hero"><h1 id="title"></h1><div class="sub" id="tagline"></div><div class="live" id="liveLine" hidden></div></div>
@@ -3827,7 +3842,8 @@ function build(){
   if(spotifySrc(SET.spotify_url||SET.spotify_playlist))setTimeout(preloadSpotify,1200);
   // start menu
   const ul=document.getElementById("startlist");ul.innerHTML="";
-  Object.entries(WINS).filter(([id])=>!HIDDEN.has(id)).forEach(([id,w])=>{const li=document.createElement("li");li.innerHTML=`<button><img alt="" src="${sprite(w.icon)}">${esc(w.title)}</button>`;li.firstChild.onclick=()=>{toggleStart(false);openWin(id)};ul.appendChild(li)});
+  Object.entries(WINS).filter(([id])=>!HIDDEN.has(id)).forEach(([id,w])=>{const li=document.createElement("li");const lpOk=id==="radio"||/contact/i.test(id+" "+(w.title||""));   // the only two that work over the landing page
+    li.innerHTML=`<button data-win="${esc(String(id).toLowerCase())}"${lpOk?' data-lp="1"':""}><img alt="" src="${sprite(w.icon)}">${esc(w.title)}</button>`;li.firstChild.onclick=()=>{toggleStart(false);openWin(id)};ul.appendChild(li)});
   // night mode and disco mode, ticked while they're on
   ul.insertAdjacentHTML("beforeend",'<hr><li><button id="smNight"></button></li><li><button id="smDisco"></button></li><hr class="adm">');
   document.getElementById("smNight").onclick=()=>{toggleStart(false);SCENE.override=!SCENE.night;setNight(SCENE.override)};
@@ -3982,7 +3998,7 @@ function landing(){
   el.classList.remove("txt","typed");clearTimeout(LP.typeT);
   const go=()=>{if(el.classList.contains("txt"))return;lpFit();el.classList.add("txt");LP.typeT=setTimeout(()=>el.classList.add("typed"),document.body.classList.contains("still")?0:2000)};
   if(document.body.classList.contains("heroLit"))go();else{document.addEventListener("herolit",go,{once:true});LP.typeT=setTimeout(go,12000)}LP.B=LP.B0;lpPix();clearInterval(LP.tm);lpPix();LP.tm=setInterval(()=>{if(!LP.on)lpPix(true)},90);   // live, about 11 frames a second: the desert keeps moving, block by block
-  document.getElementById("lpSw").onclick=lpFlip;
+  document.getElementById("lpSw").onclick=lpFlip;lpGate();
 }
 // keep the note and switch below the header (on phones the header sits at the top of the screen)
 // the note: a blank line, or a line with only <br>, starts a new paragraph; a line with only <hr> draws a divider
@@ -3995,7 +4011,16 @@ function lpFit(){const el=document.getElementById("landing"),h=document.querySel
   let fs=land?14:mob?15:16,k=land?4:mob?5:6,gap=land?12:mob?16:22;
   const apply=()=>{tx.style.fontSize=fs+"px";box.style.gap=gap+"px";LP.k=k;lpDraw()};apply();
   for(let i=0;i<40&&box.scrollHeight>box.clientHeight+1;i++){if(fs>10)fs-=.5;if(i%3===2&&k>2)k--;if(gap>8)gap-=1;apply()}}
-function lpFlip(){if(LP.on)return;LP.on=true;const t0=performance.now();
+// Settings › landing_password (blank = buho): the switch stays dark until it's typed; remembered in this browser after
+function lpGate(){const el=document.getElementById("landing"),sw=document.getElementById("lpSw"),f=document.getElementById("lpGate"),pw=document.getElementById("lpPw");
+  const want=(String(SET.landing_password??"").trim()||"buho").toLowerCase();
+  const open=()=>{sw.disabled=false;el.classList.add("unlocked");try{localStorage.setItem("xl-pass",want)}catch(e){}};
+  let had="";try{had=localStorage.getItem("xl-pass")||""}catch(e){}
+  if(had===want){open();return}
+  sw.disabled=true;el.classList.remove("unlocked");pw.value="";
+  pw.oninput=()=>{f.classList.remove("bad");if(pw.value.trim().toLowerCase()===want){open();setTimeout(()=>sw.focus({preventScroll:true}),50)}};
+  f.onsubmit=e=>{e.preventDefault();if(pw.value.trim().toLowerCase()===want){open();lpFlip()}else{f.classList.remove("bad");void f.offsetWidth;f.classList.add("bad")}}}
+function lpFlip(){if(document.getElementById("lpSw").disabled)return;if(LP.on)return;LP.on=true;const t0=performance.now();
   const step=now=>{LP.t=Math.min(1,(now-t0)/({lever:520,dial:520,toggle:300,missile:900}[LP.look]||260));lpDraw();if(LP.t<1)requestAnimationFrame(step);else setTimeout(lpLift,380)};requestAnimationFrame(step)}
 // switched on: the veil lifts while the camera hunts for focus (blocks coarse → fine → a little soft → sharp), then the desktop
 function lpLift(){const el=document.getElementById("landing");
